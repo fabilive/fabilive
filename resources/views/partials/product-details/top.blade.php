@@ -268,33 +268,6 @@
                                 </li>
                               @endif
 
-                              @if ($productt->type == "Listing")
-                                  @if (auth()->check())
-                                    @if($productt->user_id != 0)
-                                      <li>
-                                        <a class="view-stor btn--base p-2" href="javascript:;" data-bs-toggle="modal" data-bs-target="#vendorform">
-                                          <i class="icofont-ui-chat"></i>
-                                          {{ __('Contact Seller') }}
-                                        </a>
-                                      </li>
-                                    @else
-                                      <li>
-                                        <a class="view-stor btn--base p-2" href="javascript:;" data-bs-toggle="modal" data-bs-target="#sendMessage">
-                                          <i class="icofont-ui-chat"></i>
-                                          {{ __('Contact Seller') }}
-                                        </a>
-                                      </li>
-                                    @endif
-                                  @else
-                                    <li>
-                                      <a class="view-stor btn--base p-2" href="{{ route('user.login') }}" >
-                                        <i class="icofont-ui-chat"></i>
-                                        {{ __('Contact Seller') }}
-                                      </a>
-                                    </li>
-                                  @endif
-                              @endif
-
                               @endif
                             </ul>
                          @endif
@@ -420,11 +393,11 @@
                   @if(isset($productt->user))
                     {{ $productt->user->shop_name }}
                   @endif
-                  @if($productt->user->checkStatus())
+                  @if($productt->user->is_verified == 1)
                   <br>
                   <a class="verify-link" href="javascript:;" data-toggle="tooltip" data-placement="top" title=""
                     data-original-title="{{ __('Verified') }}">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-check-circle text-primary"></i> {{ __('Verified Seller') }}
                   </a>
                   @endif
                 @else
@@ -469,46 +442,6 @@
             @endif
 
             {{-- Visit Store Ends--}}
-
-            @if($gs->is_contact_seller == 1)
-
-              {{-- Contact Seller --}}
-
-              @if(Auth::check())
-            
-
-                @if($productt->user_id != 0)
-
-
-                  <a class="view-stor btn--base" href="javascript:;" data-bs-toggle="modal" data-bs-target="#vendorform">
-                    <i class="icofont-ui-chat"></i>
-                    {{ __('Contact Seller') }}
-                  </a>
-
-
-                @else
-
-
-                  <a class="view-stor btn--base" href="javascript:;" data-bs-toggle="modal" data-bs-target="#sendMessage">
-                    <i class="icofont-ui-chat"></i>
-                    {{ __('Contact Seller') }}
-                  </a>
-
-
-                @endif
-
-              @else
-
-
-              <a class="view-stor btn--base" href="{{ route('user.login') }}" >
-                  <i class="icofont-ui-chat"></i>
-                  {{ __('Contact Seller') }}
-                </a>
-
-
-              @endif
-
-            @endif
 
 <br>
             @if($productt->user_id != 0)
@@ -661,105 +594,3 @@
     </div>
   </div>
 </div>
-
-<!-- Chat Icon -->
-@auth
-<div id="chat-icon">
-    <i class="icofont-ui-chat chat-icons"></i>
-</div>
-@endauth
-
-
-<div id="chat-popup" class="d-none">
-    <div id="chat-header">
-        Chat with {{ $productt->user->name }}
-        <button id="closeChat">×</button>
-    </div>
-    <div id="chat-body">
-        @foreach ($messages as $message)
-            <p class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
-                <strong>{{ $message->sender->name }}:</strong> {{ $message->content }}
-            </p>
-        @endforeach
-    </div>
-    <div id="chat-footer">
-        <input type="text" id="message" placeholder="Type a message...">
-        <button id="sendMessage" type="button">Send</button>
-    </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-    function scrollToBottom() {
-        $("#chat-body").scrollTop($("#chat-body")[0].scrollHeight);
-    }
-
-    // Open Chat when clicking chat icon
-    $("#chat-icon").on("click", function () {
-        $("#chat-popup").removeClass("d-none").fadeIn();
-        scrollToBottom();
-    });
-
-    // Close Chat when clicking close button
-    $("#closeChat").on("click", function () {
-        $("#chat-popup").fadeOut().addClass("d-none");
-    });
-
-    // Setup Pusher
-    Pusher.logToConsole = true;
-    var pusher = new Pusher("3ccc506b109bd00544fe", {
-        cluster: "mt1",
-        encrypted: true
-    });
-
-    var channel = pusher.subscribe("private-chat.{{ auth()->id() }}");
-
-    // Listen for New Messages
-    channel.bind("MessageSent", function (data) {
-        console.log("Received:", data);
-        $("#chat-body").append(`
-            <p class="message received">
-                <strong>${data.sender_name}:</strong> ${data.message}
-            </p>
-        `);
-        scrollToBottom();
-    });
-
-    // Send Message with `$(document).on()`
-    $(document).on("click", "#sendMessage", function () {
-        let message = $("#message").val().trim();
-        let user_id = "{{ $user->id }}"; // Ensure this variable is available
-
-        if (message === "") return; // Prevent empty messages
-
-        $.ajax({
-            url: "{{ route('chat.send') }}",
-            type: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}" // Ensure CSRF token is sent
-            },
-            data: {
-                user_id: user_id,
-                message: message,
-            },
-            success: function (response) {
-                console.log("Message Sent:", response);
-                $("#chat-body").append(`
-                    <p class="message sent"><strong>You:</strong> ${message}</p>
-                `);
-                $("#message").val(""); // Clear input field
-                scrollToBottom();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error saving message:", xhr.responseText);
-            }
-        });
-    });
-
-    // Allow sending message on "Enter" key press
-    $("#message").keypress(function (e) {
-        if (e.which === 13) { // Enter key
-            $("#sendMessage").click();
-        }
-    });
-</script>
