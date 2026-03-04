@@ -88,74 +88,85 @@ class RegisterController extends Controller
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
 
-            $user = new User();
-            $input = $request->all();
-            $input['password'] = bcrypt($request['password']);
-            $token = md5(time() . $request->name . $request->email);
-            $input['verification_link'] = $token;
-            $input['affilate_code'] = md5($request->name . $request->email);
+            try {
+                \DB::beginTransaction();
 
-            // Handle affiliate bonus
-            if (Session::has('affilate')) {
-                $affiliateId = Session::get('affilate');
-                $referrer = User::find($affiliateId);
-                $general = Generalsetting::first();
+                $user = new User();
+                $input = $request->all();
+                $input['password'] = bcrypt($request['password']);
+                $token = md5(time() . $request->name . $request->email);
+                $input['verification_link'] = $token;
+                $input['affilate_code'] = md5($request->name . $request->email);
+
+                // Handle affiliate bonus
+                if (Session::has('affilate')) {
+                    $affiliateId = Session::get('affilate');
+                    $referrer = User::lockForUpdate()->find($affiliateId);
+                    $general = Generalsetting::first();
 
 
-                // dd($general);
-                $affiliateBonus = $general->referral_bonus ?? 0;
-                $referrerBonus = $general->referral_amount ?? 0;
-                $input['ref_user_id'] = $affiliateId;
-                $input['balance'] = $affiliateBonus;
-                if ($referrer) {
-                    $referrer->balance += $referrerBonus;
-                    $referrer->affilate_income += $referrerBonus; // Track referral earnings
+                    // dd($general);
+                    $affiliateBonus = $general->referral_bonus ?? 0;
+                    $referrerBonus = $general->referral_amount ?? 0;
+                    $input['ref_user_id'] = $affiliateId;
+                    $input['balance'] = $affiliateBonus;
+                    if ($referrer) {
+                        $referrer->balance += $referrerBonus;
+                        $referrer->affilate_income += $referrerBonus; // Track referral earnings
 
-                    $referrer->save();
-                }
-            }
-
-            // Vendor registration during new signup
-            // Vendor registration during new signup
-            if (!empty($request->vendor)) {
-
-                // Validate shop fields + selfie
-                $validator = Validator::make($request->all(), [
-                    'shop_name' => 'unique:users,' . ($user->id ?? 'NULL'),
-                    'reg_number' => 'required',
-                    'shop_number' => 'max:10',
-                    'selfie_image' => 'required|file|mimes:jpg,jpeg,png', // <-- Added
-                ], [
-                    'shop_name.unique' => __('This Shop Name has already been taken.'),
-                    'shop_number.max' => __('Shop Number Must Be Less Than 10 Digits.'),
-                    'selfie_image.required' => __('Please capture and upload a selfie image.'),
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+                        $referrer->save();
+                    }
                 }
 
-                // Custom validation: at least one ID document is required
-                if (
-                    !$request->hasFile('national_id_front_image') &&
-                    !$request->hasFile('national_id_back_image')
-                ) {
-                    return response()->json([
-                        'errors' => ['files' => __('Please upload National ID Front/Back')]
+                // Vendor registration during new signup
+                if (!empty($request->vendor)) {
+
+                    // Validate shop fields + selfie
+                    $validator = Validator::make($request->all(), [
+                        'shop_name' => 'unique:users,' . ($user->id ?? 'NULL'),
+                        'reg_number' => 'required',
+                        'shop_number' => 'max:10',
+                        'selfie_image' => 'required|file|mimes:jpg,jpeg,png', // <-- Added
+                    ], [
+                        'shop_name.unique' => __('This Shop Name has already been taken.'),
+                        'shop_number.max' => __('Shop Number Must Be Less Than 10 Digits.'),
+                        'selfie_image.required' => __('Please capture and upload a selfie image.'),
                     ]);
+
+                    if ($validator->fails()) {
+                        \DB::rollBack();
+                        return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+                    }
+
+                    // Custom validation: at least one ID document is required
+                    if (
+                        !$request->hasFile('national_id_front_image') &&
+                        !$request->hasFile('national_id_back_image')
+                    ) {
+                        \DB::rollBack();
+                        return response()->json([
+                            'errors' => ['files' => __('Please upload National ID Front/Back')]
+                        ]);
+                    }
+
+                    $input['is_vendor'] = 1;
                 }
 
-                $input['is_vendor'] = 1;
-            }
 
 
+                $user->fill($input)->save();
 
-            $user->fill($input)->save();
+                // Handle vendor uploads if vendor
+                if (!empty($request->vendor)) {
+                    $this->handleVendorUploads($request, $user);
+                    $user->save();
+                }
 
-            // Handle vendor uploads if vendor
-            if (!empty($request->vendor)) {
-                $this->handleVendorUploads($request, $user);
-                $user->save();
+                \DB::commit();
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                return response()->json(['errors' => [$e->getMessage()]]);
             }
         }
 

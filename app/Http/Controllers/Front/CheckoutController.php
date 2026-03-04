@@ -214,7 +214,7 @@ private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earth
         $oldCart = Session::get('cart');
         $cart = new Cart($oldCart);
         $products = $cart->items;
-        $service_areas = collect([]);
+        $service_areas = ServiceArea::all();
         $paystack = PaymentGateway::whereKeyword('paystack')->first();
         $paystackData = $paystack->convertAutoData();
         // dd(Auth::user());
@@ -248,7 +248,7 @@ private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earth
                 $total = Session::get('coupon_total');
                 $total =  str_replace(',', '', str_replace($curr->sign, '', $total));
             }
-            $service_areas = collect([]);
+            $service_areas = ServiceArea::all();
 
             return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways,'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas ]);
         } else {

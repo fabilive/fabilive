@@ -4,7 +4,12 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
-	protected $fillable = ['user_id', 'cart', 'method', 'shipping', 'pickup_location', 'total_delivery_fee', 'totalQty', 'pay_amount', 'txnid', 'charge_id', 'order_number', 'payment_status', 'customer_name', 'customer_email', 'customer_phone', 'customer_address', 'customer_city', 'customer_zip', 'service_area_id', 'customer_state', 'customer_country', 'shipping_name', 'shipping_email', 'shipping_phone', 'shipping_address', 'shipping_city', 'shipping_zip', 'shipping_state', 'shipping_country', 'order_note', 'coupon_code', 'coupon_discount', 'status', 'escrow_status', 'affilate_user', 'affilate_charge', 'currency_sign', 'currency_name', 'currency_value', 'shipping_cost', 'packing_cost', 'tax', 'tax_location', 'dp', 'pay_id', 'vendor_shipping_id', 'vendor_packing_id', 'wallet_price', 'shipping_title', 'packing_title', 'affilate_users', 'commission', 'is_shipping', 'vendor_ids'];
+	protected $fillable = ['user_id', 'cart', 'method', 'shipping', 'pickup_location', 'total_delivery_fee', 'totalQty', 'pay_amount', 'txnid', 'charge_id', 'order_number', 'payment_status', 'customer_name', 'customer_email', 'customer_phone', 'customer_address', 'customer_city', 'customer_zip', 'service_area_id', 'customer_lat', 'customer_lng', 'customer_state', 'customer_country', 'shipping_name', 'shipping_email', 'shipping_phone', 'shipping_address', 'shipping_city', 'shipping_zip', 'shipping_state', 'shipping_country', 'order_note', 'coupon_code', 'coupon_discount', 'status', 'escrow_status', 'affilate_user', 'affilate_charge', 'currency_sign', 'currency_name', 'currency_value', 'shipping_cost', 'packing_cost', 'tax', 'tax_location', 'dp', 'pay_id', 'vendor_shipping_id', 'vendor_packing_id', 'wallet_price', 'shipping_title', 'packing_title', 'affilate_users', 'commission', 'is_shipping', 'vendor_ids'];
+
+    public function deliveryJob()
+    {
+        return $this->hasOne(DeliveryJob::class);
+    }
 
 	public function walletLedgers()
 	{

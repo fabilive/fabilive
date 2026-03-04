@@ -8,6 +8,8 @@ use App\Models\Package;
 use App\Models\Shipping;
 use Illuminate\Http\Request;
 use Datatables;
+use App\Services\DeliveryJobService;
+use App\Models\DeliveryJob;
 class OrderController extends VendorBaseController
 {
     public function datatables()
@@ -125,6 +127,32 @@ class OrderController extends VendorBaseController
         } else {
             $user = $this->user;
             VendorOrder::where('order_number', '=', $slug)->where('user_id', '=', $user->id)->update(['status' => $status]);
+            
+            // If status is "ready", trigger the Delivery System logic
+            if ($status === 'ready') {
+                $jobService = app(DeliveryJobService::class);
+                $job = DeliveryJob::where('order_id', $order->id)->first();
+                if (!$job) {
+                    $job = $jobService->createJobFromOrder($order);
+                }
+
+                $stop = $job->stops()->where('type', 'pickup')->where('seller_id', $user->id)->first();
+                if ($stop && $stop->status === 'pending') {
+                    $stop->update([
+                        'status' => 'ready',
+                        'ready_at' => now()
+                    ]);
+                    $jobService->logEvent($job, 'seller', $user->id, 'seller_marked_ready');
+
+                    // If it was pending_readiness, it's now available for riders
+                    if ($job->status === 'pending_readiness') {
+                        $jobService->transitionStatus($job, 'available', 'system', null, ['trigger' => 'first_seller_ready']);
+                        app(\App\Services\DeliveryDispatchService::class)->dispatchToRiders($job);
+                        app(\App\Services\DeliveryDispatchService::class)->remindSellers($job);
+                    }
+                }
+            }
+            
             return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
         }
     }

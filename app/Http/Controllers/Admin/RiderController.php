@@ -139,13 +139,39 @@ class RiderController extends AdminBaseController
     }
     public function reject($id)
     {
-        $withdraw = Withdraw::findOrFail($id);
-        $account = Rider::findOrFail($withdraw->rider->id);
-        $account->balance = $account->balance + $withdraw->amount + $withdraw->fee;
-        $account->update();
-        $data['status'] = "rejected";
-        $withdraw->update($data);
-        $msg = __('Withdraw Rejected Successfully.');
-        return response()->json($msg);
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            $withdraw = Withdraw::lockForUpdate()->findOrFail($id);
+            if ($withdraw->status == 'rejected' || $withdraw->status == 'completed') {
+                return response()->json('Already processed');
+            }
+
+            $account = Rider::lockForUpdate()->findOrFail($withdraw->rider->id);
+            $account->balance = $account->balance + $withdraw->amount + $withdraw->fee;
+            $account->update();
+
+            $data['status'] = "rejected";
+            $withdraw->update($data);
+
+            // Log reversal in ledger
+            \App\Models\WalletLedger::create([
+                'user_id' => $account->id,
+                'amount' => $withdraw->amount + $withdraw->fee,
+                'type' => 'withdrawal_reversal',
+                'reference' => 'WDR-' . $withdraw->id,
+                'status' => 'completed',
+                'details' => 'Rider withdrawal request rejected by admin. Funds returned to balance.'
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            $msg = __('Withdraw Rejected Successfully.');
+            return response()->json($msg);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json($e->getMessage());
+        }
     }
 }

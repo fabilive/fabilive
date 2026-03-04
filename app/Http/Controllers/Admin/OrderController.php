@@ -429,9 +429,11 @@ class OrderController extends AdminBaseController
 
     public function update(Request $request, $id)
     {
-        $data = Order::findOrFail($id);
-        $input = $request->all();
-        if ($request->has('status')) {
+        try {
+            DB::beginTransaction();
+            $data = Order::lockForUpdate()->findOrFail($id);
+            $input = $request->all();
+            if ($request->has('status')) {
                 if ($input['status'] == "completed") {
                     $cart = json_decode($data->cart, true);
                     if (!empty($cart['items'])) {
@@ -443,7 +445,7 @@ class OrderController extends AdminBaseController
                 'product_id' => $productId
             ])->get();
             foreach ($deliveryRiders as $deliveryRider) {
-                $rider = Rider::find($deliveryRider->rider_id);
+                $rider = Rider::lockForUpdate()->find($deliveryRider->rider_id);
                 if ($rider) {
                     $rider->balance += $productFee;
                     $rider->save();
@@ -452,14 +454,16 @@ class OrderController extends AdminBaseController
         }
     }
     foreach ($data->vendororders as $vorder) {
-        $uprice = User::find($vorder->user_id);
-        $uprice->current_balance = $uprice->current_balance + $vorder->price - $data->commission;
+        $uprice = User::lockForUpdate()->find($vorder->user_id);
+        if ($uprice) {
+            $uprice->current_balance = $uprice->current_balance + $vorder->price - $data->commission;
         $vorder->status = 'completed';
         $vorder->update();
         $uprice->update();
     }
+}
                     if (User::where('id', $data->affilate_user)->exists()) {
-                        $auser = User::where('id', $data->affilate_user)->first();
+                        $auser = User::lockForUpdate()->where('id', $data->affilate_user)->first();
                         $auser->affilate_income += $data->affilate_charge;
                         $auser->update();
                         $affiliate_bonus = new AffliateBonus();
@@ -472,7 +476,7 @@ class OrderController extends AdminBaseController
                     if ($data->affilate_users != null) {
                         $ausers = json_decode($data->affilate_users, true);
                         foreach ($ausers as $auser) {
-                            $user = User::find($auser['user_id']);
+                            $user = User::lockForUpdate()->find($auser['user_id']);
                             if ($user) {
                                 $user->affilate_income += $auser['charge'];
                                 $user->update();
@@ -504,7 +508,7 @@ class OrderController extends AdminBaseController
                 if ($input['status'] == "declined") {
                     if ($data->user_id != 0) {
                         if ($data->wallet_price != 0) {
-                            $user = User::find($data->user_id);
+                            $user = User::lockForUpdate()->find($data->user_id);
                             if ($user) {
                                 $user->balance = $user->balance + $data->wallet_price;
                                 $user->save();
@@ -550,19 +554,28 @@ class OrderController extends AdminBaseController
                         $ck->text = $request->track_text;
                         $ck->update();
                     } else {
-                        $data = new OrderTrack;
-                        $data->order_id = $id;
-                        $data->title = $title;
-                        $data->text = $request->track_text;
-                        $data->save();
+                        $track = new OrderTrack;
+                        $track->order_id = $id;
+                        $track->title = $title;
+                        $track->text = $request->track_text;
+                        $track->save();
                     }
                 }
+                DB::commit();
                 $msg = __('Status Updated Successfully.');
                 return response()->json($msg);
+            }
+            $data->update($input);
+            DB::commit();
+            $msg = __('Data Updated Successfully.');
+            return redirect()->back()->with('success', $msg);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($request->has('status')) {
+                return response()->json(['errors' => [$e->getMessage()]], 500);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
         }
-        $data->update($input);
-        $msg = __('Data Updated Successfully.');
-        return redirect()->back()->with('success', $msg);
     }
     
     

@@ -108,6 +108,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/order/track/edit/{id}', 'Admin\OrderTrackController@edit')->name('admin-order-track-edit');
         Route::post('/order/track/update/{id}', 'Admin\OrderTrackController@update')->name('admin-order-track-update');
         Route::delete('/order/track/delete/{id}', 'Admin\OrderTrackController@delete')->name('admin-order-track-delete');
+        
+        // Delivery Verification
+        Route::post('/delivery/verify/{job}', [App\Http\Controllers\Admin\DeliveryVerificationController::class, 'verify'])->name('admin-delivery-verify');
 
         // Order Tracking Ends
 

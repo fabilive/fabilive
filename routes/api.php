@@ -30,6 +30,13 @@ Route::prefix('rider')->group(function () {
     Route::post('reset-password', 'Api\Auth\Rider\RiderAuthController@resetPassword');
     Route::group(['middleware' => 'auth:rider-api'], function () {
 
+        // ============ Start: Multi-Seller Delivery System =========================\\
+        Route::get('delivery/available', 'Rider\RiderController@availableJobs')->name('rider-delivery-available');
+        Route::get('delivery/accept/{id}', 'Rider\RiderController@acceptJob')->name('rider-delivery-accept');
+        Route::get('delivery/jobs', 'Rider\RiderController@deliveryJobs')->name('rider-delivery-index');
+        Route::get('delivery/details/{id}', 'Rider\RiderController@jobDetails')->name('rider-delivery-details');
+        // ============ End: Multi-Seller Delivery System =========================\\
+
         Route::post('service-area', 'Api\Rider\RiderController@storeServiceArea');
         Route::delete('service-area/{id}', 'Api\Rider\RiderController@deleteServiceArea');
         Route::put('service-area', 'Api\Rider\RiderController@updateServiceArea');
@@ -252,6 +259,38 @@ Route::group(['prefix' => 'front'], function () {
     //------------ Checkout Controller ------------
 
 });
+
+Route::post('/campay/webhook', [App\Http\Controllers\Api\Payment\CampayWebhookController::class, 'handle']);
+
+// ============ Start: Multi-Seller Delivery System =========================\\
+Route::prefix('delivery')->group(function () {
+    // Seller Endpoints
+    Route::post('seller/ready/{order}', [App\Http\Controllers\Api\DeliveryJobController::class, 'sellerReady'])->middleware('auth:api');
+    
+    // Rider Endpoints
+    Route::group(['middleware' => 'auth:rider-api'], function () {
+        Route::get('rider/available', [App\Http\Controllers\Api\DeliveryJobController::class, 'availableJobs']);
+        Route::post('rider/accept/{job}', [App\Http\Controllers\Api\DeliveryJobController::class, 'accept']);
+        Route::post('rider/update-stop/{job}/{stop}', [App\Http\Controllers\Api\DeliveryJobController::class, 'updateStop']);
+        Route::post('rider/deliver/{job}', [App\Http\Controllers\Api\DeliveryJobController::class, 'markDelivered']);
+    });
+
+    // Buyer Tracking (Public with Order ID / Private with auth)
+    Route::get('tracking/{order}', [App\Http\Controllers\Api\DeliveryJobController::class, 'tracking']);
+
+    // Delivery Chat Endpoints
+    Route::group(['middleware' => ['auth:api,rider-api', 'delivery.chat.access']], function () {
+        Route::get('chat/messages/{chat_thread_id}', [App\Http\Controllers\Api\DeliveryChatController::class, 'fetchMessages']);
+        Route::post('chat/send', [App\Http\Controllers\Api\DeliveryChatController::class, 'sendMessage']);
+    });
+
+    // Admin/System Management
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::post('admin/cancel/{job}', [App\Http\Controllers\Api\DeliveryJobController::class, 'cancel']);
+        Route::post('admin/return/{job}', [App\Http\Controllers\Api\DeliveryJobController::class, 'returnJob']);
+    });
+});
+// ============ End: Multi-Seller Delivery System =========================\\
 
 Route::fallback(function () {
     return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Not Found!']], 404);

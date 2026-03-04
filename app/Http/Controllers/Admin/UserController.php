@@ -485,16 +485,42 @@ class UserController extends AdminBaseController
     //*** GET Request
     public function reject($id)
     {
-        $withdraw = Withdraw::findOrFail($id);
-        $account = User::findOrFail($withdraw->user->id);
-        $account->affilate_income = $account->affilate_income + $withdraw->amount + $withdraw->fee;
-        $account->update();
-        $data['status'] = "rejected";
-        $withdraw->update($data);
-        //--- Redirect Section
-        $msg = __('Withdraw Rejected Successfully.');
-        return response()->json($msg);
-        //--- Redirect Section Ends
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+            
+            $withdraw = Withdraw::lockForUpdate()->findOrFail($id);
+            if ($withdraw->status == 'rejected' || $withdraw->status == 'completed') {
+                return response()->json('Already processed');
+            }
+
+            $account = User::lockForUpdate()->findOrFail($withdraw->user->id);
+            // Refund the exact amount requested back to the user's balance
+            $account->balance = $account->balance + $withdraw->amount + $withdraw->fee;
+            $account->update();
+
+            $data['status'] = "rejected";
+            $withdraw->update($data);
+
+            // Log reversal in ledger
+            \App\Models\WalletLedger::create([
+                'user_id' => $account->id,
+                'amount' => $withdraw->amount + $withdraw->fee,
+                'type' => 'withdrawal_reversal',
+                'reference' => 'WDR-' . $withdraw->id,
+                'status' => 'completed',
+                'details' => 'Withdrawal request rejected by admin. Funds returned to wallet.'
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+            
+            //--- Redirect Section
+            $msg = __('Withdraw Rejected Successfully.');
+            return response()->json($msg);
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json($e->getMessage());
+        }
     }
 
 

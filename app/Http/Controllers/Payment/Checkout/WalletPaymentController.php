@@ -19,13 +19,17 @@ class WalletPaymentController extends CheckoutBaseControlller
 {
     public function store(Request $request)
     {
-        $input = $request->all();
-        if ($request->pass_check) {
-            $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
-                return redirect()->back()->with('unsuccess', $auth['error_message']);
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            $input = $request->all();
+            if ($request->pass_check) {
+                $auth = OrderHelper::auth_check($input); // For Authentication Checking
+                if (!$auth['auth_success']) {
+                    \Illuminate\Support\Facades\DB::rollBack();
+                    return redirect()->back()->with('unsuccess', $auth['error_message']);
+                }
             }
-        }
         if (!Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
@@ -33,10 +37,12 @@ class WalletPaymentController extends CheckoutBaseControlller
         $cart = new Cart($oldCart);
         $orderCalculate = PriceHelper::getOrderTotal($input, $cart);
         if (!Auth::check()) {
+            \Illuminate\Support\Facades\DB::rollBack();
             return redirect()->back()->with('unsuccess', 'Please login to continue');
         } else {
-            $user = Auth::user();
+            $user = \App\Models\User::lockForUpdate()->find(Auth::user()->id);
             if ($user->balance < $orderCalculate['total_amount']) {
+                \Illuminate\Support\Facades\DB::rollBack();
                 return redirect()->back()->with('unsuccess', 'You do not have enough balance in your wallet');
             }
         }
@@ -309,9 +315,9 @@ $input['total_delivery_fee'] = $new_cart['grand_total_fee'];
         Session::forget('coupon_total');
         Session::forget('coupon_total1');
         Session::forget('coupon_percentage');
-        $user = Auth::user();
         $user->balance = $user->balance - $orderTotal;
         $user->save();
+        \Illuminate\Support\Facades\DB::commit();
         if ($order->user_id != 0 && $order->wallet_price != 0) {
             OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions
         }
@@ -335,6 +341,10 @@ $input['total_delivery_fee'] = $new_cart['grand_total_fee'];
         $mailer = new GeniusMailer();
         $mailer->sendCustomMail($data);
         return redirect($success_url);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->back()->with('unsuccess', $e->getMessage());
+        }
     }
     private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earthRadius = 6371)
 {

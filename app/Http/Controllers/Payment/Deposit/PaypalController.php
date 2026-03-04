@@ -84,6 +84,9 @@ class PaypalController extends DepositBaseController
     {
         $responseData = $request->all();
         $dep = Session::get('deposit');
+        if (!$dep) {
+            return redirect()->route('user-dashboard')->with('unsuccess', __('Session expired.'));
+        }
 
         $success_url = route('deposit.payment.return');
         $cancel_url = route('deposit.payment.cancle');
@@ -95,67 +98,75 @@ class PaypalController extends DepositBaseController
                 'message' => __('Unknown error occurred'),
             ];
         }
-        $transaction = $this->gateway->completePurchase(array(
-            'payer_id' => $responseData['PayerID'],
-            'transactionReference' => $responseData['paymentId'],
-        ));
 
-        $response = $transaction->send();
+        try {
+            $transaction_omnipay = $this->gateway->completePurchase(array(
+                'payer_id' => $responseData['PayerID'],
+                'transactionReference' => $responseData['paymentId'],
+            ));
 
-        if ($response->isSuccessful()) {
+            $response = $transaction_omnipay->send();
 
-            $deposit = new Deposit;
-            $deposit->user_id = $dep['user_id'];
-            $deposit->currency = $dep['currency'];
-            $deposit->currency_code = $dep['currency_code'];
-            $deposit->amount = $dep['amount'];
-            $deposit->currency_value = $dep['currency_value'];
-            $deposit->method = $dep['method'];
-            $deposit->txnid = $response->getData()['transactions'][0]['related_resources'][0]['sale']['id'];
-            $deposit->status = 1;
-            $deposit->save();
+            if ($response->isSuccessful()) {
+                \Illuminate\Support\Facades\DB::beginTransaction();
 
-            $user = \App\Models\User::findOrFail($deposit->user_id);
-            $user->balance = $user->balance + ($deposit->amount);
-            $user->save();
+                $deposit = new Deposit;
+                $deposit->user_id = $dep['user_id'];
+                $deposit->currency = $dep['currency'];
+                $deposit->currency_code = $dep['currency_code'];
+                $deposit->amount = $dep['amount'];
+                $deposit->currency_value = $dep['currency_value'];
+                $deposit->method = $dep['method'];
+                $deposit->txnid = $response->getData()['transactions'][0]['related_resources'][0]['sale']['id'];
+                $deposit->status = 1;
+                $deposit->save();
 
-            // store in transaction table
-            if ($deposit->status == 1) {
-                $transaction = new \App\Models\Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
-                $transaction->user_id = $deposit->user_id;
-                $transaction->amount = $deposit->amount;
-                $transaction->user_id = $deposit->user_id;
-                $transaction->currency_sign = $deposit->currency;
-                $transaction->currency_code = $deposit->currency_code;
-                $transaction->currency_value = $deposit->currency_value;
-                $transaction->method = $deposit->method;
-                $transaction->txnid = $deposit->txnid;
-                $transaction->details = 'Payment Deposit';
-                $transaction->type = 'plus';
-                $transaction->save();
+                $user = \App\Models\User::lockForUpdate()->findOrFail($deposit->user_id);
+                $user->balance = $user->balance + ($deposit->amount);
+                $user->save();
+
+                // store in transaction table
+                if ($deposit->status == 1) {
+                    $transaction = new \App\Models\Transaction;
+                    $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                    $transaction->user_id = $deposit->user_id;
+                    $transaction->amount = $deposit->amount;
+                    $transaction->currency_sign = $deposit->currency;
+                    $transaction->currency_code = $deposit->currency_code;
+                    $transaction->currency_value = $deposit->currency_value;
+                    $transaction->method = $deposit->method;
+                    $transaction->txnid = $deposit->txnid;
+                    $transaction->details = 'Payment Deposit';
+                    $transaction->type = 'plus';
+                    $transaction->save();
+                }
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                $maildata = [
+                    'to' => $user->email,
+                    'type' => "wallet_deposit",
+                    'cname' => $user->name,
+                    'damount' => $deposit->amount,
+                    'wbalance' => $user->balance,
+                    'oamount' => "",
+                    'aname' => "",
+                    'aemail' => "",
+                    'onumber' => "",
+                ];
+
+                $mailer = new GeniusMailer();
+                $mailer->sendAutoMail($maildata);
+
+                Session::forget('deposit');
+                Session::forget('paypal_payment_id');
+                return redirect($success_url);
+            } else {
+                return redirect($cancel_url);
             }
-
-            $maildata = [
-                'to' => $user->email,
-                'type' => "wallet_deposit",
-                'cname' => $user->name,
-                'damount' => $deposit->amount,
-                'wbalance' => $user->balance,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
-            ];
-
-            $mailer = new GeniusMailer();
-            $mailer->sendAutoMail($maildata);
-
-            Session::forget('deposit');
-            Session::forget('paypal_payment_id');
-            return redirect($success_url);
-        } else {
-            return redirect($cancel_url);
+        } catch (\Exception $e) {
+            if (\DB::transactionLevel() > 0) \DB::rollBack();
+            return redirect($cancel_url)->with('unsuccess', $e->getMessage());
         }
     }
 }

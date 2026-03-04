@@ -8,6 +8,8 @@
         <ul>
             <li class=""><a class="{{ Request::url() == route('rider-dashboard') ? 'active':'' }}" href="{{ route('rider-dashboard') }}">@lang('Dashboard')</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-orders') ? 'active':'' }}" href="{{ route('rider-orders') }}">{{ __('Pending Order') }}</a></li>
+            <li class=""><a class="{{ Request::is('delivery/available') ? 'active':'' }}" href="{{ route('rider-delivery-available') }}">{{ __('Delivery Marketplace') }}</a></li>
+            <li class=""><a class="{{ Request::is('delivery/jobs') || Request::is('delivery/details/*') ? 'active':'' }}" href="{{ route('rider-delivery-index') }}">{{ __('My Delivery Jobs') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-conversation') ? 'active':'' }}" href="{{ route('rider-conversation') }}">{{ __('Buyer Conversation') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-orders').'?type=complete' ? 'active':'' }}" href="{{ route('rider-orders').'?type=complete' }}">{{ __('Complete Order') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-service-area') ? 'active':'' }}" href="{{ route('rider-service-area') }}">{{ __('Service Area') }}</a></li>

@@ -234,16 +234,41 @@ class VendorController extends AdminBaseController
     //*** GET Request   
     public function reject($id)
     {
-        $withdraw = Withdraw::findOrFail($id);
-        $account = User::findOrFail($withdraw->user->id);
-        $account->current_balance = $account->current_balance + $withdraw->amount + $withdraw->fee;
-        $account->update();
-        $data['status'] = "rejected";
-        $withdraw->update($data);
-        //--- Redirect Section     
-        $msg = 'Withdraw Rejected Successfully.';
-        return response()->json($msg);
-        //--- Redirect Section Ends   
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            $withdraw = Withdraw::lockForUpdate()->findOrFail($id);
+            if ($withdraw->status == 'rejected' || $withdraw->status == 'completed') {
+                return response()->json('Already processed');
+            }
+
+            $account = User::lockForUpdate()->findOrFail($withdraw->user->id);
+            $account->current_balance = $account->current_balance + $withdraw->amount + $withdraw->fee;
+            $account->update();
+
+            $data['status'] = "rejected";
+            $withdraw->update($data);
+
+            // Log reversal in ledger
+            \App\Models\WalletLedger::create([
+                'user_id' => $account->id,
+                'amount' => $withdraw->amount + $withdraw->fee,
+                'type' => 'withdrawal_reversal',
+                'reference' => 'WDR-' . $withdraw->id,
+                'status' => 'completed',
+                'details' => 'Vendor withdrawal request rejected by admin. Funds returned to balance.'
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            //--- Redirect Section     
+            $msg = 'Withdraw Rejected Successfully.';
+            return response()->json($msg);
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json($e->getMessage());
+        }
     }
 
     //*** GET Request

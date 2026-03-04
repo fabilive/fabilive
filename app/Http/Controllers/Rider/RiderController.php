@@ -13,6 +13,9 @@ use App\Models\RiderServiceArea;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+use App\Models\DeliveryJob;
+use App\Services\DeliveryAcceptanceService;
+use App\Services\DeliveryJobService;
 class RiderController extends RiderBaseController
 {
     public function index()
@@ -309,28 +312,48 @@ public function orderAccept($id)
         return back()->with('success', __('Successfully Delivered this order'));
     }
 
-//     public function orderComplete($id)
-//     {
-//     $data = DeliveryRider::with('order')->where('rider_id', $this->rider->id)->where('id', $id)->first();
-//     if (!$data || $data->status !== 'accepted') {
-//         return back()->with('error', 'Order must be accepted before marking it delivered.');
-//     }
-//     $order = $data->order;
-//     $shipping = \App\Models\Shipping::where('user_id', $order->user_id)->first();
-//     if (!$shipping) {
-//         $shipping = \App\Models\Shipping::where('user_id', 0)->first();
-//     }
-//     if ($shipping) {
-//         $rider = $this->rider;
-//         $rider->balance += $shipping->price;
-//         $rider->save();
-//     }
-//     $data->status = 'delivered';
-//     $data->save();
-//     if ($order) {
-//         $order->status = 'delivered';
-//         $order->save();
-//     }
-//     return back()->with('success', __('Successfully Delivered this order. Shipping price added to wallet.'));
-// }
+    public function availableJobs()
+    {
+        $rider = $this->rider;
+        $jobs = DeliveryJob::where('status', 'available')
+            ->where('service_area_id', $rider->service_area_id)
+            ->with(['order', 'stops'])
+            ->latest()
+            ->get();
+
+        return view('rider.delivery.available', compact('jobs'));
+    }
+
+    public function acceptJob($id)
+    {
+        $rider = $this->rider;
+        $acceptanceService = app(DeliveryAcceptanceService::class);
+
+        try {
+            $job = $acceptanceService->acceptJob($id, $rider->id);
+            return redirect()->route('rider-delivery-index')->with('success', __('Job Accepted successfully.'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function deliveryJobs()
+    {
+        $rider = $this->rider;
+        $jobs = DeliveryJob::where('assigned_rider_id', $rider->id)
+            ->with(['order', 'stops'])
+            ->latest()
+            ->get();
+
+        return view('rider.delivery.index', compact('jobs'));
+    }
+
+    public function jobDetails($id)
+    {
+        $job = DeliveryJob::with(['order', 'stops.seller', 'events'])->findOrFail($id);
+        if ($job->assigned_rider_id != $this->rider->id) {
+            return redirect()->back()->with('error', __('Unauthorized.'));
+        }
+        return view('rider.delivery.details', compact('job'));
+    }
 }

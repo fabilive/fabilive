@@ -73,59 +73,74 @@ class StripeController extends DepositBaseController
     public function notify(Request $request)
     {
         $input = Session::get('input_data');
+        if (!$input) {
+            return redirect()->route('user-dashboard')->with('unsuccess', __('Session expired.'));
+        }
 
-        $user = $this->user;
-        $stripe = new \Stripe\StripeClient(Config::get('services.stripe.secret'));
-        $response = $stripe->checkout->sessions->retrieve($request->session_id);
-        if ($response->status == 'complete') {
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-            $user->balance = $user->balance + ($input['amount'] / $this->curr->value);
-            $user->mail_sent = 1;
-            $user->save();
+            $user = \App\Models\User::lockForUpdate()->find($this->user->id);
+            $stripe = new \Stripe\StripeClient(Config::get('services.stripe.secret'));
+            $response = $stripe->checkout->sessions->retrieve($request->session_id);
 
-            $deposit = new Deposit;
-            $deposit->user_id = $user->id;
-            $deposit->currency = $this->curr->sign;
-            $deposit->currency_code = $this->curr->name;
-            $deposit->currency_value = $this->curr->value;
-            $deposit->amount = $input['amount'] / $this->curr->value;
-            $deposit->method = 'Stripe';
-            $deposit->txnid = $response->payment_intent;
-            $deposit->status = 1;
-            $deposit->save();
-            // store in transaction table
-            if ($deposit->status == 1) {
-                $transaction = new Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
-                $transaction->user_id = $deposit->user_id;
-                $transaction->amount = $deposit->amount;
-                $transaction->user_id = $deposit->user_id;
-                $transaction->currency_sign  = $deposit->currency;
-                $transaction->currency_code  = $deposit->currency_code;
-                $transaction->currency_value = $deposit->currency_value;
-                $transaction->method = $deposit->method;
-                $transaction->txnid = $deposit->txnid;
-                $transaction->details = 'Payment Deposit';
-                $transaction->type = 'plus';
-                $transaction->save();
+            if ($response->status == 'complete') {
+                $amount = $input['amount'] / $this->curr->value;
+                $user->balance = $user->balance + $amount;
+                $user->mail_sent = 1;
+                $user->save();
+
+                $deposit = new Deposit;
+                $deposit->user_id = $user->id;
+                $deposit->currency = $this->curr->sign;
+                $deposit->currency_code = $this->curr->name;
+                $deposit->currency_value = $this->curr->value;
+                $deposit->amount = $amount;
+                $deposit->method = 'Stripe';
+                $deposit->txnid = $response->payment_intent;
+                $deposit->status = 1;
+                $deposit->save();
+
+                // store in transaction table
+                if ($deposit->status == 1) {
+                    $transaction = new Transaction;
+                    $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                    $transaction->user_id = $deposit->user_id;
+                    $transaction->amount = $deposit->amount;
+                    $transaction->currency_sign  = $deposit->currency;
+                    $transaction->currency_code  = $deposit->currency_code;
+                    $transaction->currency_value = $deposit->currency_value;
+                    $transaction->method = $deposit->method;
+                    $transaction->txnid = $deposit->txnid;
+                    $transaction->details = 'Payment Deposit';
+                    $transaction->type = 'plus';
+                    $transaction->save();
+                }
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                $data = [
+                    'to' => $user->email,
+                    'type' => "wallet_deposit",
+                    'cname' => $user->name,
+                    'damount' => $deposit->amount,
+                    'wbalance' => $user->balance,
+                    'oamount' => "",
+                    'aname' => "",
+                    'aemail' => "",
+                    'onumber' => "",
+                ];
+                $mailer = new GeniusMailer();
+                $mailer->sendAutoMail($data);
+
+                return redirect()->route('user-dashboard')->with('success', __('Balance has been added to your account.'));
+            } else {
+                \Illuminate\Support\Facades\DB::rollBack();
+                return redirect()->route('user-dashboard')->with('unsuccess', __('Payment was not successful.'));
             }
-
-            $data = [
-                'to' => $user->email,
-                'type' => "wallet_deposit",
-                'cname' => $user->name,
-                'damount' => $deposit->amount,
-                'wbalance' => $user->balance,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
-            ];
-            $mailer = new GeniusMailer();
-            $mailer->sendAutoMail($data);
-
-
-            return redirect()->route('user-dashboard')->with('success', __('Balance has been added to your account.'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->route('user-dashboard')->with('unsuccess', $e->getMessage());
         }
     }
 }

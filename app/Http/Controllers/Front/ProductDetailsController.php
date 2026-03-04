@@ -26,57 +26,6 @@ class ProductDetailsController extends FrontBaseController
 
 
     // -------------------------------- PRODUCT DETAILS SECTION ----------------------------------------
-
-    // public function product(Request $request, $slug)
-    // {
-    //     $affilate_user = 0;
-    //     $gs = $this->gs;
-    //     if ($gs->product_affilate == 1) {
-    //         if ($request->has('ref')) {
-    //             if (!empty($request->ref)) {
-    //                 $ref = $request->ref;
-    //                 $user = User::where('affilate_code', $ref)->first();
-    //                 if ($user) {
-    //                     $affilate_users = array();
-    //                     $ck = false;
-    //                     if (Auth::check()) {
-    //                         // Checking whether the affiliate holder is using his own affilate
-    //                         if (Auth::user()->id != $user->id) {
-    //                             $affilate_user = $user->id;
-    //                         }
-    //                     } else {
-    //                         $affilate_user = $user->id;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     $productt = Product::with('user.country', 'galleries')->where('slug', '=', $slug)->firstOrFail();
-    //     $vendor_products = Product::where('user_id', $productt->user_id)->where('id', '!=', $productt->id)->
-    //     where('status', 1)->orderBy('id', 'desc')
-    //         ->withCount('ratings')
-    //         ->withAvg('ratings', 'rating')
-    //         ->take(9)->get()
-    //         ->chunk(3);
-    //     if ($productt->status == 0) {
-    //         return response()->view('errors.404')->setStatusCode(404);
-    //     }
-    //     $productt->views += 1;
-    //     $productt->update();
-    //     $curr = $this->curr;
-    //     $product_click =  new ProductClick;
-    //     $product_click->product_id = $productt->id;
-    //     $product_click->date = Carbon::now()->format('Y-m-d');
-    //     $product_click->save();
-    //     $user=$productt->user;
-    //     $messages = LiveMessage::where(function ($query) use ($user) {
-    //         $query->where('sender_id', auth()->id())->where('receiver_id', $user->id);
-    //     })->orWhere(function ($query) use ($user) {
-    //         $query->where('sender_id', $user->id)->where('receiver_id', auth()->id());
-    //     })->orderBy('created_at', 'asc')->get();
-    //     //dd(env('DB_DATABASE'));
-    //     return view('frontend.product', compact('productt', 'curr', 'affilate_user', 'vendor_products', 'messages', 'user'));
-    // }
     
     public function product(Request $request, $slug)
     {
@@ -102,7 +51,7 @@ class ProductDetailsController extends FrontBaseController
                 }
             }
         }
-        $productt = Product::with('user.country', 'cities', 'galleries')->where('slug', '=', $slug)->firstOrFail();
+        $productt = Product::with('user.country', 'cities', 'serviceArea', 'galleries')->where('slug', '=', $slug)->firstOrFail();
         $vendor_products = Product::where('user_id', $productt->user_id)->where('id', '!=', $productt->id)->
         where('status', 1)->orderBy('id', 'desc')
             ->withCount('ratings')

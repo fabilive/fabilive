@@ -40,6 +40,15 @@
                                     @lang('Make Complete')
                                 </a>
                             @endif
+
+                            @php
+                                $vendorOrder = $order->vendororders()->where('user_id', auth()->id())->first();
+                            @endphp
+                            @if($vendorOrder && $vendorOrder->status == 'pending')
+                                <a href="{{ route('vendor-order-status', ['id1' => $order->order_number, 'status' => 'ready']) }}" class="mybtn1 bg-info">
+                                    <i class="fas fa-check-circle"></i> @lang('Ready for Pickup')
+                                </a>
+                            @endif
                         </h4>
                         
                     </div>

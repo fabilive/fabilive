@@ -22,55 +22,65 @@ class WithdrawController extends RiderBaseController
     }
     
     public function store(Request $request)
-{
-    $from = Rider::findOrFail($this->rider->id);
-    $withdrawcharge = $this->gs;
-    $charge = $withdrawcharge->withdraw_fee;
+    {
+        try {
+            DB::beginTransaction();
+            $from = Rider::lockForUpdate()->findOrFail($this->rider->id);
+            $withdrawcharge = $this->gs;
+            $charge = $withdrawcharge->withdraw_fee;
 
-    if ($request->amount > 0) {
-        $amount = $request->amount;
+            if ($request->amount > 0) {
+                $amount = $request->amount;
 
-        if ($from->balance >= $amount) {
-            $fee = (($withdrawcharge->withdraw_charge / 100) * $amount) + $charge;
-            $finalamount = $amount - $fee;
+                if ($from->balance >= $amount) {
+                    $fee = (($withdrawcharge->withdraw_charge / 100) * $amount) + $charge;
+                    $finalamount = $amount - $fee;
 
-            if ($finalamount < 0) {
-                return response()->json(['errors' => [__('You can not withdraw this amount.')]]);
+                    if ($finalamount < 0) {
+                        DB::rollBack();
+                        return response()->json(['errors' => [__('You can not withdraw this amount.')]]);
+                    }
+
+                    $from->balance -= $amount;
+                    $from->update();
+
+                    $newwithdraw = new Withdraw();
+                    $newwithdraw['user_id'] = $this->rider->id;
+                    $newwithdraw['method'] = $request->methods;
+                    $newwithdraw['amount'] = number_format($finalamount, 2, '.', '');
+                    $newwithdraw['fee'] = $fee;
+                    $newwithdraw['type'] = 'rider';
+                    $newwithdraw['reference'] = $request->reference;
+
+                    if ($request->methods == 'Campay') {
+                        $newwithdraw['network'] = $request->network;
+                        $newwithdraw['campay_acc_no'] = $request->campay_acc_no;
+                        $newwithdraw['campay_acc_name'] = $request->campay_acc_name;
+                    }
+
+                    if ($request->methods == 'Bank') {
+                        $newwithdraw['iban'] = $request->iban;
+                        $newwithdraw['acc_name'] = $request->acc_name;
+                        $newwithdraw['address'] = $request->address;
+                        $newwithdraw['swift'] = $request->swift;
+                    }
+
+                    $newwithdraw->save();
+
+                    DB::commit();
+                    return response()->json(__('Withdraw Request Sent Successfully.'));
+                } else {
+                    DB::rollBack();
+                    return response()->json(['errors' => [__('Insufficient Balance.')]]);
+                }
             }
-
-            $from->balance -= $amount;
-            $from->update();
-
-            $newwithdraw = new Withdraw();
-            $newwithdraw['user_id'] = $this->rider->id;
-            $newwithdraw['method'] = $request->methods;
-            $newwithdraw['amount'] = number_format($finalamount, 2, '.', '');
-            $newwithdraw['fee'] = $fee;
-            $newwithdraw['type'] = 'rider';
-            $newwithdraw['reference'] = $request->reference;
-
-            if ($request->methods == 'Campay') {
-                $newwithdraw['network'] = $request->network;
-                $newwithdraw['campay_acc_no'] = $request->campay_acc_no;
-                $newwithdraw['campay_acc_name'] = $request->campay_acc_name;
-            }
-
-            if ($request->methods == 'Bank') {
-                $newwithdraw['iban'] = $request->iban;
-                $newwithdraw['acc_name'] = $request->acc_name;
-                $newwithdraw['address'] = $request->address;
-                $newwithdraw['swift'] = $request->swift;
-            }
-
-            $newwithdraw->save();
-
-            return response()->json(__('Withdraw Request Sent Successfully.'));
-        } else {
-            return response()->json(['errors' => [__('Insufficient Balance.')]]);
+            DB::rollBack();
+            return response()->json(['errors' => [__('Please enter a valid amount.')]]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['errors' => [$e->getMessage()]], 500);
         }
     }
-    return response()->json(['errors' => [__('Please enter a valid amount.')]]);
-}
 
     
     // public function store(Request $request)
