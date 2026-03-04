@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Fix malformed slugs in the 'pages' table
-        DB::table('pages')->where('slug', 'anti scam')->update(['slug' => 'anti-scam']);
-        DB::table('pages')->where('slug', 'return policy')->update(['slug' => 'return-policy']);
-        DB::table('pages')->where('slug', 'refund policy')->update(['slug' => 'refund-policy']);
+        // 1. Fix malformed slugs in the 'pages' table if it exists
+        if (Schema::hasTable('pages')) {
+            DB::table('pages')->where('slug', 'anti scam')->update(['slug' => 'anti-scam']);
+            DB::table('pages')->where('slug', 'return policy')->update(['slug' => 'return-policy']);
+            DB::table('pages')->where('slug', 'refund policy')->update(['slug' => 'refund-policy']);
+        }
 
         // 2. Create a simple 'redirects' table for 301 handling if we want to handle it via DB
         // For now, we will handle the most critical ones via the migration logic:

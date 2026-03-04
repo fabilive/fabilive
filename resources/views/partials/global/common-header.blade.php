@@ -226,29 +226,67 @@
                                         href="{{ route('front.index') }}">{{ __('Home') }}</a>
                                 </li>
                                 @if ($ps->home == 1)
-                                    <li class="nav-item dropdown mega-dropdown">
-                                        <a class="nav-link dropdown-toggle"
-                                            href="{{ route('front.category') }}">{{ __('Product') }}</a>
-                                        <ul class="dropdown-menu mega-dropdown-menu">
-                                            <li class="mega-container">
-                                                <div class="row row-cols-lg-4 row-cols-sm-2 row-cols-1">
-                                                    @foreach ($categories as $category)
-                                                        <div class="col">
-                                                            <a class="d-inline-block px-3 font-600 text-uppercase text-secondary pb-2" href="{{ route('front.category', $category->slug) }}">{{ $category->name }}</a>
-                                                            <ul>
-                                                                @if ($category->subs->count() > 0)
-                                                                    @foreach ($category->subs as $subcategory)
-                                                                        <li><a class="dropdown-item"
-                                                                                href="{{ route('front.category', [$category->slug, $subcategory->slug]) }}{{ !empty(request()->input('search')) ? '?search=' . request()->input('search') : '' }}">{{ $subcategory->name }}</a>
-                                                                        </li>
-                                                                    @endforeach
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="{{ route('front.category') }}">{{ __('Product') }}</a>
+                                        <ul class="dropdown-menu">
+                                            <style>
+                                                .dropdown-menu .dropend:hover > .sub-menu-dropdown {
+                                                    display: block !important;
+                                                }
+                                                .dropdown-menu .dropend .sub-menu-dropdown {
+                                                    display: none;
+                                                    top: -10px;
+                                                    left: 100%;
+                                                    min-width: 220px;
+                                                    position: absolute;
+                                                    background: #fff;
+                                                    border: 1px solid rgba(0,0,0,.15);
+                                                    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+                                                    z-index: 1000;
+                                                    padding: 0.5rem 0;
+                                                }
+                                                .dropdown-menu .dropend {
+                                                    position: relative;
+                                                }
+                                            </style>
+                                            @foreach ($categories as $category)
+                                                @if ($category->subs->count() > 0)
+                                                    <li class="dropend">
+                                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('front.category', $category->slug) }}">
+                                                            {{ $category->name }}
+                                                            <i class="fas fa-chevron-right ms-2" style="font-size: 10px; color: #999;"></i>
+                                                        </a>
+                                                        <ul class="sub-menu-dropdown list-unstyled">
+                                                            @foreach ($category->subs as $subcategory)
+                                                                @if ($subcategory->childs && $subcategory->childs->count() > 0)
+                                                                    <li class="dropend">
+                                                                        <a class="dropdown-item d-flex justify-content-between align-items-center"
+                                                                            href="{{ route('front.category', [$category->slug, $subcategory->slug]) }}{{ !empty(request()->input('search')) ? '?search=' . request()->input('search') : '' }}">
+                                                                            {{ $subcategory->name }}
+                                                                            <i class="fas fa-chevron-right ms-2" style="font-size: 10px; color: #999;"></i>
+                                                                        </a>
+                                                                        <ul class="sub-menu-dropdown list-unstyled">
+                                                                            @foreach ($subcategory->childs as $child)
+                                                                                <li>
+                                                                                    <a class="dropdown-item" href="{{ route('front.category', [$category->slug, $subcategory->slug, $child->slug]) }}{{ !empty(request()->input('search')) ? '?search=' . request()->input('search') : '' }}">
+                                                                                        {{ $child->name }}
+                                                                                    </a>
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    </li>
+                                                                @else
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('front.category', [$category->slug, $subcategory->slug]) }}{{ !empty(request()->input('search')) ? '?search=' . request()->input('search') : '' }}">{{ $subcategory->name }}</a>
+                                                                    </li>
                                                                 @endif
-                                                            </ul>
-                                                        </div>
-                                                    @endforeach
-
-                                                </div>
-                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </li>
+                                                @else
+                                                    <li><a class="dropdown-item" href="{{ route('front.category', $category->slug) }}">{{ $category->name }}</a></li>
+                                                @endif
+                                            @endforeach
                                         </ul>
                                     </li>
                                 @endif
