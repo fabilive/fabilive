@@ -50,11 +50,13 @@ class DeliveryVerificationController extends Controller
                 
                 // The EscrowReleaseService expects order->status to be 'delivered' or 'completed'
                 // and order->admin_verified to be true.
+                // Use explicit assignment (not mass-assignment) for security-sensitive state changes.
                 if (strtolower($order->status) !== 'completed') {
-                    $order->update(['status' => 'completed']);
+                    $order->status = 'completed';
                 }
                 
-                $order->update(['admin_verified' => true]);
+                $order->admin_verified = true;
+                $order->save();
 
                 // 3. Release Escrow
                 $this->escrowService->releaseOrderEscrow($order);
