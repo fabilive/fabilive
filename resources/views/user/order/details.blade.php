@@ -182,7 +182,7 @@
                         <div class="billing-add-area">
                            <div class="row">
                               <div class="col-md-12">
-                                 <h5>{{ __('Delivery Rider Information') }}</h5>
+                                 <h5>{{ __('Delivery Agent Information') }}</h5>
                                  <address>
                                     {{ __('Name:') }} {{$order->deliveryRider->rider->name}}<br>
                                     {{ __('Phone:') }} {{$order->deliveryRider->phone_number}}<br>

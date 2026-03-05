@@ -137,79 +137,10 @@
 											<!--	</div>-->
 											<!--</div>-->
 											
-											@php
-                                                $serviceAreas = \App\Models\ServiceArea::all(); 
-                                            @endphp
-                                            <div class="row">
-                                                <div class="col-lg-12">
-                                                    <div class="left-area">
-                                                        <h4 class="heading">
-                                                            {{ __('Product Location') }}* <small> (Select city and area)</small>
-                                                        </h4>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="text-editor">
-                                                        <select name="product_location" class="form-control" id="service_area_id" required>
-                                                            <option value="">-- Select Location --</option>
-                                                            @foreach($serviceAreas as $area)
-                                                                <option value="{{ $area->id }}">{{ $area->location }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="row">
-                                                <div class="col-lg-12">
-                                                    <div class="left-area">
-                                                        <h4 class="heading">
-                                                            {{ __('Product City') }}* <small>(Select city)</small>
-                                                        </h4>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="text-editor">
-                                                        <select name="product_city" class="form-control" required>
-                                                            <option value="">-- Select City --</option>
-                                                            @foreach($cities as $id => $name)
-                                                                <option value="{{ $id }}">{{ $name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- 04/09/2025 ko below Field add ki by suleman -->
-                                            <div class="row mt-3">
-                                                <div class="col-lg-12">
-                                                    <div class="left-area">
-                                                        <h4 class="heading">
-                                                            {{ __('Delivery Fee Calculation') }}*
-                                                            <small> (Enter weight and select unit)</small>
-                                                        </h4>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="form-group row align-items-center">
-                                                        <div class="col-md-6">
-                                                            <input type="number" 
-                                                                   name="delivery_fee" 
-                                                                   class="form-control" 
-                                                                   placeholder="Enter weight" 
-                                                                   step="0.01"
-                                                                   min="0">
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select name="delivery_unit" class="form-control">
-                                                                <option value="gram">Gram</option>
-                                                                <option value="kilogram">Kilogram</option>
-                                                                <option value="ton">Ton</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <input type="hidden" name="product_location" value="1">
+                                            <input type="hidden" name="product_city" value="1">
+                                            <input type="hidden" name="delivery_fee" value="0">
+                                            <input type="hidden" name="delivery_unit" value="gram">
 	
 											<div class="row file">
 												<div class="col-lg-12">

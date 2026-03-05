@@ -1,54 +1,49 @@
-(function($) {
-    "use strict";
+(function ($) {
+  "use strict";
 
-  $(document).ready(function() {
-
-
-function disablekey()
-{
- document.onkeydown = function (e)
- {
-  return false;
- }
-}
-
-function enablekey()
-{
- document.onkeydown = function (e)
- {
-  return true;
- }
-}
-
-// **************************************  AJAX REQUESTS SECTION *****************************************
-
-  // Status Start
-      $(document).on('click','.status',function () {
-        var link = $(this).attr('data-href');
-            $.get( link, function(data) {
-              }).done(function(data) {
-                  $('#geniustable').DataTable().ajax.reload();
-                  $('.alert-danger').hide();
-                  $('.alert-success').show();
-                  $('.alert-success p').html(data);
-            })
-          });
-  // Status Ends
+  $(document).ready(function () {
 
 
-  // Display Subcategories & attributes
-      $(document).on('change','#cat',function () {
-        var link = $(this).find(':selected').attr('data-href');
-        if(link != "")
-        {
-          $('#subcat').load(link);
-          $('#subcat').prop('disabled',false);
-        }
-        $.get(getattrUrl + '?id=' + this.value + '&type=category', function(data) {
-  
-          let attrHtml = '';
-          for (var i = 0; i < data.length; i++) {
-            attrHtml += `
+    function disablekey() {
+      document.onkeydown = function (e) {
+        return false;
+      }
+    }
+
+    function enablekey() {
+      document.onkeydown = function (e) {
+        return true;
+      }
+    }
+
+    // **************************************  AJAX REQUESTS SECTION *****************************************
+
+    // Status Start
+    $(document).on('click', '.status', function () {
+      var link = $(this).attr('data-href');
+      $.get(link, function (data) {
+      }).done(function (data) {
+        $('#geniustable').DataTable().ajax.reload();
+        $('.alert-danger').hide();
+        $('.alert-success').show();
+        $('.alert-success p').html(data);
+      })
+    });
+    // Status Ends
+
+
+    // Display Subcategories & attributes
+    $(document).on('change', '#cat', function () {
+      var link = $(this).find(':selected').attr('data-href');
+      if (link != "") {
+        $('#subcat').load(link);
+        $('#subcat').prop('disabled', false);
+      }
+      $.get(getattrUrl + '?id=' + this.value + '&type=category', function (data) {
+
+        let attrHtml = '';
+        for (var i = 0; i < data.length; i++) {
+          attrHtml += `
             <div class="row">
               <div class="col-lg-4">
                 <div class="left-area">
@@ -58,12 +53,12 @@ function enablekey()
               <div class="col-lg-7">
             `;
 
-            for (var j = 0; j < data[i].options.length; j++) {
-              let priceClass = '';
-              if (data[i].attribute.price_status == 0) {
-                priceClass = 'd-none';
-              }
-              attrHtml += `
+          for (var j = 0; j < data[i].options.length; j++) {
+            let priceClass = '';
+            if (data[i].attribute.price_status == 0) {
+              priceClass = 'd-none';
+            }
+            attrHtml += `
                 <div class="row mb-0 option-row">
                   <div class="col-lg-5">
                     <div class="custom-control custom-checkbox">
@@ -87,35 +82,34 @@ function enablekey()
                 </div>
 
               `;
-            }
+          }
 
-            attrHtml +=  `
+          attrHtml += `
               </div>
             </div>
             `;
-          }
-
-          $("#catAttributes").html(attrHtml);
-          $("#subcatAttributes").html('');
-          $("#childcatAttributes").html('');
-        });
-      });
-  // Display Subcategories Ends
-
-  // Display Childcategories & Attributes
-      $(document).on('change','#subcat',function () {
-        var link = $(this).find(':selected').attr('data-href');
-        if(link != "")
-        {
-          $('#childcat').load(link);
-          $('#childcat').prop('disabled',false);
         }
 
-        $.get(getattrUrl + '?id=' + this.value + '&type=subcategory', function(data) {
+        $("#catAttributes").html(attrHtml);
+        $("#subcatAttributes").html('');
+        $("#childcatAttributes").html('');
+      });
+    });
+    // Display Subcategories Ends
 
-          let attrHtml = '';
-          for (var i = 0; i < data.length; i++) {
-            attrHtml += `
+    // Display Childcategories & Attributes
+    $(document).on('change', '#subcat', function () {
+      var link = $(this).find(':selected').attr('data-href');
+      if (link != "") {
+        $('#childcat').load(link);
+        $('#childcat').prop('disabled', false);
+      }
+
+      $.get(getattrUrl + '?id=' + this.value + '&type=subcategory', function (data) {
+
+        let attrHtml = '';
+        for (var i = 0; i < data.length; i++) {
+          attrHtml += `
             <div class="row">
               <div class="col-lg-4">
                 <div class="left-area">
@@ -125,12 +119,12 @@ function enablekey()
               <div class="col-lg-7">
             `;
 
-            for (var j = 0; j < data[i].options.length; j++) {
-              let priceClass = '';
-              if (data[i].attribute.price_status == 0) {
-                priceClass = 'd-none';
-              }
-              attrHtml += `
+          for (var j = 0; j < data[i].options.length; j++) {
+            let priceClass = '';
+            if (data[i].attribute.price_status == 0) {
+              priceClass = 'd-none';
+            }
+            attrHtml += `
                   <div class="row option-row">
                     <div class="col-lg-5">
                       <div class="custom-control custom-checkbox custom-control-inline">
@@ -153,29 +147,29 @@ function enablekey()
                     </div>
                   </div>
               `;
-            }
+          }
 
-            attrHtml +=  `
+          attrHtml += `
               </div>
             </div>
             `;
-          }
+        }
 
-          $("#subcatAttributes").html(attrHtml);
-          $("#childcatAttributes").html('');
-        });
+        $("#subcatAttributes").html(attrHtml);
+        $("#childcatAttributes").html('');
       });
-  // Display Childcateogries & Attributes Ends
+    });
+    // Display Childcateogries & Attributes Ends
 
 
-  // Display Attributes for Selected Childcategory Starts
-      $(document).on('change','#childcat',function () {
+    // Display Attributes for Selected Childcategory Starts
+    $(document).on('change', '#childcat', function () {
 
-        $.get(getattrUrl + '?id=' + this.value + '&type=childcategory', function(data) {
+      $.get(getattrUrl + '?id=' + this.value + '&type=childcategory', function (data) {
 
-          let attrHtml = '';
-          for (var i = 0; i < data.length; i++) {
-            attrHtml += `
+        let attrHtml = '';
+        for (var i = 0; i < data.length; i++) {
+          attrHtml += `
             <div class="row">
               <div class="col-lg-4">
                 <div class="left-area">
@@ -185,12 +179,12 @@ function enablekey()
               <div class="col-lg-7">
             `;
 
-            for (var j = 0; j < data[i].options.length; j++) {
-              let priceClass = '';
-              if (data[i].attribute.price_status == 0) {
-                priceClass = 'd-none';
-              }
-              attrHtml += `
+          for (var j = 0; j < data[i].options.length; j++) {
+            let priceClass = '';
+            if (data[i].attribute.price_status == 0) {
+              priceClass = 'd-none';
+            }
+            attrHtml += `
                   <div class="row option-row">
                     <div class="col-lg-5">
                       <div class="custom-control custom-checkbox custom-control-inline">
@@ -214,278 +208,254 @@ function enablekey()
                   </div>
 
               `;
-            }
+          }
 
-            attrHtml +=  `
+          attrHtml += `
               </div>
             </div>
             `;
-          }
+        }
 
-          $("#childcatAttributes").html(attrHtml);
-        });
+        $("#childcatAttributes").html(attrHtml);
       });
-  // Display Attributes for Selected Childcategory Ends
+    });
+    // Display Attributes for Selected Childcategory Ends
 
 
-  // Droplinks Start
-      $(document).on('change','.droplinks',function () {
+    // Droplinks Start
+    $(document).on('change', '.droplinks', function () {
 
-        var link = $(this).val();
-        var data = $(this).find(':selected').attr('data-val');
-        if(data == 0)
-        {
-          $(this).next(".nice-select.process.select.droplinks").removeClass("drop-success").addClass("drop-danger");
+      var link = $(this).val();
+      var data = $(this).find(':selected').attr('data-val');
+      if (data == 0) {
+        $(this).next(".nice-select.process.select.droplinks").removeClass("drop-success").addClass("drop-danger");
+      }
+      else {
+        $(this).next(".nice-select.process.select.droplinks").removeClass("drop-danger").addClass("drop-success");
+      }
+      $.get(link, function (data) {
+      }).done(function (data) {
+        $.notify(data, "success");
+      })
+    });
+
+
+    $(document).on('change', '.vdroplinks', function () {
+
+      var link = $(this).val();
+      var data = $(this).find(':selected').attr('data-val');
+      if (data == 0) {
+        $(this).next(".nice-select.process.select1.vdroplinks").removeClass("drop-success").addClass("drop-danger");
+      }
+      else {
+        $(this).next(".nice-select.process.select1.vdroplinks").removeClass("drop-danger").addClass("drop-success");
+      }
+      $.get(link, function (data) {
+      }).done(function (data) {
+        $.notify(data, "success");
+      })
+    });
+
+    $(document).on('change', '.data-droplinks', function (e) {
+      $('#confirm-delete').modal('show');
+      $('#confirm-delete').find('.btn-ok').attr('href', $(this).val());
+      $('#geniustable').DataTable().ajax.reload();
+    });
+
+
+    // Droplinks Ends
+
+
+
+    // ADD OPERATION
+
+    $(document).on('click', '#add-data', function () {
+      if (admin_loader == 1) {
+        $('.submit-loader').show();
+      }
+      $('#modal1').find('.modal-title').html($('#headerdata').val());
+      $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'), function (response, status, xhr) {
+        if (status == "success") {
+          if (admin_loader == 1) {
+            $('.submit-loader').hide();
+          }
         }
-        else{
-          $(this).next(".nice-select.process.select.droplinks").removeClass("drop-danger").addClass("drop-success");
-        }
-        $.get(link, function(data) {
-        }).done(function(data) {
-          $.notify(data,"success");
-        })
+
       });
+    });
+
+    // ADD OPERATION END
 
 
-      $(document).on('change','.vdroplinks',function () {
 
-        var link = $(this).val();
-        var data = $(this).find(':selected').attr('data-val');
-        if(data == 0)
-        {
-          $(this).next(".nice-select.process.select1.vdroplinks").removeClass("drop-success").addClass("drop-danger");
+    // EDIT OPERATION
+
+    $(document).on('click', '.edit', function () {
+      if (admin_loader == 1) {
+        $('.submit-loader').show();
+      }
+      $('#modal1').find('.modal-title').html($('#headerdata').val());
+      $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'), function (response, status, xhr) {
+        if (status == "success") {
+          if (admin_loader == 1) {
+            $('.submit-loader').hide();
+          }
         }
-        else{
-          $(this).next(".nice-select.process.select1.vdroplinks").removeClass("drop-danger").addClass("drop-success");
-        }
-        $.get(link, function(data) {
-        }).done(function(data) {
-          $.notify(data,"success");
-        })
       });
-
-      $(document).on('change','.data-droplinks',function (e) {
-          $('#confirm-delete').modal('show');
-          $('#confirm-delete').find('.btn-ok').attr('href', $(this).val());
-          $('#geniustable').DataTable().ajax.reload();
-        });
+    });
 
 
-  // Droplinks Ends
+    // EDIT OPERATION END
 
 
+    // FEATURE OPERATION
 
-// ADD OPERATION
-
-$(document).on('click','#add-data',function(){
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-  $('#modal1').find('.modal-title').html($('#headerdata').val());
-  $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
-      if(status == "success")
-      {
-        if(admin_loader == 1)
-          {
+    $(document).on('click', '.feature', function () {
+      if (admin_loader == 1) {
+        $('.submit-loader').show();
+      }
+      $('#modal2').find('.modal-title').html($('#headerdata').val() + ' Highlight');
+      $('#modal2 .modal-content .modal-body').html('').load($(this).attr('data-href'), function (response, status, xhr) {
+        if (status == "success") {
+          if (admin_loader == 1) {
             $('.submit-loader').hide();
           }
-      }
-
+        }
+      });
     });
-});
-
-// ADD OPERATION END
 
 
+    // EDIT OPERATION END
 
-// EDIT OPERATION
 
-$(document).on('click','.edit',function(){
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-  $('#modal1').find('.modal-title').html($('#headerdata').val());
-  $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
-      if(status == "success")
-      {
-        if(admin_loader == 1)
-          {
+    // SHOW OPERATION
+
+    $(document).on('click', '.view', function () {
+      if (admin_loader == 1) {
+        $('.submit-loader').show();
+      }
+      $('#modal1').find('.modal-title').html($('#headerdata').val() + ' DETAILS');
+      $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'), function (response, status, xhr) {
+        if (status == "success") {
+          if (admin_loader == 1) {
             $('.submit-loader').hide();
           }
-      }
+        }
+
+      });
     });
-});
 
 
-// EDIT OPERATION END
+    // SHOW OPERATION END
 
 
-// FEATURE OPERATION
 
-$(document).on('click','.feature',function(){
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-  $('#modal2').find('.modal-title').html($('#headerdata').val()+' Highlight');
-  $('#modal2 .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
-      if(status == "success")
-      {
-        if(admin_loader == 1)
-          {
-            $('.submit-loader').hide();
-          }
+    // ADD / EDIT FORM SUBMIT FOR DATA TABLE
+
+
+    $(document).on('submit', '#geniusformdata', function (e) {
+      e.preventDefault();
+      if (admin_loader == 1) {
+        $('.submit-loader').show();
       }
-    });
-});
-
-
-// EDIT OPERATION END
-
-
-// SHOW OPERATION
-
-$(document).on('click','.view',function(){
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-  $('#modal1').find('.modal-title').html($('#headerdata').val()+' DETAILS');
-  $('#modal1 .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
-      if(status == "success")
-      {
-        if(admin_loader == 1)
-          {
-            $('.submit-loader').hide();
-          }
-      }
-
-    });
-});
-
-
-// SHOW OPERATION END
-
-
-
-// ADD / EDIT FORM SUBMIT FOR DATA TABLE
-
-
-$(document).on('submit','#geniusformdata',function(e){
-  e.preventDefault();
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-  $('button.addProductSubmit-btn').prop('disabled',true);
-  disablekey();
+      $('button.addProductSubmit-btn').prop('disabled', true);
+      disablekey();
       $.ajax({
-       method:"POST",
-       url:$(this).prop('action'),
-       data:new FormData(this),
-       dataType:'JSON',
-       contentType: false,
-       cache: false,
-       processData: false,
-       success:function(data)
-       {
+        method: "POST",
+        url: $(this).prop('action'),
+        data: new FormData(this),
+        dataType: 'JSON',
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function (data) {
           if ((data.errors)) {
-          $('.alert-danger').show();
-          $('.alert-danger ul').html('');
-            for(var error in data.errors)
-            {
-              $('.alert-danger ul').append('<li>'+ data.errors[error] +'</li>');
+            $('.alert-danger').show();
+            $('.alert-danger ul').html('');
+            for (var error in data.errors) {
+              $('.alert-danger ul').append('<li>' + data.errors[error] + '</li>');
             }
-        if(admin_loader == 1)
-          {
-            $('.submit-loader').hide();
-          }
+            if (admin_loader == 1) {
+              $('.submit-loader').hide();
+            }
             $("#modal1 .modal-content .modal-body .alert-danger").focus();
-            $('button.addProductSubmit-btn').prop('disabled',false);
+            $('button.addProductSubmit-btn').prop('disabled', false);
             $('#geniusformdata input , #geniusformdata select , #geniusformdata textarea').eq(1).focus();
           }
-          else
-          {
+          else {
             $('#geniustable').DataTable().ajax.reload();
             $('.alert-success').show();
             $('.alert-success p').html(data);
-        if(admin_loader == 1)
-          {
-            $('.submit-loader').hide();
-          }
-            $('button.addProductSubmit-btn').prop('disabled',false);
+            if (admin_loader == 1) {
+              $('.submit-loader').hide();
+            }
+            $('button.addProductSubmit-btn').prop('disabled', false);
             $('#modal1,#modal2').modal('toggle');
 
-           }
-          enablekey();
-       }
-
-      });
-
-});
-
-
-// ADD / EDIT FORM SUBMIT FOR DATA TABLE ENDS
-
-
-
-// DELETE OPERATION
-
-      $('#confirm-delete').on('show.bs.modal', function(e) {
-          $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
-      });
-
-      $('#confirm-delete .btn-ok').on('click', function(e) {
-        if($('#confirm-delete .btn-ok').hasClass("order-btn")){
-if(admin_loader == 1)
-  {
-  $('.submit-loader').show();
-}
-        }
-        $.ajax({
-         type:"GET",
-         url:$(this).attr('href'),
-         success:function(data)
-         {
-              $('#confirm-delete').modal('toggle');
-              $('#geniustable').DataTable().ajax.reload();
-              $('.alert-danger').hide();
-              $('.alert-success').show();
-              $('.alert-success p').html(data);
-
-              if($('#confirm-delete .btn-ok').hasClass("order-btn")){
-        if(admin_loader == 1)
-          {
-            $('.submit-loader').hide();
           }
-              }
+          enablekey();
+        }
 
-         }
-        });
-        return false;
       });
 
-      $('#status-modal .btn-ok').on('click', function(e) {
+    });
 
-        $.ajax({
-         type:"GET",
-         url:$(this).attr('href'),
-         success:function(data)
-         {
-              $('#status-modal').modal('toggle');
-              $('#geniustable').DataTable().ajax.reload();
-              $('.alert-danger').hide();
-              $('.alert-success').show();
-              $('.alert-success p').html(data[0]);
-         }
-        });
-        return false;
+
+    // ADD / EDIT FORM SUBMIT FOR DATA TABLE ENDS
+
+
+
+    // DELETE OPERATION
+
+    $('#confirm-delete').on('show.bs.modal', function (e) {
+      $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+    });
+
+    $('#confirm-delete .btn-ok').on('click', function (e) {
+      if ($('#confirm-delete .btn-ok').hasClass("order-btn")) {
+        if (admin_loader == 1) {
+          $('.submit-loader').show();
+        }
+      }
+      $.ajax({
+        type: "GET",
+        url: $(this).attr('href'),
+        success: function (data) {
+          $('#confirm-delete').modal('toggle');
+          $('#geniustable').DataTable().ajax.reload();
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html(data);
+
+          if ($('#confirm-delete .btn-ok').hasClass("order-btn")) {
+            if (admin_loader == 1) {
+              $('.submit-loader').hide();
+            }
+          }
+
+        }
       });
+      return false;
+    });
+
+    $('#status-modal .btn-ok').on('click', function (e) {
+
+      $.ajax({
+        type: "GET",
+        url: $(this).attr('href'),
+        success: function (data) {
+          $('#status-modal').modal('toggle');
+          $('#geniustable').DataTable().ajax.reload();
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html(data[0]);
+        }
+      });
+      return false;
+    });
 
 
-// DELETE OPERATION END
+    // DELETE OPERATION END
 
   });
 
@@ -493,27 +463,26 @@ if(admin_loader == 1)
 
   // NORMAL FORM
 
-  $(document).on('submit','#geniusform',function(e){
+  $(document).on('submit', '#geniusform', function (e) {
     e.preventDefault();
-    if(admin_loader == 1)
-    {
-    $('.gocover').show();
+    if (admin_loader == 1) {
+      $('.gocover').show();
     }
 
     var fd = new FormData(this);
 
     if ($('.attr-checkbox').length > 0) {
-      $('.attr-checkbox').each(function() {
+      $('.attr-checkbox').each(function () {
 
         // if checkbox checked then take the value of corresponsig price input (if price input exists)
-        if($(this).prop('checked') == true) {
+        if ($(this).prop('checked') == true) {
 
-          if ($("#"+$(this).attr('id')+'_price').val().length > 0) {
+          if ($("#" + $(this).attr('id') + '_price').val().length > 0) {
             // if price value is given
-            fd.append($("#"+$(this).attr('id')+'_price').data('name'), $("#"+$(this).attr('id')+'_price').val());
+            fd.append($("#" + $(this).attr('id') + '_price').data('name'), $("#" + $(this).attr('id') + '_price').val());
           } else {
             // if price value is not given then take 0
-            fd.append($("#"+$(this).attr('id')+'_price').data('name'), 0.00);
+            fd.append($("#" + $(this).attr('id') + '_price').data('name'), 0.00);
           }
 
           // $("#"+$(this).attr('id')+'_price').val(0.00);
@@ -521,382 +490,367 @@ if(admin_loader == 1)
       });
     }
 
-    $('button.addProductSubmit-btn').prop('disabled',true);
-        $.ajax({
-         method:"POST",
-         url:$(this).prop('action'),
-         data: fd,
-         contentType: false,
-         cache: false,
-         processData: false,
-         success:function(data)
-         {
-            console.log(data);
-            if ((data.errors)) {
-            $('.alert-success').hide();
-            $('.alert-danger').show();
-            $('.alert-danger ul').html('');
-              for(var error in data.errors)
-              {
-                $('.alert-danger ul').append('<li>'+ data.errors[error] +'</li>')
-              }
-              $('#geniusform input , #geniusform select , #geniusform textarea').eq(1).focus();
-            }
-            else
-            {
-              $('.alert-danger').hide();
-              $('.alert-success').show();
-              $('.alert-success p').html(data);
-              $('#geniusform input , #geniusform select , #geniusform textarea').eq(1).focus();
-            }
-    if(admin_loader == 1)
-    {
-            $('.gocover').hide();
-    }
+    $('button.addProductSubmit-btn').prop('disabled', true);
+    $.ajax({
+      method: "POST",
+      url: $(this).prop('action'),
+      data: fd,
+      contentType: false,
+      cache: false,
+      processData: false,
+      success: function (data) {
+        console.log(data);
+        if ((data.errors)) {
+          $('.alert-success').hide();
+          $('.alert-danger').show();
+          $('.alert-danger ul').html('');
+          for (var error in data.errors) {
+            $('.alert-danger ul').append('<li>' + data.errors[error] + '</li>')
+          }
+          $('#geniusform input , #geniusform select , #geniusform textarea').eq(1).focus();
+        }
+        else {
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html(data);
+          $('#geniusform input , #geniusform select , #geniusform textarea').eq(1).focus();
+        }
+        if (admin_loader == 1) {
+          $('.gocover').hide();
+        }
 
-            $('button.addProductSubmit-btn').prop('disabled',false);
-         }
+        $('button.addProductSubmit-btn').prop('disabled', false);
+      }
 
-        });
+    });
 
   });
 
   // NORMAL FORM ENDS
 
 
-// MESSAGE FORM
+  // MESSAGE FORM
 
-$(document).on('submit','#messageform',function(e){
-  e.preventDefault();
-  var href = $(this).data('href');
-  if(admin_loader == 1)
-  {
-  $('.gocover').show();
-  }
-  $('button.mybtn1').prop('disabled',true);
-      $.ajax({
-       method:"POST",
-       url:$(this).prop('action'),
-       data:new FormData(this),
-       contentType: false,
-       cache: false,
-       processData: false,
-       success:function(data)
-       {
-          if ((data.errors)) {
+  $(document).on('submit', '#messageform', function (e) {
+    e.preventDefault();
+    var href = $(this).data('href');
+    if (admin_loader == 1) {
+      $('.gocover').show();
+    }
+    $('button.mybtn1').prop('disabled', true);
+    $.ajax({
+      method: "POST",
+      url: $(this).prop('action'),
+      data: new FormData(this),
+      contentType: false,
+      cache: false,
+      processData: false,
+      success: function (data) {
+        if ((data.errors)) {
           $('.alert-success').hide();
           $('.alert-danger').show();
           $('.alert-danger ul').html('');
-            for(var error in data.errors)
-            {
-              $('.alert-danger ul').append('<li>'+ data.errors[error] +'</li>')
-            }
-            $('#messageform textarea').val('');
+          for (var error in data.errors) {
+            $('.alert-danger ul').append('<li>' + data.errors[error] + '</li>')
           }
-          else
-          {
-            $('.alert-danger').hide();
-            $('.alert-success').show();
-            $('.alert-success p').html(data);
-            $('#messageform textarea').val('');
-            $('#messages').load(href);
-          }
-  if(admin_loader == 1)
-  {
+          $('#messageform textarea').val('');
+        }
+        else {
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html(data);
+          $('#messageform textarea').val('');
+          $('#messages').load(href);
+        }
+        if (admin_loader == 1) {
           $('.gocover').hide();
-  }
-          $('button.mybtn1').prop('disabled',false);
-       }
-      });
-});
+        }
+        $('button.mybtn1').prop('disabled', false);
+      }
+    });
+  });
 
-// MESSAGE FORM ENDS
+  // MESSAGE FORM ENDS
 
 
-// LOGIN FORM
+  // LOGIN FORM
 
-$("#loginform").on('submit',function(e){
-  e.preventDefault();
-  $('button.submit-btn').prop('disabled',true);
-  $('.alert-info').show();
-  $('.alert-info p').html($('#authdata').val());
-      $.ajax({
-       method:"POST",
-       url:$(this).prop('action'),
-       data:new FormData(this),
-       dataType:'JSON',
-       contentType: false,
-       cache: false,
-       processData: false,
-       success:function(data)
-       {
-          if ((data.errors)) {
+  $("#loginform").on('submit', function (e) {
+    e.preventDefault();
+    $('button.submit-btn').prop('disabled', true);
+    $('.alert-info').show();
+    $('.alert-info p').html($('#authdata').val());
+    $.ajax({
+      method: "POST",
+      url: $(this).prop('action'),
+      data: new FormData(this),
+      dataType: 'JSON',
+      contentType: false,
+      cache: false,
+      processData: false,
+      success: function (data) {
+        if ((data.errors)) {
           $('.alert-success').hide();
           $('.alert-info').hide();
           $('.alert-danger').show();
           $('.alert-danger ul').html('');
-            for(var error in data.errors)
-            {
-              $('.alert-danger p').html(data.errors[error]);
-            }
+          for (var error in data.errors) {
+            $('.alert-danger p').html(data.errors[error]);
           }
-          else
-          {
-            $('.alert-info').hide();
-            $('.alert-danger').hide();
-            $('.alert-success').show();
-            $('.alert-success p').html('Success !');
-            window.location = data;
-          }
-          $('button.submit-btn').prop('disabled',false);
-       }
+        }
+        else {
+          $('.alert-info').hide();
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html('Success !');
+          window.location = data;
+        }
+        $('button.submit-btn').prop('disabled', false);
+      }
 
-      });
+    });
 
-});
-
-
-// LOGIN FORM ENDS
+  });
 
 
-// FORGOT FORM
+  // LOGIN FORM ENDS
 
-$("#forgotform").on('submit',function(e){
-  e.preventDefault();
-  $('button.submit-btn').prop('disabled',true);
-  $('.alert-info').show();
-  $('.alert-info p').html($('#authdata').val());
-      $.ajax({
-       method:"POST",
-       url:$(this).prop('action'),
-       data:new FormData(this),
-       dataType:'JSON',
-       contentType: false,
-       cache: false,
-       processData: false,
-       success:function(data)
-       {
-          if ((data.errors)) {
+
+  // FORGOT FORM
+
+  $("#forgotform").on('submit', function (e) {
+    e.preventDefault();
+    $('button.submit-btn').prop('disabled', true);
+    $('.alert-info').show();
+    $('.alert-info p').html($('#authdata').val());
+    $.ajax({
+      method: "POST",
+      url: $(this).prop('action'),
+      data: new FormData(this),
+      dataType: 'JSON',
+      contentType: false,
+      cache: false,
+      processData: false,
+      success: function (data) {
+        if ((data.errors)) {
           $('.alert-success').hide();
           $('.alert-info').hide();
           $('.alert-danger').show();
           $('.alert-danger ul').html('');
-            for(var error in data.errors)
-            {
-              $('.alert-danger p').html(data.errors[error]);
-            }
+          for (var error in data.errors) {
+            $('.alert-danger p').html(data.errors[error]);
           }
-          else
-          {
-            $('.alert-info').hide();
-            $('.alert-danger').hide();
-            $('.alert-success').show();
-            $('.alert-success p').html(data);
-            $('input[type=email]').val('');
-          }
-          $('button.submit-btn').prop('disabled',false);
-       }
+        }
+        else {
+          $('.alert-info').hide();
+          $('.alert-danger').hide();
+          $('.alert-success').show();
+          $('.alert-success p').html(data);
+          $('input[type=email]').val('');
+        }
+        $('button.submit-btn').prop('disabled', false);
+      }
 
+    });
+
+  });
+
+
+  // FORGOT FORM ENDS
+
+  // USER REGISTER NOTIFICATION
+
+  $(document).ready(function () {
+    setInterval(function () {
+      $.ajax({
+        type: "GET",
+        url: $("#user-notf-count").data('href'),
+        success: function (data) {
+          $("#user-notf-count").html(data);
+        }
       });
-
-});
-
-
-// FORGOT FORM ENDS
-
-// USER REGISTER NOTIFICATION
-
-$(document).ready(function(){
-    setInterval(function(){
-            $.ajax({
-                    type: "GET",
-                    url:$("#user-notf-count").data('href'),
-                    success:function(data){
-                        $("#user-notf-count").html(data);
-                      }
-              });
     }, 5000);
-});
+  });
 
-$(document).on('click','#notf_user',function(){
-  $("#user-notf-count").html('0');
-  $('#user-notf-show').load($("#user-notf-show").data('href'));
-});
+  $(document).on('click', '#notf_user', function () {
+    $("#user-notf-count").html('0');
+    $('#user-notf-show').load($("#user-notf-show").data('href'));
+  });
 
-$(document).on('click','#user-notf-clear',function(){
-  $(this).parent().parent().trigger('click');
-  $.get($('#user-notf-clear').data('href'));
-});
+  $(document).on('click', '#user-notf-clear', function () {
+    $(this).parent().parent().trigger('click');
+    $.get($('#user-notf-clear').data('href'));
+  });
 
-// USER REGISTER NOTIFICATION ENDS
+  // USER REGISTER NOTIFICATION ENDS
 
-// ORDER NOTIFICATION
+  // ORDER NOTIFICATION
 
-$(document).ready(function(){
-    setInterval(function(){
-            $.ajax({
-                    type: "GET",
-                    url:$("#order-notf-count").data('href'),
-                    success:function(data){
-                        $("#order-notf-count").html(data);
-                      }
-              });
+  $(document).ready(function () {
+    setInterval(function () {
+      $.ajax({
+        type: "GET",
+        url: $("#order-notf-count").data('href'),
+        success: function (data) {
+          $("#order-notf-count").html(data);
+        }
+      });
     }, 5000);
-});
+  });
 
-$(document).on('click','#notf_order',function(){
-  $("#order-notf-count").html('0');
-  $('#order-notf-show').load($("#order-notf-show").data('href'));
-});
+  $(document).on('click', '#notf_order', function () {
+    $("#order-notf-count").html('0');
+    $('#order-notf-show').load($("#order-notf-show").data('href'));
+  });
 
-$(document).on('click','#order-notf-clear',function(){
-  $(this).parent().parent().trigger('click');
-  $.get($('#order-notf-clear').data('href'));
-});
+  $(document).on('click', '#order-notf-clear', function () {
+    $(this).parent().parent().trigger('click');
+    $.get($('#order-notf-clear').data('href'));
+  });
 
-// ORDER NOTIFICATION ENDS
+  // ORDER NOTIFICATION ENDS
 
-// PRODUCT NOTIFICATION
+  // PRODUCT NOTIFICATION
 
-$(document).ready(function(){
-    setInterval(function(){
-            $.ajax({
-                    type: "GET",
-                    url:$("#product-notf-count").data('href'),
-                    success:function(data){
-                        $("#product-notf-count").html(data);
-                      }
-              });
+  $(document).ready(function () {
+    setInterval(function () {
+      $.ajax({
+        type: "GET",
+        url: $("#product-notf-count").data('href'),
+        success: function (data) {
+          $("#product-notf-count").html(data);
+        }
+      });
     }, 5000);
-});
+  });
 
-$(document).on('click','#notf_product',function(){
-  $("#product-notf-count").html('0');
-  $('#product-notf-show').load($("#product-notf-show").data('href'));
-});
+  $(document).on('click', '#notf_product', function () {
+    $("#product-notf-count").html('0');
+    $('#product-notf-show').load($("#product-notf-show").data('href'));
+  });
 
-$(document).on('click','#product-notf-clear',function(){
-  $(this).parent().parent().trigger('click');
-  $.get($('#product-notf-clear').data('href'));
-});
+  $(document).on('click', '#product-notf-clear', function () {
+    $(this).parent().parent().trigger('click');
+    $.get($('#product-notf-clear').data('href'));
+  });
 
-// PRODUCT NOTIFICATION ENDS
+  // PRODUCT NOTIFICATION ENDS
 
-// CONVERSATION NOTIFICATION
+  // CONVERSATION NOTIFICATION
 
-$(document).ready(function(){
-    setInterval(function(){
-            $.ajax({
-                    type: "GET",
-                    url:$("#conv-notf-count").data('href'),
-                    success:function(data){
-                        $("#conv-notf-count").html(data);
-                      }
-              });
+  $(document).ready(function () {
+    setInterval(function () {
+      $.ajax({
+        type: "GET",
+        url: $("#conv-notf-count").data('href'),
+        success: function (data) {
+          $("#conv-notf-count").html(data);
+        }
+      });
     }, 5000);
-});
+  });
 
-$(document).on('click','#notf_conv',function(){
-  $("#conv-notf-count").html('0');
-  $('#conv-notf-show').load($("#conv-notf-show").data('href'));
-});
+  $(document).on('click', '#notf_conv', function () {
+    $("#conv-notf-count").html('0');
+    $('#conv-notf-show').load($("#conv-notf-show").data('href'));
+  });
 
-$(document).on('click','#conv-notf-clear',function(){
-  $(this).parent().parent().trigger('click');
-  $.get($('#conv-notf-clear').data('href'));
-});
+  $(document).on('click', '#conv-notf-clear', function () {
+    $(this).parent().parent().trigger('click');
+    $.get($('#conv-notf-clear').data('href'));
+  });
 
-// CONVERSATION NOTIFICATION ENDS
-
-
-// SEND MESSAGE SECTION
-$(document).on('click','.send',function(){
-  $('.eml-val').val($(this).data('email'));
-});
-
-          $(document).on("submit", "#emailreply1" , function(){
-          var token = $(this).find('input[name=_token]').val();
-          var subject = $(this).find('input[name=subject]').val();
-          var message =  $(this).find('textarea[name=message]').val();
-          var to = $(this).find('input[name=to]').val();
-          $('#eml1').prop('disabled', true);
-          $('#subj1').prop('disabled', true);
-          $('#msg1').prop('disabled', true);
-          $('#emlsub1').prop('disabled', true);
-            $.ajax({
-            type: 'post',
-            url: mainurl+'/admin/user/send/message',
-            data: {
-                '_token': token,
-                'subject'   : subject,
-                'message'  : message,
-                'to'   : to
-                  },
-                 success: function( data) {
-                  $('#eml1').prop('disabled', false);
-                  $('#subj1').prop('disabled', false);
-                  $('#msg1').prop('disabled', false);
-                  $('#subj1').val('');
-                  $('#msg1').val('');
-                  $('#emlsub1').prop('disabled', false);
-                  if(data == 0)
-                    $.notify("Oops Something Goes Wrong !!","error");
-                  else
-                    $.notify("Message Sent !!","success");
-                  $('.close').click();
-            }
-        });
-          return false;
-        });
-
-// SEND MESSAGE SECTION ENDS
+  // CONVERSATION NOTIFICATION ENDS
 
 
+  // SEND MESSAGE SECTION
+  $(document).on('click', '.send', function () {
+    $('.eml-val').val($(this).data('email'));
+  });
 
-
-
-
-// SEND EMAIL SECTION
-
-          $(document).on("submit", "#emailreply" , function(){
-          var token = $(this).find('input[name=_token]').val();
-          var subject = $(this).find('input[name=subject]').val();
-          var message =  $(this).find('textarea[name=message]').val();
-          var to = $(this).find('input[name=to]').val();
-          $('#eml').prop('disabled', true);
-          $('#subj').prop('disabled', true);
-          $('#msg').prop('disabled', true);
-          $('#emlsub').prop('disabled', true);
-     $.ajax({
-            type: 'post',
-            url: mainurl+'/admin/order/email',
-            data: {
-                '_token': token,
-                'subject'   : subject,
-                'message'  : message,
-                'to'   : to
-                  },
-            success: function( data) {
-          $('#eml').prop('disabled', false);
-          $('#subj').prop('disabled', false);
-          $('#msg').prop('disabled', false);
-          $('#subj').val('');
-          $('#msg').val('');
-        $('#emlsub').prop('disabled', false);
-        if(data == 0)
-        $.notify("Oops Something Goes Wrong !!","error");
+  $(document).on("submit", "#emailreply1", function () {
+    var token = $(this).find('input[name=_token]').val();
+    var subject = $(this).find('input[name=subject]').val();
+    var message = $(this).find('textarea[name=message]').val();
+    var to = $(this).find('input[name=to]').val();
+    $('#eml1').prop('disabled', true);
+    $('#subj1').prop('disabled', true);
+    $('#msg1').prop('disabled', true);
+    $('#emlsub1').prop('disabled', true);
+    $.ajax({
+      type: 'post',
+      url: mainurl + '/admin/user/send/message',
+      data: {
+        '_token': token,
+        'subject': subject,
+        'message': message,
+        'to': to
+      },
+      success: function (data) {
+        $('#eml1').prop('disabled', false);
+        $('#subj1').prop('disabled', false);
+        $('#msg1').prop('disabled', false);
+        $('#subj1').val('');
+        $('#msg1').val('');
+        $('#emlsub1').prop('disabled', false);
+        if (data == 0)
+          $.notify("Oops Something Goes Wrong !!", "error");
         else
-        $.notify("Email Sent !!","success");
+          $.notify("Message Sent !!", "success");
         $('.close').click();
-            }
+      }
+    });
+    return false;
+  });
 
-        });
-          return false;
-        });
-// SEND EMAIL SECTION ENDS
+  // SEND MESSAGE SECTION ENDS
 
 
-// **************************************  AJAX REQUESTS SECTION ENDS *****************************************
+
+
+
+
+  // SEND EMAIL SECTION
+
+  $(document).on("submit", "#emailreply", function () {
+    var token = $(this).find('input[name=_token]').val();
+    var subject = $(this).find('input[name=subject]').val();
+    var message = $(this).find('textarea[name=message]').val();
+    var to = $(this).find('input[name=to]').val();
+    $('#eml').prop('disabled', true);
+    $('#subj').prop('disabled', true);
+    $('#msg').prop('disabled', true);
+    $('#emlsub').prop('disabled', true);
+    $.ajax({
+      type: 'post',
+      url: mainurl + '/vendor/order/email',
+      data: {
+        '_token': token,
+        'subject': subject,
+        'message': message,
+        'to': to
+      },
+      success: function (data) {
+        $('#eml').prop('disabled', false);
+        $('#subj').prop('disabled', false);
+        $('#msg').prop('disabled', false);
+        $('#subj').val('');
+        $('#msg').val('');
+        $('#emlsub').prop('disabled', false);
+        if (data == 0)
+          $.notify("Oops Something Goes Wrong !!", "error");
+        else
+          $.notify("Email Sent !!", "success");
+        $('.close').click();
+      }
+
+    });
+    return false;
+  });
+  // SEND EMAIL SECTION ENDS
+
+
+  // **************************************  AJAX REQUESTS SECTION ENDS *****************************************
 
 
 })(jQuery);

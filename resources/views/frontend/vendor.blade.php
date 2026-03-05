@@ -8,7 +8,23 @@
     <div class="container">
         <div class="row text-center text-white">
             <div class="col-12">
-                <h3 class="mb-2 text-white">{{ __('Products') }}</h3>
+                <h3 class="mb-2 text-white">{{ isset($vendor) ? $vendor->shop_name : __('Products') }}</h3>
+                @if(isset($vendor))
+                <div class="mt-3">
+                    @if(Auth::check() && Auth::user()->id != $vendor->id)
+                        @php
+                            $fav = App\Models\FavoriteSeller::where('user_id', Auth::user()->id)->where('vendor_id', $vendor->id)->first();
+                        @endphp
+                        @if($fav)
+                            <a href="{{ route('user-favorite-delete', $fav->id) }}" class="btn btn-danger btn-sm"><i class="fas fa-heart-broken"></i> {{ __('Unfollow Store') }}</a>
+                        @else
+                            <a href="{{ route('user-favorite', ['id1' => Auth::user()->id, 'id2' => $vendor->id]) }}" class="btn btn-primary btn-sm"><i class="fas fa-heart"></i> {{ __('Follow Store') }}</a>
+                        @endif
+                    @endif
+                    <button class="btn btn-info btn-sm" onclick="shareStore()"><i class="fas fa-share-alt"></i> {{ __('Share Store') }}</button>
+                    <input type="hidden" id="store-url" value="{{ url()->current() }}">
+                </div>
+                @endif
             </div>
             <div class="col-12">
                 <nav aria-label="breadcrumb">
@@ -210,6 +226,27 @@
 
 (function($) {
 		"use strict";
+
+  window.shareStore = function() {
+        var url = document.getElementById("store-url").value;
+        if (navigator.share) {
+            navigator.share({
+                title: '{{ isset($vendor) ? $vendor->shop_name : "Store" }}',
+                text: 'Check out this store on Fabilive!',
+                url: url
+            }).catch(function(error) {
+                console.log('Error sharing', error);
+            });
+        } else {
+            var tempInput = document.createElement("input");
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert("Store link copied to clipboard: " + url);
+        }
+    };
 
   $(function () {
     $("#slider-range").slider({

@@ -62,6 +62,10 @@ class FabiliveResetCommand extends Command
 
     public function handle(): int
     {
+        if (config('app.env') === 'production' && env('DATA_RESET_ENABLED', false) !== true) {
+            $this->error('Data reset is disabled in production. Set DATA_RESET_ENABLED=true in .env to proceed.');
+            return 1;
+        }
         if (!$this->option('force') || !$this->option('i-understand')) {
             $this->error('This command will DELETE ALL transactional data.');
             $this->error('Run with: php artisan fabilive:reset --force --i-understand');
@@ -110,6 +114,9 @@ class FabiliveResetCommand extends Command
         $this->newLine();
         $this->info("✅ Reset complete: {$reset} tables truncated, {$skipped} skipped.");
         $this->info("Admin accounts, products, categories, and system settings are preserved.");
+
+        // Audit log
+        \Illuminate\Support\Facades\Log::warning("FABILIVE DATA RESET EXECUTED: {$reset} tables truncated, {$skipped} skipped. Triggered via artisan fabilive:reset.");
 
         return 0;
     }

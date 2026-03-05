@@ -228,6 +228,44 @@
 
     <div class="row row-cards-one">
 
+        @php
+            $referralService = app(\App\Services\ReferralService::class);
+            $user = Auth::user();
+            $stats = $referralService->getStats($user);
+            if (empty($stats['code'])) {
+                $referralService->generateCode($user, $user->is_vendor == 2 ? 'vendor' : 'buyer');
+                $stats = $referralService->getStats($user);
+            }
+            $referralLink = url('/user/register?ref=' . $stats['code']);
+        @endphp
+
+        <div class="col-md-12 col-lg-12 col-xl-12">
+            <div class="card mb-4">
+                <h5 class="card-header">{{ __('Your Referral Link') }}</h5>
+                <div class="card-body">
+                    <p>{{ __('Share this link to invite buyers/riders and earn a bonus when they sign up!') }}</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="referral-link" value="{{ $referralLink }}" readonly>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="copyReferral()">{{ __('Copy Link') }}</button>
+                        </div>
+                    </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-sm-6">
+                            <strong>{{ __('Total Successful Referrals') }}:</strong> {{ $stats['total_referrals'] }}
+                        </div>
+                        <div class="col-sm-6">
+                            <strong>{{ __('Total Referral Bonus Earned') }}:</strong> {{ App\Models\Product::vendorConvertPrice($stats['total_earned']) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row row-cards-one">
+
         <div class="col-md-12 col-lg-12 col-xl-12">
             <div class="card">
                 <h5 class="card-header">{{ __('Total Sales in Last 30 Days') }}</h5>
@@ -250,6 +288,14 @@
 <script type="text/javascript">
     (function($) {
 		"use strict";
+
+    window.copyReferral = function() {
+        var copyText = document.getElementById("referral-link");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        $.notify("Referral link copied to clipboard!", "success");
+    };
 
     displayLineChart();
 

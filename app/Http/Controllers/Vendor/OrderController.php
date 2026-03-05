@@ -223,4 +223,54 @@ class OrderController extends VendorBaseController
 
 
 
+    public function emailsub(Request $request)
+    {
+        $vendor_id = auth()->id();
+        
+        // Rate Limiter: Max 5 emails per 10 minutes from a specific vendor to prevent spam
+        $key = 'vendor-email-attempt:' . $vendor_id;
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) {
+            return response()->json(0);
+        }
+        
+        // Ensure vendor is authorized to email this buyer (has an order with this email)
+        $hasOrder = \App\Models\Order::where('customer_email', $request->to)
+            ->whereHas('vendororders', function($q) use ($vendor_id) {
+                $q->where('user_id', $vendor_id);
+            })->exists();
+            
+        if (!$hasOrder) {
+            return response()->json(0);
+        }
+
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 600); // 10 minutes
+
+        // Log to DB (Audit)
+        \DB::table('buyer_seller_email_logs')->insert([
+            'vendor_id' => $vendor_id,
+            'buyer_email' => $request->to,
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $gs = \App\Models\Generalsetting::findOrFail(1);
+        if ($gs->is_smtp == 1) {
+            $data = [
+                'to' => $request->to,
+                'subject' => $request->subject,
+                'body' => $request->message,
+            ];
+
+            $mailer = new \App\Classes\GeniusMailer();
+            $mailer->sendCustomMail($data);
+        } else {
+            $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+            mail($request->to, $request->subject, $request->message, $headers);
+        }
+
+        return response()->json(1);
+    }
+
 }

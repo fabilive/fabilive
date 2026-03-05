@@ -202,17 +202,17 @@
                                 <tr>
                                     <th width="45%">{{ __('Email') }}</th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->customer_email}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%">{{ __('Phone') }}</th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->customer_phone}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%">{{ __('Address') }}</th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->customer_address}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy (Rider Delivery)') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%">{{ __('Country') }}</th>
@@ -272,20 +272,17 @@
                                 <tr>
                                     <th width="45%"><strong>{{ __('Email') }}:</strong></th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->shipping_email == null ? $order->customer_email :
-                                        $order->shipping_email}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%"><strong>{{ __('Phone') }}:</strong></th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->shipping_phone == null ? $order->customer_phone :
-                                        $order->shipping_phone}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%"><strong>{{ __('Address') }}:</strong></th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->shipping_address == null ? $order->customer_address :
-                                        $order->shipping_address}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy (Rider Delivery)') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%"><strong>{{ __('Country') }}:</strong></th>

@@ -70,7 +70,7 @@
                         <span><strong>{{ __('Customer Name') }}</strong>:
                             {{ $order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</span><br>
                         <span><strong>{{ __('Address') }}</strong>:
-                            {{ $order->shipping_address == null ? $order->customer_address : $order->shipping_address }}</span><br>
+                            <span class="text-muted"><i>{{ __('Hidden for Privacy (Rider Delivery)') }}</i></span></span><br>
                         <span><strong>{{ __('City') }}</strong>:
                             {{ $order->shipping_city == null ? $order->customer_city : $order->shipping_city }}</span><br>
                         <span><strong>{{ __('Country') }}</strong>:
@@ -85,7 +85,7 @@
                     <div class="buyer">
                         <p><strong>{{ __('Billing Details') }}</strong></p>
                         <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->customer_name}}</span><br>
-                        <span><strong>{{ __('Address') }}</strong>: {{ $order->customer_address }}</span><br>
+                        <span><strong>{{ __('Address') }}</strong>: <span class="text-muted"><i>{{ __('Hidden for Privacy') }}</i></span></span><br>
                         <span><strong>{{ __('City') }}</strong>: {{ $order->customer_city }}</span><br>
                         <span><strong>{{ __('Country') }}</strong>: {{ $order->customer_country }}</span>
                     </div>

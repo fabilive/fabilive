@@ -86,7 +86,7 @@
                                                 'rider_id' => $order->deliveryRider->rider_id
                                             ]) }}"
                                            class="mybtn1 rounded-2">
-                                            Chat With Delivery
+                                            Chat With Delivery Agent
                                         </a>
                                     @endif --}}
                                     </td>

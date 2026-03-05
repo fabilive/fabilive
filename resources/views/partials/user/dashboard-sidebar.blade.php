@@ -23,9 +23,8 @@
             <li class=""><a class="{{ Request::url() == route('user-order-track') ? 'active':'' }}" href="{{route('user-order-track')}}">{{ __('Order Tracking') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-favorites') ? 'active':'' }}" href="{{route('user-favorites')}}">{{ __('Favourite Sellers') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-messages') ? 'active':'' }}" href="{{route('user-messages')}}">{{ __('Messages') }}</a></li>
-            <li class=""><a class="{{ Request::url() == route('user-messages-delivery') ? 'active':'' }}" href="{{route('user-messages-delivery')}}">{{ __('Deleviry Conservation' ) }}</a></li>
+            <li class=""><a class="{{ Request::url() == route('user-messages-delivery') ? 'active':'' }}" href="{{route('user-messages-delivery')}}">{{ __('Contact Delivery Agent' ) }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-message-index') ? 'active':'' }}" href="{{route('user-message-index')}}">{{ __('Tickets') }}</a></li>
-            <li class=""><a class="{{ Request::url() == route('user-dmessage-index') ? 'active':'' }}" href="{{ route('user-dmessage-index') }}">{{ __('Disputes') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-profile') ? 'active':'' }}" href="{{ route('user-profile') }}">{{ __('Edit Profile') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-reset') ? 'active':'' }}" href="{{ route('user-reset') }}">{{ __('Reset Password') }}</a></li>
             <li class=""><a class="" href="{{ route('user-logout') }}">{{ __('Logout') }}</a></li>
