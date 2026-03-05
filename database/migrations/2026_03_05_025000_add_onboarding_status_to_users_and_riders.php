@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // Add vendor onboarding status + rejection reason
+        if (!Schema::hasColumn('users', 'vendor_status')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->enum('vendor_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
+                    ->default('pending_docs')
+                    ->after('is_vendor');
+                $table->text('vendor_rejection_reason')->nullable()->after('vendor_status');
+                $table->timestamp('vendor_approved_at')->nullable()->after('vendor_rejection_reason');
+            });
+        }
+
+        // Add rider onboarding status (A3 prep)
+        if (!Schema::hasColumn('riders', 'onboarding_status')) {
+            Schema::table('riders', function (Blueprint $table) {
+                $table->enum('onboarding_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
+                    ->default('pending_docs')
+                    ->after('rider_status');
+                $table->text('rejection_reason')->nullable()->after('onboarding_status');
+                $table->timestamp('approved_at')->nullable()->after('rejection_reason');
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        if (Schema::hasColumn('users', 'vendor_status')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn(['vendor_status', 'vendor_rejection_reason', 'vendor_approved_at']);
+            });
+        }
+
+        if (Schema::hasColumn('riders', 'onboarding_status')) {
+            Schema::table('riders', function (Blueprint $table) {
+                $table->dropColumn(['onboarding_status', 'rejection_reason', 'approved_at']);
+            });
+        }
+    }
+};

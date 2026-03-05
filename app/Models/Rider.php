@@ -9,7 +9,8 @@ class Rider extends Authenticatable implements JWTSubject
     'transport_license','insurance_certificate_company','tin_company','rider_status',
     'vehicle_type_individual','tin_individual','driver_license_individual',
     'live_selfie_individual','vehicle_registration_certificate',
-    'insurance_certificate_individual','criminal_records', 'is_verified'];
+    'insurance_certificate_individual','criminal_records', 'is_verified',
+    'onboarding_status', 'rejection_reason', 'approved_at'];
     protected $hidden   = [
         'password', 'remember_token'
     ];
