@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 // routes/api.php
 Route::get('/service-areas', 'Api\GeneralController@serviceAreas');
 
+// AI Assistant Endpoint (Rate limited internally by AIService)
+Route::post('/assistant/reply', 'Api\AssistantController@reply');
+
 Route::prefix('rider')->group(function () {
     Route::post('login', 'Api\Auth\Rider\RiderAuthController@login');
     Route::post('register', 'Api\Auth\Rider\RiderRegisterController@store');
