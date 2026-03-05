@@ -25,6 +25,7 @@
 	<link href="{{asset('assets/admin/css/jquery.tagit.css')}}" rel="stylesheet" />
 	<link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap-coloroicker.css') }}">
 	<!-- Main Css -->
+	<link rel="stylesheet" href="{{ asset('resources/css/responsive-fixes.css') }}">
 	
 	 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 
