@@ -59,6 +59,10 @@
             <a href="{{route('admin-commission-income')}}"> {{ __('Commission Earning') }}</a>
         </li>
 
+        <li>
+            <a href="{{route('admin-financial-report')}}"> {{ __('Financial Reports') }}</a>
+        </li>
+
     </ul>
 </li>
 

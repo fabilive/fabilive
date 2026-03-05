@@ -33,7 +33,7 @@ class EnsureDeliveryChatAccess
         $isRider = $user->id === $thread->rider_id;
         $isBuyer = $user->id === $thread->buyer_id;
         $isSeller = $user->id === $thread->seller_id;
-        $isAdmin = $user->is_admin ?? false; // Assuming is_admin flag
+        $isAdmin = ($user instanceof \App\Models\Admin) || ($user->is_admin ?? false) || (Auth::guard('admin')->check());
 
         if (!$isRider && !$isBuyer && !$isSeller && !$isAdmin) {
             return response()->json(['message' => 'Unauthorized access to this chat.'], 403);

@@ -109,6 +109,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/order/track/update/{id}', 'Admin\OrderTrackController@update')->name('admin-order-track-update');
         Route::delete('/order/track/delete/{id}', 'Admin\OrderTrackController@delete')->name('admin-order-track-delete');
         
+        // Financial Reports
+        Route::get('/reports/financial', [App\Http\Controllers\Admin\FinancialReportController::class, 'index'])->name('admin-financial-report');
+        Route::get('/reports/financial/export', [App\Http\Controllers\Admin\FinancialReportController::class, 'exportCsv'])->name('admin-financial-report-export');
+
         // Delivery Verification
         Route::post('/delivery/verify/{job}', [App\Http\Controllers\Admin\DeliveryVerificationController::class, 'verify'])->name('admin-delivery-verify');
 

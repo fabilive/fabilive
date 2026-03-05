@@ -279,7 +279,7 @@ Route::prefix('delivery')->group(function () {
     Route::get('tracking/{order}', [App\Http\Controllers\Api\DeliveryJobController::class, 'tracking']);
 
     // Delivery Chat Endpoints
-    Route::group(['middleware' => ['auth:api,rider-api', 'delivery.chat.access']], function () {
+    Route::group(['middleware' => ['auth:api,rider-api,admin', 'delivery.chat.access']], function () {
         Route::get('chat/messages/{chat_thread_id}', [App\Http\Controllers\Api\DeliveryChatController::class, 'fetchMessages']);
         Route::post('chat/send', [App\Http\Controllers\Api\DeliveryChatController::class, 'sendMessage']);
     });

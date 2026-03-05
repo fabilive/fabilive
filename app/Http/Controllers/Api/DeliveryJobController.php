@@ -144,7 +144,11 @@ class DeliveryJobController extends Controller
         ]);
 
         if ($request->hasFile('proof_photo')) {
-            $path = $request->file('proof_photo')->store('delivery_proofs', 'public');
+            $file = $request->file('proof_photo');
+            $filename = 'proof_' . $job->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $disk = config('filesystems.default', 'public');
+            $path = $file->storeAs('delivery_proofs', $filename, $disk);
+            
             $job->update([
                 'proof_photo' => $path,
                 'proof_uploaded_at' => now()

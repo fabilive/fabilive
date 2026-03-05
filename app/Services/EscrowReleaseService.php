@@ -121,8 +121,13 @@ class EscrowReleaseService
                 }
             }
 
+            if ($order->payout_released_at) {
+                throw new Exception("Payout for this order has already been processed.");
+            }
+
             // 5. Update Order Escrow Status
             $order->escrow_status = 'released';
+            $order->payout_released_at = now();
             $order->save();
 
             return true;
