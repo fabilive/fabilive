@@ -44,6 +44,19 @@ class DeliveryChatService
     }
 
     /**
+     * Archive (hide) threads for jobs completed more than 24 hours ago.
+     */
+    public function archiveExpiredThreads(): int
+    {
+        return DeliveryChatThread::whereNull('hidden_at')
+            ->whereHas('deliveryJob', function($query) {
+                $query->whereIn('status', ['delivered', 'cancelled', 'returned'])
+                      ->where('updated_at', '<', now()->subHours(24));
+            })
+            ->update(['hidden_at' => now()]);
+    }
+
+    /**
      * Check if a thread is visible to a user.
      */
     public function isThreadVisible(DeliveryChatThread $thread): bool

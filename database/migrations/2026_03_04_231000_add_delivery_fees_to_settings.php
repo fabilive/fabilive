@@ -11,10 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('generalsettings', function (Blueprint $table) {
-            $table->decimal('delivery_base_fee', 15, 4)->default(1000);
-            $table->decimal('delivery_stopover_fee', 15, 4)->default(300);
-        });
+        if (Schema::hasTable('generalsettings')) {
+            Schema::table('generalsettings', function (Blueprint $table) {
+                if (!Schema::hasColumn('generalsettings', 'delivery_base_fee')) {
+                    $table->decimal('delivery_base_fee', 15, 4)->default(1000);
+                }
+                if (!Schema::hasColumn('generalsettings', 'delivery_stopover_fee')) {
+                    $table->decimal('delivery_stopover_fee', 15, 4)->default(300);
+                }
+                if (!Schema::hasColumn('generalsettings', 'rider_percentage_commission')) {
+                    $table->decimal('rider_percentage_commission', 15, 4)->default(80);
+                }
+            });
+        }
     }
 
     /**

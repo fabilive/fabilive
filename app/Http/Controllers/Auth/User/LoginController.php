@@ -15,8 +15,11 @@ class LoginController extends Controller
     $rules = [
       'email'   => 'required|email',
       'password' => 'required',
-      'g-recaptcha-response' => 'required',
     ];
+
+    if (config('app.env') !== 'local') {
+        $rules['g-recaptcha-response'] = 'required';
+    }
     $validator = Validator::make($request->all(), $rules);
     if ($validator->fails()) {
       return response()->json(array('errors' => $validator->getMessageBag()->toArray()));

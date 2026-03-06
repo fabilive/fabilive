@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 
-class StripeController extends SubscriptionBaseController
+class HitpayController extends SubscriptionBaseController
 {
 
     public function __construct()

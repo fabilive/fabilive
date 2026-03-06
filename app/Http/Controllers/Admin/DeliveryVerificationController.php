@@ -33,42 +33,18 @@ class DeliveryVerificationController extends Controller
     public function verify(Request $request, DeliveryJob $job)
     {
         try {
-            return DB::transaction(function () use ($job) {
-                // 1. Lock for update and check status
-                $job = DeliveryJob::lockForUpdate()->find($job->id);
+            if ($job->status === 'delivered_verified') {
+                return response()->json(['message' => 'This delivery is already verified.'], 400);
+            }
 
-                if ($job->status === 'delivered_verified') {
-                    return response()->json(['message' => 'This delivery is already verified.'], 400);
-                }
+            if ($job->status !== 'delivered_pending_verification') {
+                return response()->json(['message' => 'Delivery is not in a pending verification state.'], 400);
+            }
 
-                if ($job->status !== 'delivered_pending_verification') {
-                    return response()->json(['message' => 'Delivery is not in a pending verification state.'], 400);
-                }
+            // Use the unified settlement service
+            $this->jobService->verifyAndSettle($job);
 
-                // 2. Prepare order for escrow release
-                $order = $job->order;
-                
-                // The EscrowReleaseService expects order->status to be 'delivered' or 'completed'
-                // and order->admin_verified to be true.
-                // Use explicit assignment (not mass-assignment) for security-sensitive state changes.
-                if (strtolower($order->status) !== 'completed') {
-                    $order->status = 'completed';
-                }
-                
-                $order->admin_verified = true;
-                $order->save();
-
-                // 3. Release Escrow
-                $this->escrowService->releaseOrderEscrow($order);
-
-                // 4. Update Job Status
-                $this->jobService->transitionStatus($job, 'delivered_verified', 'admin', auth()->id());
-
-                // 5. Close Delivery Chats
-                $this->chatLifecycleService->closeDeliveryChats($job->id, 'delivered');
-
-                return response()->json(['status' => true, 'message' => 'Delivery verified and funds released successfully.']);
-            });
+            return response()->json(['status' => true, 'message' => 'Delivery verified and funds released successfully.']);
         } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }

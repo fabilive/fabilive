@@ -9,24 +9,35 @@ return new class extends Migration
     public function up(): void
     {
         // Add vendor onboarding status + rejection reason
-        if (!Schema::hasColumn('users', 'vendor_status')) {
+        if (Schema::hasTable('users')) {
             Schema::table('users', function (Blueprint $table) {
-                $table->enum('vendor_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
-                    ->default('pending_docs')
-                    ->after('is_vendor');
-                $table->text('vendor_rejection_reason')->nullable()->after('vendor_status');
-                $table->timestamp('vendor_approved_at')->nullable()->after('vendor_rejection_reason');
+                if (!Schema::hasColumn('users', 'vendor_status')) {
+                    $table->enum('vendor_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
+                        ->default('pending_docs')
+                        ->after('is_vendor');
+                }
+                if (!Schema::hasColumn('users', 'vendor_rejection_reason')) {
+                    $table->text('vendor_rejection_reason')->nullable()->after('vendor_status');
+                }
+                if (!Schema::hasColumn('users', 'vendor_approved_at')) {
+                    $table->timestamp('vendor_approved_at')->nullable()->after('vendor_rejection_reason');
+                }
             });
         }
 
         // Add rider onboarding status (A3 prep)
-        if (!Schema::hasColumn('riders', 'onboarding_status')) {
+        if (Schema::hasTable('riders')) {
             Schema::table('riders', function (Blueprint $table) {
-                $table->enum('onboarding_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
-                    ->default('pending_docs')
-                    ->after('rider_status');
-                $table->text('rejection_reason')->nullable()->after('onboarding_status');
-                $table->timestamp('approved_at')->nullable()->after('rejection_reason');
+                if (!Schema::hasColumn('riders', 'onboarding_status')) {
+                    $table->enum('onboarding_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
+                        ->default('pending_docs');
+                }
+                if (!Schema::hasColumn('riders', 'rejection_reason')) {
+                    $table->text('rejection_reason')->nullable();
+                }
+                if (!Schema::hasColumn('riders', 'approved_at')) {
+                    $table->timestamp('approved_at')->nullable();
+                }
             });
         }
     }

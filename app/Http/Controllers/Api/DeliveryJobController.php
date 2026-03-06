@@ -143,21 +143,19 @@ class DeliveryJobController extends Controller
             'proof_photo' => 'required|image|max:2048'
         ]);
 
+        $path = null;
         if ($request->hasFile('proof_photo')) {
             $file = $request->file('proof_photo');
             $filename = 'proof_' . $job->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $disk = config('filesystems.default', 'public');
-            $path = $file->storeAs('delivery_proofs', $filename, $disk);
-            
-            $job->update([
-                'proof_photo' => $path,
-                'proof_uploaded_at' => now()
-            ]);
+            $path = $file->storeAs('delivery_proofs', $filename, 'public');
         }
 
-        $this->jobService->transitionStatus($job, 'delivered_pending_verification', 'rider', Auth::id());
-
-        return response()->json(['message' => 'Delivered successfully. Awaiting admin verification.']);
+        try {
+            $this->jobService->completeDeliveryJob($job, $path);
+            return response()->json(['message' => 'Delivered successfully. Awaiting admin verification for payout.']);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error completing job: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -166,7 +164,7 @@ class DeliveryJobController extends Controller
     public function cancel(DeliveryJob $job)
     {
         $this->jobService->transitionStatus($job, 'cancelled', 'admin', Auth::id());
-        app(\App\Services\DeliveryChatLifecycleService::class)->closeDeliveryChats($job->id, 'cancelled');
+        app(\App\Services\DeliveryChatService::class)->closeChatThreads($job);
 
         return response()->json(['message' => 'Delivery job cancelled.']);
     }
@@ -177,7 +175,7 @@ class DeliveryJobController extends Controller
     public function returnJob(DeliveryJob $job)
     {
         $this->jobService->transitionStatus($job, 'returned', 'admin', Auth::id());
-        app(\App\Services\DeliveryChatLifecycleService::class)->closeDeliveryChats($job->id, 'returned');
+        app(\App\Services\DeliveryChatService::class)->closeChatThreads($job);
 
         return response()->json(['message' => 'Delivery job marked as returned.']);
     }

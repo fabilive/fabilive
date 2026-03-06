@@ -11,13 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_verified')->default(false)->after('status');
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (!Schema::hasColumn('users', 'is_verified')) {
+                    $table->boolean('is_verified')->default(false)->after('status');
+                }
+            });
+        }
 
-        Schema::table('delivery_riders', function (Blueprint $table) {
-            $table->boolean('is_verified')->default(false)->after('status');
-        });
+        if (Schema::hasTable('riders')) {
+            Schema::table('riders', function (Blueprint $table) {
+                if (!Schema::hasColumn('riders', 'is_verified')) {
+                    $table->boolean('is_verified')->default(false)->after('status');
+                }
+            });
+        }
     }
 
     /**
@@ -25,12 +33,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_verified');
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (Schema::hasColumn('users', 'is_verified')) {
+                    $table->dropColumn('is_verified');
+                }
+            });
+        }
 
-        Schema::table('riders', function (Blueprint $table) {
-            $table->dropColumn('is_verified');
-        });
+        if (Schema::hasTable('riders')) {
+            Schema::table('riders', function (Blueprint $table) {
+                if (Schema::hasColumn('riders', 'is_verified')) {
+                    $table->dropColumn('is_verified');
+                }
+            });
+        }
     }
 };

@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallet_ledger', function (Blueprint $table) {
+        if (!Schema::hasTable('wallet_ledger')) {
+            Schema::create('wallet_ledger', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('user_id');
             $table->decimal('amount', 15, 4);
             $table->string('type'); // credit, debit, escrow_hold, escrow_release
-            $table->integer('order_id')->nullable();
+            $table->unsignedInteger('order_id')->nullable();
             $table->string('reference')->nullable();
             $table->string('status')->default('completed'); // pending, completed
             $table->text('details')->nullable();
@@ -24,7 +25,8 @@ return new class extends Migration
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
-        });
+            });
+        }
     }
 
     /**

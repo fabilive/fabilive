@@ -32,6 +32,12 @@ class RedirectIfAuthenticated
 
       default:
         if (Auth::guard($guard)->check()) {
+          if ($guard === 'admin') {
+            return redirect()->route('admin.dashboard');
+          }
+          if ($guard === 'rider') {
+            return redirect()->route('rider-dashboard');
+          }
           return redirect()->route('user-dashboard');
         }
         break;

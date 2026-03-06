@@ -26,21 +26,24 @@ jobs:
         run: npm run build
 
       - name: Deploy to DigitalOcean
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
           source: "."
           target: "/var/www/fabilive"
 
       - name: Run Artisan Commands
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
           script: |
             cd /var/www/fabilive
             php artisan migrate --force
+            php artisan optimize:clear
             php artisan optimize

@@ -28,6 +28,10 @@ class ReferralService
             $code = $prefix . strtoupper(Str::random(6));
         }
 
+        if ($role === 'vendor') {
+            $role = 'seller';
+        }
+
         $data = [
             'code' => $code,
             'owner_role' => $role,

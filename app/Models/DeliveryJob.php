@@ -50,7 +50,7 @@ class DeliveryJob extends Model
 
     public function rider()
     {
-        return $this->belongsTo(User::class, 'assigned_rider_id');
+        return $this->belongsTo(Rider::class, 'assigned_rider_id');
     }
 
     public function stops()

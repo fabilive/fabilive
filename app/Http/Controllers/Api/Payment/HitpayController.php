@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 
-class StripeController extends Controller
+class HitpayController extends Controller
 {
 
     public function __construct()

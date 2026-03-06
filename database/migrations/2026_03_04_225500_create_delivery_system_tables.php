@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('delivery_jobs', function (Blueprint $table) {
+        if (!Schema::hasTable('delivery_jobs')) {
+            Schema::create('delivery_jobs', function (Blueprint $table) {
             $table->id();
             $table->integer('order_id'); // Match orders.id which is int(11)
             $table->unsignedInteger('buyer_id'); // Match users.id which is int(10) unsigned
@@ -40,9 +41,11 @@ return new class extends Migration
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('buyer_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('assigned_rider_id')->references('id')->on('users')->onDelete('set null');
-        });
+            });
+        }
 
-        Schema::create('delivery_job_stops', function (Blueprint $table) {
+        if (!Schema::hasTable('delivery_job_stops')) {
+            Schema::create('delivery_job_stops', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('delivery_job_id');
             $table->string('type'); // pickup, dropoff
@@ -60,9 +63,11 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('delivery_job_id')->references('id')->on('delivery_jobs')->onDelete('cascade');
-        });
+            });
+        }
 
-        Schema::create('delivery_job_events', function (Blueprint $table) {
+        if (!Schema::hasTable('delivery_job_events')) {
+            Schema::create('delivery_job_events', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('delivery_job_id');
             $table->string('actor_type'); // system, admin, rider, seller, buyer
@@ -72,7 +77,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('delivery_job_id')->references('id')->on('delivery_jobs')->onDelete('cascade');
-        });
+            });
+        }
     }
 
     /**

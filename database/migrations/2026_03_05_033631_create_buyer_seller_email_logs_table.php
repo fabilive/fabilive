@@ -11,17 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('buyer_seller_email_logs', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('vendor_id');
-            $table->string('buyer_email');
-            $table->string('subject');
-            $table->text('message');
-            $table->timestamps();
-            
-            $table->index('vendor_id');
-            $table->index('buyer_email');
-        });
+        if (!Schema::hasTable('buyer_seller_email_logs')) {
+            Schema::create('buyer_seller_email_logs', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedInteger('vendor_id');
+                $table->string('buyer_email');
+                $table->string('subject');
+                $table->text('message');
+                $table->timestamps();
+                
+                $table->index('vendor_id');
+                $table->index('buyer_email');
+                
+                $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
     }
 
     /**

@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_areas', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable();
-            $table->decimal('price', 15, 4)->default(0);
-            $table->boolean('status')->default(1);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('service_areas')) {
+            Schema::create('service_areas', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->decimal('price', 15, 4)->default(0);
+                $table->boolean('status')->default(1);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

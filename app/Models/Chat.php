@@ -9,7 +9,7 @@ class Chat extends Model
 {
     use HasFactory;
 
-    protected $table='chats';
+    protected $table='delivery_chat_threads';
     protected $guarded=[];
 
     public function buyer()

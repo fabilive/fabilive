@@ -585,7 +585,7 @@ class FrontendController extends FrontBaseController
     {
         $gs = $this->gs;
 
-        if ($gs->is_capcha == 1) {
+        if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
             $rules = [
                 'g-recaptcha-response' => 'required',
             ];

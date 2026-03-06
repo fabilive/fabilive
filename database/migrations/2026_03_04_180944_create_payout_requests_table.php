@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payout_requests', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedInteger('user_id');
-            $table->string('role')->default('seller'); // seller, rider
-            $table->decimal('amount', 15, 4);
-            $table->string('method')->nullable();
-            $table->string('destination')->nullable();
-            $table->string('status')->default('pending'); // pending, approved, rejected
-            $table->timestamp('admin_action_at')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('payout_requests')) {
+            Schema::create('payout_requests', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedInteger('user_id');
+                $table->string('role')->default('seller'); // seller, rider
+                $table->decimal('amount', 15, 4);
+                $table->string('method')->nullable();
+                $table->string('destination')->nullable();
+                $table->string('status')->default('pending'); // pending, approved, rejected
+                $table->timestamp('admin_action_at')->nullable();
+                $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
     }
 
     /**

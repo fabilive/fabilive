@@ -8,22 +8,24 @@ class CreateChatsTable extends Migration
 {
     public function up()
     {
-        Schema::create('chats', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedInteger('sender_id');
-            $table->unsignedInteger('receiver_id');
-            $table->timestamps();
-            
-            $table->foreign('sender_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
-                  
-            $table->foreign('receiver_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
-        });
+        if (!Schema::hasTable('chats')) {
+            Schema::create('chats', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedInteger('sender_id');
+                $table->unsignedInteger('receiver_id');
+                $table->timestamps();
+
+                $table->foreign('sender_id')
+                      ->references('id')
+                      ->on('users')
+                      ->onDelete('cascade');
+
+                $table->foreign('receiver_id')
+                      ->references('id')
+                      ->on('users')
+                      ->onDelete('cascade');
+            });
+        }
     }
 
     public function down()
