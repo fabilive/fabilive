@@ -72,7 +72,7 @@
                   <div class="widget border-0 p-30 widget_categories bg-light account-info">
                      <h4 class="widget-title down-line mb-30">{{ __('Recent Orders') }}</h4>
                      <div class="table-responsive">
-                        <table class="table order-table" cellspacing="0" id="example" width="100%">
+                        <table class="table order-table" cellspacing="0" width="100%">
     <thead>
         <tr>
             <th>{{ __('#Order') }}</th>

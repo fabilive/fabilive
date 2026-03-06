@@ -58,7 +58,7 @@ class RiderOnboardingService
         }
 
         $rider->onboarding_status = 'approved';
-        $rider->rider_status = 'active';
+        $rider->status = 1;
         $rider->approved_at = now();
         $rider->save();
 

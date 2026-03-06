@@ -29,7 +29,7 @@ class LoginController extends Controller
         Auth::guard('rider')->logout();
         return response()->json(array('errors' => [0 => __('Your Account Has Been Banned.')]));
       }
-            if (Auth::guard('rider')->user()->rider_status !== 'accepted') {
+            if (Auth::guard('rider')->user()->status != 1) {
                 Auth::guard('rider')->logout();
                 return response()->json(['errors' => [0 => __('Your account is awaiting admin approval.')]]);
             }

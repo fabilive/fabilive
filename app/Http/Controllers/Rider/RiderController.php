@@ -23,7 +23,7 @@ class RiderController extends RiderBaseController
         $user = $this->rider;
         $orders = DeliveryRider::where('rider_id', $this->rider->id)
         ->orderby('id','desc')->take(8)->get();
-        return view('rider.dashbaord', compact('orders', 'user'));
+        return view('rider.dashboard', compact('orders', 'user'));
     }
 
     public function profile()
