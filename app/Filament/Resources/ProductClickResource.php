@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SeotoolResource\Pages;
-use App\Filament\Resources\SeotoolResource\RelationManagers;
-use App\Models\Seotool;
+use App\Filament\Resources\ProductClickResource\Pages;
+use App\Filament\Resources\ProductClickResource\RelationManagers;
+use App\Models\ProductClick;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,28 +13,24 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class SeotoolResource extends Resource
+class ProductClickResource extends Resource
 {
-    protected static ?string $model = Seotool::class;
+    protected static ?string $model = ProductClick::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
+    protected static ?string $navigationIcon = 'heroicon-o-fire';
 
     protected static ?string $navigationGroup = 'SEO Tools';
 
-    protected static ?string $navigationLabel = 'Website Meta Keywords';
+    protected static ?string $navigationLabel = 'Popular Products';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Textarea::make('google_analytics')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('facebook_pixel')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('meta_keys')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('meta_description')
-                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('product_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\DatePicker::make('date'),
             ]);
     }
 
@@ -42,7 +38,12 @@ class SeotoolResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('product_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('date')
+                    ->date()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -67,9 +68,9 @@ class SeotoolResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSeotools::route('/'),
-            'create' => Pages\CreateSeotool::route('/create'),
-            'edit' => Pages\EditSeotool::route('/{record}/edit'),
+            'index' => Pages\ListProductClicks::route('/'),
+            'create' => Pages\CreateProductClick::route('/create'),
+            'edit' => Pages\EditProductClick::route('/{record}/edit'),
         ];
     }
 }
