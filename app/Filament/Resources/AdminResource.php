@@ -36,9 +36,10 @@ class AdminResource extends Resource
                     ->tel()
                     ->required()
                     ->maxLength(191),
-                Forms\Components\TextInput::make('role_id')
+                Forms\Components\Select::make('role_id')
+                    ->label('Role')
+                    ->relationship('role', 'name')
                     ->required()
-                    ->numeric()
                     ->default(0),
                 Forms\Components\TextInput::make('photo')
                     ->maxLength(191)
@@ -66,8 +67,8 @@ class AdminResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('role.name')
+                    ->label('Role')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('photo')
                     ->searchable(),
