@@ -22,8 +22,17 @@ class RiderController extends RiderBaseController
     {
         $user = $this->rider;
         $orders = DeliveryRider::where('rider_id', $this->rider->id)
-        ->orderby('id','desc')->take(8)->get();
-        return view('rider.dashboard', compact('orders', 'user'));
+            ->orderby('id','desc')->take(8)->get();
+
+        // Fetch available jobs in rider's service area
+        $available_jobs = \App\Models\DeliveryJob::where('status', 'available')
+            ->whereIn('service_area_id', $user->serviceAreas->pluck('id'))
+            ->with(['order', 'stops'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('rider.dashboard', compact('orders', 'user', 'available_jobs'));
     }
 
     public function profile()
@@ -96,7 +105,7 @@ class RiderController extends RiderBaseController
     public function serviceArea()
     {
         $rider = $this->rider;
-        $service_area = RiderServiceArea::where('rider_id', $rider->id)->with('city')->get();
+        $service_area = RiderServiceArea::where('rider_id', $rider->id)->with('serviceArea')->get();
         $alreadySelected = $service_area->count() > 0;
         return view('rider.service-area', compact('service_area', 'alreadySelected'));
     }
@@ -316,7 +325,7 @@ public function orderAccept($id)
     {
         $rider = $this->rider;
         $jobs = DeliveryJob::where('status', 'available')
-            ->where('service_area_id', $rider->service_area_id)
+            ->whereIn('service_area_id', $rider->serviceAreas->pluck('id'))
             ->with(['order', 'stops'])
             ->latest()
             ->get();

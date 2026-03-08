@@ -34,10 +34,7 @@ Route::prefix('rider')->group(function () {
     Route::group(['middleware' => 'auth:rider-api'], function () {
 
         // ============ Start: Multi-Seller Delivery System =========================\\
-        Route::get('delivery/available', 'Rider\RiderController@availableJobs')->name('rider-delivery-available');
-        Route::get('delivery/accept/{id}', 'Rider\RiderController@acceptJob')->name('rider-delivery-accept');
-        Route::get('delivery/jobs', 'Rider\RiderController@deliveryJobs')->name('rider-delivery-index');
-        Route::get('delivery/details/{id}', 'Rider\RiderController@jobDetails')->name('rider-delivery-details');
+        // Moved to web.php for dashboard access
         // ============ End: Multi-Seller Delivery System =========================\\
 
         Route::post('service-area', 'Api\Rider\RiderController@storeServiceArea');

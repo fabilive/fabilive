@@ -60,7 +60,7 @@
                                                     <label for="service_area_id">@lang('Service Area')</label>
                                                     <select class="service_area input-field form-control" name="service_area_id" id="service_area_id">
                                                         @foreach ($service_areas as $area)
-                                                            <option value="{{ $area->id }}">{{ $area->location }}</option>
+                                                            <option value="{{ $area->id }}">{{ $area->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>

@@ -55,7 +55,7 @@
                                     @forelse($service_area as $area)
                                         <tr>
                                             <td data-label="{{ __('#Service Area') }}">
-                                                {{ optional($area->serviceArea)->location ?? 'N/A' }}
+                                                {{ optional($area->serviceArea)->name ?? 'N/A' }}
                                             </td>
                                             <td data-label="{{ __('Action') }}">
                                                 <a class="mybtn1 sm1" href="{{route('rider-service-area-edit',$area->id)}}">

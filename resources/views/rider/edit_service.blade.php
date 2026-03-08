@@ -60,7 +60,7 @@
                                                     <select class="service_area input-field form-control" name="service_area_id" id="service_area_id">
                                                         @foreach ($service_areas as $area)
                                                             <option value="{{ $area->id }}" {{ $service_area->service_area_id == $area->id ? 'selected' : '' }}>
-                                                                {{ $area->location }}
+                                                                {{ $area->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>

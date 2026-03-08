@@ -142,6 +142,10 @@ class OrderController extends VendorBaseController
                         'status' => 'ready',
                         'ready_at' => now()
                     ]);
+
+                    // Sync main order status for buyer awareness
+                    $order->update(['status' => 'ready to pick up']);
+
                     $jobService->logEvent($job, 'seller', $user->id, 'seller_marked_ready');
 
                     // If it was pending_readiness, it's now available for riders

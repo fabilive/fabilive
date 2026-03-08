@@ -1591,6 +1591,13 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::post('/conversation/messages','Rider\MessageDeliveryController@fetchMessages')->name('rider-chat-messages');
         Route::post('/conversation/send', 'Rider\MessageDeliveryController@sendMessage')->name('rider-chat-send');
 
+        // ============ Start: Multi-Seller Delivery System =========================\\
+        Route::get('delivery/available', 'Rider\RiderController@availableJobs')->name('rider-delivery-available');
+        Route::get('order/delivery/accept/{id}', 'Rider\RiderController@acceptJob')->name('rider-delivery-accept');
+        Route::get('delivery/jobs', 'Rider\RiderController@deliveryJobs')->name('rider-delivery-index');
+        Route::get('delivery/details/{id}', 'Rider\RiderController@jobDetails')->name('rider-delivery-details');
+        // ============ End: Multi-Seller Delivery System =========================\\
+
     });
 
     // ************************************ RIDER SECTION ENDS**********************************************
@@ -1646,7 +1653,7 @@ Route::group(['middleware' => 'maintenance'], function () {
     // TAG SECTION ENDS
 
     // TAG SECTION
-    Route::get('/search', 'Front\CatalogController@search')->name('front.search');
+    Route::get('/search', 'Front\CatalogController@category')->name('front.search');
     // TAG SECTION ENDS
 
     // PRODCT SECTION
