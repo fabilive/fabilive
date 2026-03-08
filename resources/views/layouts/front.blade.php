@@ -153,8 +153,9 @@
     <script>
         // Show popup only if user hasn't selected a country before
         window.onload = function () {
-            if (!localStorage.getItem('countrySelected')) {
-                document.getElementById('countryPopup').style.display = 'flex';
+            var popup = document.getElementById('countryPopup');
+            if (popup && !localStorage.getItem('countrySelected')) {
+                popup.style.display = 'flex';
             }
         };
 
@@ -164,8 +165,10 @@
         }
 
         function closePopup() {
-            //localStorage.setItem('countrySelected', 'current'); // user chose to stay
-            document.getElementById('countryPopup').style.display = 'none';
+            var popup = document.getElementById('countryPopup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
         }
     </script>
 

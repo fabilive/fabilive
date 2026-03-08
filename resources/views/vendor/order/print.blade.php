@@ -150,10 +150,10 @@ html {
                                                 @endif
                                                 <p>
                                                         <strong>{{ __('Price') }} :</strong> 
-                                                        {{ \PriceHelper::showOrderCurrencyPrice(($product['item_price'] * $order->currency_value),$order->currency_sign) }}
+                                                        {{ \PriceHelper::showOrderCurrencyPrice((($product['item_price'] ?? 0) * $order->currency_value),$order->currency_sign) }}
                                                 </p>
                                                <p>
-                                                    <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{ $product['item']['measure'] }}
+                                                    <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{ ($product['item']['measure'] ?? '') }}
                                                </p>
                                                     @if(!empty($product['keys']))
 
@@ -170,7 +170,7 @@ html {
                                             </td>
 
                                             <td>
-                                                {{ \PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value),$order->currency_sign) }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                                {{ \PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value),$order->currency_sign) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.($product['discount'] ?? 0).'% '.__('Off').')' }}</small>
                                             </td>
                                             @php
                                             $subtotal += round($product['price'] * $order->currency_value, 2);

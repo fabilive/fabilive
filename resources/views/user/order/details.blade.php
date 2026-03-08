@@ -218,7 +218,7 @@
                                     </td>
                                     <td data-label="{{ __('Name') }}">
                                        <div>
-                                          <input type="hidden" value="{{ $product['license'] }}">
+                                          <input type="hidden" value="{{ $product['license'] ?? '' }}">
                                           @if($product['item']['user_id'] != 0)
                                           @php
                                           $user = App\Models\User::find($product['item']['user_id']);
@@ -257,7 +257,7 @@
                                              <i class="fa fa-download"></i> {{ __('Download') }}
                                           </a>
                                           @endif
-                                          @if($product['license'] != '')
+                                          @if(($product['license'] ?? '') != '')
                                           <a href="javascript:;" data-toggle="modal" data-target="#confirm-delete"
                                              class="btn btn-sm btn-info product-btn" id="license"><i
                                                 class="fa fa-eye"></i> {{ __('View License') }}</a>
@@ -270,7 +270,7 @@
                                        <div>
                                           <b>{{ __('Quantity') }}</b>: {{$product['qty']}} <br>
                                           @if(!empty($product['size']))
-                                          <b>{{ __('Size') }}</b>: {{ $product['item']['measure'] }}{{str_replace('-','
+                                          <b>{{ __('Size') }}</b>: {{ ($product['item']['measure'] ?? '') }}{{str_replace('-','
                                           ',$product['size'])}} <br>
                                           @endif
                                           @if(!empty($product['color']))
@@ -289,15 +289,12 @@
                                     </td>
                                     <td data-label="{{ __('Price') }}">
                                        <div>
-                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ) *
-                                          $order->currency_value) }}
+                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
                                        </div>
                                     </td>
                                     <td data-label="{{ __('Total') }}">
                                        <div>
-                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] * $product['qty'] )
-                                          * $order->currency_value) }} <small>{{ $product['discount'] == 0 ? '' :
-                                             '('.$product['discount'].'% '.__('Off').')' }}</small></small>
+                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                        </div>
                                     </td>
                                  </tr>

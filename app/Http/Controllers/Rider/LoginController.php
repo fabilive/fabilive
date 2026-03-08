@@ -55,15 +55,15 @@ class LoginController extends FrontBaseController
         // if successful, then redirect to their intended location
 
         // Check If Email is verified or not
-          if(Auth::guard('guard')->user()->email_verified == 'No')
+          if(Auth::guard('rider')->user()->email_verify == 'No')
           {
-            Auth::guard('guard')->logout();
+            Auth::guard('rider')->logout();
             return response()->json(array('errors' => [ 0 => 'Your Email is not Verified!' ]));
           }
 
-          if(Auth::guard('guard')->user()->ban == 1)
+          if(Auth::guard('rider')->user()->ban == 1)
           {
-            Auth::guard('guard')->logout();
+            Auth::guard('rider')->logout();
             return response()->json(array('errors' => [ 0 => 'Your Account Has Been Banned.' ]));
           }
 

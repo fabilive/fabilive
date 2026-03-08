@@ -86,6 +86,15 @@
                                             @endif
                                         </div>
                                     @endif
+                                    
+                                    @if($stop->type == 'dropoff' && $job->status == 'assigned')
+                                        <div class="mt-3 p-2 bg-white border rounded">
+                                            <h6><i class="fas fa-user"></i> {{ __('Buyer Details') }}</h6>
+                                            <p class="mb-1"><strong>{{ $job->order->customer_name }}</strong></p>
+                                            <p class="mb-1"><i class="fas fa-phone"></i> {{ $job->order->customer_phone }}</p>
+                                            <p class="mb-0 small"><i class="fas fa-map-marker-alt"></i> {{ $job->order->customer_address }}</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -94,7 +103,7 @@
                     <div class="order-summary mt-5 p-3 bg-white border rounded">
                         <h5>{{ __('Order Summary') }}</h5>
                         <p>{{ __('Total Items') }}: {{ $job->order->total_qty }}</p>
-                        <p>{{ __('Your Earning') }}: <strong>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earning, $job->order->currency_sign) }}</strong></p>
+                        <p>{{ __('Your Earning') }}: <strong>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</strong></p>
                     </div>
                 </div>
             </div>
@@ -116,7 +125,7 @@
 <script>
     function updateStop(stopId, status) {
         if(confirm('Are you sure you want to update status to ' + status + '?')) {
-            let baseUrl = "{{ url('/api/delivery/stop') }}";
+            let baseUrl = "{{ url('/rider/delivery/stop') }}";
             let form = document.getElementById('status-update-form');
             form.action = baseUrl + '/' + stopId;
             document.getElementById('target-status').value = status;

@@ -309,7 +309,7 @@ class MessageController extends UserBaseController
         $user = auth()->user();
 
         $request->validate([
-            'chat_id' => 'required|exists:chats,id',
+            'chat_id' => 'required|exists:delivery_chat_threads,id',
             'message' => 'required|string|max:2000'
         ]);
 
@@ -325,7 +325,11 @@ class MessageController extends UserBaseController
             'is_read' => 0,
         ]);
 
-        broadcast(new UserMessageSent($message));
+        try {
+            broadcast(new UserMessageSent($message));
+        } catch (\Exception $e) {
+            // Broadcasting may fail if Pusher is not configured - message is still saved
+        }
 
         return response()->json([
             'status' => true,

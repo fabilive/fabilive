@@ -360,9 +360,58 @@ public function orderAccept($id)
     public function jobDetails($id)
     {
         $job = DeliveryJob::with(['order', 'stops.seller', 'events'])->findOrFail($id);
-        if ($job->assigned_rider_id != $this->rider->id) {
+        if ($job->assigned_rider_id != $this->rider->id && $job->status !== 'available') {
             return redirect()->back()->with('error', __('Unauthorized.'));
         }
         return view('rider.delivery.details', compact('job'));
     }
+
+    public function updateStopStatus(Request $request, $stopId)
+    {
+        $stop = \App\Models\DeliveryJobStop::findOrFail($stopId);
+        $job = $stop->deliveryJob;
+
+        // Only the assigned rider can update
+        if ($job->assigned_rider_id != $this->rider->id) {
+            return redirect()->back()->with('error', __('Unauthorized.'));
+        }
+
+        $newStatus = $request->input('status');
+        $allowedStatuses = ['arrived', 'picked_up', 'delivered'];
+        if (!in_array($newStatus, $allowedStatuses)) {
+            return redirect()->back()->with('error', __('Invalid status.'));
+        }
+
+        // Update the stop status
+        $stop->status = $newStatus;
+        if ($newStatus === 'arrived') {
+            $stop->arrived_at = now();
+        } elseif ($newStatus === 'picked_up') {
+            $stop->picked_up_at = now();
+        }
+        $stop->save();
+
+        // Sync the DeliveryJob and Order status based on stops progress
+        $allStops = $job->stops()->get();
+        $allPickups = $allStops->where('type', 'pickup');
+        $allDropoffs = $allStops->where('type', 'dropoff');
+
+        if ($newStatus === 'picked_up' && $allPickups->every(fn($s) => $s->status === 'picked_up')) {
+            // All pickups done → move to delivering
+            $job->update(['status' => 'delivering']);
+            $job->order->update(['status' => 'on delivery']);
+        } elseif ($newStatus === 'picked_up') {
+            // At least one pickup done
+            $job->update(['status' => 'picking_up']);
+            $job->order->update(['status' => 'picked up']);
+        } elseif ($newStatus === 'delivered') {
+            // Final delivery done
+            $job->update(['status' => 'delivered', 'delivered_at' => now()]);
+            $job->order->update(['status' => 'delivered']);
+        }
+
+        return redirect()->route('rider-delivery-details', $job->id)
+            ->with('success', __('Status updated to: ') . ucwords(str_replace('_', ' ', $newStatus)));
+    }
 }
+

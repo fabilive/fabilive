@@ -168,6 +168,21 @@
                                     @endif
                                 </td>
 
+                                @php
+                                    $deliveryRider = \App\Models\DeliveryRider::where('order_id', $order->id)->first();
+                                    $deliveryJob = \App\Models\DeliveryJob::where('order_id', $order->id)->first();
+                                @endphp
+
+                                @if($deliveryJob && $deliveryJob->rider)
+                                <tr>
+                                    <th width="45%">{{ __('Assigned Rider') }}</th>
+                                    <td width="10%">:</td>
+                                    <td width="45%">
+                                        <strong>{{ $deliveryJob->rider->name }}</strong><br>
+                                        <i class="fas fa-phone"></i> {{ $deliveryJob->rider->phone }}
+                                    </td>
+                                </tr>
+                                @endif
 
                                 @if(!empty($order->order_note))
                                 <th width="45%">{{ __('Order Note') }}</th>
@@ -237,7 +252,7 @@
                                 <tr>
                                     <th width="45%">{{ __('Service Area') }}</th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->servicearea->location}}</td>
+                                    <td width="45%">{{ $order->servicearea ? $order->servicearea->location : 'N/A' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -380,7 +395,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <input type="hidden" value="{{ $product['license'] }}">
+                                        <input type="hidden" value="{{ $product['license'] ?? '' }}">
                                         @if($product['item']['user_id'] != 0)
                                         @php
                                         $user = App\Models\User::find($product['item']['user_id']);
@@ -400,7 +415,7 @@
                                         </a>
                                         @endif
                                         @endif
-                                        @if($product['license'] != '')
+                                        @if(($product['license'] ?? '') != '')
                                         <a href="javascript:;" data-toggle="modal" data-target="#confirm-delete"
                                             class="btn btn-info product-btn" id="license" style="padding: 5px 12px;"><i
                                                 class="fa fa-eye"></i> {{ __('View License') }}</a>
@@ -425,7 +440,7 @@
                                         </p>
                                         <p>
                                             <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{
-                                            $product['item']['measure'] }}
+                                            ($product['item']['measure'] ?? '') }}
                                         </p>
                                         @if(!empty($product['keys']))
 
@@ -438,8 +453,8 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $order->currency_sign) }} <small>{{ $product['discount']
-                                            == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                        {{ \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $order->currency_sign) }} <small>{{ ($product['discount'] ?? 0)
+                                            == 0 ? '' : '('.($product['discount'] ?? 0).'% '.__('Off').')' }}</small>
                                     </td>
                                 </tr>
                                 @endif

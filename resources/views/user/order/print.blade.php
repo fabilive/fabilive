@@ -184,10 +184,10 @@ html {
                                                 @endif
                                              </td>
                                              <td>
-                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ) * $order->currency_value) }}
+                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
                                              </td>
                                              <td>
-                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] * $product['qty'] ) * $order->currency_value) }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                              </td>
                                           </tr>
                                           @endforeach

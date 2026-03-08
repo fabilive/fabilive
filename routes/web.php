@@ -1596,6 +1596,7 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('order/delivery/accept/{id}', 'Rider\RiderController@acceptJob')->name('rider-delivery-accept');
         Route::get('delivery/jobs', 'Rider\RiderController@deliveryJobs')->name('rider-delivery-index');
         Route::get('delivery/details/{id}', 'Rider\RiderController@jobDetails')->name('rider-delivery-details');
+        Route::post('delivery/stop/{id}', 'Rider\RiderController@updateStopStatus')->name('rider-delivery-stop-update');
         // ============ End: Multi-Seller Delivery System =========================\\
 
     });
@@ -1900,5 +1901,3 @@ Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpa
 
 Route::post('the/genius/ocean/2441139', 'Front\FrontendController@subscription');
 Route::get('finalize', 'Front\FrontendController@finalize');
-
-

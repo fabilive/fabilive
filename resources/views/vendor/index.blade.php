@@ -233,7 +233,7 @@
             $user = Auth::user();
             $stats = $referralService->getStats($user);
             if (empty($stats['code'])) {
-                $referralService->generateCode($user, $user->is_vendor == 2 ? 'vendor' : 'buyer');
+                $referralService->generateCode($user, $user->is_vendor == 2 ? 'seller' : 'buyer');
                 $stats = $referralService->getStats($user);
             }
             $referralLink = url('/user/register?ref=' . $stats['code']);

@@ -381,6 +381,62 @@
             @endif
         </div>
 
+        @if($order->deliveryJob)
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="special-box">
+                    <div class="heading-area">
+                        <h4 class="title">
+                            {{ __('Delivery & Verification') }}
+                        </h4>
+                    </div>
+                    <div class="table-responsive-sm">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th width="45%">{{ __('Delivery Status') }}</th>
+                                    <td width="10%">:</td>
+                                    <td width="45%">
+                                        @if($order->deliveryJob->status == 'delivered_pending_verification')
+                                            <span class="badge badge-warning">{{ __('Pending Verification') }}</span>
+                                        @elseif($order->deliveryJob->status == 'delivered_verified')
+                                            <span class="badge badge-success">{{ __('Verified & Settled') }}</span>
+                                        @else
+                                            <span class="badge badge-info">{{ ucwords(str_replace('_', ' ', $order->deliveryJob->status)) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @if($order->deliveryJob->proof_photo)
+                                <tr>
+                                    <th width="45%">{{ __('Delivery Proof') }}</th>
+                                    <td width="10%">:</td>
+                                    <td width="45%">
+                                        <a href="{{ asset('storage/'.$order->deliveryJob->proof_photo) }}" target="_blank">
+                                            <img src="{{ asset('storage/'.$order->deliveryJob->proof_photo) }}" style="max-width: 200px; border: 1px solid #ddd; padding: 5px;">
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+                                @if($order->deliveryJob->status == 'delivered_pending_verification')
+                                <tr>
+                                    <th width="45%">{{ __('Action') }}</th>
+                                    <td width="10%">:</td>
+                                    <td width="45%">
+                                        <button type="button" class="mybtn1 verify-delivery-btn" 
+                                                data-href="{{ route('admin-delivery-verify', $order->deliveryJob->id) }}">
+                                            <i class="fas fa-check-circle"></i> {{ __('Verify & Release Payouts') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         @php
         foreach ($cart['items'] as $key => $item) {
         $userId = $item["user_id"];
@@ -547,8 +603,7 @@
                                             $order->currency_value) }}
                                         </p>
                                         <p>
-                                            <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{
-                                            $product['item']['measure'] }}
+                                            <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{ ($product['item']['measure'] ?? '') }}
                                         </p>
                                         @if(!empty($product['keys']))
 
@@ -1017,6 +1072,43 @@ $(document).on('submit','#show-product',function(e){
 $('#delete-product-modal').on('show.bs.modal', function(e) {
     $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
   });
+
+    $(document).on('click', '.verify-delivery-btn', function() {
+        if (!confirm('{{ __("Are you sure you want to verify this delivery and release all payouts (Rider & Vendors)?") }}')) {
+            return;
+        }
+
+        var $btn = $(this);
+        var originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{ __("Processing...") }}');
+
+        $.ajax({
+            url: $btn.data('href'),
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(data) {
+                if (data.status) {
+                    $.notify(data.message, 'success');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    $.notify(data.message, 'error');
+                    $btn.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                var msg = 'Something went wrong.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                $.notify(msg, 'error');
+                $btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
 
 })(jQuery);
 

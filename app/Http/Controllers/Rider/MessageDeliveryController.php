@@ -77,7 +77,7 @@ public function sendMessage(Request $request)
         $rider = auth()->guard('rider')->user();
 
         $request->validate([
-            'chat_id' => 'required|exists:chats,id',
+            'chat_id' => 'required|exists:delivery_chat_threads,id',
             'message' => 'required|string|max:2000'
         ]);
 
@@ -98,7 +98,11 @@ public function sendMessage(Request $request)
             'is_read'    => 0,
         ]);
 
-        broadcast(new MessageSents($message)); // instead of ->toOthers()
+        try {
+            broadcast(new MessageSents($message));
+        } catch (\Exception $e) {
+            // Broadcasting may fail if Pusher is not configured - message is still saved
+        }
 
         return response()->json([
             'status'       => true,

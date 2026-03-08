@@ -67,6 +67,47 @@
                   </div>
                </div>
             </div>
+            <div class="row mt-3">
+               <div class="col-lg-12">
+                  <div class="widget border-0 p-30 widget_categories bg-light account-info">
+                     <h4 class="widget-title down-line mb-30">{{ __('Available Delivery Jobs') }}</h4>
+                     <div class="table-responsive">
+                        <table class="table order-table" cellspacing="0" width="100%">
+                           <thead>
+                              <tr>
+                                 <th>{{ __('Order #') }}</th>
+                                 <th>{{ __('Earnings') }}</th>
+                                 <th>{{ __('Stops') }}</th>
+                                 <th>{{ __('Action') }}</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @forelse($available_jobs as $job)
+                              <tr>
+                                 <td>{{ $job->order->order_number }}</td>
+                                 <td>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
+                                 <td>{{ $job->stops->count() }} {{ __('Stops') }}</td>
+                                 <td>
+                                    <a href="{{ route('rider-delivery-accept', $job->id) }}" class="mybtn1 sm1">
+                                       {{ __('Accept') }}
+                                    </a>
+                                    <a href="{{ route('rider-delivery-details', $job->id) }}" class="mybtn1 sm1 bg-info">
+                                       {{ __('View') }}
+                                    </a>
+                                 </td>
+                              </tr>
+                              @empty
+                              <tr>
+                                 <td colspan="4" class="text-center">{{ __('No available jobs in your service area.') }}</td>
+                              </tr>
+                              @endforelse
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
             <div class="row table-responsive-lg mt-3">
                <div class="col-lg-12">
                   <div class="widget border-0 p-30 widget_categories bg-light account-info">

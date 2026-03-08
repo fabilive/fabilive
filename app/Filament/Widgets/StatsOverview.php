@@ -21,7 +21,7 @@ class StatsOverview extends BaseWidget
                 ->description('Total orders processed')
                 ->descriptionIcon('heroicon-m-shopping-cart')
                 ->color('info'),
-            Stat::make('Active Riders', Rider::where('is_verified', 1)->count())
+            Stat::make('Active Riders', Rider::where('status', 1)->count())
                 ->description('Verified delivery partners')
                 ->descriptionIcon('heroicon-m-truck')
                 ->color('warning'),

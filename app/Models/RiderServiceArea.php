@@ -7,10 +7,6 @@ class RiderServiceArea extends Model
     use HasFactory;
     public $timestamps = false;
     protected $fillable = ['rider_id', 'service_area_id'];
-    public function city()
-    {
-        return $this->belongsTo(City::class, 'city_id');
-    }
     public function serviceArea()
     {
         return $this->belongsTo(ServiceArea::class, 'service_area_id');
