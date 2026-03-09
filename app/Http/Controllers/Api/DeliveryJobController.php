@@ -60,6 +60,9 @@ class DeliveryJobController extends Controller
         ]);
 
         $this->jobService->logEvent($job, 'seller', $sellerId, 'seller_marked_ready');
+        
+        // Sync main order status for buyer awareness
+        $order->update(['status' => 'ready to pick up']);
 
         // 3. Dispatch rule: notify riders if this is the FIRST seller ready
         if ($job->status === 'pending_readiness') {
@@ -125,6 +128,9 @@ class DeliveryJobController extends Controller
         $pendingPickups = $job->stops()->where('type', 'pickup')->where('status', '!=', 'picked_up')->count();
         if ($pendingPickups === 0 && $job->status !== 'picked_up') {
             $this->jobService->transitionStatus($job, 'picked_up', 'rider', Auth::id());
+            $job->order->update(['status' => 'on delivery']);
+        } elseif ($status === 'picked_up') {
+            $job->order->update(['status' => 'picked up']);
         }
 
         return response()->json(['message' => 'Stop updated.', 'job' => $job->load('stops')]);
