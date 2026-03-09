@@ -139,11 +139,13 @@ class DeliveryJobService
                 'proof_uploaded_at' => $proofPhotoPath ? now() : null
             ]);
 
-            // 2. Update Order Status (intermediate state)
+            // 2. Update Order Status
             $order = $job->order;
-            if ($order->status !== 'on delivery') {
-                $order->update(['status' => 'on delivery']);
+            $updateData = ['status' => 'delivered'];
+            if ($order->method === 'Cash On Delivery') {
+                $updateData['payment_status'] = 'Completed';
             }
+            $order->update($updateData);
 
             // 3. Log Event
             $this->logEvent($job, 'rider', $job->assigned_rider_id, 'delivered_pending_verification');

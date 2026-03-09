@@ -318,6 +318,15 @@ public function orderAccept($id)
         $data = DeliveryRider::where('rider_id', $this->rider->id)->where('id', $id)->first();
         $data->status = 'delivered';
         $data->save();
+
+        if ($data->order) {
+            $updateData = ['status' => 'delivered'];
+            if ($data->order->method === 'Cash On Delivery') {
+                $updateData['payment_status'] = 'Completed';
+            }
+            $data->order->update($updateData);
+        }
+
         return back()->with('success', __('Successfully Delivered this order'));
     }
 
@@ -407,11 +416,51 @@ public function orderAccept($id)
         } elseif ($newStatus === 'delivered') {
             // Final delivery done
             $job->update(['status' => 'delivered', 'delivered_at' => now()]);
-            $job->order->update(['status' => 'delivered']);
+            
+            $updateData = ['status' => 'delivered'];
+            if ($job->order->method === 'Cash On Delivery') {
+                $updateData['payment_status'] = 'Completed';
+            }
+            $job->order->update($updateData);
         }
 
         return redirect()->route('rider-delivery-details', $job->id)
             ->with('success', __('Status updated to: ') . ucwords(str_replace('_', ' ', $newStatus)));
     }
+
+    public function updateJobStatus(Request $request, $id)
+    {
+        $job = DeliveryJob::findOrFail($id);
+
+        if ($job->assigned_rider_id != $this->rider->id) {
+            return redirect()->back()->with('error', __('Unauthorized.'));
+        }
+
+        $newStatus = $request->input('status');
+        $allowed = ['picked_up', 'on_delivery', 'delivered'];
+        if (!in_array($newStatus, $allowed)) {
+            return redirect()->back()->with('error', __('Invalid status.'));
+        }
+
+        if ($newStatus === 'picked_up') {
+            $job->update(['status' => 'picking_up', 'picked_up_at' => now()]);
+            $job->order->update(['status' => 'picked up']);
+        } elseif ($newStatus === 'on_delivery') {
+            $job->update(['status' => 'delivering']);
+            $job->order->update(['status' => 'on delivery']);
+        } elseif ($newStatus === 'delivered') {
+            $job->update(['status' => 'delivered', 'delivered_at' => now()]);
+            
+            $updateData = ['status' => 'delivered'];
+            if ($job->order->method === 'Cash On Delivery') {
+                $updateData['payment_status'] = 'Completed';
+            }
+            $job->order->update($updateData);
+        }
+
+        return redirect()->route('rider-delivery-index')
+            ->with('success', __('Order status updated to: ') . ucwords(str_replace('_', ' ', $newStatus)));
+    }
 }
+
 
