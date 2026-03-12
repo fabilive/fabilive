@@ -17,7 +17,8 @@ class LoginController extends Controller
       'password' => 'required',
     ];
 
-    if (config('app.env') !== 'local') {
+    $gs = \App\Models\Generalsetting::findOrFail(1);
+    if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
         $rules['g-recaptcha-response'] = 'required';
     }
     $validator = Validator::make($request->all(), $rules);
