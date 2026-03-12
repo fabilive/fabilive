@@ -50,8 +50,9 @@ class GeniusMailer
             $this->mail->Body = $body;
             $this->mail->send();
         } catch (Exception $e) {
-            dd($e);
+            \Log::error("Mailer AutoOrderMail Error: " . $e->getMessage());
         }
+
         $files = glob('assets/temp_files/*'); //get all file names
         foreach ($files as $file) {
             if (is_file($file))
@@ -79,7 +80,7 @@ class GeniusMailer
             $this->mail->send();
 
         } catch (Exception $e) {
-            dd("Mailer Error: " . $this->mail->ErrorInfo);
+            \Log::error("Mailer AutoMail Error: " . $this->mail->ErrorInfo);
         }
 
         return true;
@@ -98,7 +99,7 @@ class GeniusMailer
             $this->mail->Port = 587;
             $this->mail->send();
         } catch (Exception $e) {
-            dd("Mailer Error: " . $this->mail->ErrorInfo);
+            \Log::error("Mailer CustomMail Error: " . $this->mail->ErrorInfo);
         }
         return true;
     }
