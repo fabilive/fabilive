@@ -10,6 +10,11 @@ use App\Http\Controllers\PaymentController;
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
+
+Route::get('/backoffice/{any?}', function () {
+    return redirect()->route('admin.login');
+})->where('any', '.*');
+
 Route::prefix('admin')->group(function () {
 
     //------------ ADMIN GROWTH TRACKING SECTION ------------
