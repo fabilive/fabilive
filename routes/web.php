@@ -1482,12 +1482,12 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('admin/message/load/{id}', 'User\MessageController@messageload')->name('user-message-load');
         // User Admin Send Message Ends
 
-        Route::get('/affiliate/program', 'User\UserController@affilate_code')->name('user-affilate-program');
-        Route::get('/affiliate/history', 'User\UserController@affilate_history')->name('user-affilate-history');
+        Route::get('/affilate/program', 'User\UserController@affilate_code')->name('user-affilate-program');
+        Route::get('/affilate/history', 'User\UserController@affilate_history')->name('user-affilate-history');
 
-        Route::get('/affiliate/withdraw', 'User\WithdrawController@index')->name('user-wwt-index');
-        Route::get('/affiliate/withdraw/create', 'User\WithdrawController@create')->name('user-wwt-create');
-        Route::post('/affiliate/withdraw/create', 'User\WithdrawController@store')->name('user-wwt-store');
+        Route::get('/affilate/withdraw', 'User\WithdrawController@index')->name('user-wwt-index');
+        Route::get('/affilate/withdraw/create', 'User\WithdrawController@create')->name('user-wwt-create');
+        Route::post('/affilate/withdraw/create', 'User\WithdrawController@store')->name('user-wwt-store');
 
         // User Favorite Seller
 
