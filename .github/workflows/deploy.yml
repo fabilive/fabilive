@@ -45,6 +45,9 @@ jobs:
           script: |
             echo "--- Syncing code from Host to Container ---"
             docker cp /var/www/fabilive/. fabilive_app:/var/www/html/ || true
+            echo "--- Networking Diagnostics ---"
+            docker exec fabilive_app ip route || true
+            docker exec fabilive_app cat /etc/hosts || true
             echo "--- Latest Laravel Logs ---"
             docker exec fabilive_app tail -n 50 storage/logs/laravel.log || true
             echo "------------------------"
