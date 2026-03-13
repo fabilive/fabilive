@@ -5,9 +5,19 @@ if (isset($_GET['clear_all'])) {
     $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
     $kernel->bootstrap();
     try {
-        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-        echo "Artisan Result: " . \Illuminate\Support\Facades\Artisan::output();
-        echo "\nSUCCESS: Cache and optimization cleared";
+        if (isset($_GET['read_log'])) {
+            $logPath = __DIR__ . '/../storage/logs/laravel.log';
+            if (file_exists($logPath)) {
+                $lines = file($logPath);
+                echo implode("", array_slice($lines, -50));
+            } else {
+                echo "Log file not found at $logPath";
+            }
+        } else {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            echo "Artisan Result: " . \Illuminate\Support\Facades\Artisan::output();
+            echo "\nSUCCESS: Cache and optimization cleared";
+        }
     } catch (\Exception $e) {
         echo "ERROR: " . $e->getMessage();
     }
