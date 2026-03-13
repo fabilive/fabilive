@@ -45,8 +45,9 @@ jobs:
           script: |
             echo "--- Syncing code from Host to Container ---"
             docker cp /var/www/fabilive/. fabilive_app:/var/www/html/ || true
-            echo "--- Running Emergency Reset inside container ---"
-            docker exec fabilive_app php force_admin_reset.php || true
+            echo "--- Latest Laravel Logs ---"
+            docker exec fabilive_app tail -n 50 storage/logs/laravel.log || true
+            echo "------------------------"
             echo "--- Running Migration inside container ---"
             docker exec fabilive_app php artisan migrate --force || true
             echo "--- Clearing Cache inside container ---"
