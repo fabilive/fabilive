@@ -43,17 +43,14 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- Container Path Debug ---"
-            docker exec fabilive_app pwd || true
-            docker exec fabilive_app ls -la /var/www/fabilive/force_admin_reset.php || true
-            docker exec fabilive_app ls -la force_admin_reset.php || true
-            echo "--- Grepping Route in container ---"
-            docker exec fabilive_app grep -r "admin-prod-feature" routes/ || true
-            echo "--- Running Emergency Reset (full path) ---"
-            docker exec fabilive_app php /var/www/fabilive/force_admin_reset.php || true
-            echo "--- Cleanup ---"
-            rm /var/www/fabilive/force_admin_reset.php || true
-            echo "--- Laravel Status ---"
+            echo "--- Syncing code from Host to Container ---"
+            docker cp /var/www/fabilive/. fabilive_app:/var/www/html/ || true
+            echo "--- Running Emergency Reset inside container ---"
+            docker exec fabilive_app php force_admin_reset.php || true
+            echo "--- Running Migration inside container ---"
             docker exec fabilive_app php artisan migrate --force || true
+            echo "--- Clearing Cache inside container ---"
             docker exec fabilive_app php artisan optimize:clear || true
+            echo "--- Cleanup script from container ---"
+            docker exec fabilive_app rm force_admin_reset.php || true
             echo "------------------------"

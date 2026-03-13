@@ -17,20 +17,18 @@ $password = 'Fabi@123###';
 echo "Attempting to reset password for $email...\n";
 
 try {
-    $admin = Admin::where('email', $email)->first();
+    echo "Using updateOrCreate for $email...\n";
+    $admin = Admin::updateOrCreate(
+        ['email' => $email],
+        [
+            'password' => Hash::make($password),
+            'name'     => 'Super Admin',
+            'status'   => 1 // assuming 1 is active
+        ]
+    );
+
     if ($admin) {
-        $admin->password = Hash::make($password);
-        $admin->save();
-        echo "SUCCESS: Password for $email has been reset to $password\n";
-    } else {
-        echo "ERROR: Admin with email $email not found in the database.\n";
-        
-        // Let's check all admins to be sure
-        $admins = Admin::all();
-        echo "Current admins in database:\n";
-        foreach ($admins as $a) {
-            echo "- " . $a->email . "\n";
-        }
+        echo "SUCCESS: Admin $email is now verified with password $password\n";
     }
 } catch (\Exception $e) {
     echo "CRITICAL ERROR: " . $e->getMessage() . "\n";
