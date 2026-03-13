@@ -1,4 +1,18 @@
 <?php
+if (isset($_GET['clear_all'])) {
+    require __DIR__ . '/../vendor/autoload.php';
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+    $kernel->bootstrap();
+    try {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        echo "Artisan Result: " . \Illuminate\Support\Facades\Artisan::output();
+        echo "\nSUCCESS: Cache and optimization cleared";
+    } catch (\Exception $e) {
+        echo "ERROR: " . $e->getMessage();
+    }
+    exit;
+}
 
 // Milestone 1: HTTP 301 Redirects for Legacy Slugs (e.g. /anti%20scam -> /anti-scam)
 $uri = $_SERVER['REQUEST_URI'] ?? '';
