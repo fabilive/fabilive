@@ -12,6 +12,13 @@ Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('
 Broadcast::routes(['middleware' => ['auth']]);
 Route::prefix('admin')->group(function () {
 
+    //------------ ADMIN GROWTH TRACKING SECTION ------------
+    Route::group(['middleware' => 'permissions:growth'], function () {
+        Route::get('/referrals/datatables', 'Admin\ReferralController@datatables')->name('admin-referral-datatables');
+        Route::get('/referrals', 'Admin\ReferralController@index')->name('admin-referral-index');
+    });
+    //------------ ADMIN GROWTH TRACKING SECTION ENDS ------------
+
     //------------ ADMIN LOGIN SECTION ------------
     Route::get('/login', 'Auth\Admin\LoginController@showForm')->name('admin.login');
     Route::post('/login', 'Auth\Admin\LoginController@login')->name('admin.login.submit');
@@ -114,6 +121,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/reports/financial/export', [App\Http\Controllers\Admin\FinancialReportController::class, 'exportCsv'])->name('admin-financial-report-export');
 
         // Delivery Verification
+        Route::get('/delivery-jobs/datatables', 'Admin\DeliveryJobController@datatables')->name('admin-delivery-job-datatables');
+        Route::get('/delivery-jobs', 'Admin\DeliveryJobController@index')->name('admin-delivery-job-index');
+        Route::get('/delivery-job/{id}/show', 'Admin\DeliveryJobController@show')->name('admin-delivery-job-show');
         Route::post('/delivery/verify/{job}', [App\Http\Controllers\Admin\DeliveryVerificationController::class, 'verify'])->name('admin-delivery-verify');
 
         // Order Tracking Ends

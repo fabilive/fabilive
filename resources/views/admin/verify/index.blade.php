@@ -44,6 +44,7 @@
 		                                                  <th>{{ __("Vendor Name") }}</th>
 		                                                  <th>{{ __("Vendor Email") }}</th>
 		                                                  <th>{{ __("Descriptions") }}</th>
+                                                          <th>{{ __("Attachments") }}</th>
 		                                                  <th>{{ __("Status") }}</th>
 		                                                  <th>{{ __("Options") }}</th>
 														</tr>
@@ -204,6 +205,111 @@
 
 {{-- GALLERY MODAL ENDS --}}
 
+{{-- VERIFICATION MODAL --}}
+
+<div class="modal fade" id="verify-modal" tabindex="-1" role="dialog" aria-labelledby="modal1" aria-hidden="true">
+
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="submit-loader">
+				<img src="{{asset('assets/images/'.$gs->admin_loader)}}" alt="">
+			</div>
+			<div class="modal-header">
+				<h5 class="modal-title">{{ __('ASK FOR VERIFICATION') }}</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __("Close") }}</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+{{-- VERIFICATION MODAL ENDS --}}
+
+{{-- SUBSCRIPTION MODAL --}}
+
+<div class="modal fade" id="ad-subscription-modal" tabindex="-1" role="dialog" aria-labelledby="modal1"
+	aria-hidden="true">
+
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<div class="submit-loader">
+				<img src="{{asset('assets/images/'.$gs->admin_loader)}}" alt="">
+			</div>
+			<div class="modal-header">
+				<h5 class="modal-title">{{ __('ADD SUBSCRIPTION PLAN') }}</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __("Close") }}</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+{{-- SUBSCRIPTION MODAL ENDS --}}
+
+{{-- MESSAGE MODAL --}}
+
+<div class="sub-categori">
+	<div class="modal" id="vendorform" tabindex="-1" role="dialog" aria-labelledby="vendorformLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="vendorformLabel">{{ __("Send Message") }}</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="container-fluid p-0">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="contact-form">
+									<form id="emailreply1">
+										{{csrf_field()}}
+										<ul>
+											<li>
+												<input type="email" class="input-field eml-val" id="eml1" name="to"
+													placeholder="{{ __(" Email") }} *" value="" required="">
+											</li>
+											<li>
+												<input type="text" class="input-field" id="subj1" name="subject"
+													placeholder="{{ __(" Subject") }} *" required="">
+											</li>
+											<li>
+												<textarea class="input-field textarea" name="message" id="msg1"
+													placeholder="{{ __(" Your Message") }} *" required=""></textarea>
+											</li>
+										</ul>
+										<button class="submit-btn" id="emlsub1" type="submit">{{ __("Send Message")
+											}}</button>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{{-- MESSAGE MODAL ENDS --}}
+
 
 @endsection    
 
@@ -225,6 +331,7 @@
                         { data: 'name', name: 'name' },
                         { data: 'email', name: 'email' },
                         { data: 'text', name: 'text' },
+                        { data: 'attachments', name: 'attachments', searchable: false, orderable: false},
                         { data: 'status', searchable: false, orderable: false},
             			{ data: 'action', searchable: false, orderable: false }
                      ],
@@ -344,6 +451,67 @@
 	
 })(jQuery);
 
-	</script>
+</script>
 
-@endsection   
+<script type="text/javascript">
+	(function($) {
+		"use strict";
+
+$(document).on('click','.verify',function(){
+if(admin_loader == 1)
+  {
+  $('.submit-loader').show();
+}
+  $('#verify-modal .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
+      if(status == "success")
+      {
+        if(admin_loader == 1)
+          {
+            $('.submit-loader').hide();
+          }
+      }
+    });
+});
+
+
+})(jQuery);
+
+</script>
+
+
+<script type="text/javascript">
+	(function($) {
+		"use strict";
+
+	$(document).on('click','.add-subs',function(){
+	if(admin_loader == 1)
+	  {
+	  $('.submit-loader').show();
+	}
+	  $('#ad-subscription-modal .modal-content .modal-body').html('').load($(this).attr('data-href'),function(response, status, xhr){
+		  if(status == "success")
+		  {
+			if(admin_loader == 1)
+			  {
+				$('.submit-loader').hide();
+			  }
+		  }
+		});
+	});
+
+
+	$(document).on('click','.vendor_commission',function(){
+		let status = confirm('Are you sure to release the commission?');
+		if(status){
+			return true;
+		}else{
+			return false;
+		}
+	})
+	
+	
+})(jQuery);
+
+</script>
+
+@endsection

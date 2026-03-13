@@ -1,0 +1,1 @@
+INSERT INTO agreements (type, image, created_at, updated_at) VALUES ('Fabilive_Sub_merchant_Agreement', 'assets/images/submerchantagreementrider/1759330534agreement1759330531461pdf.pdf', NOW(), NOW()), ('Selfi_Instructions', 'assets/images/submerchantagreementrider/1759330534agreement1759330531461pdf.pdf', NOW(), NOW());

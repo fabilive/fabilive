@@ -144,12 +144,20 @@
                                                     let stream = null;
 
                                                     openBtn.addEventListener('click', async () => {
-                                                        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                                                        video.srcObject = stream;
-                                                        await video.play();
-                                                        video.style.display = 'block';
-                                                        captureBtn.style.display = 'inline-block';
-                                                        openBtn.style.display = 'none';
+                                                        try {
+                                                            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                                                                throw new Error('Camera access is not supported in this browser or requires a secure (HTTPS) connection.');
+                                                            }
+                                                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                                                            video.srcObject = stream;
+                                                            await video.play();
+                                                            video.style.display = 'block';
+                                                            captureBtn.style.display = 'inline-block';
+                                                            openBtn.style.display = 'none';
+                                                        } catch (err) {
+                                                            alert('Error: ' + err.message);
+                                                            console.error('Camera access error:', err);
+                                                        }
                                                     });
 
                                                     captureBtn.addEventListener('click', () => {
@@ -164,7 +172,9 @@
                                                             dt.items.add(file);
                                                             fileInput.files = dt.files;
 
-                                                            stream.getTracks().forEach(t => t.stop());
+                                                            if(stream) {
+                                                                stream.getTracks().forEach(t => t.stop());
+                                                            }
                                                             video.style.display = 'none';
                                                             preview.src = URL.createObjectURL(file);
                                                             preview.style.display = 'block';

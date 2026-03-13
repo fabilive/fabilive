@@ -21,7 +21,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        // dd($request->all());
+        \Log::info('Registration attempt: ', $request->except(['password', 'password_confirmation']));
         $gs = Generalsetting::findOrFail(1);
 
         // ------------------- CAPTCHA Validation -------------------
@@ -124,10 +124,10 @@ class RegisterController extends Controller
 
                     // Validate shop fields + selfie
                     $validator = Validator::make($request->all(), [
-                        'shop_name' => 'unique:users,' . ($user->id ?? 'NULL'),
+                        'shop_name' => 'unique:users,shop_name',
                         'reg_number' => 'required',
                         'shop_number' => 'max:10',
-                        'selfie_image' => 'required|file|mimes:jpg,jpeg,png', // <-- Added
+                        'selfie_image' => 'nullable|file|mimes:jpg,jpeg,png', // <-- Changed to nullable
                     ], [
                         'shop_name.unique' => __('This Shop Name has already been taken.'),
                         'shop_number.max' => __('Shop Number Must Be Less Than 10 Digits.'),
@@ -161,6 +161,13 @@ class RegisterController extends Controller
                 if (!empty($request->vendor)) {
                     $this->handleVendorUploads($request, $user);
                     $user->save();
+
+                    // Create verification record automatically
+                    $user->verifies()->create([
+                        'attachments' => implode(',', array_filter([$user->selfie_image, $user->national_id_front_image, $user->national_id_back_image])),
+                        'status' => 'Pending',
+                        'text' => 'New vendor registration verification.'
+                    ]);
                 }
 
                 // --- Referral System: apply code + generate user's own code ---
@@ -220,7 +227,7 @@ class RegisterController extends Controller
             $mailer->sendAutoMail($data);
 
             Auth::login($user);
-            echo 1;
+            return response()->json(1);
         }
     }
 
@@ -246,6 +253,8 @@ class RegisterController extends Controller
                 $filename = \PriceHelper::ImageCreateName($file);
                 $file->move("assets/images/{$folder}", $filename);
                 $user->{$field} = $filename; // Saves the filename in DB
+            } elseif ($field === 'selfie_image') {
+                $user->selfie_image = null; // Ensure it's null if not provided
             }
         }
     }
