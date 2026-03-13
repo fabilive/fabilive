@@ -13,7 +13,7 @@
         "beyondcode/laravel-websockets": "^1.14",
         "brian2694/laravel-toastr": "^5.57",
         "cartalyst/stripe-laravel": "^15.0",
-        "filament/filament": "^3.0",
+
         "guzzlehttp/guzzle": "^7.8",
         "instamojo/instamojo-php": "^1.0",
         "intervention/image": "^2.7",
@@ -61,8 +61,8 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan package:discover --ansi"
+
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

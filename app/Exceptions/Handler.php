@@ -37,9 +37,6 @@ class Handler extends ExceptionHandler
         if ($request->is('admin') || $request->is('admin/*')) {
             return redirect()->guest('/admin/login');
         }
-        if ($request->is('backoffice') || $request->is('backoffice/*')) {
-            return redirect()->guest('/backoffice/login');
-        }
         if ($request->is('user') || $request->is('user/*')) {
             return redirect()->guest('/')->with('auth-modal',__('Please Login First !!'));
         }
