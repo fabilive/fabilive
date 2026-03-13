@@ -23,7 +23,9 @@ try {
         [
             'password' => Hash::make($password),
             'name'     => 'Super Admin',
-            'status'   => 1 // assuming 1 is active
+            'phone'    => '0000000000',
+            'shop_name'=> 'Fabilive',
+            'status'   => 1 
         ]
     );
 
