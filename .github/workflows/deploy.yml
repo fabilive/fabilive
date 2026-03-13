@@ -43,9 +43,8 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- System Search ---"
-            find / -maxdepth 4 -name "artisan" 2>/dev/null || true
-            echo "--- Nginx Config Check ---"
-            ls /etc/nginx/sites-enabled/ 2>/dev/null || true
-            cat /etc/nginx/sites-enabled/* 2>/dev/null | grep root || true
-            echo "----------------------"
+            echo "--- Active Web Root Search ---"
+            find / -name "style.css" -path "*/admin/css/*" 2>/dev/null || true
+            echo "--- Processes Check ---"
+            ps aux | grep -E "nginx|php-fpm|apache" || true
+            echo "------------------------------"
