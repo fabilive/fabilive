@@ -1,4 +1,44 @@
 <?php
+// EMERGENCY RECOVERY HOOK - Remove after use!
+if (isset($_GET['emergency_fix'])) {
+    $paths = [
+        __DIR__ . '/../bootstrap/cache/config.php',
+        __DIR__ . '/../bootstrap/cache/routes.php',
+        __DIR__ . '/../bootstrap/cache/services.php',
+        __DIR__ . '/../bootstrap/cache/packages.php',
+        __DIR__ . '/../storage/framework/views/',
+    ];
+    echo "Starting cleanup...\n";
+    foreach ($paths as $path) {
+        if (is_dir($path)) {
+            foreach (glob($path . "*.php") as $file) {
+                if (unlink($file)) echo "Deleted view: " . basename($file) . "\n";
+            }
+        } elseif (file_exists($path)) {
+            if (unlink($path)) echo "Deleted cache: " . basename($path) . "\n";
+        }
+    }
+    
+    // Reset Admin Password via direct PDO if possible, or try bootstrap if cleanup worked
+    echo "Attempting password reset...\n";
+    try {
+        require __DIR__ . '/../vendor/autoload.php';
+        $app = require_once __DIR__ . '/../bootstrap/app.php';
+        $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $kernel->bootstrap();
+        $admin = \App\Models\Admin::where('email', 'hello@fabilive.com')->first();
+        if ($admin) {
+            $admin->password = \Illuminate\Support\Facades\Hash::make('Fabi@123###');
+            $admin->save();
+            echo "SUCCESS: Admin password updated to Fabi@123###\n";
+        } else {
+            echo "ERROR: Admin not found\n";
+        }
+    } catch (\Exception $e) {
+        echo "Laravel Error during reset: " . $e->getMessage() . "\n";
+    }
+    exit;
+}
 if (isset($_GET['clear_all'])) {
     require __DIR__ . '/../vendor/autoload.php';
     $app = require_once __DIR__ . '/../bootstrap/app.php';
