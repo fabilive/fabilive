@@ -44,6 +44,6 @@ jobs:
           port: 22
           script: |
             cd /var/www/fabilive
-            php artisan migrate --force
-            php artisan optimize:clear
-            php artisan optimize
+            /usr/local/bin/php artisan migrate --force
+            /usr/local/bin/php artisan optimize:clear
+            /usr/local/bin/php artisan optimize

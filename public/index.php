@@ -1,12 +1,4 @@
 <?php
-if (isset($_GET['check_php'])) {
-    echo "PHP Path: " . exec('which php') . "\n";
-    echo "PHP Status: " . exec('php -v') . "\n";
-    echo "PHP 8.1 Path: " . exec('which php8.1') . "\n";
-    echo "PHP 8.2 Path: " . exec('which php8.2') . "\n";
-    echo "USER: " . exec('whoami') . "\n";
-    exit;
-}
 
 // Milestone 1: HTTP 301 Redirects for Legacy Slugs (e.g. /anti%20scam -> /anti-scam)
 $uri = $_SERVER['REQUEST_URI'] ?? '';
