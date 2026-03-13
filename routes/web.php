@@ -948,7 +948,7 @@ Route::prefix('admin')->group(function () {
 
     // FEATURE SECTION
     Route::get('/products/feature/{id}', 'Admin\ProductController@feature')->name('admin-prod-feature');
-    Route::post('/products/feature/{id}', 'Admin\ProductController@featuresubmit')->name('admin-prod-feature');
+    Route::post('/products/feature/{id}', 'Admin\ProductController@featuresubmit')->name('admin-prod-feature-submit');
     // FEATURE SECTION ENDS
 
     // GALLERY SECTION ------------
