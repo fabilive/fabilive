@@ -43,7 +43,12 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
+            echo "--- Debug Info ---"
+            echo "User: $(whoami)"
+            echo "PATH: $PATH"
+            echo "Which php: $(which php)"
+            echo "Whereis php: $(whereis php)"
+            find /usr/bin /usr/local/bin -name "php*" -type f 2>/dev/null || true
+            echo "------------------"
             cd /var/www/fabilive
-            /usr/local/bin/php artisan migrate --force
-            /usr/local/bin/php artisan optimize:clear
-            /usr/local/bin/php artisan optimize
+            # We will use the identified path in the next attempt
