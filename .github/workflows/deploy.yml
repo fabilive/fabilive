@@ -43,9 +43,12 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- Global index.php Search ---"
-            find / -name "index.php" -not -path "*/vendor/*" 2>/dev/null || true
-            echo "--- Nginx Sites Check ---"
-            ls -R /etc/nginx/sites-enabled/ 2>/dev/null || true
-            grep -r "root" /etc/nginx/sites-enabled/ 2>/dev/null || true
-            echo "------------------------------"
+            echo "--- Docker Containers ---"
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
+            echo "--- Docker Inspect (if fabilive) ---"
+            docker inspect fabilive 2>/dev/null | grep -i "Source\|Destination" || true
+            echo "--- Active hook Search ---"
+            grep -r "emergency_fix" /var/www/ /var/lib/docker/ 2>/dev/null || true
+            echo "--- Timestamp Check ---"
+            ls -la /var/www/fabilive/public/index.php || true
+            echo "------------------------"
