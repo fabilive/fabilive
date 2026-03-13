@@ -43,12 +43,13 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- Docker Containers ---"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
-            echo "--- Docker Inspect (if fabilive) ---"
-            docker inspect fabilive 2>/dev/null | grep -i "Source\|Destination" || true
-            echo "--- Active hook Search ---"
-            grep -r "emergency_fix" /var/www/ /var/lib/docker/ 2>/dev/null || true
-            echo "--- Timestamp Check ---"
-            ls -la /var/www/fabilive/public/index.php || true
+            echo "--- Inspecting fabilive_app ---"
+            docker inspect fabilive_app --format '{{ range .Mounts }}{{ .Source }}:{{ .Destination }}{{ "\n" }}{{ end }}' || true
+            echo "--- Running Migration inside container ---"
+            docker exec fabilive_app php artisan migrate --force || true
+            echo "--- Clearing Cache inside container ---"
+            docker exec fabilive_app php artisan optimize:clear || true
+            docker exec fabilive_app php artisan optimize || true
+            echo "--- Verifying hook inside container ---"
+            docker exec fabilive_app grep -r "emergency_fix" public/index.php || true
             echo "------------------------"
