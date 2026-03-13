@@ -13,10 +13,7 @@ class Authenticate extends Middleware
     protected function redirectTo(Request $request): ?string
     {
         if (! $request->expectsJson()) {
-            if ($request->is('backoffice') || $request->is('backoffice/*')) {
-                return route('filament.backoffice.auth.login');
-            }
-            return route('user.login');
+            return route('admin.login');
         }
 
         return null;
