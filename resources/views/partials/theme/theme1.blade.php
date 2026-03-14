@@ -3,6 +3,38 @@
     {{-- <link rel="stylesheet" href="{{ asset('assets/front/css/category/classic.css') }}"> --}}
 
     <style>
+        .banner-slide-item {
+            overflow: hidden;
+        }
+        .banner-slide-item video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        /* Floating animation for the robot if not using internal GLB animations */
+        .robot-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
         /* @media only screen and (max-width: 767px) {
             .banner-slide-item  {
             background-size: contain !important;
@@ -29,11 +61,33 @@
             <section class="home-slider owl-theme owl-carousel">
                 @foreach ($sliders as $data)
                     <div class="banner-slide-item"
-                        style="position: relative; background: url('{{ asset('assets/images/sliders/' . $data->photo) }}') no-repeat center center / cover;">
+                        style="position: relative; background: {{ $data->video || $data->{'3d_model'} ? 'black' : "url('" . asset('assets/images/sliders/' . $data->photo) . "')" }} no-repeat center center / cover;">
+
+                        @if($data->video)
+                            <video autoplay muted loop playsinline>
+                                <source src="{{ asset('assets/videos/' . $data->video) }}" type="video/mp4">
+                            </video>
+                        @endif
+
+                        @if($data->{'3d_model'})
+                            <model-viewer 
+                                src="{{ asset('assets/models/' . $data->{'3d_model'}) }}" 
+                                alt="A 3D robot model" 
+                                auto-rotate 
+                                camera-controls 
+                                autoplay 
+                                animation-name="Idle"
+                                shadow-intensity="1" 
+                                class="robot-float"
+                                exposure="1"
+                                environment-image="neutral"
+                                disable-zoom>
+                            </model-viewer>
+                        @endif
 
                         <!-- Overlay -->
                         <div
-                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35);">
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); z-index: 1;">
                         </div>
 
                         <!-- Text -->
@@ -273,6 +327,7 @@
     <a href="#" class="scroller text-white" id="scroll"><i class="fa fa-angle-up"></i></a>
 @endsection
 @section('script')
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
     <script>
         var owl = $('.home-slider').owlCarousel({
             loop: true,

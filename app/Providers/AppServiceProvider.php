@@ -55,6 +55,15 @@ class AppServiceProvider extends ServiceProvider
             }
 
             
+            if (!Session::has('visited')) {
+                Session::put('visited', 1);
+                $visited = 1;
+            } else {
+                $visited = 0;
+            }
+
+            $settings->with('visited', $visited);
+            
             $settings->with('footer_blogs', DB::table('blogs')->orderby('id','desc')->limit(3)->get());
         });
     }
