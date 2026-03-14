@@ -55,9 +55,15 @@ jobs:
             echo "--- Latest Laravel Logs ---"
             docker exec fabilive_app tail -n 50 storage/logs/laravel.log || true
             echo "------------------------"
+            echo "--- Fixing Permissions inside container ---"
+            docker exec fabilive_app chown -R www-data:www-data /var/www/fabilive || true
+            docker exec fabilive_app chmod -R 775 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache || true
+            echo "--- Auditing Controller Directory ---"
+            docker exec fabilive_app ls -la /var/www/fabilive/app/Http/Controllers/User/ || true
             echo "--- Running Migration inside container ---"
             docker exec fabilive_app php artisan migrate --force || true
-            echo "--- Clearing Cache inside container ---"
+            echo "--- Regenerating Autoloader and Clearing Cache ---"
+            docker exec fabilive_app composer dump-autoload --optimize || true
             docker exec fabilive_app php artisan optimize:clear || true
             echo "--- Cleanup script from container ---"
             docker exec fabilive_app rm force_admin_reset.php || true
