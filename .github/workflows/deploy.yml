@@ -44,7 +44,7 @@ jobs:
           port: 22
           script: |
             echo "--- Syncing code from Host to Container ---"
-            docker cp /var/www/fabilive/. fabilive_app:/var/www/html/ || true
+            docker cp /var/www/fabilive/. fabilive_app:/var/www/fabilive/ || true
             echo "--- Networking Diagnostics ---"
             docker exec fabilive_app ip route || true
             docker exec fabilive_app cat /etc/hosts || true
