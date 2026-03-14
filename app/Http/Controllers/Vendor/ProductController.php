@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Image;
 use Validator;
+use App\Services\AI\ThreeDGeneratorService;
 
 class ProductController extends VendorBaseController
 {
@@ -212,6 +213,16 @@ class ProductController extends VendorBaseController
         $img->save(public_path() . '/assets/images/thumbnails/' . $thumbnail);
         $data->thumbnail = $thumbnail;
         $data->update();
+
+        // 3D Model Generation
+        if (config('ai.features.photo_enhancer')) {
+            $threeDService = new ThreeDGeneratorService();
+            $threeDModelPath = $threeDService->generateForProduct($data, public_path($path));
+            if ($threeDModelPath) {
+                $data->update(['3d_model' => $threeDModelPath]);
+            }
+        }
+
         return response()->json(['status' => true, 'file_name' => $image_name]);
     }
 
@@ -614,6 +625,16 @@ class ProductController extends VendorBaseController
                 $prod->thumbnail = $thumbnail;
             }
             $prod->update();
+
+            // 3D Model Generation
+            if (config('ai.features.photo_enhancer')) {
+                $threeDService = new ThreeDGeneratorService();
+                $threeDModelPath = $threeDService->generateForProduct($prod, public_path('assets/images/products/' . $prod->photo));
+                if ($threeDModelPath) {
+                    $prod->update(['3d_model' => $threeDModelPath]);
+                }
+            }
+
             $lastid = $data->id;
             if ($files = $request->file('gallery')) {
                 foreach ($files as $key => $file) {

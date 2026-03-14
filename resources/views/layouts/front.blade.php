@@ -85,6 +85,24 @@
   <link rel="stylesheet" id="colorr" href="{{ asset('assets/front/css/font.php?font_familly='." Open Sans") }}">
   @endif
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    <!-- Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+      .product-3d-container {
+        width: 100%;
+        height: 100%;
+        min-height: 285px;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      model-viewer.product-3d-viewer {
+        width: 100%;
+        height: 100%;
+        --poster-color: transparent;
+      }
+    </style>
   @if(!empty($seo->google_analytics))
   <script>
     window.dataLayer = window.dataLayer || [];

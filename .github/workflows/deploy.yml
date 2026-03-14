@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          source: "."
+          source: ". , !node_modules"
           target: "/var/www/fabilive"
 
       - name: Run Artisan Commands

@@ -17,8 +17,8 @@ class Product extends Model
           'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
            'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
             'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check','delivery_fee','delivery_unit','product_servicearea',
-             'cross_products'];
-    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type'];
+             'cross_products', '3d_model'];
+    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model'];
     public function user()
     {
         return $this->belongsTo('App\Models\User')->withDefault();
