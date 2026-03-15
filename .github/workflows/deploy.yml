@@ -27,9 +27,13 @@ jobs:
 
       - name: Create Deployment Tarball
         run: |
-          echo "--- Runner Space Before Tar ---"
+          echo "--- Runner Space Before Cleanup ---"
           df -h
-          tar -czf fabilive_deploy.tar.gz --exclude=fabilive_deploy.tar.gz --exclude=node_modules --exclude=vendor --exclude=.git --exclude='*.zip' --exclude='*.rar' .
+          echo "--- Removing Massive Archive Files from Runner ---"
+          rm -rf *.zip *.rar *.7z
+          echo "--- Runner Space After Cleanup ---"
+          df -h
+          tar -czf fabilive_deploy.tar.gz --exclude=fabilive_deploy.tar.gz --exclude=node_modules --exclude=vendor --exclude=.git .
           echo "--- Tarball Size ---"
           ls -lh fabilive_deploy.tar.gz
 
@@ -73,7 +77,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V16 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V17 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
@@ -86,11 +90,12 @@ jobs:
               sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=fabilive/' /var/www/fabilive/.env
             fi
             
+            echo "--- Encryption Key Check ---" >> $LOG_FILE
             if ! grep -q "APP_KEY=base64:" /var/www/fabilive/.env; then
-              echo "Generating APP_KEY..." >> $LOG_FILE
+              echo "Generating mandatory APP_KEY..." >> $LOG_FILE
               docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
             else
-              echo "APP_KEY already set" >> $LOG_FILE
+              echo "APP_KEY detected" >> $LOG_FILE
             fi
             
             echo "--- Syncing code from Host to Container Volume ---" >> $LOG_FILE
