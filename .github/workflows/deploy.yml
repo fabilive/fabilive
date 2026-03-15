@@ -79,7 +79,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V18 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V19 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
@@ -92,9 +92,6 @@ jobs:
               sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=fabilive/' /var/www/fabilive/.env
             fi
             
-            echo "--- Encryption Key Force ---" >> $LOG_FILE
-            docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
-            
             echo "--- Syncing code from Host to Container Volume ---" >> $LOG_FILE
             docker exec fabilive_app chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1 || true
             
@@ -103,13 +100,17 @@ jobs:
             mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
             chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
             
-            echo "--- In-Container Composer Install (Shared Volume) ---" >> $LOG_FILE
+            echo "--- In-Container Composer Install (CRITICAL: MUST RUN BEFORE ARTISAN) ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app composer install --no-dev --optimize-autoloader >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            
+            echo "--- Clearing Config & Generating Mandatory Encryption Key ---" >> $LOG_FILE
+            docker exec -w /var/www/fabilive fabilive_app php artisan config:clear >> $LOG_FILE 2>&1 || true
+            docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
             
             echo "--- Active Database Configuration ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app php artisan tinker --execute="print_r(config('database.connections.mysql'))" >> $LOG_FILE 2>&1 || true
             
-            echo "--- Health Checks & Migrations (Shared Volume) ---" >> $LOG_FILE
+            echo "--- Health Checks & Migrations ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app php artisan optimize:clear >> $LOG_FILE 2>&1 || true
             docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
             
