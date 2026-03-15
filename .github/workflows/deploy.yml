@@ -59,33 +59,37 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- Checking Host Space ---"
-            df -h
+            LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
+            echo "--- DEPLOYMENT DIAGNOSTICS V12 ---" > $LOG_FILE
+            echo "Time: $(date)" >> $LOG_FILE
             
-            echo "--- Syncing code from Host to Container Volume ---"
-            docker cp /var/www/fabilive/. fabilive_app:/var/www/fabilive/ || true
+            echo "--- Host Space ---" >> $LOG_FILE
+            df -h >> $LOG_FILE
             
-            echo "--- Initializing Storage Subdirectories in Shared Volume ---"
-            docker exec fabilive_app mkdir -p /var/www/fabilive/storage/framework/sessions
-            docker exec fabilive_app mkdir -p /var/www/fabilive/storage/framework/views
-            docker exec fabilive_app mkdir -p /var/www/fabilive/storage/framework/cache
-            docker exec fabilive_app mkdir -p /var/www/fabilive/storage/app/public
-            docker exec fabilive_app chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache || true
+            echo "--- Syncing code from Host to Container Volume ---" >> $LOG_FILE
+            # Note: No docker cp needed as it's a bind mount, but we ensure permissions
+            docker exec fabilive_app chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1 || true
             
-            echo "--- In-Container Composer Install (Shared Volume) ---"
-            docker exec -w /var/www/fabilive fabilive_app composer install --no-dev --optimize-autoloader || true
+            echo "--- Initializing Storage Subdirectories in Shared Volume ---" >> $LOG_FILE
+            mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
+            mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
+            chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
             
-            echo "--- Health Checks & Migrations (Shared Volume) ---"
-            docker exec -w /var/www/fabilive fabilive_app php artisan optimize:clear || true
-            docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force || true
+            echo "--- In-Container Composer Install (Shared Volume) ---" >> $LOG_FILE
+            # Use full path to composer if possible, or assume it's in path
+            docker exec -w /var/www/fabilive fabilive_app composer install --no-dev --optimize-autoloader >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
-            echo "--- Host Diagnostic: Checking Autoloader ---"
-            ls -la /var/www/fabilive/vendor/autoload.php || echo "CRITICAL: Autoloader missing on host!"
+            echo "--- Health Checks & Migrations (Shared Volume) ---" >> $LOG_FILE
+            docker exec -w /var/www/fabilive fabilive_app php artisan optimize:clear >> $LOG_FILE 2>&1 || true
+            docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force >> $LOG_FILE 2>&1 || true
             
-            echo "--- Final Laravel Log Check ---"
-            docker exec -w /var/www/fabilive fabilive_app tail -n 50 storage/logs/laravel.log || true
+            echo "--- Host Diagnostic: Checking Autoloader ---" >> $LOG_FILE
+            ls -la /var/www/fabilive/vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing on host!" >> $LOG_FILE
             
-            echo "--- Final Space Check ---"
-            df -h
-            docker exec fabilive_app df -h || true
-            echo "------------------------"
+            echo "--- Final Laravel Log Check ---" >> $LOG_FILE
+            docker exec -w /var/www/fabilive fabilive_app tail -n 50 storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
+            
+            echo "--- Diagnostic Log Ready at http://165.227.114.119/deploy_log.txt ---" >> $LOG_FILE
+            
+            # Print to GH Actions too just in case
+            cat $LOG_FILE
