@@ -25,6 +25,9 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      - name: Create Deployment Tarball
+        run: tar -czf fabilive_deploy.tar.gz --exclude=node_modules --exclude=vendor --exclude=.git .
+
       - name: Pre-deployment Cleanup
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -37,9 +40,7 @@ jobs:
             docker system prune -af --volumes || true
             echo "--- Clearing Host Target Directory ---"
             rm -rf /var/www/fabilive/*
-            echo "--- Host Space Check ---"
             df -h
-            docker system df
 
       - name: Deploy to DigitalOcean (SCP)
         uses: appleboy/scp-action@v0.1.7
@@ -48,7 +49,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          source: "., !node_modules, !vendor, !.git"
+          source: "fabilive_deploy.tar.gz"
           target: "/var/www/fabilive"
 
       - name: Run Post-deployment Tasks
@@ -60,7 +61,14 @@ jobs:
           port: 22
           script: |
             LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
-            echo "--- DEPLOYMENT DIAGNOSTICS V13 ---" > $LOG_FILE
+            
+            echo "--- Unpacking Tarball ---"
+            cd /var/www/fabilive
+            tar -xzf fabilive_deploy.tar.gz
+            rm fabilive_deploy.tar.gz
+            
+            # Now we can write to the log file since 'public' exists
+            echo "--- DEPLOYMENT DIAGNOSTICS V14 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
