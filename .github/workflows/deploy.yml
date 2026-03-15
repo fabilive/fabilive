@@ -59,20 +59,30 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
+            echo "--- Host: Listing contents of /var/www/fabilive ---"
+            ls -la /var/www/fabilive || true
+            
             echo "--- Checking Container Internal Space ---"
             docker exec fabilive_app df -h || true
             
-            echo "--- Cleaning Container Target Directory ---"
-            docker exec fabilive_app find /var/www/fabilive -mindepth 1 -delete || true
+            echo "--- Container: Deep cleaning /var/www/fabilive ---"
+            docker exec fabilive_app sh -c "ls -la /var/www/fabilive && find /var/www/fabilive -mindepth 1 -delete" || true
             
             echo "--- Syncing code from Host to Container ---"
             docker cp /var/www/fabilive/. fabilive_app:/var/www/fabilive/ || true
+            
+            echo "--- Container: Verifying synced files ---"
+            docker exec fabilive_app ls -la /var/www/fabilive || true
+            docker exec fabilive_app ls -la /var/www/fabilive/public || true
             
             echo "--- In-Container Composer Install ---"
             docker exec fabilive_app composer install --no-dev --optimize-autoloader || true
             
             echo "--- Latest Laravel Logs ---"
             docker exec fabilive_app tail -n 100 storage/logs/laravel.log || true
+            
+            echo "--- Container Details & Nginx Check ---"
+            docker inspect fabilive_app || true
             
             echo "--- Database Connectivity Test ---"
             docker exec fabilive_app php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'DB Connected Successfully!'; } catch (\Exception \$e) { echo 'DB Connection Failed: ' . \$e->getMessage(); }" || true
