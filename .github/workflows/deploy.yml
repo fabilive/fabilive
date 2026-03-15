@@ -25,7 +25,23 @@ jobs:
       - name: Build Assets
         run: npm run build
 
-      - name: Deploy to DigitalOcean
+      - name: Pre-deployment Cleanup
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          script: |
+            echo "--- Reclaiming Space Before Transfer ---"
+            docker system prune -af --volumes || true
+            echo "--- Clearing Host Target Directory ---"
+            rm -rf /var/www/fabilive/*
+            echo "--- Host Space Check ---"
+            df -h
+            docker system df
+
+      - name: Deploy to DigitalOcean (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DO_HOST }}
@@ -35,7 +51,7 @@ jobs:
           source: "., !node_modules, !vendor/composer/autoload_static.php"
           target: "/var/www/fabilive"
 
-      - name: Run Artisan Commands
+      - name: Run Post-deployment Tasks
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DO_HOST }}
@@ -43,16 +59,6 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
-            echo "--- Aggressive Space Recovery ---"
-            docker system prune -af --volumes || true
-            
-            echo "--- Host Diagnostics ---"
-            df -h
-            docker system df
-            
-            echo "--- Cleaning up Host to avoid Ghost Files ---"
-            rm -rf /var/www/fabilive/node_modules
-            
             echo "--- Checking Container Internal Space ---"
             docker exec fabilive_app df -h || true
             
