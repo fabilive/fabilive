@@ -63,45 +63,47 @@ jobs:
             df -h
             
             echo "--- Syncing code from Host to Container ---"
-            # We copy to /var/www/fabilive (the bind mount)
             docker cp /var/www/fabilive/. fabilive_app:/var/www/fabilive/ || true
             
-            echo "--- Synchronizing Web Roots (/var/www/html & /var/www/fabilive) ---"
-            # Ensure the standard web root exists and is clean
+            echo "--- Harmonizing Web Roots (/var/www/html) ---"
             docker exec fabilive_app mkdir -p /var/www/html
             docker exec fabilive_app sh -c "rm -rf /var/www/html/*" || true
             docker exec fabilive_app cp -r /var/www/fabilive/. /var/www/html/ || true
             
-            echo "--- Initializing Storage Subdirectories ---"
+            echo "--- Initializing Storage Subdirectories (Container) ---"
             docker exec fabilive_app mkdir -p /var/www/html/storage/framework/sessions
             docker exec fabilive_app mkdir -p /var/www/html/storage/framework/views
             docker exec fabilive_app mkdir -p /var/www/html/storage/framework/cache
             docker exec fabilive_app mkdir -p /var/www/html/storage/app/public
-            
-            echo "--- Fixing Permissions ---"
-            docker exec fabilive_app chown -R www-data:www-data /var/www/html
-            docker exec fabilive_app chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
-            
-            echo "--- Container: Verifying synced files in /var/www/html ---"
-            docker exec fabilive_app ls -la /var/www/html/public/index.php || true
+            docker exec fabilive_app chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache || true
             
             echo "--- In-Container Composer Install ---"
             docker exec -w /var/www/html fabilive_app composer install --no-dev --optimize-autoloader || true
             
-            echo "--- Diagnostics & Health Checks ---"
+            echo "--- BACK-SYNCING VENDOR TO HOST (/var/www/fabilive) ---"
+            # This ensures Nginx on the host can find the vendor/autoload.php file
+            docker cp fabilive_app:/var/www/html/vendor /var/www/fabilive/ || true
+            
+            echo "--- Initializing Storage Subdirectories (Host Path) ---"
+            mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache}
+            mkdir -p /var/www/fabilive/storage/app/public
+            chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache || true
+            
+            echo "--- Health Checks & Migrations ---"
             docker exec -w /var/www/html fabilive_app php artisan optimize:clear || true
             docker exec -w /var/www/html fabilive_app php artisan migrate --force || true
+            
+            echo "--- Host Diagnostic: Checking Autoloader ---"
+            ls -la /var/www/fabilive/vendor/autoload.php || echo "CRITICAL: Autoloader missing on host!"
             
             echo "--- Final Laravel Log Check ---"
             docker exec -w /var/www/html fabilive_app tail -n 50 storage/logs/laravel.log || true
             
-            echo "--- Nginx Version & Config Check ---"
-            docker exec fabilive_app nginx -v || true
-            docker exec fabilive_app nginx -T | grep -E "root|index" || true
+            echo "--- Nginx Integration Diagnostic ---"
+            # Check what IP/Port Nginx is looking at if possible
+            netstat -tulpn | grep 80 || true
             
             echo "------------------------"
             df -h
             docker exec fabilive_app df -h || true
-            echo "------------------------"
-
 
