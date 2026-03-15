@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          source: "., !node_modules, !vendor"
+          source: "., !node_modules, !vendor, !.git"
           target: "/var/www/fabilive"
 
       - name: Run Post-deployment Tasks
@@ -61,6 +61,9 @@ jobs:
           script: |
             echo "--- Checking Container Internal Space ---"
             docker exec fabilive_app df -h || true
+            
+            echo "--- Cleaning Container Target Directory ---"
+            docker exec fabilive_app find /var/www/fabilive -mindepth 1 -delete || true
             
             echo "--- Syncing code from Host to Container ---"
             docker cp /var/www/fabilive/. fabilive_app:/var/www/fabilive/ || true
