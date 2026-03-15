@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          source: "., !node_modules, !vendor/composer/autoload_static.php"
+          source: "., !node_modules"
           target: "/var/www/fabilive"
 
       - name: Run Post-deployment Tasks
