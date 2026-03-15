@@ -60,14 +60,23 @@ jobs:
           port: 22
           script: |
             LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
-            echo "--- DEPLOYMENT DIAGNOSTICS V12 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V13 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
-            echo "--- Host Space ---" >> $LOG_FILE
-            df -h >> $LOG_FILE
+            echo "--- Environment Setup (.env) ---" >> $LOG_FILE
+            if [ ! -f /var/www/fabilive/.env ]; then
+              echo "Creating .env from .env.example" >> $LOG_FILE
+              cp /var/www/fabilive/.env.example /var/www/fabilive/.env
+              sed -i 's/DB_HOST=.*/DB_HOST=mariadb/' /var/www/fabilive/.env
+              sed -i 's/DB_DATABASE=.*/DB_DATABASE=fabilive/' /var/www/fabilive/.env
+              sed -i 's/DB_USERNAME=.*/DB_USERNAME=fabilive/' /var/www/fabilive/.env
+              sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=fabilive/' /var/www/fabilive/.env
+              docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
+            else
+              echo ".env already exists" >> $LOG_FILE
+            fi
             
             echo "--- Syncing code from Host to Container Volume ---" >> $LOG_FILE
-            # Note: No docker cp needed as it's a bind mount, but we ensure permissions
             docker exec fabilive_app chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1 || true
             
             echo "--- Initializing Storage Subdirectories in Shared Volume ---" >> $LOG_FILE
@@ -76,12 +85,14 @@ jobs:
             chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
             
             echo "--- In-Container Composer Install (Shared Volume) ---" >> $LOG_FILE
-            # Use full path to composer if possible, or assume it's in path
             docker exec -w /var/www/fabilive fabilive_app composer install --no-dev --optimize-autoloader >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            
+            echo "--- Active Database Configuration ---" >> $LOG_FILE
+            docker exec -w /var/www/fabilive fabilive_app php artisan tinker --execute="print_r(config('database.connections.mysql'))" >> $LOG_FILE 2>&1 || true
             
             echo "--- Health Checks & Migrations (Shared Volume) ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app php artisan optimize:clear >> $LOG_FILE 2>&1 || true
-            docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force >> $LOG_FILE 2>&1 || true
+            docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
             
             echo "--- Host Diagnostic: Checking Autoloader ---" >> $LOG_FILE
             ls -la /var/www/fabilive/vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing on host!" >> $LOG_FILE
@@ -90,6 +101,4 @@ jobs:
             docker exec -w /var/www/fabilive fabilive_app tail -n 50 storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
             
             echo "--- Diagnostic Log Ready at http://165.227.114.119/deploy_log.txt ---" >> $LOG_FILE
-            
-            # Print to GH Actions too just in case
             cat $LOG_FILE
