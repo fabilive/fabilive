@@ -26,7 +26,12 @@ jobs:
         run: npm run build
 
       - name: Create Deployment Tarball
-        run: tar -czf fabilive_deploy.tar.gz --exclude=node_modules --exclude=vendor --exclude=.git .
+        run: |
+          echo "--- Runner Space Before Tar ---"
+          df -h
+          tar -czf fabilive_deploy.tar.gz --exclude=node_modules --exclude=vendor --exclude=.git --exclude='*.zip' --exclude='*.rar' .
+          echo "--- Tarball Size ---"
+          ls -lh fabilive_deploy.tar.gz
 
       - name: Pre-deployment Cleanup
         uses: appleboy/ssh-action@v1.2.0
@@ -68,7 +73,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V14 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V15 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
