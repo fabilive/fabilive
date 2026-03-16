@@ -4,9 +4,10 @@
 
     <style>
         :root {
-            --premium-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --premium-gradient: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+            --glass-bg: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-purple: #a855f7;
         }
 
         .banner-slide-item {
@@ -41,14 +42,16 @@
         /* Premium Content Container */
         .banner-content-wrapper {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            max-width: 650px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border-radius: 30px;
+            padding: 60px;
+            max-width: 700px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUpFade 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            position: relative;
+            z-index: 10;
         }
 
         /* Staggered Animations */
@@ -64,22 +67,22 @@
         .banner-content .subtitle {
             font-family: 'Outfit', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: 600;
-            color: #a855f7;
-            margin-bottom: 15px;
+            letter-spacing: 5px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            margin-bottom: 20px;
             display: inline-block;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
         }
 
         .banner-content .title {
             font-family: 'Jost', sans-serif;
-            font-weight: 800;
-            font-size: 56px;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            background: linear-gradient(to right, #ffffff, #e2e8f0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: clamp(32px, 8vw, 64px);
+            line-height: 1;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .banner-content .details-text {
