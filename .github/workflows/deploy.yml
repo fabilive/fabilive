@@ -33,6 +33,8 @@ jobs:
           rm -rf *.zip *.rar *.7z
           echo "--- Runner Space After Cleanup ---"
           df -h
+          echo "--- Runner Memory Status ---"
+          free -m
           echo "--- Creating Resilient Tarball (Outside project root) ---"
           tar -czf ../fabilive_deploy.tar.gz --exclude=.git --exclude=node_modules --exclude=vendor .
           mv ../fabilive_deploy.tar.gz .
@@ -49,6 +51,8 @@ jobs:
           script: |
             echo "--- Reclaiming Space Before Transfer ---"
             docker system prune -af --volumes || true
+            echo "--- Droplet Memory Before Deployment ---"
+            free -m
             echo "--- Clearing Host Target Directory ---"
             rm -rf /var/www/fabilive/*
             df -h
@@ -79,8 +83,12 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V19 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V20 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
+            
+            echo "--- Droplet Resources ---" >> $LOG_FILE
+            free -m >> $LOG_FILE
+            docker stats --no-stream >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
             if [ ! -f /var/www/fabilive/.env ]; then
@@ -92,33 +100,34 @@ jobs:
               sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=fabilive/' /var/www/fabilive/.env
             fi
             
-            echo "--- Syncing code from Host to Container Volume ---" >> $LOG_FILE
+            echo "--- Permissions Sync ---" >> $LOG_FILE
             docker exec fabilive_app chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1 || true
             
-            echo "--- Initializing Storage Subdirectories in Shared Volume ---" >> $LOG_FILE
+            echo "--- Storage Init ---" >> $LOG_FILE
             mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
             mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
             chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
             
-            echo "--- In-Container Composer Install (CRITICAL: MUST RUN BEFORE ARTISAN) ---" >> $LOG_FILE
+            echo "--- Composer Install (CRITICAL: RUN BEFORE ARTISAN) ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app composer install --no-dev --optimize-autoloader >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
-            echo "--- Clearing Config & Generating Mandatory Encryption Key ---" >> $LOG_FILE
-            docker exec -w /var/www/fabilive fabilive_app php artisan config:clear >> $LOG_FILE 2>&1 || true
-            docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
+            echo "--- App Key Generation ---" >> $LOG_FILE
+            # Ensure APP_KEY exists or generate it
+            grep -q "APP_KEY=base64:" /var/www/fabilive/.env || docker exec -w /var/www/fabilive fabilive_app php artisan key:generate --force >> $LOG_FILE 2>&1
             
-            echo "--- Active Database Configuration ---" >> $LOG_FILE
+            echo "--- Database Config Check ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app php artisan tinker --execute="print_r(config('database.connections.mysql'))" >> $LOG_FILE 2>&1 || true
             
-            echo "--- Health Checks & Migrations ---" >> $LOG_FILE
+            echo "--- Cache Clear & Migrations ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app php artisan optimize:clear >> $LOG_FILE 2>&1 || true
             docker exec -w /var/www/fabilive fabilive_app php artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
             
-            echo "--- Host Diagnostic: Checking Autoloader ---" >> $LOG_FILE
-            ls -la /var/www/fabilive/vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing on host!" >> $LOG_FILE
+            echo "--- Final Health Check ---" >> $LOG_FILE
+            grep "APP_KEY=" /var/www/fabilive/.env >> $LOG_FILE
+            ls -la /var/www/fabilive/vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing!" >> $LOG_FILE
             
-            echo "--- Final Laravel Log Check ---" >> $LOG_FILE
-            docker exec -w /var/www/fabilive fabilive_app tail -n 50 storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
+            echo "--- Log Output ---" >> $LOG_FILE
+            docker exec -w /var/www/fabilive fabilive_app tail -n 20 storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
             
             echo "--- Diagnostic Log Ready at http://165.227.114.119/deploy_log.txt ---" >> $LOG_FILE
             cat $LOG_FILE
