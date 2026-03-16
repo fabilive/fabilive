@@ -7,9 +7,9 @@
                       <div class="woocommerce-product-gallery woocommerce-product-gallery--with-images woocommerce-product-gallery--columns-4 images" data-columns="4" style="opacity: 1; transition: opacity 0.25s ease-in-out 0s;">
                           <figure class="woocommerce-product-gallery__wrapper">
                               <div class="bg-light">
-                                  @if($productt->3d_model)
+                                  @if($productt->{'3d_model'})
                                   <div class="product-3d-container" style="min-height: 400px;">
-                                     <model-viewer class="product-3d-viewer" src="{{ asset($productt->3d_model) }}" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" shadow-intensity="1" auto-rotate></model-viewer>
+                                     <model-viewer class="product-3d-viewer" src="{{ asset($productt->{'3d_model'}) }}" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" shadow-intensity="1" auto-rotate></model-viewer>
                                   </div>
                                   @else
                                   <img  id="single-image-zoom" src="{{filter_var($productt->photo, FILTER_VALIDATE_URL) ?$productt->photo:asset('assets/images/products/'.$productt->photo)}}" alt="Thumb Image" data-zoom-image="{{filter_var($productt->photo, FILTER_VALIDATE_URL) ?$productt->photo:asset('assets/images/products/'.$productt->photo)}}" />
