@@ -26,7 +26,7 @@
             z-index: 0;
             transform: translate(-50%, -50%);
             object-fit: cover;
-            opacity: 0.6; /* Darker backdrop for better text contrast */
+            opacity: 0.45; /* Slightly brighter for more life */
         }
 
         model-viewer {
@@ -41,17 +41,23 @@
 
         /* Premium Content Container */
         .banner-content-wrapper {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 60px;
-            max-width: 700px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: slideUpFade 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            background: rgba(0, 0, 0, 0.45); /* Darker glass for better contrast */
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 70px;
+            max-width: 750px;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7), 
+                        0 0 20px rgba(124, 58, 237, 0.15); /* Subtle glow */
+            animation: luxuryEntry 1.4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
             position: relative;
             z-index: 10;
+        }
+
+        @keyframes luxuryEntry {
+            from { opacity: 0; transform: scale(0.95) translateY(40px); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
 
         /* Staggered Animations */
@@ -67,22 +73,23 @@
         .banner-content .subtitle {
             font-family: 'Outfit', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: 700;
-            color: var(--accent-purple);
-            margin-bottom: 20px;
+            letter-spacing: 7px;
+            font-weight: 800;
+            color: #60a5fa; /* Electric blue accent */
+            margin-bottom: 25px;
             display: inline-block;
-            text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            text-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
         }
 
         .banner-content .title {
             font-family: 'Jost', sans-serif;
             font-weight: 900;
-            font-size: clamp(32px, 8vw, 64px);
-            line-height: 1;
-            margin-bottom: 25px;
+            font-size: clamp(40px, 10vw, 80px); /* Larger, more impactful */
+            line-height: 0.95;
+            margin-bottom: 30px;
             color: #fff;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            letter-spacing: -2px;
         }
 
         .banner-content .details-text {

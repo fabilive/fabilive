@@ -234,7 +234,8 @@
                               <div class="row">
                                  <div class="col-lg-12  mt-3">
                                     <div class="bottom-area paystack-area-btn">
-                                       <button type="submit" class="mybtn1 ">{{ __('Continue') }}</button>
+                                       <button type="button" id="continue-step1" class="mybtn1 ">{{ __('Continue') }}</button>
+                                       <button type="submit" id="submit-form-hidden" class="d-none"></button>
                                     </div>
                                  </div>
                               </div>
@@ -1138,13 +1139,21 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
          $('.ship-diff-addres-area input, .ship-diff-addres-area select').prop('required',true);
       }
    });
+   function getShipping(){
+      mship = 0;
+      $('.shipping').each(function(){
+            if($(this).is(':checked')){
+               mship += parseFloat($(this).attr('data-price'));
+            }
+      });
+   }
    $('.shipping').on('click',function(){
-      //getShipping();
+      getShipping();
       let ref = $(this).attr('ref');
       let view = $(this).attr('view');
       let title = $(this).attr('data-form');
       $('#shipping_text'+ref).html(title +'+'+ view);
-      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack);
+      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + parseFloat(cartDeliveryFee);
       ttotal = parseFloat(ttotal).toFixed(2);
    	if(pos == 0){
    			$('#final-cost').html('{{ $curr->sign }}'+ttotal);
@@ -1161,7 +1170,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
       let view = $(this).attr('view');
       let title = $(this).attr('data-form');
       $('#packing_text'+ref).html(title +'+'+ view);
-      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack);
+      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + parseFloat(cartDeliveryFee);
       ttotal = parseFloat(ttotal).toFixed(2);
       if(pos == 0){
    			$('#final-cost').html('{{ $curr->sign }}'+ttotal);
@@ -1271,15 +1280,26 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     var ck = 0;
 
     // Step 1 form submission
+    // Step 1 button click
+    $('#continue-step1').on('click', function(e){
+        // Manual form validation check
+        var form = $('.checkoutform')[0];
+        if (form.checkValidity()) {
+            $('#pills-step1').removeClass('active');
+            $('#pills-step2-tab').click();
+            $('#pills-step2').addClass('active');
+        } else {
+            // Trigger browser validation UI
+            form.reportValidity();
+        }
+    });
+
     $('.checkoutform').on('submit', function(e){
         if(ck == 0) {
             e.preventDefault();
-            $('#pills-step1').removeClass('active');
-            $('#pills-step2-tab').click();
         } else {
             $('#preloader').show();
         }
-        $('#pills-step2').addClass('active');
     });
 
     // Step navigation buttons
