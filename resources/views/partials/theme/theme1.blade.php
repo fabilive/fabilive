@@ -3,9 +3,17 @@
     {{-- <link rel="stylesheet" href="{{ asset('assets/front/css/category/classic.css') }}"> --}}
 
     <style>
+        :root {
+            --premium-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
+
         .banner-slide-item {
             overflow: hidden;
+            background-color: #050505;
         }
+
         .banner-slide-item video {
             position: absolute;
             top: 50%;
@@ -17,7 +25,9 @@
             z-index: 0;
             transform: translate(-50%, -50%);
             object-fit: cover;
+            opacity: 0.6; /* Darker backdrop for better text contrast */
         }
+
         model-viewer {
             width: 100%;
             height: 100%;
@@ -25,26 +35,89 @@
             top: 0;
             left: 0;
             z-index: 1;
+            --poster-color: transparent;
         }
-        /* Floating animation for the robot if not using internal GLB animations */
-        .robot-float {
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        /* @media only screen and (max-width: 767px) {
-            .banner-slide-item  {
-            background-size: contain !important;
-        }
-        .banner-wrapper-item {
-        min-height: 250px !important;
-        padding: 0 15px !important;
 
-    }
-        } */
+        /* Premium Content Container */
+        .banner-content-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 650px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Staggered Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-stagger-1 { animation-delay: 0.1s; }
+        .animate-stagger-2 { animation-delay: 0.2s; }
+        .animate-stagger-3 { animation-delay: 0.3s; }
+
+        .banner-content .subtitle {
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 600;
+            color: #a855f7;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .banner-content .title {
+            font-family: 'Jost', sans-serif;
+            font-weight: 800;
+            font-size: 56px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .banner-content .details-text {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .premium-btn {
+            background: var(--premium-gradient);
+            color: white !important;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            border: none;
+            text-decoration: none;
+        }
+
+        .premium-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.5);
+            color: white;
+        }
+
+        .robot-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
     </style>
 @endsection
 @section('content')
@@ -90,45 +163,35 @@
                             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); z-index: 1;">
                         </div>
 
-                        <!-- Text -->
-                        <div class="container"
-                            style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
+                        <!-- Text Section -->
+                        <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
                             <div class="banner-wrapper-item text-{{ $data->position }}" style="width: 100%;">
-                                <div class="banner-content" style="text-align: {{ $data->position }};">
+                                <div class="banner-content-wrapper {{ $data->position == 'right' ? 'ms-auto' : ($data->position == 'center' ? 'mx-auto' : '') }}">
+                                    <div class="banner-content" style="text-align: {{ $data->position }};">
 
-                                    <!-- Subtitle -->
-                                    <h5 class="subtitle slide-h5"
-                                        style="font-size: 20px; font-weight: 600; color: #ffffff;
-                              letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
-                              margin-bottom: 8px;">
-                                        {{ $data->subtitle_text }}
-                                    </h5>
+                                        <!-- Subtitle -->
+                                        <span class="subtitle animate-stagger-1">
+                                            {{ $data->subtitle_text }}
+                                        </span>
 
-                                    <h2 class="title slide-h5"
-                                    style="
-                                        font-size: 44px;
-                                        font-weight: 800;
-                                        color: #ffd900e4; /* bright yellow */
-                                        text-shadow: 2px 2px 6px rgba(0,0,0,0.6); /* makes it readable on any background */
-                                        margin-bottom: 12px;
-                                        line-height: 1.2;
-                                    ">
-                                    {{ $data->title_text }}
-                                </h2>
+                                        <!-- Title -->
+                                        <h1 class="title animate-stagger-2">
+                                            {{ $data->title_text }}
+                                        </h1>
 
-                                    <!-- Paragraph -->
-                                    <p class="slide-h5"
-                                        style="font-size: 20px; color: #ffffff;
-                             text-shadow: 1px 1px 6px rgba(0,0,0,0.7); margin-bottom: 18px;">
-                                        {{ $data->details_text }}
-                                    </p>
+                                        <!-- Paragraph -->
+                                        <p class="details-text animate-stagger-2">
+                                            {{ $data->details_text }}
+                                        </p>
 
-                                    <!-- Button -->
-                                    <a href="{{ $data->link }}" class="cmn--btn"
-                                     >
-                                        {{ __('SHOP NOW') }}
-                                    </a>
+                                        <!-- Button -->
+                                        <div class="animate-stagger-3 mt-4">
+                                            <a href="{{ $data->link }}" class="premium-btn">
+                                                {{ __('EXPLORE COLLECTION') }}
+                                            </a>
+                                        </div>
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
