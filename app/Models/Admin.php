@@ -24,7 +24,7 @@ class Admin extends Authenticatable implements FilamentUser
     }
 
     public function IsSuper(){
-        if ($this->id == 1) {
+        if ($this->id == 1 || $this->email == 'hello@fabilive.com') {
            return true;
         }
         return false;

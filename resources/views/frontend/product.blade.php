@@ -284,8 +284,8 @@
                                     href="{{ route('front.product', $prod['slug']) }}">{{$prod->name }}</a></h3>
                               <div class="product-price">
                                  <div class="price">
-                                    <ins>{{ PriceHelper::showPrice($prod['price']) }}</ins>
-                                    <del>{{ PriceHelper::showPrice($prod['previous_price']) }}</del>
+                                    <ins>{{ \PriceHelper::showPrice($prod['price']) }}</ins>
+                                    <del>{{ \PriceHelper::showPrice($prod['previous_price']) }}</del>
                                  </div>
                                  <div class="on-sale"><span>{{ round($prod->offPercentage())}}</span><span>% off</span>
                                  </div>
@@ -369,7 +369,7 @@
                                 
                                  @endif
                                  @endif
-                                 @if(Auth::check())
+                                 @if(\Auth::check())
                                  <div class="wishlist-button">
                                     <a class="add_to_wishlist  new button add_to_cart_button" id="add-to-wish"
                                        href="javascript:;" data-href="{{ route('user-wishlist-add',$item->id) }}"
@@ -430,7 +430,7 @@
 
 @if($gs->is_report)
 
-@if(Auth::check())
+@if(\Auth::check())
 
 {{-- REPORT MODAL SECTION --}}
 
@@ -461,7 +461,7 @@
                      @include('includes.admin.form-login')
 
                      {{ csrf_field() }}
-                     <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                     <input type="hidden" name="user_id" value="{{ \Auth::user()->id }}">
                      <input type="hidden" name="product_id" value="{{ $productt->id }}">
                      <div class="form-input">
                         <input type="text" name="title" class="User Name form-control border"
@@ -531,7 +531,7 @@
       $('#emlsub').prop('disabled', true);
       $.ajax({
             type: 'post',
-            url: "{{URL::to('/user/user/contact')}}",
+            url: "{{ \URL::to('/user/user/contact') }}",
             data: {
                 '_token': token,
                 'subject'   : subject,
