@@ -159,9 +159,9 @@ class SubscriptionController extends UserBaseController
             'id_card_copy' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
             'driver_license_copy' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
 
-            'selfie_image' => 'required|file',
+            'selfie_image' => 'nullable|file',
             'taxpayer_card_copy' => 'required|file|mimes:jpg,jpeg,png,pdf',
-            'residence_permit' => 'required|file|mimes:jpg,jpeg,png,pdf',
+            'residence_permit' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
         ], [
             'shop_name.unique' => __('This shop name has already been taken.'),
         ]);
@@ -177,13 +177,13 @@ class SubscriptionController extends UserBaseController
                 ->withInput();
         }
 
-        if (!$request->hasFile('selfie_image')) {
-            return redirect()->back()
-                ->withErrors([
-                    'selfie_image' => __('Please capture and upload a selfie image.')
-                ])
-                ->withInput();
-        }
+        // if (!$request->hasFile('selfie_image')) {
+        //     return redirect()->back()
+        //         ->withErrors([
+        //             'selfie_image' => __('Please capture and upload a selfie image.')
+        //         ])
+        //         ->withInput();
+        // }
 
         if (\DB::table('pages')->where('slug', $request->shop_name)->exists()) {
             return redirect()->back()->with('unsuccess', __('This shop name has already been taken.'));

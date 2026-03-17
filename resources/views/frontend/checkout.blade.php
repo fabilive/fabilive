@@ -1286,8 +1286,10 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         var form = $('.checkoutform')[0];
         if (form.checkValidity()) {
             $('#pills-step1').removeClass('active');
+            $('#pills-step1').removeClass('show');
             $('#pills-step2-tab').removeClass('disabled').click();
             $('#pills-step2').addClass('active');
+            $('#pills-step2').addClass('show');
         } else {
             // Trigger browser validation UI
             form.reportValidity();
@@ -1305,13 +1307,17 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     // Step navigation buttons
     $('#step1-btn').on('click', function(){
         $('#pills-step2').removeClass('active');
+        $('#pills-step2').removeClass('show');
         $('#pills-step1').addClass('active');
+        $('#pills-step1').addClass('show');
         $('#pills-step1-tab').click();
     });
 
     $('#step2-btn').on('click', function(){
         $('#pills-step3').removeClass('active');
+        $('#pills-step3').removeClass('show');
         $('#pills-step2').addClass('active');
+        $('#pills-step2').addClass('show');
         $('#pills-step2-tab').removeClass('active');
         $('#pills-step3-tab').addClass('disabled');
         $('#pills-step2-tab').click();
@@ -1335,6 +1341,9 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
             $('.checkoutform').attr('id','');
         }
 
+        $('#pills-step2').removeClass('active');
+        $('#pills-step2').removeClass('show');
+
         $('#pills-step3-tab').removeClass('disabled').click();
 
         // Standardize shipping info for guest or logged-in users
@@ -1348,9 +1357,12 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         $('#shipping_phone').html('<i class="fas fa-phone"></i>' + shipping_phone);
         $('#shipping_email').html('<i class="fas fa-envelope"></i>' + shipping_email);
 
-        $('#pills-step1-tab').addClass('active');
-        $('#pills-step2-tab').addClass('active');
+        $('#pills-step1-tab').removeClass('active');
+        $('#pills-step2-tab').removeClass('active');
+        $('#pills-step3-tab').addClass('active');
+
         $('#pills-step3').addClass('active');
+        $('#pills-step3').addClass('show');
     });
 
     // Final button triggers checkout

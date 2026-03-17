@@ -244,32 +244,15 @@
                                                 </div>
                                             </div>
                                             <br>
-                                            <!-- Selfie Image -->
-                                            @foreach($agreements->where('type', 'Fabilive_Sub_merchant_Agreement') as $agreement)
-                                            <div class="row">
-                                                <div class="col-lg-4">
-                                                    <h5 class="title pt-1">
-                                                        {{ __('Please Download Fabilive Sub-Merchant Agreement') }} *
-                                                    </h5>
-                                                </div>
-                                                <div class="col-lg-8">
-                                                    <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                        {{ __('Fabilive Sub-Merchant Agreement') }} <i
-                                                            class="fa fa-download"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            @endforeach
-
+                                            <!-- Selfie Image (Disabled for now) -->
+                                            <!--
                                             <div class="row mb-2">
                                                 <div class="col-12">
 
                                                     <input type="file" id="selfieFile" class="w-100" name="selfie_image" style="display:none;">
 
-                                                    <!-- Video element full width -->
                                                     <video id="cam" class="w-100 rounded mb-2" style="display:none;"></video>
 
-                                                    <!-- Preview image full width -->
                                                     <img id="preview" class="w-100 rounded mb-2" style="display:none;">
 
                                                     <button type="button" class="btn btn-dark btn-sm rounded-2 w-100 mb-2" id="openCamera">
@@ -323,7 +306,7 @@
 
                                                 </div>
                                             </div>
-
+                                            -->
                                             <!-- Selfie Image -->
 
 
@@ -332,13 +315,13 @@
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
-                                                        {{ __('Residence Permit for Foreigners') }} *
+                                                        {{ __('Residence Permit for Foreigners') }} <small>{{ __('(Optional)') }}</small>
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="residence_permit"
-                                                        placeholder="{{ __('Residence Permit') }}" required>
+                                                        placeholder="{{ __('Residence Permit') }}">
                                                 </div>
                                             </div>
                                             <br>
