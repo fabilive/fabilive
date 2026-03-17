@@ -56,7 +56,7 @@
                                             </p>
                                             @if($gs->is_capcha == 1)
                                             <div class="form-input mb-3">
-                                                 <div data-sitekey="6LcQrmIrAAAAABNWTdrJbBzy9TfhBzBH4P4IQIIT" class="g-recaptcha"></div>
+                                                 {!! NoCaptcha::display() !!}
                                                  {!! NoCaptcha::renderJs() !!}
                                                  @error('g-recaptcha-response')
                                                  <p class="my-2">{{$message}}</p>
