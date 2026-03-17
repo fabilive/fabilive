@@ -58,15 +58,14 @@
                                             </p>
 
                                             <div id="company_fields" style="display:none;">
-                                                <div class="alert alert-info">
-                                                    @foreach($agreements->where('type', 'Fabilive_Delivery_Company_Agreement') as $agreement)
-                                                        <label><strong>{{ __('Instructions:') }}</strong> {{ __('Please Download, Sign, and upload the Delivery Company Agreement below.') }}</label>
-                                                        <br>
-                                                        <a href="{{ asset($agreement->image) }}" target="_blank" class="btn btn-sm btn-info text-white mt-1">
-                                                            <i class="fa fa-download"></i> {{ __('Download Delivery Company Agreement') }}
-                                                        </a>
-                                                    @endforeach
+                                                <div class="alert alert-info mb-4">
+                                                    <label><strong>{{ __('Step 1: Download & Sign') }}</strong></label>
+                                                    <p>{{ __('Please download the Delivery Company Agreement, sign it, and you will upload it at the bottom of this section.') }}</p>
+                                                    <a href="{{ asset('assets/images/submerchantagreementrider/1773713000CompanyAgreement.pdf') }}" target="_blank" class="btn btn-sm btn-info text-white">
+                                                        <i class="fa fa-download"></i> {{ __('Download Delivery Company Agreement') }}
+                                                    </a>
                                                 </div>
+
                                                 <p>
                                                     <label for="">{{ __('Company Registration Documents') }}</label>
                                                     <input type="file" name="company_registration_document" class="form-control">
@@ -95,21 +94,25 @@
                                                     <input type="text" name="tin_company" class="form-control">
                                                 </p>
                                                 <p>
-                                                    <label for="submerchant_agreement_company">{{ __('Delivery Company Agreement') }} *</label>
+                                                    <label for="submerchant_agreement_company">{{ __('Step 2: Upload Signed Delivery Company Agreement') }} *</label>
+                                                    <div class="mb-2">
+                                                        <a href="{{ asset('assets/images/submerchantagreementrider/1773713000CompanyAgreement.pdf') }}" target="_blank" class="text-info small">
+                                                            <i class="fa fa-download"></i> {{ __('Re-download Agreement') }}
+                                                        </a>
+                                                    </div>
                                                     <input type="file" name="submerchant_agreement_company" id="submerchant_agreement_company" class="form-control agreement-upload">
                                                 </p>
                                             </div>
 
                                             <div id="individual_fields" style="display:none;">
-                                                <div class="alert alert-info">
-                                                    @foreach($agreements->where('type', 'Fabilive_Delivery_Individual_Agreement') as $agreement)
-                                                        <label><strong>{{ __('Instructions:') }}</strong> {{ __('Please Download, Sign, and upload the Delivery Agent Agreement below.') }}</label>
-                                                        <br>
-                                                        <a href="{{ asset($agreement->image) }}" target="_blank" class="btn btn-sm btn-info text-white mt-1">
-                                                            <i class="fa fa-download"></i> {{ __('Download Delivery Agent Agreement') }}
-                                                        </a>
-                                                    @endforeach
+                                                <div class="alert alert-info mb-4">
+                                                    <label><strong>{{ __('Step 1: Download & Sign') }}</strong></label>
+                                                    <p>{{ __('Please download the Delivery Agent Agreement, sign it, and you will upload it at the bottom of this section.') }}</p>
+                                                    <a href="{{ asset('assets/images/submerchantagreementrider/1773713000IndividualAgreement.pdf') }}" target="_blank" class="btn btn-sm btn-info text-white">
+                                                        <i class="fa fa-download"></i> {{ __('Download Delivery Agent Agreement') }}
+                                                    </a>
                                                 </div>
+
                                                 <p>
                                                     <select name="vehicle_type_individual" class="form-control">
                                                         <option value="">{{ __('Select Vehicle Type') }}</option>
@@ -146,7 +149,12 @@
                                                     <input type="file" name="criminal_records" class="form-control">
                                                 </p>
                                                 <p>
-                                                    <label for="submerchant_agreement_individual">{{ __('Delivery Agent Agreement') }} *</label>
+                                                    <label for="submerchant_agreement_individual">{{ __('Step 2: Upload Signed Delivery Agent Agreement') }} *</label>
+                                                    <div class="mb-2">
+                                                        <a href="{{ asset('assets/images/submerchantagreementrider/1773713000IndividualAgreement.pdf') }}" target="_blank" class="text-info small">
+                                                            <i class="fa fa-download"></i> {{ __('Re-download Agreement') }}
+                                                        </a>
+                                                    </div>
                                                     <input type="file" name="submerchant_agreement_individual" id="submerchant_agreement_individual" class="form-control agreement-upload">
                                                 </p>
                                             </div>
@@ -224,12 +232,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Handle file sync for the controller which expects "submerchant_agreement"
-    // Since we have two separate fields for better UI, we can either:
-    // 1. Give them the same name (risky if not handled by PHP)
-    // 2. Use JS to sync the file to a hidden input (complex)
-    // 3. Just rename them back to the same name if PHP handles it (it takes the last one)
-    // Actually, I'll just give them the same name "submerchant_agreement" and ensure only one is required.
     companyUpload.name = "submerchant_agreement";
     individualUpload.name = "submerchant_agreement";
 });
