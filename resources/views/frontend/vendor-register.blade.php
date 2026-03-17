@@ -89,9 +89,9 @@
 
                                             @foreach($agreements->where('type', 'Fabilive_Sub_merchant_Agreement') as $agreement)
                                             <p>
-                                                <label>{{ __('Please Download, Sign, and upload the merchant Agreement') }}</label>
+                                                <label>{{ __('Please Download, Sign, and upload the Fabilive Sub-Merchant Agreement') }}</label>
                                                 <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                    {{ __('Merchant Agreement') }} <i class="fa fa-download"></i>
+                                                    {{ __('Fabilive Sub-Merchant Agreement') }} <i class="fa fa-download"></i>
                                                 </a>
                                             </p>
                                         @endforeach
@@ -107,14 +107,6 @@
 
                                         <!-- -->
 
-                                        @foreach($agreements->where('type', 'Selfi_Instructions') as $agreement)
-                                        <p>
-                                            <label>{{ __('Please Download Selfi Intructions') }}</label>
-                                            <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                {{ __('Selfi Intructions') }} <i class="fa fa-download"></i>
-                                            </a>
-                                        </p>
-                                    @endforeach
 
                                         <div class="row mb-2">
                                             <div class="col-12">
