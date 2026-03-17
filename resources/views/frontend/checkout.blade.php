@@ -1286,7 +1286,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         var form = $('.checkoutform')[0];
         if (form.checkValidity()) {
             $('#pills-step1').removeClass('active');
-            $('#pills-step2-tab').click();
+            $('#pills-step2-tab').removeClass('disabled').click();
             $('#pills-step2').addClass('active');
         } else {
             // Trigger browser validation UI
@@ -1335,8 +1335,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
             $('.checkoutform').attr('id','');
         }
 
-        $('#pills-step3-tab').removeClass('disabled');
-        $('#pills-step3-tab').click();
+        $('#pills-step3-tab').removeClass('disabled').click();
 
         // Standardize shipping info for guest or logged-in users
         var shipping_user  = $('input[name="shipping_name"]').val() || $('input[name="customer_name"]').val() || '';
