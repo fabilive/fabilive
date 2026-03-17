@@ -75,7 +75,17 @@
 
                                             <input type="hidden" name="modal"  value="1">
 				                            <input type="hidden" name="vendor"  value="1">
-                                            <input id="authdata" type="hidden" value="{{ __('Authenticating...') }}">
+                                             <input id="authdata" type="hidden" value="{{ __('Authenticating...') }}">
+                                             @if($gs->is_capcha == 1)
+                                                 <div class="form-input mb-3">
+                                                      {!! NoCaptcha::display() !!}
+                                                      {!! NoCaptcha::renderJs() !!}
+                                                      
+                                                      @error('g-recaptcha-response')
+                                                      <p class="my-2 text-danger">{{$message}}</p>
+                                                      @enderror
+                                                  </div>
+                                             @endif
 
                                             <button type="submit" class="woocommerce-form-login__submit btn btn-primary border-0 rounded-0 submit-btn float-none w-100" name="login" value="Log in">{{ __('Log in') }}</button>
 
