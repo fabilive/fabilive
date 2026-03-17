@@ -17,9 +17,13 @@
                     <ul class="top-links d-flex ms-auto align-items-center justify-content-end">
                         @if (!Auth::guard('web')->check() && !Auth::guard('rider')->check())
                             <li><a class="border px-3 py-1"
-                                    href="{{ route('vendor.register') }}">{{ __('Sell') }}</a></li>
+                                    href="{{ route('user.register', ['source' => 'sell']) }}">{{ __('Sell') }}</a></li>
                             <li><a class="border px-3 py-1"
                                     href="{{ route('rider.register') }}">{{ __('Become a Delivery Agent') }}</a></li>
+                        @endif
+                        @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 0)
+                            <li><a class="border px-3 py-1"
+                                    href="{{ route('user-package') }}">{{ __('Sell') }}</a></li>
                         @endif
                         @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 2)
                             <li><a class="border px-3 py-1"
@@ -107,10 +111,15 @@
                         <div class="d-flex">
                             @if (!Auth::guard('web')->check() && !Auth::guard('rider')->check())
                                 <li><a class="border px-3 py-1"
-                                        href="{{ route('vendor.register') }}">{{ __('Sell') }}</a></li>
+                                        href="{{ route('user.register', ['source' => 'sell']) }}">{{ __('Sell') }}</a></li>
                                 <li><a class="border px-3 py-1"
                                         href="{{ route('rider.register') }}">{{ __('Become a Delivery Agent') }}</a>
                                 </li>
+                            @endif
+
+                            @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 0)
+                                <li><a class="border px-3 py-1"
+                                        href="{{ route('user-package') }}">{{ __('Sell') }}</a></li>
                             @endif
 
                             @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 2)

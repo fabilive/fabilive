@@ -35,6 +35,7 @@
                                         <h3>{{ __('Signup Now') }}</h3>
                                         <form id="registerform" action="{{route('user-register-submit')}}" method="POST">
                                             @csrf
+                                            <input type="hidden" name="source" value="{{ request()->source }}">
                                             <p>
                                                 <input type="text" name="name" class="form-control" placeholder="{{ __('Full Name') }}"  >
                                             </p>
@@ -96,8 +97,25 @@
                 cache: false,
                 processData: false,
                 success: function(response){
-                    alert('Registration Successful! Please login.');
-                    window.location.href = '{{ route("user.login") }}';
+                    if(response == 1) {
+                        alert('Registration Successful!');
+                        @if(request()->source == 'sell')
+                            window.location.href = '{{ route("user-package") }}';
+                        @else
+                            window.location.href = '{{ route("user-dashboard") }}';
+                        @endif
+                    } else if(typeof response === 'string') {
+                        alert(response);
+                        window.location.reload();
+                    } else if(response.errors) {
+                        $('.submit-btn').html('Register');
+                        let err = '';
+                        for(let e in response.errors) {
+                            err += response.errors[e] + '\n';
+                        }
+                        alert(err);
+                        isSubmitting = false;
+                    }
                 },
                 error: function(xhr){
                     $('.submit-btn').html('Register');
