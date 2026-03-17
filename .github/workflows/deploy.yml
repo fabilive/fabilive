@@ -36,7 +36,7 @@ jobs:
           echo "--- Runner Memory Status ---"
           free -m
           echo "--- Creating Resilient Tarball (Outside project root) ---"
-          tar -czf ../fabilive_deploy.tar.gz --exclude=.git --exclude=node_modules --exclude=vendor .
+          tar -czf ../fabilive_deploy.tar.gz --exclude=.git --exclude=node_modules --exclude=./vendor .
           mv ../fabilive_deploy.tar.gz .
           echo "--- Tarball Size ---"
           ls -lh fabilive_deploy.tar.gz
