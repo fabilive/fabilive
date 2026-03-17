@@ -18,7 +18,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    // 'Captcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
+    // (NoCaptcha alias registered below in aliases array)
 
 
     /*
@@ -192,6 +192,7 @@ return [
         'OrderHelper' => App\Helpers\OrderHelper::class,
         'PriceHelper' => App\Helpers\PriceHelper::class,
         'Datatables' => Yajra\DataTables\Facades\DataTables::class,
+        'NoCaptcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
     ])->toArray(),
 
 ];
