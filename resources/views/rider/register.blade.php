@@ -66,14 +66,6 @@
                                                     <input type="file" name="id_company_owner" class="form-control">
                                                 </p>
 
-                                                @foreach($agreements->where('type', 'Selfi_Instructions') as $agreement)
-                                                <p>
-                                                    <label>{{ __('Please Download and Read Selfi Instructions') }}</label>
-                                                    <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                        {{ __('Selfi Instructions') }} <i class="fa fa-download"></i>
-                                                    </a>
-                                                </p>
-                                            @endforeach
                                                 <input type="file" id="selfieFile1" name="live_selfie_company" style="display:none;">
                                                 <video id="cam_company"></video>
                                                 <img id="preview_company">
@@ -93,9 +85,9 @@
                                                 </p>
                                                 @foreach($agreements->where('type', 'Fabilive_Delivery_Company_Agreement') as $agreement)
                                                 <p>
-                                                    <label>{{ __('Please Download, Sign, and upload the Fabilive Rider Agreement') }}</label>
+                                                    <label>{{ __('Please Download, Sign, and upload the Delivery Company Agreement') }}</label>
                                                     <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                        {{ __('Fabilive Rider Agreement') }} <i class="fa fa-download"></i>
+                                                        {{ __('Delivery Company Agreement') }} <i class="fa fa-download"></i>
                                                     </a>
                                                 </p>
                                             @endforeach
@@ -120,14 +112,6 @@
                                                     <label for="">{{ __('Drivers License image') }}</label>
                                                     <input type="file" name="driver_license_individual" class="form-control">
                                                 </p>
-                                                @foreach($agreements->where('type', 'Selfi_Instructions') as $agreement)
-                                                <p>
-                                                    <label>{{ __('Please Download and Read Selfi Instructions') }}</label>
-                                                    <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                        {{ __('Selfi Instructions') }} <i class="fa fa-download"></i>
-                                                    </a>
-                                                </p>
-                                            @endforeach
                                                 <input type="file" id="selfieFile" name="live_selfie_individual" style="display:none;">
                                                 <video id="cam_individual"></video>
                                                 <img id="preview_individual">
@@ -147,9 +131,9 @@
                                                 </p>
                                                 @foreach($agreements->where('type', 'Fabilive_Delivery_Individual_Agreement') as $agreement)
                                             <p>
-                                                <label>{{ __('Please Download, Sign, and upload the Fabilive Rider Agreement') }}</label>
+                                                <label>{{ __('Please Download, Sign, and upload the Delivery Agent Agreement') }}</label>
                                                 <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                    {{ __('Fabilive Rider Agreement') }} <i class="fa fa-download"></i>
+                                                    {{ __('Delivery Agent Agreement') }} <i class="fa fa-download"></i>
                                                 </a>
                                             </p>
                                         @endforeach
@@ -167,7 +151,7 @@
 
                                             <p>
                                                 <label
-                                                    for="submerchant_agreement">{{ __('Fabilive Rider Agreement') }}</label>
+                                                    for="submerchant_agreement">{{ __('Delivery Agent Agreement') }}</label>
                                                 <input type="file" name="submerchant_agreement"
                                                     id="submerchant_agreement" class="form-control" required="">
                                             </p>
