@@ -56,7 +56,17 @@
                                                 <label for="national_id_front_image">{{ __('National ID Front Image') }}</label>
                                                 <input type="file" name="national_id_front_image" id="national_id_front_image" class="form-control" required="">
                                             </p>
+
                                             <div id="company_fields" style="display:none;">
+                                                <div class="alert alert-info">
+                                                    @foreach($agreements->where('type', 'Fabilive_Delivery_Company_Agreement') as $agreement)
+                                                        <label><strong>{{ __('Instructions:') }}</strong> {{ __('Please Download, Sign, and upload the Delivery Company Agreement below.') }}</label>
+                                                        <br>
+                                                        <a href="{{ asset($agreement->image) }}" target="_blank" class="btn btn-sm btn-info text-white mt-1">
+                                                            <i class="fa fa-download"></i> {{ __('Download Delivery Company Agreement') }}
+                                                        </a>
+                                                    @endforeach
+                                                </div>
                                                 <p>
                                                     <label for="">{{ __('Company Registration Documents') }}</label>
                                                     <input type="file" name="company_registration_document" class="form-control">
@@ -67,10 +77,11 @@
                                                 </p>
 
                                                 <input type="file" id="selfieFile1" name="live_selfie_company" style="display:none;">
-                                                <video id="cam_company"></video>
-                                                <img id="preview_company">
-                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2" id="openCamera_company">Open Camera</button>
-                                                <button type="button" id="capture_company">Capture</button>
+                                                <video id="cam_company" class="w-100 rounded mb-2" style="display:none;"></video>
+                                                <img id="preview_company" class="w-100 rounded mb-2" style="display:none;">
+                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_company">Open Camera</button>
+                                                <button type="button" id="capture_company" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">Capture</button>
+
                                                 <p>
                                                     <label for="">{{ __('Transport License / Permis de Transport.') }}</label>
                                                     <input type="file" name="transport_license" class="form-control">
@@ -83,17 +94,22 @@
                                                     <label for="">{{ __('Taxpayer Registration number (TIN)') }}</label>
                                                     <input type="text" name="tin_company" class="form-control">
                                                 </p>
-                                                @foreach($agreements->where('type', 'Fabilive_Delivery_Company_Agreement') as $agreement)
                                                 <p>
-                                                    <label>{{ __('Please Download, Sign, and upload the Delivery Company Agreement') }}</label>
-                                                    <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                        {{ __('Delivery Company Agreement') }} <i class="fa fa-download"></i>
-                                                    </a>
+                                                    <label for="submerchant_agreement_company">{{ __('Delivery Company Agreement') }} *</label>
+                                                    <input type="file" name="submerchant_agreement_company" id="submerchant_agreement_company" class="form-control agreement-upload">
                                                 </p>
-                                            @endforeach
-
                                             </div>
+
                                             <div id="individual_fields" style="display:none;">
+                                                <div class="alert alert-info">
+                                                    @foreach($agreements->where('type', 'Fabilive_Delivery_Individual_Agreement') as $agreement)
+                                                        <label><strong>{{ __('Instructions:') }}</strong> {{ __('Please Download, Sign, and upload the Delivery Agent Agreement below.') }}</label>
+                                                        <br>
+                                                        <a href="{{ asset($agreement->image) }}" target="_blank" class="btn btn-sm btn-info text-white mt-1">
+                                                            <i class="fa fa-download"></i> {{ __('Download Delivery Agent Agreement') }}
+                                                        </a>
+                                                    @endforeach
+                                                </div>
                                                 <p>
                                                     <select name="vehicle_type_individual" class="form-control">
                                                         <option value="">{{ __('Select Vehicle Type') }}</option>
@@ -113,10 +129,10 @@
                                                     <input type="file" name="driver_license_individual" class="form-control">
                                                 </p>
                                                 <input type="file" id="selfieFile" name="live_selfie_individual" style="display:none;">
-                                                <video id="cam_individual"></video>
-                                                <img id="preview_individual">
-                                                <button type="button " class="btn btn-sm btn-dark w-100 rounded-2" id="openCamera_individual">Open Camera</button>
-                                                <button type="button" id="capture_individual">Capture</button>
+                                                <video id="cam_individual" class="w-100 rounded mb-2" style="display:none;"></video>
+                                                <img id="preview_individual" class="w-100 rounded mb-2" style="display:none;">
+                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_individual">Open Camera</button>
+                                                <button type="button" id="capture_individual" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">Capture</button>
                                                 <p>
                                                     <label for="">{{ __('Vehicle Registration Certificate (Carte Grise)') }}</label>
                                                     <input type="file" name="vehicle_registration_certificate" class="form-control">
@@ -129,17 +145,14 @@
                                                     <label for="">{{ __('Criminal records / Police Report') }}</label>
                                                     <input type="file" name="criminal_records" class="form-control">
                                                 </p>
-                                                @foreach($agreements->where('type', 'Fabilive_Delivery_Individual_Agreement') as $agreement)
-                                            <p>
-                                                <label>{{ __('Please Download, Sign, and upload the Delivery Agent Agreement') }}</label>
-                                                <a href="{{ asset($agreement->image) }}" target="_blank">
-                                                    {{ __('Delivery Agent Agreement') }} <i class="fa fa-download"></i>
-                                                </a>
-                                            </p>
-                                        @endforeach
-
-
+                                                <p>
+                                                    <label for="submerchant_agreement_individual">{{ __('Delivery Agent Agreement') }} *</label>
+                                                    <input type="file" name="submerchant_agreement_individual" id="submerchant_agreement_individual" class="form-control agreement-upload">
+                                                </p>
                                             </div>
+
+                                            <input type="hidden" name="submerchant_agreement" id="final_submerchant_agreement">
+
                                             <p>
                                                 <label for="national_id_back_image">{{ __('National ID Back Image') }}</label>
                                                 <input type="file" name="national_id_back_image" id="national_id_back_image" class="form-control" required=""  placeholder="{{ __('National ID Back Image') }}" >
@@ -148,14 +161,6 @@
                                                 <label for="license_image">{{ __('Drivers License image') }}</label>
                                                 <input type="file" name="license_image" id="license_image" class="form-control" required=""  placeholder="{{ __('Drivers License image') }}" >
                                             </p>
-
-                                            <p>
-                                                <label
-                                                    for="submerchant_agreement">{{ __('Delivery Agent Agreement') }}</label>
-                                                <input type="file" name="submerchant_agreement"
-                                                    id="submerchant_agreement" class="form-control" required="">
-                                            </p>
-
 
                                             <p>
                                                 <input type="password" name="password" class="form-control" required=""  placeholder="{{ __('Password') }}" >
@@ -195,18 +200,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const riderType = document.getElementById('rider_type');
     const companyFields = document.getElementById('company_fields');
     const individualFields = document.getElementById('individual_fields');
+
+    const companyUpload = document.getElementById('submerchant_agreement_company');
+    const individualUpload = document.getElementById('submerchant_agreement_individual');
+    const finalUpload = document.getElementById('final_submerchant_agreement');
+
     riderType.addEventListener('change', function () {
         if (this.value === 'company') {
             companyFields.style.display = 'block';
             individualFields.style.display = 'none';
+            companyUpload.setAttribute('required', 'required');
+            individualUpload.removeAttribute('required');
         } else if (this.value === 'individual') {
             companyFields.style.display = 'none';
             individualFields.style.display = 'block';
+            individualUpload.setAttribute('required', 'required');
+            companyUpload.removeAttribute('required');
         } else {
             companyFields.style.display = 'none';
             individualFields.style.display = 'none';
+            companyUpload.removeAttribute('required');
+            individualUpload.removeAttribute('required');
         }
     });
+
+    // Handle file sync for the controller which expects "submerchant_agreement"
+    // Since we have two separate fields for better UI, we can either:
+    // 1. Give them the same name (risky if not handled by PHP)
+    // 2. Use JS to sync the file to a hidden input (complex)
+    // 3. Just rename them back to the same name if PHP handles it (it takes the last one)
+    // Actually, I'll just give them the same name "submerchant_agreement" and ensure only one is required.
+    companyUpload.name = "submerchant_agreement";
+    individualUpload.name = "submerchant_agreement";
 });
 </script>
 <script>

@@ -245,6 +245,7 @@
                                             </div>
                                             <br>
                                             <!-- Selfie Image -->
+                                            @foreach($agreements->where('type', 'Fabilive_Sub_merchant_Agreement') as $agreement)
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
@@ -252,12 +253,13 @@
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
-                                                    <a href="{{ asset('assets/pdf/fabilive.pdf') }}" target="_blank">
+                                                    <a href="{{ asset($agreement->image) }}" target="_blank">
                                                         {{ __('Fabilive Sub-Merchant Agreement') }} <i
                                                             class="fa fa-download"></i>
                                                     </a>
                                                 </div>
                                             </div>
+                                            @endforeach
 
                                             <div class="row mb-2">
                                                 <div class="col-12">

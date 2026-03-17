@@ -38,6 +38,7 @@ class SubscriptionController extends UserBaseController
         $paystackData = PaymentGateway::whereKeyword('paystack')->first();
         $data['paystack'] = $paystackData->convertAutoData();
         $voguepayData = PaymentGateway::whereKeyword('voguepay')->first();
+        $data['agreements'] = \App\Models\ManageAgreement::all();
         return view('user.package.details', $data);
     }
 
