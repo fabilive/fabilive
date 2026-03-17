@@ -650,7 +650,7 @@
                                 @endforeach
                                 @php
 
-                                $order_shipping = @json_decode($order->vendor_shipping_id, true);
+                                $order_shipping = json_decode($order->vendor_shipping_id, true);
                                 $order_package = @json_decode($order->vendor_packing_id, true);
 
                                 $vendor_shipping_id = @$order_shipping[$key1];

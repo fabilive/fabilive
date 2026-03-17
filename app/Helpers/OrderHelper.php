@@ -10,7 +10,8 @@ use App\{
     Models\Transaction,
     Models\VendorOrder,
     Models\Notification,
-    Models\UserNotification
+    Models\UserNotification,
+    Models\Generalsetting
 };
 use App\Models\AffliateBonus;
 use Auth;
@@ -82,7 +83,7 @@ class OrderHelper
     {
         $affilate_users = null;
         $i = 0;
-        $gs = \App\Models\Generalsetting::find(1);
+        $gs = Generalsetting::find(1);
         $percentage = $gs->affilate_charge / 100;
         foreach ($cart->items as $prod) {
 

@@ -144,7 +144,7 @@ $order = $data->order;
                                     </table>
                                     <div class="text-center">
                                         @php
-                                        $order_shipping = @json_decode($data->order->vendor_shipping_id, true);
+                                        $order_shipping = json_decode($data->order->vendor_shipping_id, true);
                                         $order_package = @json_decode($data->order->vendor_packing_id, true);
                                         $vendor_shipping_id = @$order_shipping[$data->vendor_id];
                                         $vendor_package_id = @$order_package[$data->vendor_id];

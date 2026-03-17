@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+
 class GeniusMailer
 {
     public $mail;
@@ -50,7 +52,7 @@ class GeniusMailer
             $this->mail->Body = $body;
             $this->mail->send();
         } catch (Exception $e) {
-            \Log::error("Mailer AutoOrderMail Error: " . $e->getMessage());
+            Log::error("Mailer AutoOrderMail Error: " . $e->getMessage());
         }
 
         $files = glob('assets/temp_files/*'); //get all file names
@@ -80,7 +82,7 @@ class GeniusMailer
             $this->mail->send();
 
         } catch (Exception $e) {
-            \Log::error("Mailer AutoMail Error: " . $this->mail->ErrorInfo);
+            Log::error("Mailer AutoMail Error: " . $this->mail->ErrorInfo);
         }
 
         return true;
@@ -99,10 +101,11 @@ class GeniusMailer
             $this->mail->Port = 587;
             $this->mail->send();
         } catch (Exception $e) {
-            \Log::error("Mailer CustomMail Error: " . $this->mail->ErrorInfo);
+            Log::error("Mailer CustomMail Error: " . $this->mail->ErrorInfo);
         }
         return true;
     }
+
 
     private function addRecipients($to)
 {
