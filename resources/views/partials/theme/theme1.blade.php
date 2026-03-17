@@ -39,24 +39,16 @@
             --poster-color: transparent;
         }
 
-        /* Premium Content Container */
-        .banner-content-wrapper {
-            background: rgba(0, 0, 0, 0.45); /* Darker glass for better contrast */
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 40px;
-            padding: 70px;
-            max-width: 750px;
-            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7), 
-                        0 0 20px rgba(124, 58, 237, 0.15); /* Subtle glow */
+        /* Premium Content Box (No Cover) */
+        .banner-content-box {
+            max-width: 800px;
             animation: luxuryEntry 1.4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
             position: relative;
             z-index: 10;
         }
 
         @keyframes luxuryEntry {
-            from { opacity: 0; transform: scale(0.95) translateY(40px); filter: blur(10px); }
+            from { opacity: 0; transform: scale(0.98) translateY(20px); filter: blur(5px); }
             to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
 
@@ -93,10 +85,12 @@
         }
 
         .banner-content .details-text {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-            margin-bottom: 30px;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.5;
+            margin-bottom: 35px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            font-weight: 500;
         }
 
         .premium-btn {
@@ -176,7 +170,7 @@
                         <!-- Text Section -->
                         <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
                             <div class="banner-wrapper-item text-{{ $data->position }}" style="width: 100%;">
-                                <div class="banner-content-wrapper {{ $data->position == 'right' ? 'ms-auto' : ($data->position == 'center' ? 'mx-auto' : '') }}">
+                                <div class="banner-content-box {{ $data->position == 'right' ? 'ms-auto' : ($data->position == 'center' ? 'mx-auto' : '') }}">
                                     <div class="banner-content" style="text-align: {{ $data->position }};">
 
                                         <!-- Subtitle -->

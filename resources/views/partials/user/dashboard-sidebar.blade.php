@@ -21,7 +21,7 @@
     <li class=""><a class="{{ Request::url() == route('user-wwt-index') ? 'active':'' }}" href="{{route('user-wwt-index')}}">{{ __('Withdraw') }}</a></li>
 
             <li class=""><a class="{{ Request::url() == route('user-order-track') ? 'active':'' }}" href="{{route('user-order-track')}}">{{ __('Order Tracking') }}</a></li>
-            <li class=""><a class="{{ Request::url() == route('user-favorites') ? 'active':'' }}" href="{{route('user-favorites')}}">{{ __('Favourite Sellers') }}</a></li>
+            <li class=""><a class="{{ Request::url() == route('user-wishlists') ? 'active':'' }}" href="{{route('user-wishlists')}}">{{ __('Favourite Products') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-messages') ? 'active':'' }}" href="{{route('user-messages')}}">{{ __('Messages') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-messages-delivery') ? 'active':'' }}" href="{{route('user-messages-delivery')}}">{{ __('Contact Delivery Agent' ) }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-message-index') ? 'active':'' }}" href="{{route('user-message-index')}}">{{ __('Tickets') }}</a></li>

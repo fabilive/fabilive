@@ -120,9 +120,7 @@ class UserController extends UserBaseController
 
     public function favorites()
     {
-        $user = $this->user;
-        $favorites = FavoriteSeller::where('user_id', '=', $user->id)->get();
-        return view('user.favorite', compact('user', 'favorites'));
+        return redirect()->route('user-wishlists');
     }
 
     public function favdelete($id)
