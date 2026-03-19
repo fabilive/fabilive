@@ -26,7 +26,7 @@
 	<link href="{{asset('assets/admin/css/jquery.tagit.css')}}" rel="stylesheet" />
 	<link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap-coloroicker.css') }}">
 	<!-- Main Css -->
-	<link rel="stylesheet" href="{{ asset('resources/css/responsive-fixes.css') }}">
+	<link rel="stylesheet" href="{{ asset('assets/css/responsive-fixes.css') }}">
 
 	<!-- stylesheet -->
 	@if(DB::table('admin_languages')->where('is_default','=',1)->first()->rtl == 1)
