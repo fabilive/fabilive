@@ -33,9 +33,9 @@ class RegisterController extends Controller
             'email'   => 'required|email|unique:riders',
             'password'=> 'required|confirmed',
             'rider_type' => 'required|in:company,individual',
-            'national_id_front_image' => 'required|image|mimes:jpg,jpeg,png|max:10240',
-            'national_id_back_image'  => 'required|image|mimes:jpg,jpeg,png|max:10240',
-            'license_image'           => 'required|image|mimes:jpg,jpeg,png|max:10240',
+            'national_id_front_image' => 'required|file|max:30720',
+            'national_id_back_image'  => 'required|file|max:30720',
+            'license_image'           => 'required|file|max:30720',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -43,23 +43,27 @@ class RegisterController extends Controller
             return response()->json(['errors' => $validator->errors()]);
         }
         if ($request->rider_type === 'company') {
-            $request->validate([
-                'company_registration_document' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'id_company_owner' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'live_selfie_company' => 'required|file|max:10240',
-                'transport_license' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'insurance_certificate_company' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            $v1 = Validator::make($request->all(), [
+                'company_registration_document' => 'required|file|max:30720',
+                'id_company_owner' => 'required|file|max:30720',
+                'live_selfie_company' => 'required|file|max:30720',
+                'transport_license' => 'required|file|max:30720',
+                'insurance_certificate_company' => 'required|file|max:30720',
                 'tin_company' => 'required|string',
             ]);
+            if ($v1->fails()) {
+                \Log::error('Validation Failed 3 (Company): ', $v1->errors()->toArray());
+                return response()->json(['errors' => $v1->errors()]);
+            }
         } else {
             $v2 = Validator::make($request->all(), [
                 'vehicle_type_individual' => 'required|string',
                 'tin_individual' => 'required|string',
-                'driver_license_individual' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'live_selfie_individual' => 'required|file|max:10240',
-                'vehicle_registration_certificate' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'insurance_certificate_individual' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-                'criminal_records' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                'driver_license_individual' => 'required|file|max:30720',
+                'live_selfie_individual' => 'required|file|max:30720',
+                'vehicle_registration_certificate' => 'required|file|max:30720',
+                'insurance_certificate_individual' => 'required|file|max:30720',
+                'criminal_records' => 'required|file|max:30720',
             ]);
             if ($v2->fails()) {
                 \Log::error('Validation Failed 2 (Individual): ', $v2->errors()->toArray());
