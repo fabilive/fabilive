@@ -39,6 +39,7 @@ class RegisterController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
+            \Log::error('Validation Failed 1: ', $validator->errors()->toArray());
             return response()->json(['errors' => $validator->errors()]);
         }
         if ($request->rider_type === 'company') {
@@ -51,7 +52,7 @@ class RegisterController extends Controller
                 'tin_company' => 'required|string',
             ]);
         } else {
-            $request->validate([
+            $v2 = Validator::make($request->all(), [
                 'vehicle_type_individual' => 'required|string',
                 'tin_individual' => 'required|string',
                 'driver_license_individual' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
@@ -60,6 +61,10 @@ class RegisterController extends Controller
                 'insurance_certificate_individual' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
                 'criminal_records' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
             ]);
+            if ($v2->fails()) {
+                \Log::error('Validation Failed 2 (Individual): ', $v2->errors()->toArray());
+                return response()->json(['errors' => $v2->errors()]);
+            }
         }
 		$rider = new Rider;
 		$input = $request->all();
