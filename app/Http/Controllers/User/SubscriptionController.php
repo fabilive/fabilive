@@ -6,7 +6,8 @@ use App\{
     Models\Subscription,
     Classes\GeniusMailer,
     Models\UserSubscription,
-    Models\PaymentGateway
+    Models\PaymentGateway,
+    Models\Verification
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -190,57 +191,66 @@ class SubscriptionController extends UserBaseController
         }
         $success_url = route('user.payment.return');
         $user = $this->user;
-        $uploadPath = public_path('assets/uploads/documents');
+        $uploadPath = public_path('assets/images/attachments');
         if (!file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
+        $attachments = [];
         if ($request->hasFile('selfie_image')) {
             $file = $request->file('selfie_image');
             $filename = time() . '_selfie.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['selfie_image'] = 'assets/uploads/documents/' . $filename;
+            $input['selfie_image'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('business_registration_certificate')) {
             $file = $request->file('business_registration_certificate');
             $filename = time() . '_business.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['business_registration_certificate'] = 'assets/uploads/documents/' . $filename;
+            $input['business_registration_certificate'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('taxpayer_card_copy')) {
             $file = $request->file('taxpayer_card_copy');
             $filename = time() . '_taxpayer.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['taxpayer_card_copy'] = 'assets/uploads/documents/' . $filename;
+            $input['taxpayer_card_copy'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('id_card_copy')) {
             $file = $request->file('id_card_copy');
             $filename = time() . '_id.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['id_card_copy'] = 'assets/uploads/documents/' . $filename;
+            $input['id_card_copy'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('passport_copy')) {
             $file = $request->file('passport_copy');
             $filename = time() . '_passport.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['passport_copy'] = 'assets/uploads/documents/' . $filename;
+            $input['passport_copy'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('driver_license_copy')) {
             $file = $request->file('driver_license_copy');
             $filename = time() . '_license.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['driver_license_copy'] = 'assets/uploads/documents/' . $filename;
+            $input['driver_license_copy'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('residence_permit')) {
             $file = $request->file('residence_permit');
             $filename = time() . '_residence.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['residence_permit'] = 'assets/uploads/documents/' . $filename;
+            $input['residence_permit'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         if ($request->hasFile('submerchant_agreement')) {
             $file = $request->file('submerchant_agreement');
             $filename = time() . '_submerchant.' . $file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['submerchant_agreement'] = 'assets/uploads/documents/' . $filename;
+            $input['submerchant_agreement'] = 'assets/images/attachments/' . $filename;
+            $attachments[] = $filename;
         }
         $subs = Subscription::findOrFail($request->subs_id);
         $user->is_vendor = 2;
@@ -257,6 +267,15 @@ class SubscriptionController extends UserBaseController
         $sub->currency_code = $this->curr->name;
         $sub->currency_value = $this->curr->value;
         $sub->fill($data)->save();
+
+        if (count($attachments) > 0) {
+            $ver = new Verification();
+            $ver->user_id = $user->id;
+            $ver->attachments = implode(',', $attachments);
+            $ver->text = $request->message;
+            $ver->status = "Pending";
+            $ver->save();
+        }
 
         $data = [
             'to' => $user->email,
