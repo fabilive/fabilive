@@ -188,12 +188,15 @@
                                                 Please upload at least ONE document: Passport, National ID Card, or Driver
                                                 License.
                                             </div>
+                                            <p class="text-info small mb-2">
+                                                {{ __('Note: You must upload at least ONE of the following three documents.') }}
+                                            </p>
 
 
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
-                                                        {{ __('National ID Card copy') }} *
+                                                        {{ __('National ID Card copy') }}
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
@@ -206,7 +209,7 @@
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
-                                                        {{ __('Passport Copy') }} *
+                                                        {{ __('Passport Copy') }}
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
@@ -220,7 +223,7 @@
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
-                                                        {{ __('Driver License Copy') }} *
+                                                        {{ __('Driver License Copy') }}
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
@@ -237,6 +240,11 @@
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
+                                                    <div class="mb-2">
+                                                        <a href="{{ asset('assets/files/agreements/submerchant_agreement.pdf') }}" target="_blank" class="text-info">
+                                                            <i class="fa fa-download"></i> {{ __('Download Sub-Merchant Agreement') }}
+                                                        </a>
+                                                    </div>
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="submerchant_agreement"
                                                         placeholder="{{ __('Fabilive Sub-Merchant Agreement') }}"

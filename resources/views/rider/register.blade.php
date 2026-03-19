@@ -75,11 +75,14 @@
                                                     <input type="file" name="id_company_owner" class="form-control">
                                                 </p>
 
-                                                <input type="file" id="selfieFile1" name="live_selfie_company" style="display:none;">
+                                                <p>
+                                                    <label for="selfieFile1">{{ __('Live Selfie (Required - Use Camera or Upload File)') }}</label>
+                                                    <input type="file" id="selfieFile1" name="live_selfie_company" class="form-control">
+                                                </p>
                                                 <video id="cam_company" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_company" class="w-100 rounded mb-2" style="display:none;">
-                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_company">Open Camera</button>
-                                                <button type="button" id="capture_company" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">Capture</button>
+                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_company">{{ __('Use Camera') }}</button>
+                                                <button type="button" id="capture_company" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">{{ __('Capture') }}</button>
 
                                                 <p>
                                                     <label for="">{{ __('Transport License / Permis de Transport.') }}</label>
@@ -131,11 +134,14 @@
                                                     <label for="">{{ __('Drivers License image') }}</label>
                                                     <input type="file" name="driver_license_individual" class="form-control">
                                                 </p>
-                                                <input type="file" id="selfieFile" name="live_selfie_individual" style="display:none;">
+                                                <p>
+                                                    <label for="selfieFile">{{ __('Live Selfie (Required - Use Camera or Upload File)') }}</label>
+                                                    <input type="file" id="selfieFile" name="live_selfie_individual" class="form-control">
+                                                </p>
                                                 <video id="cam_individual" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_individual" class="w-100 rounded mb-2" style="display:none;">
-                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_individual">Open Camera</button>
-                                                <button type="button" id="capture_individual" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">Capture</button>
+                                                <button type="button" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" id="openCamera_individual">{{ __('Use Camera') }}</button>
+                                                <button type="button" id="capture_individual" class="btn btn-sm btn-dark w-100 rounded-2 mb-2" style="display:none;">{{ __('Capture') }}</button>
                                                 <p>
                                                     <label for="">{{ __('Vehicle Registration Certificate (Carte Grise)') }}</label>
                                                     <input type="file" name="vehicle_registration_certificate" class="form-control">
