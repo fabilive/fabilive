@@ -8,6 +8,15 @@ use App\Http\Controllers\PaymentController;
 
 
 // ************************************ ADMIN SECTION **********************************************
+Route::get('/debug-logs', function() {
+    $path = storage_path('logs/laravel.log');
+    if (file_exists($path)) {
+        return response(nl2br(htmlspecialchars(shell_exec('tail -n 150 ' . escapeshellarg($path)))), 200)
+                ->header('Content-Type', 'text/html');
+    }
+    return 'Log file not found';
+});
+
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
 
