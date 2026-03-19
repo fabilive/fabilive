@@ -23,12 +23,12 @@ class RiderController extends AdminBaseController
                 return $data->orders->count();
             })
             ->addColumn('action', function (Rider $data) {
-                $class = $data->status == 0 ? 'drop-success' : 'drop-danger';
-                $s = $data->status == 1 ? 'selected' : '';
-                $ns = $data->status == 0 ? 'selected' : '';
+                $class = $data->status == 1 ? 'drop-success' : 'drop-danger';
+                $s = $data->status == 0 ? 'selected' : '';
+                $ns = $data->status == 1 ? 'selected' : '';
                 $ban = '<select class="process select droplinks ' . $class . '">' .
-                    '<option data-val="0" value="' . route('admin-rider-ban', ['id1' => $data->id, 'id2' => 1]) . '" ' . $s . '>' . __("Block") . '</option>' .
-                    '<option data-val="1" value="' . route('admin-rider-ban', ['id1' => $data->id, 'id2' => 0]) . '" ' . $ns . '>' . __("UnBlock") . '</option></select>';
+                    '<option data-val="0" value="' . route('admin-rider-ban', ['id1' => $data->id, 'id2' => 0]) . '" ' . $s . '>' . __("Block") . '</option>' .
+                    '<option data-val="1" value="' . route('admin-rider-ban', ['id1' => $data->id, 'id2' => 1]) . '" ' . $ns . '>' . __("UnBlock") . '</option></select>';
                 return '<div class="action-list">
                             <a href="javascript:;" class="send" data-email="' . $data->email . '" data-toggle="modal" data-target="#vendorform">
                             <i class="fas fa-envelope"></i> ' . __("Send") . '
@@ -70,6 +70,14 @@ class RiderController extends AdminBaseController
     {
         $rider = Rider::findOrFail($request->id);
         $rider->rider_status = $request->status;
+        if($request->status == 'accepted'){
+            $rider->status = 1;
+            $rider->onboarding_status = 'approved';
+            $rider->approved_at = Carbon::now();
+        }elseif($request->status == 'declined'){
+            $rider->status = 0;
+            $rider->onboarding_status = 'rejected';
+        }
         $rider->save();
         return response()->json(['success' => true]);
     }
