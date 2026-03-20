@@ -137,6 +137,29 @@ Route::get('/run-setup', function() {
     }
 });
 
+Route::get('/fix-slugs', function () {
+    try {
+        $prods = DB::table('products')->whereNull('slug')->orWhere('slug', '')->get();
+        $fixed = 0;
+        foreach ($prods as $p) {
+            $slug = Illuminate\Support\Str::slug($p->name);
+            $check = DB::table('products')->where('slug', $slug)->exists();
+            if ($check) {
+                $slug = $slug . '-' . time() . '-' . $p->id;
+            }
+            DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
+            $fixed++;
+        }
+        return response()->json([
+            'status' => 'success',
+            'fixed_count' => $fixed,
+            'message' => "Fixed $fixed product slugs."
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+});
+
 
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
