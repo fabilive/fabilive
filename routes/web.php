@@ -78,20 +78,14 @@ Route::get('/run-setup', function() {
         // Campay Setup Logic
         $campay = \App\Models\PaymentGateway::where('keyword', 'campay')->first();
         $campayData = [
-            'username' => '',
-            'password' => '',
+            'username' => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
+            'password' => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
+            'permanent_token' => 'fd3c20a1ff48e47cf92407c0bde3e27a53063d13',
             'base_url' => 'https://www.campay.net/api',
             'text' => 'Pay via Campay'
         ];
 
         if ($campay) {
-            $currentInfo = json_decode($campay->information, true);
-            // Migrate old keys if found
-            if (isset($currentInfo['app_id'])) $campayData['username'] = $currentInfo['app_id'];
-            if (isset($currentInfo['app_secret'])) $campayData['password'] = $currentInfo['app_secret'];
-            if (isset($currentInfo['username'])) $campayData['username'] = $currentInfo['username'];
-            if (isset($currentInfo['password'])) $campayData['password'] = $currentInfo['password'];
-            
             $campay->information = json_encode($campayData);
             $campay->checkout = 1;
             $campay->update();
