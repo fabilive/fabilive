@@ -63,19 +63,17 @@
                                             </td>
                                             <td>{{ $job->created_at->format('d M Y') }}</td>
                                             <td>
-                                                <div class="dropdown d-inline-block">
-                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-haspopup="true" aria-expanded="false">
-                                                        {{ __('Action') }}
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="{{ route('rider-delivery-details', $job->id) }}">{{ __('View Details') }}</a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <h6 class="dropdown-header text-uppercase" style="font-size: 0.7rem;">{{ __('Update Status') }}</h6>
-                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'picked_up')">{{ __('Mark as Picked Up') }}</a>
-                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'on_delivery')">{{ __('Out for Delivery') }}</a>
-                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'delivered')">{{ __('Mark as Delivered') }}</a>
-                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'returning')">{{ __('Initiate Return') }}</a>
-                                                    </div>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="{{ route('rider-delivery-details', $job->id) }}" class="btn btn-dark btn-sm mr-2" title="{{ __('View Details') }}" style="padding: 5px 10px;">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <select class="form-control form-control-sm custom-select-status" style="width: 130px; height: 31px; font-size: 12px; display: inline-block;" onchange="if(this.value) updateJobStatus('{{ $job->id }}', this.value)">
+                                                        <option value="">{{ __('Update Status') }}</option>
+                                                        <option value="picked_up">{{ __('Picked Up') }}</option>
+                                                        <option value="on_delivery">{{ __('Out for Delivery') }}</option>
+                                                        <option value="delivered">{{ __('Delivered') }}</option>
+                                                        <option value="returning">{{ __('Return to Seller') }}</option>
+                                                    </select>
                                                 </div>
                                             </td>
                                         </tr>
