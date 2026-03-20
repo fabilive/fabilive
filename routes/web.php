@@ -106,18 +106,27 @@ Route::get('/run-setup', function() {
         // Check for GD extension
         $gdStatus = "GD Extension: ";
         if (!extension_loaded('gd')) {
-            $gdStatus .= "<span style='color:red'>Not Installed</span>";
+            $gdStatus .= "Not Installed";
         } elseif (!function_exists('imagecreatefromjpeg')) {
-            $gdStatus .= "<span style='color:orange'>Installed but missing JPEG support</span>";
+            $gdStatus .= "Installed but missing JPEG support";
         } else {
-            $gdStatus .= "<span style='color:green'>Perfect</span>";
+            $gdStatus .= "Perfect";
+        }
+
+        // Check for Imagick
+        $imagickStatus = "Imagick Extension: ";
+        if (extension_loaded('imagick') && class_exists('Imagick')) {
+            $imagickStatus .= "Available";
+        } else {
+            $imagickStatus .= "Not Installed";
         }
 
         return response()->json([
             'status' => 'success',
             'migration' => $migrateOutput,
-            'gd_check' => strip_tags($gdStatus),
-            'message' => 'Setup successful! Migrations applied, directories created, and delivery data initialized. ' . strip_tags($gdStatus)
+            'gd_check' => $gdStatus,
+            'imagick_check' => $imagickStatus,
+            'message' => 'Setup successful! ' . $gdStatus . ' | ' . $imagickStatus
         ]);
     } catch (\Exception $e) {
         \Log::error('Setup Error: ' . $e->getMessage());
