@@ -121,12 +121,26 @@ Route::get('/run-setup', function() {
             $imagickStatus .= "Not Installed";
         }
 
+        // Fix missing slugs
+        $prods = DB::table('products')->whereNull('slug')->orWhere('slug', '')->get();
+        $fixedSlugs = 0;
+        foreach ($prods as $p) {
+            $slug = Illuminate\Support\Str::slug($p->name);
+            $check = DB::table('products')->where('slug', $slug)->exists();
+            if ($check) {
+                $slug = $slug . '-' . time() . '-' . $p->id;
+            }
+            DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
+            $fixedSlugs++;
+        }
+
         return response()->json([
             'status' => 'success',
             'migration' => $migrateOutput,
             'gd_check' => $gdStatus,
             'imagick_check' => $imagickStatus,
-            'message' => 'Setup successful! ' . $gdStatus . ' | ' . $imagickStatus
+            'fixed_slugs' => $fixedSlugs,
+            'message' => 'Setup successful! ' . $gdStatus . ' | Fixed ' . $fixedSlugs . ' slugs.'
         ]);
     } catch (\Exception $e) {
         \Log::error('Setup Error: ' . $e->getMessage());
