@@ -10,37 +10,6 @@ use App\Http\Controllers\PaymentController;
 
 
 // ************************************ ADMIN SECTION **********************************************
-Route::get('/debug-cart/{id}', function($id) {
-    try {
-        $order = DB::table('orders')->where('id', $id)->first();
-        if (!$order) return "Order not found";
-        
-        $rawCart = $order->cart;
-        $decoded = json_decode($rawCart, true);
-        $unserialized = null;
-        try {
-            if (strpos($rawCart, 'a:') === 0 || strpos($rawCart, 'O:') === 0) {
-                $unserialized = unserialize($rawCart);
-            }
-        } catch (\Exception $e) {
-            $unserialized = "Failed to unserialize: " . $e->getMessage();
-        }
-
-        return response()->json([
-            'order_id' => $id,
-            'raw_length' => strlen($rawCart),
-            'raw_preview' => substr($rawCart, 0, 100),
-            'raw_full' => $rawCart,
-            'json_decoded' => $decoded,
-            'unserialized' => $unserialized,
-            'is_json_valid' => (json_last_error() == JSON_ERROR_NONE),
-            'json_error' => json_last_error_msg()
-        ]);
-    } catch (\Exception $e) {
-        return $e->getMessage();
-    }
-});
-
 Route::get('/run-setup', function() {
     try {
         // Run Migrations
