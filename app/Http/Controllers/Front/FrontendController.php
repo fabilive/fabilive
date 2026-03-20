@@ -526,6 +526,9 @@ class FrontendController extends FrontBaseController
         // BLOGS
 
         $blog = Blog::where('slug', $slug)->first();
+        if (!$blog) {
+            abort(404);
+        }
 
         $blog->views = $blog->views + 1;
         $blog->update();

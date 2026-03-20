@@ -227,6 +227,9 @@ class ProductController extends AdminBaseController
     //*** POST Request
     public function store(Request $request)
     {
+        if (!function_exists('imagecreatefromjpeg')) {
+            return response()->json(array('errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']));
+        }
         try {
         $rules = [
             'photo' => 'required',
@@ -464,7 +467,7 @@ class ProductController extends AdminBaseController
         }
         $msg = __("New Product Added Successfully.") . '<a href="' . route('admin-prod-index') . '">' . __("View Product Lists.") . '</a>';
         return response()->json($msg);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Admin Product Store Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json(['message' => $e->getMessage()], 500);
         }

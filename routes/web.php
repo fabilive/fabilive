@@ -103,10 +103,21 @@ Route::get('/run-setup', function() {
             ]);
         }
 
+        // Check for GD extension
+        $gdStatus = "GD Extension: ";
+        if (!extension_loaded('gd')) {
+            $gdStatus .= "<span style='color:red'>Not Installed</span>";
+        } elseif (!function_exists('imagecreatefromjpeg')) {
+            $gdStatus .= "<span style='color:orange'>Installed but missing JPEG support</span>";
+        } else {
+            $gdStatus .= "<span style='color:green'>Perfect</span>";
+        }
+
         return response()->json([
             'status' => 'success',
             'migration' => $migrateOutput,
-            'message' => 'Setup successful! Migrations applied, directories created, and delivery data initialized.'
+            'gd_check' => strip_tags($gdStatus),
+            'message' => 'Setup successful! Migrations applied, directories created, and delivery data initialized. ' . strip_tags($gdStatus)
         ]);
     } catch (\Exception $e) {
         \Log::error('Setup Error: ' . $e->getMessage());
