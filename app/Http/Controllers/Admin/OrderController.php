@@ -143,7 +143,31 @@ class OrderController extends AdminBaseController
  public function show($id)
 {
     $order = Order::with(['customerCity', 'shippingCity'])->findOrFail($id);
-    $cart = json_decode($order->cart, true);
+    $raw_cart = $order->cart;
+    $cart = json_decode($raw_cart, true);
+    if ($cart === null && !empty($raw_cart)) {
+        try {
+            if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                $cart = unserialize($raw_cart);
+                if (is_object($cart)) {
+                     $cart = json_decode(json_encode($cart), true);
+                }
+            }
+        } catch (\Exception $e) {}
+    }
+    if (!is_array($cart)) $cart = ['items' => []];
+    if (!isset($cart['items'])) {
+        if (!empty($cart) && is_array(reset($cart))) {
+            $cart = ['items' => $cart];
+        } else {
+            $cart['items'] = [];
+        }
+    }
+    foreach($cart['items'] as $k => $v) {
+        if (is_array($v) && !isset($v['item'])) {
+            $cart['items'][$k]['item'] = $v;
+        }
+    }
     $currency = \App\Models\Currency::where('is_default', 1)->first();
     return view('admin.order.details', compact('order', 'cart', 'currency'));
 }
@@ -153,7 +177,31 @@ class OrderController extends AdminBaseController
     public function invoice($id)
     {
         $order = Order::findOrFail($id);
-        $cart = json_decode($order->cart, true);
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('admin.order.invoice', compact('order', 'cart'));
     }
 
@@ -184,7 +232,31 @@ class OrderController extends AdminBaseController
     public function printpage($id)
     {
         $order = Order::findOrFail($id);
-        $cart = json_decode($order->cart, true);
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('admin.order.print', compact('order', 'cart'));
     }
 

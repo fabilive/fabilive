@@ -42,7 +42,31 @@ class OrderController extends UserBaseController
     {
         $user = $this->user;
         $order = $user->orders()->whereId($id)->firstOrFail();
-        $cart = json_decode($order->cart, true);;
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('user.order.details',compact('user','order','cart'));
     }
 
@@ -62,7 +86,31 @@ class OrderController extends UserBaseController
     {
         $user = $this->user;
         $order = Order::findOrfail($id);
-        $cart = json_decode($order->cart, true);
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('user.order.print',compact('user','order','cart'));
     }
 

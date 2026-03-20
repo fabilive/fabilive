@@ -84,7 +84,31 @@ class OrderController extends VendorBaseController
     $order = Order::with(['customerCity','shippingCity'])
                   ->where('order_number', $slug)
                   ->firstOrFail();
-    $cart  = json_decode($order->cart, true);
+    $raw_cart = $order->cart;
+    $cart = json_decode($raw_cart, true);
+    if ($cart === null && !empty($raw_cart)) {
+        try {
+            if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                $cart = unserialize($raw_cart);
+                if (is_object($cart)) {
+                     $cart = json_decode(json_encode($cart), true);
+                }
+            }
+        } catch (\Exception $e) {}
+    }
+    if (!is_array($cart)) $cart = ['items' => []];
+    if (!isset($cart['items'])) {
+        if (!empty($cart) && is_array(reset($cart))) {
+            $cart = ['items' => $cart];
+        } else {
+            $cart['items'] = [];
+        }
+    }
+    foreach($cart['items'] as $k => $v) {
+        if (is_array($v) && !isset($v['item'])) {
+            $cart['items'][$k]['item'] = $v;
+        }
+    }
     return view('vendor.order.details', compact('user', 'order', 'cart'));
 }
 
@@ -104,7 +128,31 @@ class OrderController extends VendorBaseController
     {
         $user = $this->user;
         $order = Order::where('order_number', '=', $slug)->first();
-        $cart = json_decode($order->cart, true);;
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('vendor.order.invoice', compact('user', 'order', 'cart'));
     }
 
@@ -112,7 +160,31 @@ class OrderController extends VendorBaseController
     {
         $user = $this->user;
         $order = Order::where('order_number', '=', $slug)->first();
-        $cart = json_decode($order->cart, true);;
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && !empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                         $cart = json_decode(json_encode($cart), true);
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+        if (!is_array($cart)) $cart = ['items' => []];
+        if (!isset($cart['items'])) {
+            if (!empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach($cart['items'] as $k => $v) {
+            if (is_array($v) && !isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
         return view('vendor.order.print', compact('user', 'order', 'cart'));
     }
 

@@ -10,13 +10,35 @@ use App\Http\Controllers\PaymentController;
 
 
 // ************************************ ADMIN SECTION **********************************************
-Route::get('/debug-logs', function() {
-    $path = storage_path('logs/laravel.log');
-    if (file_exists($path)) {
-        return response(nl2br(htmlspecialchars(shell_exec('tail -n 150 ' . escapeshellarg($path)))), 200)
-                ->header('Content-Type', 'text/html');
+Route::get('/debug-cart/{id}', function($id) {
+    try {
+        $order = DB::table('orders')->where('id', $id)->first();
+        if (!$order) return "Order not found";
+        
+        $rawCart = $order->cart;
+        $decoded = json_decode($rawCart, true);
+        $unserialized = null;
+        try {
+            if (strpos($rawCart, 'a:') === 0 || strpos($rawCart, 'O:') === 0) {
+                $unserialized = unserialize($rawCart);
+            }
+        } catch (\Exception $e) {
+            $unserialized = "Failed to unserialize: " . $e->getMessage();
+        }
+
+        return response()->json([
+            'order_id' => $id,
+            'raw_length' => strlen($rawCart),
+            'raw_preview' => substr($rawCart, 0, 100),
+            'raw_full' => $rawCart,
+            'json_decoded' => $decoded,
+            'unserialized' => $unserialized,
+            'is_json_valid' => (json_last_error() == JSON_ERROR_NONE),
+            'json_error' => json_last_error_msg()
+        ]);
+    } catch (\Exception $e) {
+        return $e->getMessage();
     }
-    return 'Log file not found';
 });
 
 Route::get('/run-setup', function() {
