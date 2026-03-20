@@ -663,8 +663,8 @@ class ProductController extends VendorBaseController
             return response()->json(array('errors' => [0 => __('You Can\'t Add More Product.')]));
         }
         } catch (\Exception $e) {
-            //dd($e);
-    return response()->json(['message' => $e->getMessage()], 500);
+            \Log::error('Vendor Product Store Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -986,7 +986,7 @@ class ProductController extends VendorBaseController
                 $image = base64_decode($image);
                 $image_name = time() . Str::random(8) . '.png';
                 $path = 'assets/images/products/' . $image_name;
-                file_put_contents($path, $image);
+                file_put_contents(public_path($path), $image);
             } else {
                 $image_name = $request->photo;
             }

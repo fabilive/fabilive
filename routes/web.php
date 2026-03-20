@@ -29,6 +29,8 @@ Route::get('/run-setup', function() {
             public_path('assets/images/verification'),
             public_path('assets/images/products'),
             public_path('assets/images/thumbnails'),
+            public_path('assets/images/galleries'),
+            public_path('assets/files'),
         ];
         foreach ($dirs as $dir) {
             if (!file_exists($dir)) {
