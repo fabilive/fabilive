@@ -24,12 +24,11 @@ class RiderController extends RiderBaseController
         $orders = DeliveryRider::where('rider_id', $this->rider->id)
             ->orderby('id','desc')->take(8)->get();
 
-        // Fetch available jobs in rider's service area
+        // Fetch available jobs for all riders (removed service area restriction as per user request)
         $available_jobs = \App\Models\DeliveryJob::where('status', 'available')
-            ->whereIn('service_area_id', $user->serviceAreas->pluck('id'))
             ->with(['order', 'stops'])
             ->latest()
-            ->take(5)
+            ->take(20)
             ->get();
 
         return view('rider.dashboard', compact('orders', 'user', 'available_jobs'));
@@ -334,7 +333,6 @@ public function orderAccept($id)
     {
         $rider = $this->rider;
         $jobs = DeliveryJob::where('status', 'available')
-            ->whereIn('service_area_id', $rider->serviceAreas->pluck('id'))
             ->with(['order', 'stops'])
             ->latest()
             ->get();

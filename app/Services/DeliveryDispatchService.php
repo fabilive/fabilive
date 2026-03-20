@@ -26,9 +26,6 @@ class DeliveryDispatchService
         // 2. Create in-app notifications for all eligible riders in the service area
         $riders = \App\Models\Rider::where('status', 1)
             ->where('is_available', 1)
-            ->whereHas('serviceAreas', function($query) use ($job) {
-                $query->where('service_area_id', $job->service_area_id);
-            })
             ->get();
 
         foreach ($riders as $rider) {
