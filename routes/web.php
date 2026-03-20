@@ -51,6 +51,32 @@ Route::get('/debug-dispatch/{order_id}', function($order_id) {
     ]);
 });
 
+Route::get('/debug-dispatch-all', function() {
+    $jobs = DB::table('delivery_jobs')
+        ->join('orders', 'delivery_jobs.order_id', '=', 'orders.id')
+        ->select('delivery_jobs.*', 'orders.order_number', 'orders.service_area_id as order_service_area_id')
+        ->latest('delivery_jobs.id')
+        ->take(10)
+        ->get();
+    
+    $rider_id = Auth::guard('rider')->id();
+    $rider_areas = $rider_id ? DB::table('rider_service_areas')->where('rider_id', $rider_id)->pluck('service_area_id')->toArray() : [];
+    
+    return [
+        'rider_id' => $rider_id,
+        'rider_areas' => $rider_areas,
+        'recent_jobs' => $jobs->map(function($job) use ($rider_areas) {
+             return [
+                 'order_number' => $job->order_number,
+                 'job_status' => $job->status,
+                 'job_area' => $job->service_area_id,
+                 'order_area' => $job->order_service_area_id,
+                 'visible_to_current_rider' => ($job->status === 'available' && in_array($job->service_area_id, $rider_areas))
+             ];
+        })
+    ];
+});
+
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
