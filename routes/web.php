@@ -10,7 +10,6 @@ use App\Http\Controllers\PaymentController;
 
 // =================================== Admin Section Routes ===================================\\
 
-Route::prefix('admin')->group(function () {
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
