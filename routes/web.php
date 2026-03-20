@@ -9,6 +9,10 @@ use App\Http\Controllers\PaymentController;
 
 
 
+Route::get('/debug-shipping', function() {
+    return DB::table('shippings')->get();
+});
+
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
