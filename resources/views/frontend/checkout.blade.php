@@ -613,7 +613,7 @@
                      </li>
                         <li id="total-fee-row" style="display:none;">
                             <p>{{ __('Total Delivery Fee') }}</p>
-                            <p><b id="total-fee">0.00 PKR</b></p>
+                            <p><b id="total-fee">0.00</b></p>
                         </li>
                      <li class="tax_show  d-none">
                         <p>
@@ -1033,7 +1033,7 @@ $(document).on('change', '#service_area_select, #service_area_id', function () {
             return;
         }
         var fee = parseFloat(String(res.total_fee).toString().replace(/[^0-9.\-]+/g, '')) || 0;
-        $('#total-fee').text(fee.toFixed(2) + ' XAF');
+        $('#total-fee').text(fee.toFixed(2) + ' {{ $curr->sign }}');
         $('#total-fee-row').show();
         var baseVal = $('#base-cart-total').val() || $('#tgrandtotal').val() || '0';
         var cartBase = parseFloat(String(baseVal).replace(/[^0-9.\-]+/g, '')) || 0;
