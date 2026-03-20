@@ -124,21 +124,23 @@ Route::get('/run-setup', function() {
         // Fix missing slugs (more aggressive check)
         $tables = ['products', 'categories', 'subcategories', 'childcategories'];
         $fixedSlugs = 0;
+        $stats = [];
         foreach ($tables as $table) {
-            $records = DB::table($table)->get();
-            foreach ($records as $r) {
-                if (empty($r->slug) || strlen($r->slug) < 2) {
-                    $slug = Illuminate\Support\Str::slug($r->name);
-                    if (empty($slug)) {
-                        $slug = $table . '-' . $r->id;
-                    }
-                    $check = DB::table($table)->where('slug', $slug)->where('id', '!=', $r->id)->exists();
-                    if ($check) {
-                        $slug = $slug . '-' . time() . '-' . $r->id;
-                    }
-                    DB::table($table)->where('id', $r->id)->update(['slug' => $slug]);
-                    $fixedSlugs++;
+            $total = DB::table($table)->count();
+            $invalid = DB::table($table)->whereRaw('slug IS NULL OR slug = "" OR LENGTH(slug) < 2')->get();
+            $stats[$table] = ['total' => $total, 'invalid' => $invalid->count()];
+            
+            foreach ($invalid as $r) {
+                $slug = Illuminate\Support\Str::slug($r->name);
+                if (empty($slug)) {
+                    $slug = $table . '-' . $r->id;
                 }
+                $check = DB::table($table)->where('slug', $slug)->where('id', '!=', $r->id)->exists();
+                if ($check) {
+                    $slug = $slug . '-' . time() . '-' . $r->id;
+                }
+                DB::table($table)->where('id', $r->id)->update(['slug' => $slug]);
+                $fixedSlugs++;
             }
         }
 
@@ -148,6 +150,7 @@ Route::get('/run-setup', function() {
             'gd_check' => $gdStatus,
             'imagick_check' => $imagickStatus,
             'fixed_slugs' => $fixedSlugs,
+            'stats' => $stats,
             'message' => 'Setup successful! ' . $gdStatus . ' | Fixed ' . $fixedSlugs . ' slugs.'
         ]);
     } catch (\Exception $e) {
