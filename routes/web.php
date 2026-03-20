@@ -20,6 +20,37 @@ Route::get('/delete-free-shipping', function() {
     return "Deleted " . $deleted . " shipping methods. Cache cleared.";
 });
 
+Route::get('/debug-dispatch/{order_id}', function($order_id) {
+    $order = DB::table('orders')->where('id', $order_id)->first();
+    if (!$order) return "Order not found";
+    
+    $job = DB::table('delivery_jobs')->where('order_id', $order_id)->first();
+    if (!$job) return "Job not found for order " . $order_id;
+    
+    $rider_id = Auth::guard('rider')->id();
+    $rider = $rider_id ? DB::table('riders')->where('id', $rider_id)->first() : null;
+    $rider_areas = $rider_id ? DB::table('rider_service_areas')->where('rider_id', $rider_id)->pluck('service_area_id') : [];
+    
+    return response()->json([
+        'order' => [
+            'id' => $order->id,
+            'number' => $order->order_number,
+            'service_area_id' => $order->service_area_id
+        ],
+        'job' => [
+            'id' => $job->id,
+            'status' => $job->status,
+            'service_area_id' => $job->service_area_id
+        ],
+        'current_rider' => [
+            'id' => $rider_id,
+            'name' => $rider?->name,
+            'service_areas' => $rider_areas
+        ],
+        'is_visible' => ($job->status === 'available' && in_array($job->service_area_id, $rider_areas->toArray()))
+    ]);
+});
+
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
