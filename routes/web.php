@@ -121,17 +121,22 @@ Route::get('/run-setup', function() {
             $imagickStatus .= "Not Installed";
         }
 
-        // Fix missing slugs
-        $prods = DB::table('products')->whereNull('slug')->orWhere('slug', '')->get();
+        // Fix missing slugs (more aggressive check)
+        $prods = DB::table('products')->get();
         $fixedSlugs = 0;
         foreach ($prods as $p) {
-            $slug = Illuminate\Support\Str::slug($p->name);
-            $check = DB::table('products')->where('slug', $slug)->exists();
-            if ($check) {
-                $slug = $slug . '-' . time() . '-' . $p->id;
+            if (empty($p->slug) || strlen($p->slug) < 2) {
+                $slug = Illuminate\Support\Str::slug($p->name);
+                if (empty($slug)) {
+                    $slug = 'product-' . $p->id;
+                }
+                $check = DB::table('products')->where('slug', $slug)->where('id', '!=', $p->id)->exists();
+                if ($check) {
+                    $slug = $slug . '-' . time() . '-' . $p->id;
+                }
+                DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
+                $fixedSlugs++;
             }
-            DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
-            $fixedSlugs++;
         }
 
         return response()->json([
