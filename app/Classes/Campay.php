@@ -16,8 +16,8 @@ class Campay
         $gateway = \App\Models\PaymentGateway::where('keyword', 'campay')->first();
         if ($gateway && $gateway->information) {
             $info = json_decode($gateway->information, true);
-            $this->app_id = $info['app_id'] ?? env('CAMPAY_APP_ID');
-            $this->app_secret = $info['app_secret'] ?? env('CAMPAY_APP_SECRET');
+            $this->app_id = $info['app_id'] ?? $info['username'] ?? env('CAMPAY_APP_ID');
+            $this->app_secret = $info['app_secret'] ?? $info['password'] ?? env('CAMPAY_APP_SECRET');
             $this->base_url = $info['base_url'] ?? env('CAMPAY_BASE_URL', 'https://www.campay.net/api');
         } else {
             $this->app_id = env('CAMPAY_APP_ID');

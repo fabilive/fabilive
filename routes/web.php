@@ -23,6 +23,19 @@ Route::get('/run-setup', function() {
         Artisan::call('migrate', ['--force' => true]);
         $migrateOutput = Artisan::output();
 
+        // Ensure Directories Exist
+        $dirs = [
+            public_path('assets/temp_files'),
+            public_path('assets/images/verification'),
+            public_path('assets/images/products'),
+            public_path('assets/images/thumbnails'),
+        ];
+        foreach ($dirs as $dir) {
+            if (!file_exists($dir)) {
+                mkdir($dir, 0777, true);
+            }
+        }
+
         // Gateway Setup Logic
         $stripe = \App\Models\PaymentGateway::where('keyword', 'stripe')->first();
         if ($stripe) {
@@ -48,7 +61,25 @@ Route::get('/run-setup', function() {
 
         // Campay Setup Logic
         $campay = \App\Models\PaymentGateway::where('keyword', 'campay')->first();
-        if (!$campay) {
+        $campayData = [
+            'username' => '',
+            'password' => '',
+            'base_url' => 'https://www.campay.net/api',
+            'text' => 'Pay via Campay'
+        ];
+
+        if ($campay) {
+            $currentInfo = json_decode($campay->information, true);
+            // Migrate old keys if found
+            if (isset($currentInfo['app_id'])) $campayData['username'] = $currentInfo['app_id'];
+            if (isset($currentInfo['app_secret'])) $campayData['password'] = $currentInfo['app_secret'];
+            if (isset($currentInfo['username'])) $campayData['username'] = $currentInfo['username'];
+            if (isset($currentInfo['password'])) $campayData['password'] = $currentInfo['password'];
+            
+            $campay->information = json_encode($campayData);
+            $campay->checkout = 1;
+            $campay->update();
+        } else {
             \App\Models\PaymentGateway::create([
                 'title' => 'Campay',
                 'details' => 'Pay via Campay',
@@ -56,12 +87,7 @@ Route::get('/run-setup', function() {
                 'name' => 'Campay',
                 'keyword' => 'campay',
                 'type' => 'automatic',
-                'information' => json_encode([
-                    'app_id' => '',
-                    'app_secret' => '',
-                    'base_url' => 'https://www.campay.net/api',
-                    'text' => 'Pay via Campay'
-                ]),
+                'information' => json_encode($campayData),
                 'currency_id' => '["1"]', 
                 'checkout' => 1
             ]);

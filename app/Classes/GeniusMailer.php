@@ -41,7 +41,11 @@ class GeniusMailer
             $body = preg_replace("/{admin_email}/", $mailData['aemail'], $body);
             $body = preg_replace("/{order_number}/", $mailData['onumber'], $body);
             $body = preg_replace("/{website_title}/", $this->gs->title, $body);
-            $fileName = public_path('assets/temp_files/' . Str::random(4) . time() . '.pdf');
+            $dir = public_path('assets/temp_files/');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $fileName = $dir . Str::random(4) . time() . '.pdf';
             $pdf = PDF::loadView('pdf.order', compact('order', 'cart'))->save($fileName);
             $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
             $this->addRecipients($mailData['to']);
