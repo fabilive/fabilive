@@ -37,7 +37,7 @@
             <div class="col-xl-9">
                 <div class="row table-responsive-lg mt-3">
                     <div class="col-lg-12">
-                        <div class="widget border-0 p-30 widget_categories bg-light account-info table-responsive">
+                        <div class="widget border-0 p-30 widget_categories bg-light account-info table-responsive" style="overflow: visible;">
                             <h4 class="widget-title down-line mb-30">{{ __('My Delivery Jobs') }}</h4>
 
                             @include('alerts.form-success')
@@ -64,7 +64,7 @@
                                             <td>{{ $job->created_at->format('d M Y') }}</td>
                                             <td>
                                                 <div class="dropdown d-inline-block">
-                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-haspopup="true" aria-expanded="false">
                                                         {{ __('Action') }}
                                                     </button>
                                                     <div class="dropdown-menu">
