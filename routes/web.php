@@ -17,6 +17,49 @@ Route::get('/debug-logs', function() {
     return 'Log file not found';
 });
 
+Route::get('/run-setup', function() {
+    try {
+        // Run Migrations
+        Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = Artisan::output();
+
+        // Gateway Setup Logic
+        $stripe = \App\Models\PaymentGateway::where('keyword', 'stripe')->first();
+        if ($stripe) {
+            $stripe->checkout = 0;
+            $stripe->update();
+        }
+
+        $cod = \App\Models\PaymentGateway::where('keyword', 'cod')->first();
+        if ($cod) {
+            $cod->checkout = 1;
+            $cod->update();
+        } else {
+            \App\Models\PaymentGateway::create([
+                'title' => 'Cash On Delivery',
+                'details' => 'Pay when you receive your order',
+                'subtitle' => 'Cash On Delivery',
+                'name' => 'cod',
+                'keyword' => 'cod',
+                'type' => 'manual',
+                'checkout' => 1
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'migration' => $migrateOutput,
+            'message' => 'Stripe disabled and COD enabled successfully.'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
 

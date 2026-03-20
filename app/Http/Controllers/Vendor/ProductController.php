@@ -260,7 +260,7 @@ class ProductController extends VendorBaseController
                     return response()->json(array('errors' => ['Image format not supported']));
                 }
                 $filename = time() . '-' . $file->getClientOriginalName();
-                $file->move('assets/temp_files', $filename);
+                $file->move(public_path('assets/temp_files'), $filename);
             }
             $datas = "";
             $file = fopen(public_path('assets/temp_files/' . $filename), "r");
@@ -394,7 +394,8 @@ class ProductController extends VendorBaseController
                     return response()->json(array('errors' => ['Image format not supported']));
                 }
                 $name = \PriceHelper::ImageCreateName($file);
-                $file->move('assets/files', $name);
+                                $file->move(public_path('assets/files'), $name);
+
                 $input['file'] = $name;
             }
             $image = $request->photo;
@@ -403,7 +404,7 @@ class ProductController extends VendorBaseController
             $image = base64_decode($image);
             $image_name = time() . Str::random(8) . '.png';
             $path = 'assets/images/products/' . $image_name;
-            file_put_contents($path, $image);
+            file_put_contents(public_path($path), $image);
             
             // --- AI PHOTO ENHANCER OPTIMIZATION ---
             $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
@@ -974,7 +975,7 @@ class ProductController extends VendorBaseController
                     return response()->json(array('errors' => ['Image format not supported']));
                 }
                 $name = \PriceHelper::ImageCreateName($file);
-                $file->move('assets/files', $name);
+                $file->move(public_path('assets/files'), $name);
                 $input['file'] = $name;
             }
 

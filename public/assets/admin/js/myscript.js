@@ -881,6 +881,13 @@
 
         $("button.addProductSubmit-btn").prop("disabled", false);
       },
+      error: function(data) {
+        if (admin_loader == 1) {
+          $(".gocover").hide();
+        }
+        $("button.addProductSubmit-btn").prop("disabled", false);
+        $.notify("Something went wrong. Please try again.", "error");
+      }
     });
   });
 

@@ -190,7 +190,8 @@ class ProductController extends AdminBaseController
         $image = base64_decode($image);
         $image_name = time() . Str::random(8) . '.png';
         $path = 'assets/images/products/' . $image_name;
-        file_put_contents($path, $image);
+                file_put_contents(public_path($path), $image);
+
         if ($data->photo != null) {
             if (file_exists(public_path() . '/assets/images/products/' . $data->photo)) {
                 unlink(public_path() . '/assets/images/products/' . $data->photo);
@@ -204,9 +205,9 @@ class ProductController extends AdminBaseController
             }
         }
 
-        $img = Image::make('assets/images/products/' . $data->photo)->resize(285, 285);
+        $img = Image::make(public_path('assets/images/products/' . $data->photo))->resize(285, 285);
         $thumbnail = time() . Str::random(8) . '.jpg';
-        $img->save('assets/images/thumbnails/' . $thumbnail);
+        $img->save(public_path('assets/images/thumbnails/' . $thumbnail));
         $data->thumbnail = $thumbnail;
         $data->update();
 
@@ -238,7 +239,7 @@ class ProductController extends AdminBaseController
         $input = $request->all();
         if ($file = $request->file('file')) {
             $name = time() . \Str::random(8) . str_replace(' ', '', $file->getClientOriginalExtension());
-            $file->move('assets/files', $name);
+            $file->move(public_path('assets/files'), $name);
             $input['file'] = $name;
         }
         $image = $request->photo;
@@ -247,7 +248,8 @@ class ProductController extends AdminBaseController
         $image = base64_decode($image);
         $image_name = time() . Str::random(8) . '.png';
         $path = 'assets/images/products/' . $image_name;
-        file_put_contents($path, $image);
+                file_put_contents(public_path($path), $image);
+
         $input['photo'] = $image_name;
         if ($request->type == "Physical" || $request->type == "Listing") {
             $rules = ['sku' => 'min:8|unique:products'];
@@ -430,9 +432,9 @@ class ProductController extends AdminBaseController
         } else {
             $prod->slug = Str::slug($data->name, '-') . '-' . strtolower($data->sku);
         }
-        $img = Image::make('assets/images/products/' . $prod->photo)->resize(285, 285);
+        $img = Image::make(public_path('assets/images/products/' . $prod->photo))->resize(285, 285);
         $thumbnail = time() . Str::random(8) . '.jpg';
-        $img->save('assets/images/thumbnails/' . $thumbnail);
+        $img->save(public_path('assets/images/thumbnails/' . $thumbnail));
         $prod->thumbnail = $thumbnail;
         $prod->update();
 
@@ -451,7 +453,7 @@ class ProductController extends AdminBaseController
                 if (in_array($key, $request->galval)) {
                     $gallery = new Gallery;
                     $name = time() . \Str::random(8) . str_replace(' ', '', $file->getClientOriginalExtension());
-                    $file->move('assets/images/galleries', $name);
+                    $file->move(public_path('assets/images/galleries'), $name);
                     $gallery['photo'] = $name;
                     $gallery['product_id'] = $lastid;
                     $gallery->save();
@@ -489,7 +491,7 @@ class ProductController extends AdminBaseController
         $filename = '';
         if ($file = $request->file('csvfile')) {
             $filename = time() . '-' . $file->getClientOriginalExtension();
-            $file->move('assets/temp_files', $filename);
+            $file->move(public_path('assets/temp_files'), $filename);
         }
 
         $datas = "";
