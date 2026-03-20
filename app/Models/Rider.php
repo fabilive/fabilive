@@ -4,7 +4,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 class Rider extends Authenticatable implements JWTSubject
 {
-    protected $fillable = ['name', 'photo', 'zip', 'city_id', 'state_id', 'country', 'address', 'phone', 'fax', 'email', 'password', 'location', 'email_verify', 'email_verified', 'email_token', 'status', 'balance', 'national_id_front_image', 'national_id_back_image', 'license_image', 'submerchant_agreement',
+    protected $fillable = ['name', 'photo', 'zip', 'city_id', 'state_id', 'country', 'address', 'phone', 'fax', 'email', 'password', 'location', 'email_verify', 'email_verified', 'email_token', 'status', 'is_available', 'balance', 'national_id_front_image', 'national_id_back_image', 'license_image', 'submerchant_agreement',
     'rider_type','company_registration_document','id_company_owner','live_selfie_company',
     'transport_license','insurance_certificate_company','tin_company','rider_status',
     'vehicle_type_individual','tin_individual','driver_license_individual',
