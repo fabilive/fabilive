@@ -13,6 +13,13 @@ Route::get('/debug-shipping', function() {
     return DB::table('shippings')->get();
 });
 
+Route::get('/delete-free-shipping', function() {
+    $deleted = DB::table('shippings')->where('title', 'LIKE', '%Free Shipping%')->delete();
+    Artisan::call('cache:clear');
+    Artisan::call('view:clear');
+    return "Deleted " . $deleted . " shipping methods. Cache cleared.";
+});
+
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
