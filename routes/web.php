@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\PaymentController;
 
 
@@ -36,6 +38,18 @@ Route::get('/run-setup', function() {
             if (!file_exists($dir)) {
                 mkdir($dir, 0777, true);
             }
+        }
+
+        // Initialize default delivery data if missing
+        if (\DB::table('distance_fees')->count() == 0) {
+            \DB::table('distance_fees')->insert([
+                ['distance_start_range' => 0, 'distance_end_range' => 10000, 'fee' => 0, 'created_at' => now(), 'updated_at' => now()]
+            ]);
+        }
+        if (\DB::table('delivery_fee')->count() == 0) {
+            \DB::table('delivery_fee')->insert([
+                ['weight' => 'gram', 'start_range' => 0, 'end_range' => 10000000, 'fee' => 0, 'created_at' => now(), 'updated_at' => now()]
+            ]);
         }
 
         // Gateway Setup Logic
@@ -98,9 +112,10 @@ Route::get('/run-setup', function() {
         return response()->json([
             'status' => 'success',
             'migration' => $migrateOutput,
-            'message' => 'Stripe disabled, COD enabled, and Campay initialized successfully.'
+            'message' => 'Setup successful! Migrations applied, directories created, and delivery data initialized.'
         ]);
     } catch (\Exception $e) {
+        \Log::error('Setup Error: ' . $e->getMessage());
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage()

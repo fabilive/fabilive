@@ -11,6 +11,7 @@ use App\Models\Gallery;
 use App\Models\Generalsetting;
 use App\Models\Product;
 use App\Models\Subcategory;
+use Illuminate\Support\Facades\Log;
 use Datatables;
 use DB;
 use Illuminate\Http\Request;

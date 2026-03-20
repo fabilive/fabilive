@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Campay
 {
@@ -35,16 +36,29 @@ class Campay
             return $this->token;
         }
 
-        $response = Http::post($this->base_url . '/token/', [
+        if (empty($this->app_id) || empty($this->app_secret)) {
+            \Log::error('Campay Error: Missing App ID or App Secret.');
+            throw new \Exception('Campay Authentication Failed: Missing credentials. Please check Admin Panel > Payment Settings.');
+        }
+
+        // Masked logging for debugging
+        $maskedId = substr($this->app_id, 0, 4) . '...' . substr($this->app_id, -4);
+        \Log::info('Campay: Attempting to get token with ID: ' . $maskedId);
+
+        $response = Http::asJson()->post($this->base_url . '/token/', [
             'username' => $this->app_id,
             'password' => $this->app_secret,
         ]);
 
         if ($response->successful()) {
-            $this->token = $response->json()['token'];
-            return $this->token;
+            $data = $response->json();
+            if (isset($data['token'])) {
+                $this->token = $data['token'];
+                return $this->token;
+            }
         }
 
+        \Log::error('Campay Auth Error Response: ' . $response->body());
         throw new \Exception('Campay Authentication Failed: ' . $response->body());
     }
 

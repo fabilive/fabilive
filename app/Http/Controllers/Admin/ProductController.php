@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\Gallery;
 use App\Models\City;
 use App\Models\Product;
+use Illuminate\Support\Facades\Log;
 use App\Models\Subcategory;
 use Datatables;use DB;
 use Facade\FlareClient\View;
