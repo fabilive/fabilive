@@ -55,13 +55,26 @@
                                                         {{ __('Delivery to Customer') }}
                                                     @endif
                                                 </h5>
-                                                <p class="mb-0 text-muted small"><i class="fas fa-map-marker-alt"></i> {{ $stop->address }}</p>
+                                                <p class="mb-0 text-muted small"><i class="fas fa-map-marker-alt"></i> {{ $stop->location_text }}</p>
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            @if($stop->type == 'pickup' && $stop->status != 'picked_up')
-                                                <a href="tel:{{ $stop->seller->phone }}" class="btn btn-sm btn-outline-primary mb-1"><i class="fas fa-phone"></i></a>
-                                                {{-- Add Chat Link Here later --}}
+                                            @if($stop->type == 'pickup')
+                                                <div class="d-flex flex-column align-items-end">
+                                                    <div class="mb-2">
+                                                        <a href="tel:{{ $stop->seller->phone }}" class="btn btn-sm btn-outline-success shadow-sm" title="{{ __('Call Seller') }}">
+                                                            <i class="fas fa-phone"></i> {{ $stop->seller->phone }}
+                                                        </a>
+                                                        @php
+                                                            $sellerThread = $job->chatThreads->where('thread_type', 'rider_seller')->where('seller_id', $stop->seller_id)->first();
+                                                        @endphp
+                                                        @if($sellerThread)
+                                                            <a href="{{ route('rider-delivery-chat', $sellerThread->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('Chat with Seller') }}">
+                                                                <i class="fas fa-comments"></i>
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             @endif
                                             <p class="mb-0"><strong>{{ ucwords(str_replace('_', ' ', $stop->status)) }}</strong></p>
                                         </div>
@@ -71,28 +84,63 @@
                                         <div class="mt-3 action-buttons">
                                             @if($stop->status == 'pending')
                                                 <button onclick="updateStop('{{ $stop->id }}', 'arrived')" class="btn btn-info btn-sm">
-                                                    {{ __('I have Arrived') }}
+                                                    <i class="fas fa-map-marker-alt"></i> {{ __('I have Arrived') }}
                                                 </button>
                                             @elseif($stop->status == 'arrived')
                                                 @if($stop->type == 'pickup')
                                                     <button onclick="updateStop('{{ $stop->id }}', 'picked_up')" class="btn btn-success btn-sm">
-                                                        {{ __('Confirm Pickup') }}
+                                                        <i class="fas fa-check-circle"></i> {{ __('Confirm Pickup') }}
                                                     </button>
                                                 @else
-                                                    <button onclick="updateStop('{{ $stop->id }}', 'delivered')" class="btn btn-success btn-sm">
-                                                        {{ __('Confirm Delivery') }}
-                                                    </button>
+                                                    <div class="btn-group">
+                                                        <button onclick="updateStop('{{ $stop->id }}', 'delivered')" class="btn btn-success btn-sm mr-2">
+                                                            <i class="fas fa-check-double"></i> {{ __('Confirm Delivery') }}
+                                                        </button>
+                                                        <button onclick="updateStop('{{ $stop->id }}', 'failed')" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-times-circle"></i> {{ __('Delivery Failed') }}
+                                                        </button>
+                                                    </div>
                                                 @endif
                                             @endif
                                         </div>
                                     @endif
+
+                                    {{-- Handle Return to Seller --}}
+                                    @if($stop->type == 'dropoff' && $stop->status == 'failed' && $job->status != 'returned')
+                                        <div class="mt-3 p-3 bg-light-danger border rounded">
+                                            <p class="mb-2 text-danger"><strong>{{ __('Delivery failed.') }}</strong> {{ __('Please initiate return to seller if you cannot reach the buyer.') }}</p>
+                                            <button onclick="updateJobStatus('{{ $job->id }}', 'returning')" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-undo"></i> {{ __('Initiate Return to Seller') }}
+                                            </button>
+                                        </div>
+                                    @endif
+
+                                    @if($stop->type == 'pickup' && $job->status == 'returning' && $stop->status != 'returned')
+                                        <div class="mt-3">
+                                            <button onclick="updateStop('{{ $stop->id }}', 'returned')" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-store"></i> {{ __('Confirm Return to Seller') }}
+                                            </button>
+                                        </div>
+                                    @endif
                                     
-                                    @if($stop->type == 'dropoff' && $job->status == 'assigned')
-                                        <div class="mt-3 p-2 bg-white border rounded">
-                                            <h6><i class="fas fa-user"></i> {{ __('Buyer Details') }}</h6>
-                                            <p class="mb-1"><strong>{{ $job->order->customer_name }}</strong></p>
-                                            <p class="mb-1"><i class="fas fa-phone"></i> {{ $job->order->customer_phone }}</p>
-                                            <p class="mb-0 small"><i class="fas fa-map-marker-alt"></i> {{ $job->order->customer_address }}</p>
+                                    @if($stop->type == 'dropoff')
+                                        <div class="mt-3 p-3 bg-white border rounded shadow-sm">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0"><i class="fas fa-user-tie text-primary"></i> {{ __('Buyer Details') }}</h6>
+                                                @php
+                                                    $buyerThread = $job->chatThreads->where('thread_type', 'rider_buyer')->first();
+                                                @endphp
+                                                @if($buyerThread)
+                                                    <a href="{{ route('rider-delivery-chat', $buyerThread->id) }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                                                        <i class="fas fa-comments"></i> {{ __('Chat with Buyer') }}
+                                                    </a>
+                                                @endif
+                                            </div>
+                                            <div class="pl-4">
+                                                <p class="mb-1"><strong>{{ $job->order->customer_name }}</strong></p>
+                                                <p class="mb-1"><i class="fas fa-phone-alt text-success"></i> <a href="tel:{{ $job->order->customer_phone }}">{{ $job->order->customer_phone }}</a></p>
+                                                <p class="mb-0 small"><i class="fas fa-map-pin text-danger"></i> {{ $job->order->customer_address }}</p>
+                                            </div>
                                         </div>
                                     @endif
                                 </div>
@@ -124,7 +172,7 @@
 @section('script')
 <script>
     function updateStop(stopId, status) {
-        if(confirm('Are you sure you want to update status to ' + status + '?')) {
+        if(confirm('Are you sure you want to update status to ' + status.replace('_', ' ') + '?')) {
             let baseUrl = "{{ url('/rider/delivery/stop') }}";
             let form = document.getElementById('status-update-form');
             form.action = baseUrl + '/' + stopId;
@@ -132,5 +180,20 @@
             form.submit();
         }
     }
+
+    function updateJobStatus(jobId, status) {
+        if(confirm('Are you sure you want to ' + status.replace('_', ' ') + '?')) {
+            let baseUrl = "{{ url('/rider/delivery/job/status') }}";
+            let form = document.getElementById('job-status-update-form');
+            form.action = baseUrl + '/' + jobId;
+            document.getElementById('job-target-status').value = status;
+            form.submit();
+        }
+    }
 </script>
+
+<form id="job-status-update-form" action="" method="POST" style="display:none;">
+    @csrf
+    <input type="hidden" name="status" id="job-target-status">
+</form>
 @endsection

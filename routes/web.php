@@ -8,75 +8,9 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\PaymentController;
 
 
+// =================================== Admin Section Routes ===================================\\
 
-Route::get('/debug-shipping', function() {
-    return DB::table('shippings')->get();
-});
-
-Route::get('/delete-free-shipping', function() {
-    $deleted = DB::table('shippings')->where('title', 'LIKE', '%Free Shipping%')->delete();
-    Artisan::call('cache:clear');
-    Artisan::call('view:clear');
-    return "Deleted " . $deleted . " shipping methods. Cache cleared.";
-});
-
-Route::get('/debug-dispatch/{order_id}', function($order_id) {
-    $order = DB::table('orders')->where('id', $order_id)->first();
-    if (!$order) return "Order not found";
-    
-    $job = DB::table('delivery_jobs')->where('order_id', $order_id)->first();
-    if (!$job) return "Job not found for order " . $order_id;
-    
-    $rider_id = Auth::guard('rider')->id();
-    $rider = $rider_id ? DB::table('riders')->where('id', $rider_id)->first() : null;
-    $rider_areas = $rider_id ? DB::table('rider_service_areas')->where('rider_id', $rider_id)->pluck('service_area_id') : [];
-    
-    return response()->json([
-        'order' => [
-            'id' => $order->id,
-            'number' => $order->order_number,
-            'service_area_id' => $order->service_area_id
-        ],
-        'job' => [
-            'id' => $job->id,
-            'status' => $job->status,
-            'service_area_id' => $job->service_area_id
-        ],
-        'current_rider' => [
-            'id' => $rider_id,
-            'name' => $rider?->name,
-            'service_areas' => $rider_areas
-        ],
-        'is_visible' => ($job->status === 'available' && in_array($job->service_area_id, $rider_areas->toArray()))
-    ]);
-});
-
-Route::get('/debug-dispatch-all', function() {
-    $jobs = DB::table('delivery_jobs')
-        ->join('orders', 'delivery_jobs.order_id', '=', 'orders.id')
-        ->select('delivery_jobs.*', 'orders.order_number', 'orders.service_area_id as order_service_area_id')
-        ->latest('delivery_jobs.id')
-        ->take(10)
-        ->get();
-    
-    $rider_id = Auth::guard('rider')->id();
-    $rider_areas = $rider_id ? DB::table('rider_service_areas')->where('rider_id', $rider_id)->pluck('service_area_id')->toArray() : [];
-    
-    return [
-        'rider_id' => $rider_id,
-        'rider_areas' => $rider_areas,
-        'recent_jobs' => $jobs->map(function($job) use ($rider_areas) {
-             return [
-                 'order_number' => $job->order_number,
-                 'job_status' => $job->status,
-                 'job_area' => $job->service_area_id,
-                 'order_area' => $job->order_service_area_id,
-                 'visible_to_current_rider' => ($job->status === 'available' && in_array($job->service_area_id, $rider_areas))
-             ];
-        })
-    ];
-});
-
+Route::prefix('admin')->group(function () {
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/run-setup', function() {
     try {
@@ -1853,6 +1787,11 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('delivery/jobs', 'Rider\RiderController@deliveryJobs')->name('rider-delivery-index');
         Route::get('delivery/details/{id}', 'Rider\RiderController@jobDetails')->name('rider-delivery-details');
         Route::post('delivery/stop/{id}', 'Rider\RiderController@updateStopStatus')->name('rider-delivery-stop-update');
+        Route::post('delivery/job/status/{id}', 'Rider\RiderController@updateJobStatus')->name('rider-delivery-job-status-update');
+
+        Route::get('delivery/chat/{id}', 'Rider\DeliveryChatController@show')->name('rider-delivery-chat');
+        Route::get('delivery/chat/messages/{id}', 'Rider\DeliveryChatController@fetchMessages')->name('rider-delivery-chat-messages');
+        Route::post('delivery/chat/send', 'Rider\DeliveryChatController@sendMessage')->name('rider-delivery-chat-send');
         // ============ End: Multi-Seller Delivery System =========================\\
 
     });
@@ -2153,7 +2092,5 @@ Route::group(['middleware' => 'maintenance'], function () {
     // ************************************ FRONT SECTION ENDS**********************************************
 
 });
-Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');
 
-Route::post('the/genius/ocean/2441139', 'Front\FrontendController@subscription');
-Route::get('finalize', 'Front\FrontendController@finalize');
+Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');

@@ -67,4 +67,9 @@ class DeliveryJob extends Model
     {
         return $this->belongsTo(ServiceArea::class);
     }
+
+    public function chatThreads()
+    {
+        return $this->hasMany(DeliveryChatThread::class);
+    }
 }

@@ -63,9 +63,20 @@
                                             </td>
                                             <td>{{ $job->created_at->format('d M Y') }}</td>
                                             <td>
-                                                <a href="{{ route('rider-delivery-details', $job->id) }}" class="mybtn1 sm1">
-                                                    {{ __('Manage') }}
-                                                </a>
+                                                <div class="dropdown d-inline-block">
+                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        {{ __('Action') }}
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="{{ route('rider-delivery-details', $job->id) }}">{{ __('View Details') }}</a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <h6 class="dropdown-header text-uppercase" style="font-size: 0.7rem;">{{ __('Update Status') }}</h6>
+                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'picked_up')">{{ __('Mark as Picked Up') }}</a>
+                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'on_delivery')">{{ __('Out for Delivery') }}</a>
+                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'delivered')">{{ __('Mark as Delivered') }}</a>
+                                                        <a class="dropdown-item" href="javascript:;" onclick="updateJobStatus('{{ $job->id }}', 'returning')">{{ __('Initiate Return') }}</a>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -85,4 +96,20 @@
 @section('script')
 <script src="{{ asset('assets/front/js/dataTables.min.js') }}" defer></script>
 <script src="{{ asset('assets/front/js/user.js') }}" defer></script>
+<script>
+    function updateJobStatus(jobId, status) {
+        if(confirm('Are you sure you want to update status to ' + status.replace('_', ' ') + '?')) {
+            let baseUrl = "{{ url('/rider/delivery/job/status') }}";
+            let form = document.getElementById('job-status-update-form');
+            form.action = baseUrl + '/' + jobId;
+            document.getElementById('job-target-status').value = status;
+            form.submit();
+        }
+    }
+</script>
+
+<form id="job-status-update-form" action="" method="POST" style="display:none;">
+    @csrf
+    <input type="hidden" name="status" id="job-target-status">
+</form>
 @endsection

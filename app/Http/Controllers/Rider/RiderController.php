@@ -366,7 +366,7 @@ public function orderAccept($id)
 
     public function jobDetails($id)
     {
-        $job = DeliveryJob::with(['order', 'stops.seller', 'events'])->findOrFail($id);
+        $job = DeliveryJob::with(['order', 'stops.seller', 'events', 'chatThreads'])->findOrFail($id);
         if ($job->assigned_rider_id != $this->rider->id && $job->status !== 'available') {
             return redirect()->back()->with('error', __('Unauthorized.'));
         }
@@ -384,7 +384,7 @@ public function orderAccept($id)
         }
 
         $newStatus = $request->input('status');
-        $allowedStatuses = ['arrived', 'picked_up', 'delivered'];
+        $allowedStatuses = ['arrived', 'picked_up', 'delivered', 'failed', 'returned'];
         if (!in_array($newStatus, $allowedStatuses)) {
             return redirect()->back()->with('error', __('Invalid status.'));
         }
@@ -395,6 +395,8 @@ public function orderAccept($id)
             $stop->arrived_at = now();
         } elseif ($newStatus === 'picked_up') {
             $stop->picked_up_at = now();
+        } elseif ($newStatus === 'delivered') {
+            $stop->delivered_at = now();
         }
         $stop->save();
 
@@ -420,6 +422,14 @@ public function orderAccept($id)
                 $updateData['payment_status'] = 'Completed';
             }
             $job->order->update($updateData);
+        } elseif ($newStatus === 'failed') {
+            // Delivery failed
+            $job->update(['status' => 'failed']);
+            $job->order->update(['status' => 'failed delivery']);
+        } elseif ($newStatus === 'returned') {
+            // Return to seller done
+            $job->update(['status' => 'returned', 'returned_at' => now()]);
+            $job->order->update(['status' => 'cancelled']); // As requested: "mark order canceled once they return"
         }
 
         return redirect()->route('rider-delivery-details', $job->id)
@@ -435,7 +445,7 @@ public function orderAccept($id)
         }
 
         $newStatus = $request->input('status');
-        $allowed = ['picked_up', 'on_delivery', 'delivered'];
+        $allowed = ['picked_up', 'on_delivery', 'delivered', 'returning'];
         if (!in_array($newStatus, $allowed)) {
             return redirect()->back()->with('error', __('Invalid status.'));
         }
@@ -454,9 +464,12 @@ public function orderAccept($id)
                 $updateData['payment_status'] = 'Completed';
             }
             $job->order->update($updateData);
+        } elseif ($newStatus === 'returning') {
+            $job->update(['status' => 'returning']);
+            $job->order->update(['status' => 'returning']);
         }
 
-        return redirect()->route('rider-delivery-index')
+        return redirect()->back()
             ->with('success', __('Order status updated to: ') . ucwords(str_replace('_', ' ', $newStatus)));
     }
 }
