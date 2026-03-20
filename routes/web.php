@@ -122,20 +122,23 @@ Route::get('/run-setup', function() {
         }
 
         // Fix missing slugs (more aggressive check)
-        $prods = DB::table('products')->get();
+        $tables = ['products', 'categories', 'subcategories', 'childcategories'];
         $fixedSlugs = 0;
-        foreach ($prods as $p) {
-            if (empty($p->slug) || strlen($p->slug) < 2) {
-                $slug = Illuminate\Support\Str::slug($p->name);
-                if (empty($slug)) {
-                    $slug = 'product-' . $p->id;
+        foreach ($tables as $table) {
+            $records = DB::table($table)->get();
+            foreach ($records as $r) {
+                if (empty($r->slug) || strlen($r->slug) < 2) {
+                    $slug = Illuminate\Support\Str::slug($r->name);
+                    if (empty($slug)) {
+                        $slug = $table . '-' . $r->id;
+                    }
+                    $check = DB::table($table)->where('slug', $slug)->where('id', '!=', $r->id)->exists();
+                    if ($check) {
+                        $slug = $slug . '-' . time() . '-' . $r->id;
+                    }
+                    DB::table($table)->where('id', $r->id)->update(['slug' => $slug]);
+                    $fixedSlugs++;
                 }
-                $check = DB::table('products')->where('slug', $slug)->where('id', '!=', $p->id)->exists();
-                if ($check) {
-                    $slug = $slug . '-' . time() . '-' . $p->id;
-                }
-                DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
-                $fixedSlugs++;
             }
         }
 
