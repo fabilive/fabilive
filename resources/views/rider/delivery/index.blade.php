@@ -64,7 +64,7 @@
                                             <td>{{ $job->created_at->format('d M Y') }}</td>
                                             <td>
                                                 <div class="dropdown d-inline-block">
-                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         {{ __('Action') }}
                                                     </button>
                                                     <div class="dropdown-menu">
