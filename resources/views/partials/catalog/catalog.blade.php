@@ -147,10 +147,10 @@
                                 <div class="product type-product">
                                     <div class="product-wrapper">
                                         <div class="product-image">
-                                            <a href="{{ route('front.product', $prod['slug']) }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod['thumbnail'] ? asset('assets/images/thumbnails/'.$prod['thumbnail'] ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+                                            <a href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod['thumbnail'] ? asset('assets/images/thumbnails/'.$prod['thumbnail'] ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
                                             <div class="wishlist-view">
                                                 <div class="quickview-button">
-                                                    <a class="quickview-btn" href="{{ route('front.product', $prod['slug']) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
+                                                    <a class="quickview-btn" href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
                                                 </div>
                                                 <div class="whishlist-button">
                                                     <a class="add_to_wishlist" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('Wishlist') }}" data-bs-original-title="Add to Wishlist" aria-label="Add to Wishlist">{{ __('Wishlist') }}</a>
@@ -158,7 +158,7 @@
                                             </div>
                                         </div>
                                         <div class="product-info">
-                                            <h3 class="product-title"><a href="{{ route('front.product', $prod['slug']) }}">{{ $prod['name']  }}</a></h3>
+                                            <h3 class="product-title"><a href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}">{{ $prod['name']  }}</a></h3>
                                             <div class="product-price">
                                                 <div class="price">
                                                     <ins>{{ PriceHelper::showPrice($prod['price'])  }}</ins>
