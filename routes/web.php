@@ -23,6 +23,10 @@ Route::get('/run-setup', function() {
     try {
         // Run Migrations
         Artisan::call('migrate', ['--force' => true]);
+        Artisan::call('route:clear');
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
         $migrateOutput = Artisan::output();
 
         // Ensure Directories Exist
