@@ -68,7 +68,7 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="6" class="text-center">{{ __('No Orders Found.') }}</td>
+                                            <td colspan="6" class="text-center">{{ __('No Service Areas Found.') }}</td>
                                         </tr>
                                         @endforelse
                                 </tbody>

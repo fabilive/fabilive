@@ -14,7 +14,7 @@
             <div class="col-12">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0 d-inline-flex bg-transparent p-0">
-                        <li class="breadcrumb-item"><a href="{{ route('rider.dashboard') }}">{{ __('Dashboard') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('rider-dashboard') }}">{{ __('Dashboard') }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ __('Available Jobs') }}</li>
                     </ol>
                 </nav>
@@ -49,7 +49,6 @@
                                         <th>{{ __('Order #') }}</th>
                                         <th>{{ __('Earnings') }}</th>
                                         <th>{{ __('Stops') }}</th>
-                                        <th>{{ __('Distance (Est)') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -57,9 +56,8 @@
                                     @foreach($jobs as $job)
                                         <tr>
                                             <td>{{ $job->order->order_number }}</td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earning, $job->order->currency_sign) }}</td>
+                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
                                             <td>{{ $job->stops->count() }} {{ __('Stops') }}</td>
-                                            <td>{{ number_format($job->total_distance, 2) }} km</td>
                                             <td>
                                                 <a href="{{ route('rider-delivery-accept', $job->id) }}" class="mybtn1 sm1">
                                                     {{ __('Accept Job') }}
