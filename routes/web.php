@@ -46,10 +46,31 @@ Route::get('/run-setup', function() {
             ]);
         }
 
+        // Campay Setup Logic
+        $campay = \App\Models\PaymentGateway::where('keyword', 'campay')->first();
+        if (!$campay) {
+            \App\Models\PaymentGateway::create([
+                'title' => 'Campay',
+                'details' => 'Pay via Campay',
+                'subtitle' => 'Campay',
+                'name' => 'Campay',
+                'keyword' => 'campay',
+                'type' => 'automatic',
+                'information' => json_encode([
+                    'app_id' => '',
+                    'app_secret' => '',
+                    'base_url' => 'https://www.campay.net/api',
+                    'text' => 'Pay via Campay'
+                ]),
+                'currency_id' => '["1"]', 
+                'checkout' => 1
+            ]);
+        }
+
         return response()->json([
             'status' => 'success',
             'migration' => $migrateOutput,
-            'message' => 'Stripe disabled and COD enabled successfully.'
+            'message' => 'Stripe disabled, COD enabled, and Campay initialized successfully.'
         ]);
     } catch (\Exception $e) {
         return response()->json([

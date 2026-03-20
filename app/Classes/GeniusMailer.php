@@ -41,7 +41,7 @@ class GeniusMailer
             $body = preg_replace("/{admin_email}/", $mailData['aemail'], $body);
             $body = preg_replace("/{order_number}/", $mailData['onumber'], $body);
             $body = preg_replace("/{website_title}/", $this->gs->title, $body);
-            $fileName = 'assets/temp_files/' . Str::random(4) . time() . '.pdf';
+            $fileName = public_path('assets/temp_files/' . Str::random(4) . time() . '.pdf');
             $pdf = PDF::loadView('pdf.order', compact('order', 'cart'))->save($fileName);
             $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
             $this->addRecipients($mailData['to']);
@@ -55,10 +55,11 @@ class GeniusMailer
             Log::error("Mailer AutoOrderMail Error: " . $e->getMessage());
         }
 
-        $files = glob('assets/temp_files/*'); //get all file names
+        $files = glob(public_path('assets/temp_files/*')); //get all file names
         foreach ($files as $file) {
-            if (is_file($file))
+            if (is_file($file)) {
                 unlink($file); //delete file
+            }
         }
         return true;
     }
