@@ -40,7 +40,7 @@ class LoginController extends Controller
             if (Auth::guard('web')->user()->is_vendor == 2) {
               return response()->json(route('vendor.dashboard'));
             } else {
-              return response()->json(route('user-package'));
+              return response()->json(route('user-vendor-request', 8));
             }
           }
           return response()->json(1);

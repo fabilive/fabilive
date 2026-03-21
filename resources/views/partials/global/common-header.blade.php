@@ -23,7 +23,7 @@
                         @endif
                         @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 0)
                             <li><a class="border px-3 py-1"
-                                    href="{{ route('user-package') }}">{{ __('Sell') }}</a></li>
+                                    href="{{ route('user-vendor-request', 8) }}">{{ __('Sell') }}</a></li>
                         @endif
                         @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 2)
                             <li><a class="border px-3 py-1"
@@ -119,7 +119,7 @@
 
                             @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 0)
                                 <li><a class="border px-3 py-1"
-                                        href="{{ route('user-package') }}">{{ __('Sell') }}</a></li>
+                                        href="{{ route('user-vendor-request', 8) }}">{{ __('Sell') }}</a></li>
                             @endif
 
                             @if (Auth::guard('web')->check() && Auth::guard('web')->user()->is_vendor == 2)

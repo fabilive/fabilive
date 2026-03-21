@@ -100,7 +100,7 @@
                     if(response == 1) {
                         alert('Registration Successful!');
                         @if(request()->source == 'sell')
-                            window.location.href = '{{ route("user-package") }}';
+                            window.location.href = '{{ route("user-vendor-request", 8) }}';
                         @else
                             window.location.href = '{{ route("user-dashboard") }}';
                         @endif
