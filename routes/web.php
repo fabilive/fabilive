@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
+Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
 Route::get('/run-setup', function() {
     try {
         // Run Migrations
