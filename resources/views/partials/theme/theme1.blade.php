@@ -122,6 +122,87 @@
             50% { transform: translateY(-30px) rotate(2deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
+
+        /* Category Carousel */
+        .category-carousel-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+        .category-carousel-wrap .owl-carousel .item {
+            padding: 8px;
+        }
+        .category-carousel-wrap .product-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        .category-carousel-wrap .product-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        .category-carousel-wrap .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .category-carousel-wrap .product-wrapper:hover .product-image img {
+            transform: scale(1.08);
+        }
+        .category-carousel-wrap .product-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            padding: 12px 14px;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+        .category-carousel-wrap .product-wrapper:hover .product-info {
+            background: rgba(255,255,255,0.70);
+        }
+        .category-carousel-wrap .product-info .product-title a {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #111;
+            text-decoration: none;
+        }
+        .category-carousel-wrap .product-info .strok {
+            color: #6c63ff;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .category-carousel-wrap .owl-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .category-carousel-wrap .owl-prev,
+        .category-carousel-wrap .owl-next {
+            pointer-events: all;
+            background: rgba(255,255,255,0.85) !important;
+            border-radius: 50% !important;
+            width: 38px;
+            height: 38px;
+            line-height: 36px !important;
+            text-align: center;
+            font-size: 18px !important;
+            color: #333 !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            transition: background 0.2s;
+        }
+        .category-carousel-wrap .owl-prev:hover,
+        .category-carousel-wrap .owl-next:hover {
+            background: rgba(108,99,255,0.9) !important;
+            color: #fff !important;
+        }
     </style>
 @endsection
 @section('content')
@@ -209,27 +290,26 @@
 
 
     <!--==================== Category Section Start ====================-->
-    <div class="full-row pt-0 mt-5 px-sm-5 pb-0">
+    <div class="full-row pt-0 mt-5 px-sm-5 pb-0 category-carousel-wrap">
         <div class="container-fluid">
-            <div
-                class="row row-cols-xxl-6 row-cols-md-3 row-cols-sm-2 row-cols-2 g-3 coustom-categories-banner-1 e-wrapper-absolute e-hover-image-zoom">
+            <div class="category-owl-carousel owl-carousel owl-theme">
                 @foreach ($featured_categories as $fcategory)
-                    <div class="col">
-                        <div class="product type-product">
-                            <div class="product-wrapper">
-                                <div class="product-image">
-                                    <a href="{{ route('front.category', $fcategory->slug) }}"><img
-                                            src="{{ asset('assets/images/categories/' . $fcategory->image) }}"
-                                            alt="Product image"></a>
+                    <div class="item">
+                        <a href="{{ route('front.category', $fcategory->slug) }}" style="text-decoration:none;">
+                            <div class="product-wrapper" style="border-radius:12px;overflow:hidden;position:relative;">
+                                <div class="product-image" style="height:200px;overflow:hidden;">
+                                    <img src="{{ asset('assets/images/categories/' . $fcategory->image) }}"
+                                         alt="{{ $fcategory->name }}"
+                                         style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;">
                                 </div>
                                 <div class="product-info">
-                                    <h6 class="product-title"><a
-                                            href="{{ route('front.category', $fcategory->slug) }}">{{ $fcategory->name }}</a>
+                                    <h6 class="product-title mb-0">
+                                        <span style="font-weight:700;font-size:0.95rem;color:#111;">{{ $fcategory->name }}</span>
                                     </h6>
                                     <span class="strok">({{ $fcategory->products_count }})</span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -396,6 +476,7 @@
 @section('script')
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
     <script>
+        // Hero slider
         var owl = $('.home-slider').owlCarousel({
             loop: true,
             nav: false,
@@ -406,12 +487,34 @@
             animateIn: 'fadeInDown',
             animateOut: 'fadeOutUp',
             mouseDrag: false,
-        })
+        });
         $('.nextBtn').click(function() {
             owl.trigger('next.owl.carousel', [300]);
-        })
+        });
         $('.prevBtn').click(function() {
             owl.trigger('prev.owl.carousel', [300]);
-        })
+        });
+
+        // Category carousel — infinite scroll
+        $('.category-owl-carousel').owlCarousel({
+            loop: true,
+            margin: 12,
+            nav: true,
+            dots: false,
+            autoplay: true,
+            autoplayTimeout: 3000,
+            autoplayHoverPause: true,
+            responsive: {
+                0:    { items: 2 },
+                576:  { items: 3 },
+                768:  { items: 4 },
+                992:  { items: 5 },
+                1200: { items: 6 }
+            },
+            navText: [
+                '<i class="fa fa-chevron-left"></i>',
+                '<i class="fa fa-chevron-right"></i>'
+            ]
+        });
     </script>
 @endsection
