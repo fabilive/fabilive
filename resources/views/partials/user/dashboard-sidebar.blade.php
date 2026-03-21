@@ -32,20 +32,39 @@
     </div>
 
     @if ($gs->reg_vendor == 1)
-        @php
-            $user = Auth::user();
-            $activeSubscription = $user->subscribes()->where('status', 1)->latest('id')->first();
-            $subscriptionId = $activeSubscription ? $activeSubscription->subscription_id : 8;
-        @endphp
+        @php $user = Auth::user(); @endphp
 
-        <div class="row mt-4">
-            <div class="col-lg-12 text-center">
-                <a href="{{ route('user-vendor-request', $subscriptionId) }}" class="mybtn1 lg">
-                    <i class="fas fa-dollar-sign"></i>
-                    {{ $user->is_vendor == 1 ? __('Start Selling') : __('Start Selling') }}
-                </a>
+        @if($user->is_vendor == 2)
+            {{-- Approved vendor: show Vendor Dashboard button --}}
+            <div class="row mt-4">
+                <div class="col-lg-12 text-center">
+                    <a href="{{ route('vendor.dashboard') }}" class="mybtn1 lg">
+                        <i class="fas fa-store"></i>
+                        {{ __('Vendor Dashboard') }}
+                    </a>
+                </div>
             </div>
-        </div>
+        @elseif($user->is_vendor == 1)
+            {{-- Pending vendor: show pending message --}}
+            <div class="row mt-4">
+                <div class="col-lg-12 text-center">
+                    <a href="{{ route('user-vendor-request', 8) }}" class="mybtn1 lg" style="background:#f59e0b;">
+                        <i class="fas fa-clock"></i>
+                        {{ __('Application Pending') }}
+                    </a>
+                </div>
+            </div>
+        @else
+            {{-- Regular user: show Start Selling button linking directly to seller application form --}}
+            <div class="row mt-4">
+                <div class="col-lg-12 text-center">
+                    <a href="{{ route('user-vendor-request', 8) }}" class="mybtn1 lg">
+                        <i class="fas fa-dollar-sign"></i>
+                        {{ __('Start Selling') }}
+                    </a>
+                </div>
+            </div>
+        @endif
     @endif
 
 </div>
