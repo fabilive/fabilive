@@ -190,7 +190,7 @@
 
                                         <!-- Button -->
                                         <div class="animate-stagger-3 mt-4">
-                                            <a href="{{ $data->link }}" class="premium-btn">
+                                            <a href="{{ $data->link ? $data->link : route('front.category') }}" class="premium-btn">
                                                 {{ __('EXPLORE COLLECTION') }}
                                             </a>
                                         </div>

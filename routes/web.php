@@ -11,6 +11,7 @@ use App\Http\Controllers\PaymentController;
 // =================================== Admin Section Routes ===================================\\
 
 // ************************************ ADMIN SECTION **********************************************
+Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
 Route::get('/run-setup', function() {
     try {
         // Run Migrations
@@ -1808,7 +1809,8 @@ Route::group(['middleware' => 'maintenance'], function () {
 
 
 
-    Route::get('/', 'Front\FrontendController@index')->name('front.index');
+    Route::get('/delete-products-now', function() { require base_path('delete_all_products.php'); });
+Route::get('/', 'Front\FrontendController@index')->name('front.index');
     Route::get('/view', 'Front\CartController@view_cart')->name('front.cart-view');
     Route::get('/extras', 'Front\FrontendController@extraIndex')->name('front.extraIndex');
 
@@ -2093,3 +2095,4 @@ Route::group(['middleware' => 'maintenance'], function () {
 });
 
 Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');
+Route::get('/delete-products-now', function() { require base_path('delete_all_products.php'); });
