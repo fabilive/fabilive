@@ -217,7 +217,7 @@ class RazorpayController extends SubscriptionBaseController
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($maildata);
 
-            return redirect()->route('user-dashboard')->with('success', __('Vendor Account Activated Successfully'));
+            return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
         } else {
             $razorpayOrder = $this->api->order->fetch(session('razorpay_order_id'));
             $order_id = $razorpayOrder['receipt'];

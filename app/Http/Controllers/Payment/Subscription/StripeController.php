@@ -156,7 +156,7 @@ class StripeController extends SubscriptionBaseController
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($maildata);
             Session::forget('subscription_data');
-            return redirect()->route('user-dashboard')->with('success', __('Subscription Activated Successfully'));
+            return redirect()->route('user-dashboard')->with('success', isset($user) && $user->is_vendor == 2 ? __('Subscription Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
         }
     }
 }

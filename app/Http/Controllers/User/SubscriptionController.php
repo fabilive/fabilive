@@ -143,7 +143,7 @@ class SubscriptionController extends UserBaseController
     //         ];
     //         $mailer = new GeniusMailer();
     //         $mailer->sendAutoMail($data);
-    //         return redirect($success_url)->with('success',__('Vendor Account Activated Successfully'));
+    //         return redirect($success_url)->with('success',Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
     // }
 
     public function vendorrequestsub(Request $request)
@@ -299,7 +299,7 @@ class SubscriptionController extends UserBaseController
 
     public function payreturn()
     {
-        return redirect()->route('user-dashboard')->with('success', __('Vendor Account Activated Successfully'));
+        return redirect()->route('user-dashboard')->with('success', Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
     }
 
     public function check(Request $request)

@@ -165,7 +165,7 @@ class AuthorizeController extends SubscriptionBaseController
                         $mailer = new GeniusMailer();
                         $mailer->sendAutoMail($data);        
 
-                        return redirect()->route('user-dashboard')->with('success',__('Vendor Account Activated Successfully'));
+                        return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
 
                     } else {
                         return back()->with('unsuccess', __('Payment Failed.'));

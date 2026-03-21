@@ -83,9 +83,9 @@ class VoguepayController extends SubscriptionBaseController
                     else
                     {
                     $headers = "From: ".$settings->from_name."<".$settings->from_email.">";
-                    mail($user->email,'Your Vendor Account Activated','Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.',$headers);
+                    mail($user->email,'Your Vendor Account Activated',isset($user) && $user->is_vendor == 2 ? 'Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.' : 'Your Vendor Application Submitted Successfully. Please wait for admin approval.',$headers);
                     }
 
-                    return redirect()->route('user-dashboard')->with('success',__('Vendor Account Activated Successfully'));
+                    return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
          }   
 }

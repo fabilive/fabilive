@@ -183,10 +183,10 @@ class PackageController extends Controller
                 $mailer->sendAutoMail($data);
             } else {
                 $headers = "From: " . $settings->from_name . "<" . $settings->from_email . ">";
-                mail($user->email, 'Your Vendor Account Activated', 'Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.', $headers);
+                mail($user->email, 'Your Vendor Account Activated', isset($user) && $user->is_vendor == 2 ? 'Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.' : 'Your Vendor Application Submitted Successfully. Please wait for admin approval.', $headers);
             }
 
-            return response()->json(['status' => true, 'data' => ['message' => 'Vendor Account Activated Successfully.'], 'error' => []]);
+            return response()->json(['status' => true, 'data' => ['message' => isset($user) && $user->is_vendor == 2 ? 'Vendor Account Activated Successfully.' : 'Vendor Application Submitted Successfully. Please wait for admin approval.'], 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
         }
