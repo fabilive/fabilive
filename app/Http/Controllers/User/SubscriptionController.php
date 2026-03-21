@@ -253,7 +253,7 @@ class SubscriptionController extends UserBaseController
             $attachments[] = $filename;
         }
         $subs = Subscription::findOrFail($request->subs_id);
-        $user->is_vendor = 2;
+        $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
         $user->date = date('Y-m-d', strtotime(Carbon::now()->format('Y-m-d') . ' + ' . $subs->days . ' days'));
         $user->mail_sent = 1;
         $user->update($input);
@@ -289,7 +289,7 @@ class SubscriptionController extends UserBaseController
         $mailer = new GeniusMailer();
         $mailer->sendAutoMail($data);
 
-        return redirect($success_url)->with('success', __('Vendor Account Activated Successfully'));
+        return redirect($success_url)->with('success', __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
     }
 
     public function paycancle()

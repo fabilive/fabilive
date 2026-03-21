@@ -27,7 +27,7 @@ class WalletPaymentController extends SubscriptionBaseController
         $settings = Generalsetting::findOrFail(1);
         $today = Carbon::now()->format('Y-m-d');
         $input = $request->all();  
-        $user->is_vendor = 2;
+        $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
             if(!empty($package))
             {
                 if($package->subscription_id == $request->subs_id)

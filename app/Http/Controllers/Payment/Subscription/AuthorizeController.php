@@ -44,7 +44,7 @@ class AuthorizeController extends SubscriptionBaseController
         $item_number = Str::random(4).time();
 
         $input = $request->all();  
-        $user->is_vendor = 2;
+        $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
 
 
         $validator = \Validator::make($request->all(),[
@@ -111,7 +111,7 @@ class AuthorizeController extends SubscriptionBaseController
                     $tresponse = $response->getTransactionResponse();
                 
                     
-                        $user->is_vendor = 2;
+                        $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
                         if(!empty($package))
                         {
                             if($package->subscription_id == $request->subs_id)

@@ -168,7 +168,7 @@ class SslController extends SubscriptionBaseController
 
             $today = Carbon::now()->format('Y-m-d');
             $input = $request->all();  
-            $user->is_vendor = 2;
+            $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
             if(!empty($package))
                     {
 
