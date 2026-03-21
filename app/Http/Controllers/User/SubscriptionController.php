@@ -32,7 +32,8 @@ class SubscriptionController extends UserBaseController
         if ($this->gs->reg_vendor != 1) {
             return redirect()->back();
         }
-        if ($data['package']) {
+        // Only redirect fully-approved vendors to their dashboard; others should see the application form
+        if ($this->user->is_vendor == 2) {
             return redirect()->route('vendor.dashboard');
         }
         $data['gateway'] = PaymentGateway::whereSubscription(1)->where('currency_id', 'like', "%\"{$this->curr->id}\"%")->latest('id')->get();
