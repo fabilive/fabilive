@@ -272,7 +272,7 @@ class SubscriptionController extends UserBaseController
         $data['user_id'] = $user->id;
         $data['subscription_id'] = $subs->id;
         $data['method'] = 'Free';
-        $data['status'] = 1;
+        $data['status'] = 0; // Pending — admin must approve to set is_vendor=2
         $sub->currency_sign = $this->curr->sign;
         $sub->currency_code = $this->curr->name;
         $sub->currency_value = $this->curr->value;
