@@ -155,17 +155,26 @@ class SubscriptionController extends UserBaseController
         }
         $this->validate($request, [
             'shop_name'   => 'unique:users',
-            'business_registration_certificate' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'business_registration_certificate' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
 
-            'passport_copy' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
-            'id_card_copy' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
-            'driver_license_copy' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'passport_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
+            'id_card_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
+            'driver_license_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
 
-            'selfie_image' => 'nullable|file',
-            'taxpayer_card_copy' => 'required|file|mimes:jpg,jpeg,png,pdf',
-            'residence_permit' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'selfie_image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/gif',
+            'taxpayer_card_copy' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
+            'residence_permit' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
+            'submerchant_agreement' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
         ], [
             'shop_name.unique' => __('This shop name has already been taken.'),
+            'taxpayer_card_copy.required' => __('The Taxpayer Card Copy is required.'),
+            'taxpayer_card_copy.mimetypes' => __('The taxpayer card must be an image (jpg, png, webp, etc.) or PDF.'),
+            'passport_copy.mimetypes' => __('The passport copy must be an image (jpg, png, webp, etc.) or PDF.'),
+            'id_card_copy.mimetypes' => __('The ID card copy must be an image (jpg, png, webp, etc.) or PDF.'),
+            'driver_license_copy.mimetypes' => __('The driver license copy must be an image (jpg, png, webp, etc.) or PDF.'),
+            'business_registration_certificate.mimetypes' => __('The business certificate must be an image (jpg, png, webp, etc.) or PDF.'),
+            'submerchant_agreement.required' => __('The Sub-Merchant Agreement is required.'),
+            'submerchant_agreement.mimetypes' => __('The sub-merchant agreement must be an image (jpg, png, webp, etc.) or PDF.'),
         ]);
         if (
             !$request->hasFile('passport_copy') &&
