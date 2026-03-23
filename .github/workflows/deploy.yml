@@ -117,7 +117,7 @@ jobs:
             chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
             
             echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
-            composer install --no-dev --optimize-autoloader --working-dir=/var/www/fabilive >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            composer install --no-dev --optimize-autoloader --ignore-platform-reqs --working-dir=/var/www/fabilive >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
             echo "--- App Key Generation ---" >> $LOG_FILE
             grep -q "APP_KEY=base64:" /var/www/fabilive/.env || php /var/www/fabilive/artisan key:generate --force >> $LOG_FILE 2>&1
