@@ -21,6 +21,16 @@ class RegisterController extends FrontBaseController
     {
       return view('frontend.register');
     }
+
+    public function showRegisterFormWithReferral($referral_name)
+    {
+        $referrer = User::where('referral_name', $referral_name)->first();
+        if ($referrer) {
+            Session::put('custom_referral', $referrer->id);
+            Session::put('custom_referral_name', $referrer->name);
+        }
+        return view('frontend.register');
+    }
     public function showVendorRegisterForm()
     {
         // Fetch all agreements (or filter by type if needed)

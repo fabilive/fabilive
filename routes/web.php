@@ -1420,6 +1420,7 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('/vendor-login', 'User\LoginController@showVendorLoginForm')->name('vendor.login');
 
         Route::get('/register', 'User\RegisterController@showRegisterForm')->name('user.register');
+        Route::get('/register/{referral_name}', 'User\RegisterController@showRegisterFormWithReferral')->name('user.register.referral');
         Route::get('/vendor-register', 'User\RegisterController@showVendorRegisterForm')->name('vendor.register');
         // User Login
         Route::post('/login', 'Auth\User\LoginController@login')->name('user.login.submit');

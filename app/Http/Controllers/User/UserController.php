@@ -42,6 +42,7 @@ class UserController extends UserBaseController
             [
                 'photo' => 'mimes:jpeg,jpg,png,svg',
                 'email' => 'unique:users,email,' . $this->user->id,
+                'referral_name' => 'nullable|string|unique:users,referral_name,' . $this->user->id,
             ];
 
         $validator = Validator::make($request->all(), $rules);

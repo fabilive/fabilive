@@ -157,6 +157,20 @@ class RegisterController extends Controller
 
                 $user->fill($input)->save();
 
+                // Custom Referral System
+                if (Session::has('custom_referral')) {
+                    $customReferrerId = Session::get('custom_referral');
+                    \App\Models\CustomReferral::create([
+                        'referrer_id' => $customReferrerId,
+                        'referred_id' => $user->id,
+                        'amount' => 500,
+                        'status' => 'locked',
+                        'expires_at' => now()->addDays(30),
+                    ]);
+                    Session::forget('custom_referral');
+                    Session::forget('custom_referral_name');
+                }
+
                 // Handle vendor uploads if vendor
                 if (!empty($request->vendor)) {
                     $this->handleVendorUploads($request, $user);

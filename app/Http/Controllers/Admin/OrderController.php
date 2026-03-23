@@ -507,6 +507,43 @@ class OrderController extends AdminBaseController
             $input = $request->all();
             if ($request->has('status')) {
                 if ($input['status'] == "completed") {
+                    
+                    // Custom Referral Unlock Logic
+                    if ($data->user_id) {
+                        $lockedReferral = \App\Models\CustomReferral::where('referred_id', $data->user_id)
+                            ->where('status', 'locked')
+                            ->first();
+
+                        if ($lockedReferral && now()->lessThanOrEqualTo($lockedReferral->expires_at)) {
+                            // Sum all completed orders by this user
+                            $totalSpent = \App\Models\Order::where('user_id', $data->user_id)
+                                ->where('status', 'completed')
+                                ->sum('pay_amount'); 
+                            
+                            $totalSpent += $data->pay_amount;
+
+                            if ($totalSpent >= 10000) {
+                                $lockedReferral->status = 'unlocked';
+                                $lockedReferral->save();
+
+                                $referrer = \App\Models\User::find($lockedReferral->referrer_id);
+                                if ($referrer) {
+                                    $referrer->balance += $lockedReferral->amount;
+                                    $referrer->save();
+
+                                    \App\Models\WalletLedger::create([
+                                        'user_id' => $referrer->id,
+                                        'amount' => $lockedReferral->amount,
+                                        'type' => 'referral_bonus',
+                                        'status' => 'completed',
+                                        'reference' => 'C-REF-' . $lockedReferral->id,
+                                        'details' => "Custom referral bonus unlocked for user ID: " . $data->user_id
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+
                     $cart = json_decode($data->cart, true);
                     if (!empty($cart['items'])) {
         foreach ($cart['items'] as $item) {

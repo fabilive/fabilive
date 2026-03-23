@@ -11,7 +11,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory;
 
-    protected $fillable = ['name', 'photo', 'zip', 'city_id', 'state_id', 'country','country_id', 'address', 'phone','selfie_image',
+    protected $fillable = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country','country_id', 'address', 'phone','selfie_image',
      'lat', 'lng',
      'fax', 'email', 'password', 'affilate_code','reff', 'verification_link', 'shop_name', 'owner_name',
      'shop_number', 'shop_address', 'reg_number', 'shop_message','business_registration_certificate','taxpayer_card_copy',
@@ -198,5 +198,15 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function customReferralsSent()
+    {
+        return $this->hasMany(CustomReferral::class, 'referrer_id');
+    }
+
+    public function customReferralReceived()
+    {
+        return $this->hasOne(CustomReferral::class, 'referred_id');
     }
 }
