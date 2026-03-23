@@ -14,7 +14,7 @@ return new class extends Migration
         if (Schema::hasTable('users')) {
             Schema::table('users', function (Blueprint $table) {
                 if (!Schema::hasColumn('users', 'is_verified')) {
-                    $table->boolean('is_verified')->default(false)->after('status');
+                    $table->boolean('is_verified')->default(false);
                 }
             });
         }
@@ -22,7 +22,7 @@ return new class extends Migration
         if (Schema::hasTable('riders')) {
             Schema::table('riders', function (Blueprint $table) {
                 if (!Schema::hasColumn('riders', 'is_verified')) {
-                    $table->boolean('is_verified')->default(false)->after('status');
+                    $table->boolean('is_verified')->default(false);
                 }
             });
         }
