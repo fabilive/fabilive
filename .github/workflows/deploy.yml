@@ -56,6 +56,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          debug: true
           script: |
             echo "--- Reclaiming Space Before Transfer ---"
             docker system prune -af --volumes || true
@@ -72,6 +73,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          debug: true
           source: "fabilive_deploy.tar.gz"
           target: "/var/www/fabilive"
 
@@ -82,6 +84,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          debug: true
           script: |
             LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
             
