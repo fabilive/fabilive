@@ -47,7 +47,8 @@ return new class extends Migration
             'pagesettings' => ['contact_success' => 'Thank you for contacting us.'],
             'seotools' => ['meta_keys' => 'fabilive, ecommerce'],
             'socialsettings' => ['facebook' => 'https://facebook.com'],
-            'fonts' => ['font_family' => 'Open Sans', 'font_value' => 'Open+Sans', 'is_default' => 1]
+            'fonts' => ['font_family' => 'Open Sans', 'font_value' => 'Open+Sans', 'is_default' => 1],
+            'currencies' => ['name' => 'USD', 'sign' => '$', 'value' => 1, 'is_default' => 1]
         ];
 
         foreach ($settingsTables as $table => $data) {
