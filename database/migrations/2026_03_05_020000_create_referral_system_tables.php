@@ -50,9 +50,9 @@ return new class extends Migration
         // Add referral settings to generalsettings
         if (Schema::hasTable('generalsettings') && !Schema::hasColumn('generalsettings', 'referral_bonus_referrer')) {
             Schema::table('generalsettings', function (Blueprint $table) {
-                $table->decimal('referral_bonus_referrer', 10, 2)->default(500)->after('fixed_commission');
-                $table->decimal('referral_bonus_referred', 10, 2)->default(250)->after('referral_bonus_referrer');
-                $table->boolean('referral_system_active')->default(true)->after('referral_bonus_referred');
+                $table->decimal('referral_bonus_referrer', 10, 2)->default(500);
+                $table->decimal('referral_bonus_referred', 10, 2)->default(250);
+                $table->boolean('referral_system_active')->default(true);
             });
         }
     }

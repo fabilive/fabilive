@@ -14,7 +14,7 @@ return new class extends Migration
         if (Schema::hasTable('delivery_jobs')) {
             Schema::table('delivery_jobs', function (Blueprint $table) {
                 if (!Schema::hasColumn('delivery_jobs', 'verified_at')) {
-                    $table->timestamp('verified_at')->nullable()->after('delivered_at');
+                    $table->timestamp('verified_at')->nullable();
                 }
             });
         }

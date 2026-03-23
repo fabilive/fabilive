@@ -14,13 +14,13 @@ return new class extends Migration
                 if (!Schema::hasColumn('users', 'vendor_status')) {
                     $table->enum('vendor_status', ['pending_docs', 'pending_approval', 'approved', 'rejected'])
                         ->default('pending_docs')
-                        ->after('is_vendor');
+                        ;
                 }
                 if (!Schema::hasColumn('users', 'vendor_rejection_reason')) {
-                    $table->text('vendor_rejection_reason')->nullable()->after('vendor_status');
+                    $table->text('vendor_rejection_reason')->nullable();
                 }
                 if (!Schema::hasColumn('users', 'vendor_approved_at')) {
-                    $table->timestamp('vendor_approved_at')->nullable()->after('vendor_rejection_reason');
+                    $table->timestamp('vendor_approved_at')->nullable();
                 }
             });
         }

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             if (!Schema::hasColumn('orders', 'escrow_status')) {
-                $table->string('escrow_status')->default('held')->after('status'); // held, released, disputed
+                $table->string('escrow_status')->default('held'); // held, released, disputed
             }
         });
     }

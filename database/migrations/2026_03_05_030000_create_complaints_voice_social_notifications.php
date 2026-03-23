@@ -35,9 +35,9 @@ return new class extends Migration
         // A5: Voice notes support — add type and voice fields to messages
         if (Schema::hasTable('messages') && !Schema::hasColumn('messages', 'type')) {
             Schema::table('messages', function (Blueprint $table) {
-                $table->enum('type', ['text', 'voice', 'image'])->default('text')->after('id');
-                $table->string('voice_url')->nullable()->after('message');
-                $table->unsignedSmallInteger('voice_duration')->nullable()->after('voice_url');
+                $table->enum('type', ['text', 'voice', 'image'])->default('text');
+                $table->string('voice_url')->nullable();
+                $table->unsignedSmallInteger('voice_duration')->nullable();
             });
         }
 

@@ -29,7 +29,7 @@ return new class extends Migration
 
         if (Schema::hasTable('messages') && !Schema::hasColumn('messages', 'delivery_chat_thread_id')) {
             Schema::table('messages', function (Blueprint $table) {
-                $table->unsignedBigInteger('delivery_chat_thread_id')->nullable()->after('conversation_id');
+                $table->unsignedBigInteger('delivery_chat_thread_id')->nullable();
             });
         }
     }

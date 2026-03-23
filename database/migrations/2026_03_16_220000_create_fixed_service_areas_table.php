@@ -15,19 +15,19 @@ return new class extends Migration
         // 1. Ensure columns exist and match Model + Controller usage
         Schema::table('service_areas', function (Blueprint $table) {
             if (!Schema::hasColumn('service_areas', 'location')) {
-                $table->string('location')->nullable()->after('name');
+                $table->string('location')->nullable();
             }
             if (!Schema::hasColumn('service_areas', 'latitude')) {
-                $table->decimal('latitude', 10, 7)->nullable()->after('location');
+                $table->decimal('latitude', 10, 7)->nullable();
             }
             if (!Schema::hasColumn('service_areas', 'longitude')) {
-                $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+                $table->decimal('longitude', 10, 7)->nullable();
             }
             if (!Schema::hasColumn('service_areas', 'base_fee')) {
-                $table->decimal('base_fee', 15, 4)->default(0)->after('price');
+                $table->decimal('base_fee', 15, 4)->default(0);
             }
             if (!Schema::hasColumn('service_areas', 'stopover_fee')) {
-                $table->decimal('stopover_fee', 15, 4)->default(0)->after('base_fee');
+                $table->decimal('stopover_fee', 15, 4)->default(0);
             }
         });
 

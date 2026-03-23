@@ -13,7 +13,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('orders', 'payout_released_at')) {
             Schema::table('orders', function (Blueprint $table) {
-                $table->timestamp('payout_released_at')->nullable()->after('escrow_status');
+                $table->timestamp('payout_released_at')->nullable();
             });
         }
     }

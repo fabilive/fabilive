@@ -14,7 +14,7 @@ return new class extends Migration
         if (Schema::hasTable('riders')) {
             Schema::table('riders', function (Blueprint $table) {
                 if (!Schema::hasColumn('riders', 'is_available')) {
-                    $table->tinyInteger('is_available')->default(1)->after('status');
+                    $table->tinyInteger('is_available')->default(1);
                 }
             });
         }

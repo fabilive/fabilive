@@ -15,7 +15,7 @@ return new class extends Migration
         if (Schema::hasTable('orders')) {
             Schema::table('orders', function (Blueprint $table) {
                 if (!Schema::hasColumn('orders', 'admin_verified')) {
-                    $table->boolean('admin_verified')->default(false)->after('escrow_status');
+                    $table->boolean('admin_verified')->default(false);
                 }
             });
         }
