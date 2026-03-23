@@ -13,22 +13,22 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'lat')) {
-                $table->decimal('lat', 10, 7)->nullable()->after('address');
+                $table->decimal('lat', 10, 7)->nullable();
             }
             if (!Schema::hasColumn('users', 'lng')) {
-                $table->decimal('lng', 10, 7)->nullable()->after('lat');
+                $table->decimal('lng', 10, 7)->nullable();
             }
         });
 
         Schema::table('orders', function (Blueprint $table) {
             if (!Schema::hasColumn('orders', 'customer_lat')) {
-                $table->decimal('customer_lat', 10, 7)->nullable()->after('customer_address');
+                $table->decimal('customer_lat', 10, 7)->nullable();
             }
             if (!Schema::hasColumn('orders', 'customer_lng')) {
-                $table->decimal('customer_lng', 10, 7)->nullable()->after('customer_lat');
+                $table->decimal('customer_lng', 10, 7)->nullable();
             }
             if (!Schema::hasColumn('orders', 'service_area_id')) {
-                $table->unsignedBigInteger('service_area_id')->nullable()->after('customer_country');
+                $table->unsignedBigInteger('service_area_id')->nullable();
             }
         });
     }
