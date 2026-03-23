@@ -54,6 +54,9 @@
                                             <p>
                                                 <input type="password" name="password_confirmation" class="form-control" required=""  placeholder="{{ __('Confirm Password') }}" >
                                             </p>
+                                            <p>
+                                                <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('custom_referral_name') ? Session::get('custom_referral_name') : '' }}">
+                                            </p>
                                             @if($gs->is_capcha == 1)
                                             <div class="form-input mb-3">
                                                  {!! NoCaptcha::display() !!}
