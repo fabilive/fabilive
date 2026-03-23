@@ -14,7 +14,7 @@ return new class extends Migration
         if (!Schema::hasTable('payout_requests')) {
             Schema::create('payout_requests', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('user_id');
+                $table->unsignedBigInteger('user_id');
                 $table->string('role')->default('seller'); // seller, rider
                 $table->decimal('amount', 15, 4);
                 $table->string('method')->nullable();

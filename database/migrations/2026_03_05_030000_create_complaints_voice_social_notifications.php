@@ -12,8 +12,8 @@ return new class extends Migration
         if (!Schema::hasTable('complaints')) {
             Schema::create('complaints', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('user_id');
-                $table->unsignedInteger('order_id')->nullable();
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('order_id')->nullable();
                 $table->string('subject');
                 $table->text('description');
                 $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
@@ -45,8 +45,8 @@ return new class extends Migration
         if (!Schema::hasTable('seller_likes')) {
             Schema::create('seller_likes', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('user_id');
-                $table->unsignedInteger('vendor_id');
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('vendor_id');
                 $table->timestamps();
 
                 $table->unique(['user_id', 'vendor_id']);
@@ -61,7 +61,7 @@ return new class extends Migration
         if (!Schema::hasTable('notification_preferences')) {
             Schema::create('notification_preferences', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('user_id');
+                $table->unsignedBigInteger('user_id');
                 $table->string('notification_type', 50); 
                 $table->boolean('email_enabled')->default(true);
                 $table->boolean('push_enabled')->default(true);
@@ -78,7 +78,7 @@ return new class extends Migration
         if (!Schema::hasTable('notification_logs')) {
             Schema::create('notification_logs', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('user_id');
+                $table->unsignedBigInteger('user_id');
                 $table->string('notification_type', 50);
                 $table->string('channel', 20); // email, push, in_app
                 $table->timestamp('sent_at');
