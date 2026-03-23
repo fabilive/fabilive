@@ -10,17 +10,24 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Fix General Settings (Logos, Icons, etc.)
-        // We use existing files found in public/assets/images
-        DB::table('generalsettings')->update([
+        $settingsData = [
             'logo' => '1580538562logo.png',
             'favicon' => '1572146352favicon.png',
             'footer_logo' => '1580538630footer-logo.png',
             'invoice_logo' => '1580538562logo.png',
-            'user_loader' => 'spinner.gif',
-            'admin_loader' => 'spinner.gif',
             'is_affilate' => 1,
-            'is_capcha' => 0, // Disable captcha for now to make testing easier
-        ]);
+            'is_capcha' => 0,
+        ];
+
+        // Only add loader fields if they exist
+        if (Schema::hasColumn('generalsettings', 'user_loader')) {
+            $settingsData['user_loader'] = 'spinner.gif';
+        }
+        if (Schema::hasColumn('generalsettings', 'admin_loader')) {
+            $settingsData['admin_loader'] = 'spinner.gif';
+        }
+
+        DB::table('generalsettings')->update($settingsData);
 
         // 2. Fix Dropdowns (Header/Status)
         DB::table('pages')->update(['header' => 1]);
