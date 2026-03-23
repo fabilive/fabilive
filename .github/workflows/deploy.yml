@@ -140,5 +140,5 @@ jobs:
             echo "--- Log Output ---" >> $LOG_FILE
             docker exec -w /var/www/fabilive fabilive_app tail -n 20 storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
             
-            echo "--- Diagnostic Log Ready at http://165.227.114.119/deploy_log.txt ---" >> $LOG_FILE
+            echo "--- Diagnostic Log Ready at https://fabilive.com/deploy_log.txt ---" >> $LOG_FILE
             cat $LOG_FILE
