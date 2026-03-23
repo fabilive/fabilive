@@ -78,7 +78,30 @@ Route::get('/run-setup', function() {
             $stripe->update();
         }
 
+        // Fix Generalsettings (Logo, reCAPTCHA)
+        $gs = \App\Models\Generalsetting::first();
+        if ($gs) {
+            // Restore Logo if missing or empty
+            if (empty($gs->logo) || $gs->logo == 'noimage.png') {
+                $gs->logo = '1748411808Original-Logo001png.png';
+            }
+            if (empty($gs->footer_logo) || $gs->footer_logo == 'noimage.png') {
+                $gs->footer_logo = '1580538630footer-logo.png';
+            }
+            
+            // Enable reCAPTCHA (Note: Fields are misspelled as 'capcha' in DB)
+            $gs->is_capcha = 1;
+            if (empty($gs->capcha_site_key)) {
+                $gs->capcha_site_key = '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x'; // Placeholder, user should update
+            }
+            if (empty($gs->capcha_secret_key)) {
+                $gs->capcha_secret_key = '6Lfb9fkaAAAAAIn-M8j3X9-xX_x...'; // Placeholder
+            }
+            $gs->save();
+        }
+
         $cod = \App\Models\PaymentGateway::where('keyword', 'cod')->first();
+
         if ($cod) {
             $cod->checkout = 1;
             $cod->update();

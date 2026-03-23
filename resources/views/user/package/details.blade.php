@@ -252,10 +252,14 @@
                                                 </div>
                                             </div>
                                             <br>
-                                            <!-- Selfie Image (Disabled for now) -->
-                                            <!--
+                                            <!-- Selfie Image -->
                                             <div class="row mb-2">
-                                                <div class="col-12">
+                                                <div class="col-lg-4">
+                                                    <h5 class="title pt-1">
+                                                        {{ __('Live Selfie') }} *
+                                                    </h5>
+                                                </div>
+                                                <div class="col-lg-8">
 
                                                     <input type="file" id="selfieFile" class="w-100" name="selfie_image" style="display:none;">
 
@@ -280,12 +284,16 @@
                                                         let stream = null;
 
                                                         openBtn.addEventListener('click', async () => {
-                                                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                                                            video.srcObject = stream;
-                                                            await video.play();
-                                                            video.style.display = 'block';
-                                                            captureBtn.style.display = 'inline-block';
-                                                            openBtn.style.display = 'none';
+                                                            try {
+                                                                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                                                                video.srcObject = stream;
+                                                                await video.play();
+                                                                video.style.display = 'block';
+                                                                captureBtn.style.display = 'inline-block';
+                                                                openBtn.style.display = 'none';
+                                                            } catch (err) {
+                                                                alert('Camera access denied or NOT available. Please upload a file instead.');
+                                                            }
                                                         });
 
                                                         captureBtn.addEventListener('click', () => {
@@ -300,7 +308,9 @@
                                                                 dt.items.add(file);
                                                                 fileInput.files = dt.files;
 
-                                                                stream.getTracks().forEach(t => t.stop());
+                                                                if (stream) {
+                                                                    stream.getTracks().forEach(t => t.stop());
+                                                                }
                                                                 video.style.display = 'none';
                                                                 preview.src = URL.createObjectURL(file);
                                                                 preview.style.display = 'block';
@@ -314,7 +324,7 @@
 
                                                 </div>
                                             </div>
-                                            -->
+
                                             <!-- Selfie Image -->
 
 
