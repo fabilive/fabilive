@@ -14,7 +14,7 @@ return new class extends Migration
         if (!Schema::hasTable('buyer_seller_email_logs')) {
             Schema::create('buyer_seller_email_logs', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('vendor_id');
+                $table->unsignedBigInteger('vendor_id');
                 $table->string('buyer_email');
                 $table->string('subject');
                 $table->text('message');

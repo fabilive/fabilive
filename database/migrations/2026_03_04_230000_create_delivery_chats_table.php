@@ -16,9 +16,9 @@ return new class extends Migration
                 $table->id();
                 $table->unsignedBigInteger('delivery_job_id');
                 $table->string('thread_type'); // rider_seller, rider_buyer
-                $table->unsignedInteger('seller_id')->nullable();
-                $table->unsignedInteger('buyer_id')->nullable();
-                $table->unsignedInteger('rider_id');
+                $table->unsignedBigInteger('seller_id')->nullable();
+                $table->unsignedBigInteger('buyer_id')->nullable();
+                $table->unsignedBigInteger('rider_id');
                 
                 $table->timestamp('hidden_at')->nullable(); // Set when job is Delivered/Returned/Cancelled
                 $table->timestamps();

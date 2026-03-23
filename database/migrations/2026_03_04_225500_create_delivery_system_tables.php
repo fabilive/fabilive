@@ -14,8 +14,8 @@ return new class extends Migration
         if (!Schema::hasTable('delivery_jobs')) {
             Schema::create('delivery_jobs', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_id'); // Match orders.id which is int(11)
-            $table->unsignedInteger('buyer_id'); // Match users.id which is int(10) unsigned
+            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('buyer_id');
             $table->string('status')->default('pending_readiness'); 
             $table->unsignedBigInteger('service_area_id')->nullable();
             
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->decimal('platform_delivery_commission', 15, 4)->default(0);
             $table->decimal('rider_earnings', 15, 4)->default(0);
             
-            $table->unsignedInteger('assigned_rider_id')->nullable();
+            $table->unsignedBigInteger('assigned_rider_id')->nullable();
             $table->string('proof_photo')->nullable();
             
             $table->timestamp('accepted_at')->nullable();
@@ -49,7 +49,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('delivery_job_id');
             $table->string('type'); // pickup, dropoff
-            $table->unsignedInteger('seller_id')->nullable();
+            $table->unsignedBigInteger('seller_id')->nullable();
             $table->integer('sequence')->default(0);
             $table->string('status')->default('pending'); // pending, ready, arrived, picked_up
             
@@ -71,7 +71,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('delivery_job_id');
             $table->string('actor_type'); // system, admin, rider, seller, buyer
-            $table->unsignedInteger('actor_id')->nullable();
+            $table->unsignedBigInteger('actor_id')->nullable();
             $table->string('event');
             $table->json('meta_json')->nullable();
             $table->timestamps();
