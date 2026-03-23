@@ -11,8 +11,8 @@ class CreateChatsTable extends Migration
         if (!Schema::hasTable('chats')) {
             Schema::create('chats', function (Blueprint $table) {
                 $table->bigIncrements('id');
-                $table->unsignedInteger('sender_id');
-                $table->unsignedInteger('receiver_id');
+                $table->unsignedBigInteger('sender_id');
+                $table->unsignedBigInteger('receiver_id');
                 $table->timestamps();
 
                 $table->foreign('sender_id')
