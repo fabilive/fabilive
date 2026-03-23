@@ -14,10 +14,10 @@ return new class extends Migration
         if (!Schema::hasTable('wallet_ledger')) {
             Schema::create('wallet_ledger', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->decimal('amount', 15, 4);
             $table->string('type'); // credit, debit, escrow_hold, escrow_release
-            $table->unsignedInteger('order_id')->nullable();
+            $table->unsignedBigInteger('order_id')->nullable();
             $table->string('reference')->nullable();
             $table->string('status')->default('completed'); // pending, completed
             $table->text('details')->nullable();
