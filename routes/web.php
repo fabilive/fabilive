@@ -13,6 +13,7 @@ use App\Http\Controllers\PaymentController;
 // ************************************ ADMIN SECTION **********************************************
 Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
 Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
+Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
 Route::get('/run-setup', function() {
     try {
         // Run Migrations
@@ -22,6 +23,26 @@ Route::get('/run-setup', function() {
         Artisan::call('cache:clear');
         Artisan::call('view:clear');
         $migrateOutput = Artisan::output();
+
+        // Ensure Blog Tags column exists
+        if (!Schema::hasColumn('blogs', 'tags')) {
+            Schema::table('blogs', function ($table) {
+                $table->text('tags')->nullable();
+            });
+        }
+
+        // Ensure Blog Meta columns exist
+        if (!Schema::hasColumn('blogs', 'meta_tag')) {
+            Schema::table('blogs', function ($table) {
+                $table->text('meta_tag')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('blogs', 'meta_description')) {
+            Schema::table('blogs', function ($table) {
+                $table->text('meta_description')->nullable();
+            });
+        }
+
 
         // Ensure Directories Exist
         $dirs = [
