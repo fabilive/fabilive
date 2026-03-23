@@ -94,7 +94,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V23 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V24 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Git Safety ---" >> $LOG_FILE
