@@ -16,6 +16,7 @@ use App\Http\Controllers\PaymentController;
 Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
 Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
 Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
+Route::get('/run-setup', function() {
     try {
         if (function_exists('opcache_reset')) { opcache_reset(); }
         Artisan::call('optimize:clear');
