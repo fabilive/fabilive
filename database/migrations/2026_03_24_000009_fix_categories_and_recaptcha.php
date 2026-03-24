@@ -46,6 +46,9 @@ return new class extends Migration
                 'capcha_secret_key' => $test_secret,
             ]);
         }
+
+        // 3. Clear Cache to reflect new settings immediately
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     }
 
     public function down(): void {}

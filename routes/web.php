@@ -54,9 +54,6 @@ Route::get('/run-setup', function() {
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
-});            'trace' => $e->getTraceAsString()
-        ]);
-    }
 });
 
 Route::get('/fix-slugs', function () {
@@ -101,7 +98,7 @@ Route::prefix('admin')->group(function () {
 
     //------------ ADMIN LOGIN SECTION ------------
     Route::get('/login', 'Auth\Admin\LoginController@showForm')->name('admin.login');
-    Route::post('/login', 'Auth\Admin\LoginController@login')->name('admin.login.submit');
+    Route::middleware('throttle:5,1')->post('/login', 'Auth\Admin\LoginController@login')->name('admin.login.submit');
     Route::get('/logout', 'Auth\Admin\LoginController@logout')->name('admin.logout');
 
     //------------ ADMIN LOGIN SECTION ENDS ------------
@@ -109,9 +106,9 @@ Route::prefix('admin')->group(function () {
     //------------ ADMIN FORGOT SECTION ------------
 
     Route::get('/forgot', 'Auth\Admin\ForgotController@showForm')->name('admin.forgot');
-    Route::post('/forgot', 'Auth\Admin\ForgotController@forgot')->name('admin.forgot.submit');
+    Route::middleware('throttle:5,1')->post('/forgot', 'Auth\Admin\ForgotController@forgot')->name('admin.forgot.submit');
     Route::get('/change-password/{token}', 'Auth\Admin\ForgotController@showChangePassForm')->name('admin.change.token');
-    Route::post('/change-password', 'Auth\Admin\ForgotController@changepass')->name('admin.change.password');
+    Route::middleware('throttle:5,1')->post('/change-password', 'Auth\Admin\ForgotController@changepass')->name('admin.change.password');
 
     //------------ ADMIN FORGOT SECTION ENDS ------------
 
@@ -1322,19 +1319,19 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('/register/{referral_name}', 'User\RegisterController@showRegisterFormWithReferral')->name('user.register.referral');
         Route::get('/vendor-register', 'User\RegisterController@showVendorRegisterForm')->name('vendor.register');
         // User Login
-        Route::post('/login', 'Auth\User\LoginController@login')->name('user.login.submit');
+        Route::middleware('throttle:5,1')->post('/login', 'Auth\User\LoginController@login')->name('user.login.submit');
         // User Login End
 
         // User Register
-        Route::post('/register', 'Auth\User\RegisterController@register')->name('user-register-submit');
+        Route::middleware('throttle:5,1')->post('/register', 'Auth\User\RegisterController@register')->name('user-register-submit');
         Route::get('/register/verify/{token}', 'Auth\User\RegisterController@token')->name('user-register-token');
         // User Register End
 
         //------------ USER FORGOT SECTION ------------
         Route::get('/forgot', 'Auth\User\ForgotController@index')->name('user.forgot');
-        Route::post('/forgot', 'Auth\User\ForgotController@forgot')->name('user.forgot.submit');
+        Route::middleware('throttle:5,1')->post('/forgot', 'Auth\User\ForgotController@forgot')->name('user.forgot.submit');
         Route::get('/change-password/{token}', 'Auth\User\ForgotController@showChangePassForm')->name('user.change.token');
-        Route::post('/change-password', 'Auth\User\ForgotController@changepass')->name('user.change.password');
+        Route::middleware('throttle:5,1')->post('/change-password', 'Auth\User\ForgotController@changepass')->name('user.change.password');
 
         //------------ USER FORGOT SECTION ENDS ------------
 
@@ -1628,21 +1625,21 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // USER AUTH SECION
         Route::get('/login', 'Rider\LoginController@showLoginForm')->name('rider.login');
-        Route::post('/login', 'Auth\Rider\LoginController@login')->name('rider.login.submit');
+        Route::middleware('throttle:5,1')->post('/login', 'Auth\Rider\LoginController@login')->name('rider.login.submit');
         Route::get('/success/{status}', 'Rider\LoginController@status')->name('rider.success');
 
         Route::get('/register', 'Rider\RegisterController@showRegisterForm')->name('rider.register');
 
         // rider Register
-        Route::post('/register', 'Auth\Rider\RegisterController@register')->name('rider-register-submit');
+        Route::middleware('throttle:5,1')->post('/register', 'Auth\Rider\RegisterController@register')->name('rider-register-submit');
         Route::get('/register/verify/{token}', 'Auth\Rider\RegisterController@token')->name('rider-register-token');
         // rider Register End
 
         //------------ rider FORGOT SECTION ------------
         Route::get('/forgot', 'Auth\Rider\ForgotController@index')->name('rider.forgot');
-        Route::post('/forgot', 'Auth\Rider\ForgotController@forgot')->name('rider.forgot.submit');
+        Route::middleware('throttle:5,1')->post('/forgot', 'Auth\Rider\ForgotController@forgot')->name('rider.forgot.submit');
         Route::get('/change-password/{token}', 'Auth\Rider\ForgotController@showChangePassForm')->name('rider.change.token');
-        Route::post('/change-password', 'Auth\Rider\ForgotController@changepass')->name('rider.change.password');
+        Route::middleware('throttle:5,1')->post('/change-password', 'Auth\Rider\ForgotController@changepass')->name('rider.change.password');
 
         //------------ USER FORGOT SECTION ENDS ------------
 
