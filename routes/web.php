@@ -37,14 +37,28 @@ Route::get('/run-setup', function() {
 
         $cat_images = is_dir(public_path('assets/images/categories')) ? scandir(public_path('assets/images/categories')) : 'DIR MISSING';
 
-        return response()->json([
-            'status' => 'success',
-            'schema' => $schema,
-            'counts' => $counts,
-            'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
-            'category_images_check' => $cat_images,
-            'generalsettings_data' => $gs,
-            'products_schema_details' => $products_desc,
+        $backups = [];
+    $dirs = ['/var/www/fabilive', '/var/www/fabilive/storage', '/tmp'];
+    foreach ($dirs as $dir) {
+        if (is_dir($dir)) {
+            $files = scandir($dir);
+            foreach ($files as $file) {
+                if (str_ends_with($file, '.sql') || str_ends_with($file, '.sql.gz')) {
+                    $backups[] = $dir . '/' . $file;
+                }
+            }
+        }
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'backups' => $backups,
+        'schema' => $schema, // Corrected: $schema should be directly assigned, not wrapped in an array with other keys
+        'counts' => $counts,
+        'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
+        'category_images_check' => $cat_images,
+        'generalsettings_data' => $gs,
+        'products_schema_details' => $products_desc,
             'image_dirs' => $image_dirs,
             'env_exists' => file_exists(base_path('.env')),
             'nocaptcha_config' => config('services.nocaptcha'),

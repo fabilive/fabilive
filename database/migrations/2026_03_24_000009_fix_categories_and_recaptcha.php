@@ -18,8 +18,22 @@ return new class extends Migration
             'surveillance' => 'category_surveillance_1774125828972.png',
         ];
 
+        $names = [
+            'electronics' => 'Electronics',
+            'fashion'     => 'Fashion',
+            'smartphone'  => 'Smartphone',
+            'sport'       => 'Sport',
+            'jewelry'     => 'Jewelry',
+            'camera'      => 'Camera',
+            'surveillance' => 'Surveillance',
+        ];
+
         foreach ($mappings as $slug => $photo) {
-            DB::table('categories')->where('slug', $slug)->update(['photo' => $photo]);
+            DB::table('categories')->where('slug', $slug)->update([
+                'photo' => $photo,
+                'name'  => $names[$slug] ?? DB::raw('name'),
+                'status' => 1
+            ]);
         }
 
         // 2. Force-seed General Settings & reCAPTCHA Activation
