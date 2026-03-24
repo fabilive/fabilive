@@ -35,10 +35,14 @@ Route::get('/run-setup', function() {
         $products_desc = Schema::hasTable('products') ? DB::select('DESCRIBE products') : 'MISSING';
         $image_dirs = is_dir(public_path('assets/images')) ? array_filter(scandir(public_path('assets/images')), function($d) { return is_dir(public_path('assets/images/'.$d)); }) : 'ASSETS MISSING';
 
+        $cat_images = is_dir(public_path('assets/images/categories')) ? scandir(public_path('assets/images/categories')) : 'DIR MISSING';
+
         return response()->json([
             'status' => 'success',
             'schema' => $schema,
             'counts' => $counts,
+            'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
+            'category_images_check' => $cat_images,
             'generalsettings_data' => $gs,
             'products_schema_details' => $products_desc,
             'image_dirs' => $image_dirs,
