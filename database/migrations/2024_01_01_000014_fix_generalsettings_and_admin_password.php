@@ -25,6 +25,7 @@ return new class extends Migration
             });
         }
 
+        /* 
         // 2. Reset Admin Password
         if (Schema::hasTable('admins')) {
             if (!Schema::hasColumn('admins', 'username')) {
@@ -44,6 +45,7 @@ return new class extends Migration
                 ]
             );
         }
+        */
     }
 
     public function down(): void {}
