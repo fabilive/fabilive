@@ -84,7 +84,6 @@
                                     @if($gs->is_capcha == 1)
                                          <div class="form-input mb-3">
                                               {!! NoCaptcha::display() !!}
-                                              {!! NoCaptcha::renderJs() !!}
                                               
                                               @error('g-recaptcha-response')
                                               <p class="my-2 text-danger">{{$message}}</p>
@@ -111,5 +110,7 @@
 
 @section('script')
 
-
+    @if($gs->is_capcha == 1)
+        {!! NoCaptcha::renderJs() !!}
+    @endif
 @endsection

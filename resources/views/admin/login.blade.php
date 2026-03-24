@@ -68,7 +68,6 @@
                   @if($gs->is_capcha == 1)
                   <div class="form-input mb-4">
                        {!! NoCaptcha::display() !!}
-                       {!! NoCaptcha::renderJs() !!}
                        @error('g-recaptcha-response')
                        <p class="my-2">{{$message}}</p>
                        @enderror
@@ -104,6 +103,9 @@
     <!-- AJAX Js-->
     <script src="{{asset('assets/admin/js/myscript.js')}}"></script>
 
+    @if($gs->is_capcha == 1)
+        {!! NoCaptcha::renderJs() !!}
+    @endif
   </body>
 
 </html>

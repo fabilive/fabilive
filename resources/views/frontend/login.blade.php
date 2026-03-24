@@ -85,7 +85,6 @@
                                         @if($gs->is_capcha == 1)
                                             <div class="form-input mb-3">
                                                  {!! NoCaptcha::display() !!}
-                                                 {!! NoCaptcha::renderJs() !!}
                                                  
                                                  @error('g-recaptcha-response')
                                                  <p class="my-2">{{$message}}</p>
@@ -133,4 +132,7 @@
     @includeIf('partials.global.common-footer')
 @endsection
 @section('script')
+    @if($gs->is_capcha == 1)
+        {!! NoCaptcha::renderJs() !!}
+    @endif
 @endsection

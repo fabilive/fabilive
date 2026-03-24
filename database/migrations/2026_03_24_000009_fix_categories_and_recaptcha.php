@@ -9,7 +9,7 @@ return new class extends Migration
     {
         // 1. Map Category Images (Matched artifacts exactly)
         $mappings = [
-            'electronic' => 'category_electronic_1774125726419.png',
+            'electronics' => 'category_electronic_1774125726419.png',
             'fashion'    => 'category_fashion_1774125742762.png',
             'smartphone' => 'category_smartphone_1774125778584.png',
             'sport'      => 'category_sport_1774125795641.png',
