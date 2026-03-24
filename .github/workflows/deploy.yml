@@ -113,22 +113,23 @@ jobs:
             ls -la .env >> $LOG_FILE
             
             echo "--- Permissions Sync ---" >> $LOG_FILE
-            chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1
-            chmod -R 775 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
+            sudo chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1
+            sudo chmod -R 775 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
             # Explicitly fix logs permission
-            mkdir -p /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
-            touch /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1
-            chmod -R 777 /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
-            chown -R www-data:www-data /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
+            sudo mkdir -p /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
+            sudo touch /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1
+            sudo chmod -R 777 /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
+            sudo chown -R www-data:www-data /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
             
             # CRITICAL: COMPOSER FIRST
             echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
-            composer install --no-dev --optimize-autoloader --ignore-platform-reqs >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            # Use sudo if needed, but usually not recommended for composer. Trying without first but with hardening flags.
+            composer install --no-dev --no-plugins --no-scripts --optimize-autoloader --ignore-platform-reqs >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
             echo "--- Storage Init ---" >> $LOG_FILE
-            mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
-            mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
-            chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
+            sudo mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
+            sudo mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
+            sudo chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
             php artisan storage:link >> $LOG_FILE 2>&1 || echo "Storage link already exists"
             
             echo "--- App Key Generation ---" >> $LOG_FILE
@@ -145,7 +146,7 @@ jobs:
             ls -la vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing!" >> $LOG_FILE
             
             echo "--- PHP Refresh ---" >> $LOG_FILE
-            systemctl restart php8.3-fpm >> $LOG_FILE 2>&1 || service php8.3-fpm restart >> $LOG_FILE 2>&1
+            sudo systemctl restart php8.3-fpm >> $LOG_FILE 2>&1 || sudo service php8.3-fpm restart >> $LOG_FILE 2>&1
             
             echo "--- Log Output ---" >> $LOG_FILE
             tail -n 20 /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
