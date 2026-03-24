@@ -12,27 +12,24 @@ return new class extends Migration
         // 1. Restore Logo and Favicon in generalsettings
         if (Schema::hasTable('generalsettings')) {
             $gs = DB::table('generalsettings')->first();
+            
+            $updateData = [];
+            if (Schema::hasColumn('generalsettings', 'logo')) $updateData['logo'] = '1748411808Original-Logo001png.png';
+            if (Schema::hasColumn('generalsettings', 'footer_logo')) $updateData['footer_logo'] = '1580538630footer-logo.png';
+            if (Schema::hasColumn('generalsettings', 'favicon')) $updateData['favicon'] = '1580538630favicon.png';
+            if (Schema::hasColumn('generalsettings', 'is_capcha')) $updateData['is_capcha'] = 1;
+            if (Schema::hasColumn('generalsettings', 'is_maintenance')) $updateData['is_maintenance'] = 0;
+            if (Schema::hasColumn('generalsettings', 'is_maintainance')) $updateData['is_maintainance'] = 0;
+            if (Schema::hasColumn('generalsettings', 'capcha_site_key')) $updateData['capcha_site_key'] = '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x';
+            if (Schema::hasColumn('generalsettings', 'capcha_secret_key')) $updateData['capcha_secret_key'] = '6Lfb9fkaAAAAAIn-M8j3X9-xX_x';
+
             if ($gs) {
-                DB::table('generalsettings')->where('id', $gs->id)->update([
-                    'logo' => '1748411808Original-Logo001png.png',
-                    'footer_logo' => '1580538630footer-logo.png',
-                    'favicon' => '1580538630favicon.png',
-                    'is_capcha' => 1,
-                    'is_maintainance' => 0,
-                    'capcha_site_key' => '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x',
-                    'capcha_secret_key' => '6Lfb9fkaAAAAAIn-M8j3X9-xX_x',
-                ]);
+                if (!empty($updateData)) {
+                    DB::table('generalsettings')->where('id', $gs->id)->update($updateData);
+                }
             } else {
                 // Emergency Insert if table is empty
-                DB::table('generalsettings')->insert([
-                    'logo' => '1748411808Original-Logo001png.png',
-                    'footer_logo' => '1580538630footer-logo.png',
-                    'favicon' => '1580538630favicon.png',
-                    'is_capcha' => 1,
-                    'is_maintainance' => 0,
-                    'capcha_site_key' => '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x',
-                    'capcha_secret_key' => '6Lfb9fkaAAAAAIn-M8j3X9-xX_x',
-                ]);
+                DB::table('generalsettings')->insert($updateData);
             }
         }
 
