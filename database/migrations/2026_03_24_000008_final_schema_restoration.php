@@ -78,7 +78,8 @@ return new class extends Migration
                 'price' => 1200,
                 'status' => 1,
                 'sku' => 'LAP-001',
-                'product_type' => 'physical'
+                'product_type' => 'normal',
+                'type' => 'Physical'
             ]
         );
     }

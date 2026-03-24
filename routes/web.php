@@ -33,6 +33,7 @@ Route::get('/run-setup', function() {
 
         $gs = DB::table('generalsettings')->first();
         $products_desc = Schema::hasTable('products') ? DB::select('DESCRIBE products') : 'MISSING';
+        $category_images = is_dir(public_path('assets/images/categories')) ? scandir(public_path('assets/images/categories')) : 'DIR MISSING';
 
         return response()->json([
             'status' => 'success',
@@ -40,6 +41,7 @@ Route::get('/run-setup', function() {
             'counts' => $counts,
             'generalsettings_data' => $gs,
             'products_schema_details' => $products_desc,
+            'category_images' => $category_images,
             'env_exists' => file_exists(base_path('.env')),
             'nocaptcha_config' => config('services.nocaptcha'),
             'migrations_ran' => DB::table('migrations')->pluck('migration'),
