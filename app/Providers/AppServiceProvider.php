@@ -4,12 +4,10 @@ namespace App\Providers;
 
 use App\Models\Currency;
 use App\Models\Language;
-use Illuminate\{
-    Support\Facades\DB,
-    Support\Collection,
-    Support\ServiceProvider,
-    Pagination\LengthAwarePaginator
-};
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 use App\Models\Font;
 use Illuminate\Pagination\Paginator;
@@ -21,21 +19,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrap();
-
-        // Dynamically set reCAPTCHA keys from database
-        try {
-            if (DB::connection()->getDatabaseName()) {
-                $gs = DB::table('generalsettings')->first();
-                if ($gs) {
-                    config([
-                        'services.nocaptcha.sitekey' => $gs->capcha_site_key,
-                        'services.nocaptcha.secret'  => $gs->capcha_secret_key,
-                    ]);
-                }
-            }
-        } catch (\Exception $e) {
-            // Database might not be ready during some commands
-        }
 
         view()->composer('*', function ($settings) {
 
