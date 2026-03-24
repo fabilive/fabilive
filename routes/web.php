@@ -23,22 +23,38 @@ Route::get('/run-setup', function() {
         
         $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products'];
         $schema = [];
+        $counts = [];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) {
                 $schema[$table] = Schema::getColumnListing($table);
+                $counts[$table] = DB::table($table)->count();
             } else {
                 $schema[$table] = 'MISSING';
+                $counts[$table] = 0;
             }
         }
+
+        $envFile = base_path('.env');
+        $envExists = file_exists($envFile);
+        $nocaptcha_sitekey = env('NOCAPTCHA_SITEKEY') ? 'SET' : 'MISSING';
+        $nocaptcha_secret = env('NOCAPTCHA_SECRET') ? 'SET' : 'MISSING';
 
         return response()->json([
             'status' => 'success',
             'schema' => $schema,
-            'nocaptcha' => config('services.nocaptcha'),
-            'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
+            'counts' => $counts,
+            'env_exists' => $envExists,
+            'nocaptcha_sitekey' => $nocaptcha_sitekey,
+            'nocaptcha_secret' => $nocaptcha_secret,
+            'nocaptcha_config' => config('services.nocaptcha'),
+            'log_tail' => shell_exec('tail -n 50 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
-        return $e->getMessage();
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
     }
 });
 
