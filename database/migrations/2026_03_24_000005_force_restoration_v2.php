@@ -30,7 +30,7 @@ return new class extends Migration
                     'subtitle_text' => 'Get the best deals on the latest gadgets',
                     'details_text' => 'Up to 50% OFF on all electronics',
                     'link' => '/category/electronics',
-                    'position' => 'left'
+                    'position' => 1
                 ],
                 [
                     'photo' => '1571217740slider2.jpg',
@@ -38,7 +38,7 @@ return new class extends Migration
                     'subtitle_text' => 'New Season Collection',
                     'details_text' => 'Explore the latest styles',
                     'link' => '/category/fashion',
-                    'position' => 'center'
+                    'position' => 2
                 ],
                 [
                     'photo' => '1571217750slider3.jpg',
@@ -46,7 +46,7 @@ return new class extends Migration
                     'subtitle_text' => 'Eco-friendly products for your home',
                     'details_text' => 'Shop responsibly today',
                     'link' => '/category/home',
-                    'position' => 'right'
+                    'position' => 3
                 ]
             ]);
         }
