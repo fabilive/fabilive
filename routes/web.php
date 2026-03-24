@@ -65,6 +65,16 @@ Route::get('/run-setup', function() {
             ];
         }),
         'counts' => $counts,
+        'visibility_fix' => DB::table('products')->update([
+            'is_featured' => 1,
+            'hot' => 1,
+            'best' => 1,
+            'latest' => 1,
+            'trending' => 1,
+            'top' => 1,
+            'big' => 1,
+            'status' => 1
+        ]),
         'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
         'category_images_check' => $cat_images,
         'generalsettings_data' => $gs,

@@ -28,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
             config([
                 'nocaptcha.sitekey' => $gs->capcha_site_key,
                 'nocaptcha.secret' => $gs->capcha_secret_key,
+                'services.nocaptcha.sitekey' => $gs->capcha_site_key,
+                'services.nocaptcha.secret' => $gs->capcha_secret_key,
                 'nocaptcha.options' => [
                     'timeout' => 30,
                 ],

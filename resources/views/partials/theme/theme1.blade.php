@@ -164,11 +164,14 @@
         .category-carousel-wrap .product-wrapper:hover .product-info {
             background: rgba(255,255,255,0.70);
         }
-        .category-carousel-wrap .product-info .product-title a {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #111;
-            text-decoration: none;
+        .category-carousel-wrap .product-info .product-title span {
+            display: block;
+            white-space: nowrap;
+            overflow: visible !important;
+            text-overflow: clip;
+        }
+        .category-carousel-wrap .item {
+            min-width: 140px; /* Ensure enough width for labels */
         }
         .category-carousel-wrap .product-info .strok {
             color: #6c63ff;
