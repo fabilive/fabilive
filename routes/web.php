@@ -53,7 +53,17 @@ Route::get('/run-setup', function() {
     return response()->json([
         'status' => 'success',
         'backups' => $backups,
-        'schema' => $schema, // Corrected: $schema should be directly assigned, not wrapped in an array with other keys
+        'nocaptcha_sitekey' => config('nocaptcha.sitekey'),
+        'nocaptcha_secret' => config('nocaptcha.secret'),
+        'env_app_env' => config('app.env'),
+        'category_encoding_test' => DB::table('categories')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'name' => $c->name,
+                'hex' => bin2hex($c->name),
+                'count' => $c->products_count ?? 'N/A'
+            ];
+        }),
         'counts' => $counts,
         'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
         'category_images_check' => $cat_images,
