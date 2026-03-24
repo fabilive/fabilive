@@ -27,6 +27,12 @@ return new class extends Migration
 
         // 2. Reset Admin Password
         if (Schema::hasTable('admins')) {
+            if (!Schema::hasColumn('admins', 'username')) {
+                Schema::table('admins', function (Blueprint $table) {
+                    $table->string('username')->nullable()->after('name');
+                });
+            }
+            
             DB::table('admins')->updateOrInsert(
                 ['email' => 'hello@fabilive.com'],
                 [

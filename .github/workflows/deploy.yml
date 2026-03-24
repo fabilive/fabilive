@@ -94,34 +94,34 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V24 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V25 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
-            
-            echo "--- Git Safety ---" >> $LOG_FILE
-            git config --global --add safe.directory /var/www/fabilive >> $LOG_FILE 2>&1
             
             echo "--- Droplet Resources ---" >> $LOG_FILE
             free -m >> $LOG_FILE
             
             echo "--- Environment Setup (.env) ---" >> $LOG_FILE
+            # Only create .env if it doesn't exist
             if [ ! -f /var/www/fabilive/.env ]; then
               echo "Creating .env from .env.example" >> $LOG_FILE
               cp /var/www/fabilive/.env.example /var/www/fabilive/.env
             fi
             
             echo "--- Permissions Sync ---" >> $LOG_FILE
-            # Set ownership to root first for composer, then to www-data for web server
-            chown -R root:root /var/www/fabilive >> $LOG_FILE 2>&1
+            chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1
+            chmod -R 775 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
+            # Explicitly fix logs permission
+            mkdir -p /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
+            touch /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1
+            chmod -R 777 /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
+            chown -R www-data:www-data /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
             
             echo "--- Storage Init ---" >> $LOG_FILE
             mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
             mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
-            mkdir -p /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
-            touch /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1
-            chmod -R 777 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
+            chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
             
             echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
-            export COMPOSER_ALLOW_SUPERUSER=1
             composer install --no-dev --optimize-autoloader --ignore-platform-reqs --working-dir=/var/www/fabilive >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
             echo "--- App Key Generation ---" >> $LOG_FILE
@@ -129,14 +129,7 @@ jobs:
             
             echo "--- Cache Clear & Migrations ---" >> $LOG_FILE
             php /var/www/fabilive/artisan optimize:clear >> $LOG_FILE 2>&1 || true
-            php /var/www/fabilive/artisan storage:link >> $LOG_FILE 2>&1 || true
             php /var/www/fabilive/artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
-            
-            echo "--- Permissions Finalize ---" >> $LOG_FILE
-            chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1
-            chmod -R 775 /var/www/fabilive/storage /var/www/fabilive/bootstrap/cache >> $LOG_FILE 2>&1
-            # Ensure log file is writable by www-data
-            chmod 666 /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1
             
             echo "--- Final Health Check ---" >> $LOG_FILE
             grep "APP_KEY=" /var/www/fabilive/.env >> $LOG_FILE
