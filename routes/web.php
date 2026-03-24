@@ -28,37 +28,27 @@ Route::get('/run-setup', function() {
             if (Schema::hasTable($table)) {
                 $schema[$table] = Schema::getColumnListing($table);
                 $counts[$table] = DB::table($table)->count();
-            } else {
-                $schema[$table] = 'MISSING';
-                $counts[$table] = 0;
             }
         }
 
-        $envFile = base_path('.env');
-        $envExists = file_exists($envFile);
-        $nocaptcha_sitekey = env('NOCAPTCHA_SITEKEY') ? 'SET' : 'MISSING';
-        $nocaptcha_secret = env('NOCAPTCHA_SECRET') ? 'SET' : 'MISSING';
-
-        $migrationsRan = DB::table('migrations')->pluck('migration')->toArray();
-        $migrationFiles = array_diff(scandir(database_path('migrations')), ['.', '..']);
+        $gs = DB::table('generalsettings')->first();
+        $products_desc = Schema::hasTable('products') ? DB::select('DESCRIBE products') : 'MISSING';
 
         return response()->json([
             'status' => 'success',
             'schema' => $schema,
             'counts' => $counts,
-            'env_exists' => $envExists,
-            'nocaptcha_sitekey' => $nocaptcha_sitekey,
-            'nocaptcha_secret' => $nocaptcha_secret,
-            'migrations_ran' => $migrationsRan,
-            'migration_files' => $migrationFiles,
+            'generalsettings_data' => $gs,
+            'products_schema_details' => $products_desc,
+            'env_exists' => file_exists(base_path('.env')),
             'nocaptcha_config' => config('services.nocaptcha'),
-            'log_tail' => shell_exec('tail -n 100 ' . storage_path('logs/laravel.log'))
+            'migrations_ran' => DB::table('migrations')->pluck('migration'),
+            'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+});            'trace' => $e->getTraceAsString()
         ]);
     }
 });

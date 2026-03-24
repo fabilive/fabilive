@@ -20,11 +20,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        view()->composer('*', function ($settings) {
+        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
+            return DB::table('generalsettings')->first();
+        });
 
-            $settings->with('gs', cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
-            }));
+        if ($gs) {
+            config([
+                'services.nocaptcha.sitekey' => $gs->capcha_site_key,
+                'services.nocaptcha.secret' => $gs->capcha_secret_key,
+                'services.nocaptcha.options' => [
+                    'timeout' => 30,
+                ],
+            ]);
+        }
+
+        view()->composer('*', function ($settings) use ($gs) {
+            $settings->with('gs', $gs);
 
             $settings->with('ps', cache()->remember('pagesettings', now()->addDay(), function () {
                 return DB::table('pagesettings')->first();
