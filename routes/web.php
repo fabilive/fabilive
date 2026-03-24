@@ -20,19 +20,19 @@ Route::get('/run-setup', function() {
     try {
         Artisan::call('cache:clear');
         
-        $diagnostics = [
-            'sliders' => DB::table('sliders')->select('title', 'subtitle', 'photo')->get(),
-            'gs' => DB::table('generalsettings')->select('is_capcha', 'capcha_site_key', 'capcha_secret_key')->first(),
-            'categories' => DB::table('categories')->count(),
-            'subcategories' => DB::table('subcategories')->count(),
-            'childcategories' => DB::table('childcategories')->count(),
-            'products' => DB::table('products')->count(),
-        ];
+        $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products'];
+        $schema = [];
+        foreach ($tables as $table) {
+            if (Schema::hasTable($table)) {
+                $schema[$table] = Schema::getColumnListing($table);
+            } else {
+                $schema[$table] = 'MISSING';
+            }
+        }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Diagnostics captured',
-            'data' => $diagnostics,
+            'schema' => $schema,
             'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
