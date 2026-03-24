@@ -17,21 +17,16 @@ return new class extends Migration
                 $updateData['is_capcha'] = 1;
             }
             
-            if (Schema::hasColumn('generalsettings', 'capcha_site_key') && env('NOCAPTCHA_SITEKEY')) {
-                $updateData['capcha_site_key'] = env('NOCAPTCHA_SITEKEY');
-            }
-            
-            if (Schema::hasColumn('generalsettings', 'capcha_secret_key') && env('NOCAPTCHA_SECRET')) {
-                $updateData['capcha_secret_key'] = env('NOCAPTCHA_SECRET');
-            }
+            // Note: Keys must be set in .env
             
             if (!empty($updateData)) {
                 DB::table('generalsettings')->update($updateData);
             }
         }
 
-        // 2. Restore Sliders
-        if (Schema::hasTable('sliders') && DB::table('sliders')->count() == 0) {
+        // 2. Force Restore Sliders (Delete existing first to ensure 3)
+        if (Schema::hasTable('sliders')) {
+            DB::table('sliders')->truncate();
             DB::table('sliders')->insert([
                 [
                     'photo' => '1571217730slider1.jpg',
@@ -60,15 +55,18 @@ return new class extends Migration
             ]);
         }
 
-        // 3. Ensure Categories are active
-        if (Schema::hasTable('categories')) {
-            DB::table('categories')->update(['status' => 1]);
-        }
-        if (Schema::hasTable('subcategories')) {
-            DB::table('subcategories')->update(['status' => 1]);
+        // 3. Ensure Categories exist (Restoring Product Sub Pages)
+        if (Schema::hasTable('categories') && DB::table('categories')->count() == 0) {
+            DB::table('categories')->insert([
+                ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1, 'is_featured' => 1, 'photo' => 'category1.jpg'],
+                ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1, 'is_featured' => 1, 'photo' => 'category2.jpg'],
+                ['name' => 'Home & Garden', 'slug' => 'home-garden', 'status' => 1, 'is_featured' => 1, 'photo' => 'category3.jpg'],
+                ['name' => 'Smartphone', 'slug' => 'smartphone', 'status' => 1, 'is_featured' => 1, 'photo' => 'category4.jpg'],
+                ['name' => 'Camera', 'slug' => 'camera', 'status' => 1, 'is_featured' => 1, 'photo' => 'category5.jpg']
+            ]);
         }
 
-        // 4. Fallback for Blog Category if not seeded
+        // 4. Ensure Blog Category exists
         if (Schema::hasTable('blog_categories') && DB::table('blog_categories')->count() == 0) {
             DB::table('blog_categories')->insert([
                 'name' => 'General',
