@@ -4,6 +4,10 @@ on:
   push:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -94,7 +98,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V29 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V30 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Droplet Resources ---" >> $LOG_FILE
