@@ -18,16 +18,22 @@ Route::get('/delete-all-products-now', function() { require base_path('delete_pr
 Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
 Route::get('/run-setup', function() {
     try {
-        Artisan::call('optimize:clear');
-        $log = "";
-        $logFile = storage_path('logs/laravel.log');
-        if (file_exists($logFile)) {
-            $log = shell_exec('tail -n 50 ' . escapeshellarg($logFile));
-        }
+        Artisan::call('cache:clear');
+        
+        $diagnostics = [
+            'sliders' => DB::table('sliders')->select('title', 'subtitle', 'photo')->get(),
+            'gs' => DB::table('generalsettings')->select('is_capcha', 'capcha_site_key', 'capcha_secret_key')->first(),
+            'categories' => DB::table('categories')->count(),
+            'subcategories' => DB::table('subcategories')->count(),
+            'childcategories' => DB::table('childcategories')->count(),
+            'products' => DB::table('products')->count(),
+        ];
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Cache Cleared!',
-            'log_tail' => $log
+            'message' => 'Diagnostics captured',
+            'data' => $diagnostics,
+            'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
         return $e->getMessage();

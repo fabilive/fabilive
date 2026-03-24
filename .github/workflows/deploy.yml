@@ -98,7 +98,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V34 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V35 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Droplet Resources ---" >> $LOG_FILE
