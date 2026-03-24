@@ -19,7 +19,16 @@ Route::get('/check-settings-now', function() { require base_path('check_settings
 Route::get('/run-setup', function() {
     try {
         Artisan::call('optimize:clear');
-        return "Cache Cleared! Migrations are now handled automatically during deployment.";
+        $log = "";
+        $logFile = storage_path('logs/laravel.log');
+        if (file_exists($logFile)) {
+            $log = shell_exec('tail -n 50 ' . escapeshellarg($logFile));
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cache Cleared!',
+            'log_tail' => $log
+        ]);
     } catch (\Exception $e) {
         return $e->getMessage();
     }
