@@ -9,6 +9,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         // 1. Update Sliders with REAL image filenames found on server
         if (Schema::hasTable('sliders')) {
             DB::table('sliders')->truncate();
@@ -40,9 +42,13 @@ return new class extends Migration
             ]);
         }
 
-        // 2. Update Categories with REAL image filenames
+        // 2. Clear dependent tables first
+        if (Schema::hasTable('products')) DB::table('products')->truncate();
+        if (Schema::hasTable('subcategories')) DB::table('subcategories')->truncate();
+        if (Schema::hasTable('categories')) DB::table('categories')->truncate();
+
+        // 3. Update Categories with REAL image filenames
         if (Schema::hasTable('categories')) {
-            DB::table('categories')->truncate();
             $categories = [
                 ['name' => 'Electronics', 'slug' => 'electronics', 'photo' => 'category_electronic.png'],
                 ['name' => 'Fashion', 'slug' => 'fashion', 'photo' => 'category_fashion.png'],
@@ -55,9 +61,8 @@ return new class extends Migration
             }
         }
 
-        // 3. Seed Subcategories (Ensure Sub Pages populate)
+        // 4. Seed Subcategories (Ensure Sub Pages populate)
         if (Schema::hasTable('subcategories')) {
-            DB::table('subcategories')->truncate();
             $cat_ids = DB::table('categories')->pluck('id', 'slug');
             if (isset($cat_ids['electronics'])) {
                 DB::table('subcategories')->insert([
@@ -73,41 +78,40 @@ return new class extends Migration
             }
         }
 
-        // 4. Seed Initial Products (Ensure Product detail pages work)
+        // 5. Seed Initial Products (Ensure Product detail pages work)
         if (Schema::hasTable('products')) {
-            // Only seed if empty to avoid bloat
-            if (DB::table('products')->count() == 0) {
-                $cat_ids = DB::table('categories')->pluck('id', 'slug');
-                $sub_ids = DB::table('subcategories')->pluck('id', 'slug');
-                
-                DB::table('products')->insert([
-                    [
-                        'sku' => 'ELEC001',
-                        'name' => 'High Performance Laptop',
-                        'slug' => 'high-performance-laptop',
-                        'category_id' => $cat_ids['electronics'] ?? 0,
-                        'subcategory_id' => $sub_ids['laptops'] ?? 0,
-                        'photo' => '1744212714Akshyjpeg.jpeg', // from category images dir
-                        'price' => 1200,
-                        'details' => 'Premium laptop for professionals',
-                        'status' => 1,
-                        'stock' => 10
-                    ],
-                    [
-                        'sku' => 'FASH001',
-                        'name' => 'Urban Fashion Tee',
-                        'slug' => 'urban-fashion-tee',
-                        'category_id' => $cat_ids['fashion'] ?? 0,
-                        'subcategory_id' => $sub_ids['clothing'] ?? 0,
-                        'photo' => '1568708973f12.jpg',
-                        'price' => 25,
-                        'details' => 'Stylish and comfortable t-shirt',
-                        'status' => 1,
-                        'stock' => 100
-                    ]
-                ]);
-            }
+            $cat_ids = DB::table('categories')->pluck('id', 'slug');
+            $sub_ids = DB::table('subcategories')->pluck('id', 'slug');
+            
+            DB::table('products')->insert([
+                [
+                    'sku' => 'ELEC001',
+                    'name' => 'High Performance Laptop',
+                    'slug' => 'high-performance-laptop',
+                    'category_id' => $cat_ids['electronics'] ?? 0,
+                    'subcategory_id' => $sub_ids['laptops'] ?? 0,
+                    'photo' => '1744212714Akshyjpeg.jpeg',
+                    'price' => 1200,
+                    'details' => 'Premium laptop for professionals',
+                    'status' => 1,
+                    'stock' => 10
+                ],
+                [
+                    'sku' => 'FASH001',
+                    'name' => 'Urban Fashion Tee',
+                    'slug' => 'urban-fashion-tee',
+                    'category_id' => $cat_ids['fashion'] ?? 0,
+                    'subcategory_id' => $sub_ids['clothing'] ?? 0,
+                    'photo' => '1568708973f12.jpg',
+                    'price' => 25,
+                    'details' => 'Stylish and comfortable t-shirt',
+                    'status' => 1,
+                    'stock' => 100
+                ]
+            ]);
         }
+
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void {}
