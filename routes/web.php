@@ -39,6 +39,9 @@ Route::get('/run-setup', function() {
         $nocaptcha_sitekey = env('NOCAPTCHA_SITEKEY') ? 'SET' : 'MISSING';
         $nocaptcha_secret = env('NOCAPTCHA_SECRET') ? 'SET' : 'MISSING';
 
+        $migrationsRan = DB::table('migrations')->pluck('migration')->toArray();
+        $migrationFiles = array_diff(scandir(database_path('migrations')), ['.', '..']);
+
         return response()->json([
             'status' => 'success',
             'schema' => $schema,
@@ -46,8 +49,10 @@ Route::get('/run-setup', function() {
             'env_exists' => $envExists,
             'nocaptcha_sitekey' => $nocaptcha_sitekey,
             'nocaptcha_secret' => $nocaptcha_secret,
+            'migrations_ran' => $migrationsRan,
+            'migration_files' => $migrationFiles,
             'nocaptcha_config' => config('services.nocaptcha'),
-            'log_tail' => shell_exec('tail -n 50 ' . storage_path('logs/laravel.log'))
+            'log_tail' => shell_exec('tail -n 100 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
         return response()->json([
