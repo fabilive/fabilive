@@ -65,8 +65,12 @@ class CatalogController extends FrontBaseController
     $sort = $request->sort;
     $search = $request->search;
     $pageby = $request->pageby;
-    $minprice = ($minprice / $this->curr->value);
-    $maxprice = ($maxprice / $this->curr->value);
+    if (!$this->curr) {
+        $this->curr = Currency::where('is_default', 1)->first() ?? Currency::first();
+    }
+    
+    $minprice = ($minprice / ($this->curr->value ?? 1));
+    $maxprice = ($maxprice / ($this->curr->value ?? 1));
     $type = $request->has('type') ?? '';
 
 
@@ -88,17 +92,10 @@ class CatalogController extends FrontBaseController
       ->whereHas('user', function ($q) {
         $q->where('is_vendor', 2);
       })
-      ->when('user', function ($query) {
-        foreach ($query as $q) {
-            if ($q->is_vendor == 2) {
-                return $q;
-            }
-        }
-    })
       ->withCount('ratings')
       ->withAvg('ratings', 'rating')
       ->get()
-      ->chunk(4);;
+      ->chunk(4);
 
     $prods = Product::with('user')->when($cat, function ($query, $cat) {
       return $query->where('category_id', $cat->id);
@@ -204,12 +201,12 @@ class CatalogController extends FrontBaseController
       }
     });
 
-    $prods = $prods->where('status', 1)->get()
-
-      ->map(function ($item) {
+    $prods = $prods->where('status', 1)->paginate(isset($pageby) ? $pageby : ($this->gs->page_count ?? 12));
+    
+    $prods->getCollection()->transform(function ($item) {
         $item->price = $item->vendorSizePrice();
         return $item;
-      })->paginate(isset($pageby) ? $pageby : $this->gs->page_count);
+    });
     $data['prods'] = $prods;
     //    dd($data['prods']);
     if ($request->ajax()) {
