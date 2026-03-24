@@ -21,6 +21,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrap();
+
+        // Dynamically set reCAPTCHA keys from database
+        try {
+            if (DB::connection()->getDatabaseName()) {
+                $gs = DB::table('generalsettings')->first();
+                if ($gs) {
+                    config([
+                        'services.nocaptcha.sitekey' => $gs->capcha_site_key,
+                        'services.nocaptcha.secret'  => $gs->capcha_secret_key,
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Database might not be ready during some commands
+        }
+
         view()->composer('*', function ($settings) {
 
             $settings->with('gs', cache()->remember('generalsettings', now()->addDay(), function () {
