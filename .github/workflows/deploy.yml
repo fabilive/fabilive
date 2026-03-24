@@ -98,7 +98,7 @@ jobs:
             rm fabilive_deploy.tar.gz
             
             # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V36 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V42 ---" > $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Droplet Resources ---" >> $LOG_FILE
@@ -121,14 +121,15 @@ jobs:
             chmod -R 777 /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
             chown -R www-data:www-data /var/www/fabilive/storage/logs >> $LOG_FILE 2>&1
             
+            # CRITICAL: COMPOSER FIRST
+            echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
+            composer install --no-dev --optimize-autoloader --ignore-platform-reqs >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            
             echo "--- Storage Init ---" >> $LOG_FILE
             mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
             mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
             chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
             php artisan storage:link >> $LOG_FILE 2>&1 || echo "Storage link already exists"
-            
-            echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
-            composer install --no-dev --optimize-autoloader --ignore-platform-reqs >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
             echo "--- App Key Generation ---" >> $LOG_FILE
             if ! grep -q "APP_KEY=base64" .env; then
