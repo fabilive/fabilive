@@ -21,7 +21,7 @@ Route::get('/run-setup', function() {
         if (function_exists('opcache_reset')) { opcache_reset(); }
         Artisan::call('optimize:clear');
         
-        $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products'];
+        $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products', 'attributes'];
         $schema = [];
         $counts = [];
         foreach ($tables as $table) {
