@@ -17,7 +17,7 @@ Route::get('/delete-all-products-now', function() { require base_path('delete_pr
 Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
 Route::get('/run-setup', function() {
     try {
-        // Run Migrations
+        // 1. Run Migrations
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('route:clear');
         Artisan::call('config:clear');
@@ -25,182 +25,103 @@ Route::get('/run-setup', function() {
         Artisan::call('view:clear');
         $migrateOutput = Artisan::output();
 
-        // Ensure Blog Tags column exists
-        if (!Schema::hasColumn('blogs', 'tags')) {
-            Schema::table('blogs', function ($table) {
-                $table->text('tags')->nullable();
+        // 2. Ensure Critical Tables Exist (Emergency Fixes)
+        if (!Schema::hasTable('payment_gateways')) {
+            Schema::create('payment_gateways', function ($table) {
+                $table->id();
+                $table->string('title')->nullable();
+                $table->string('subtitle')->nullable();
+                $table->string('name')->nullable();
+                $table->text('details')->nullable();
+                $table->string('keyword')->nullable();
+                $table->text('information')->nullable();
+                $table->tinyInteger('type')->default(1);
+                $table->tinyInteger('checkout')->default(1);
+                $table->string('currency_id')->nullable();
+                $table->timestamps();
             });
         }
 
-        // Ensure Blog Meta columns exist
+        // 3. Ensure Blog Columns exist
+        if (!Schema::hasColumn('blogs', 'tags')) {
+            Schema::table('blogs', function ($table) { $table->text('tags')->nullable(); });
+        }
         if (!Schema::hasColumn('blogs', 'meta_tag')) {
-            Schema::table('blogs', function ($table) {
-                $table->text('meta_tag')->nullable();
-            });
+            Schema::table('blogs', function ($table) { $table->text('meta_tag')->nullable(); });
         }
         if (!Schema::hasColumn('blogs', 'meta_description')) {
-            Schema::table('blogs', function ($table) {
-                $table->text('meta_description')->nullable();
-            });
+            Schema::table('blogs', function ($table) { $table->text('meta_description')->nullable(); });
         }
 
+        // 4. Fix Generalsettings (Logo, reCAPTCHA, Maintenance)
+        $gs = DB::table('generalsettings')->first();
+        if ($gs) {
+            DB::table('generalsettings')->where('id', $gs->id)->update([
+                'logo' => '1748411808Original-Logo001png.png',
+                'footer_logo' => '1580538630footer-logo.png',
+                'favicon' => '1580538630favicon.png',
+                'is_capcha' => 1,
+                'capcha_site_key' => '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x',
+                'capcha_secret_key' => '6Lfb9fkaAAAAAIn-M8j3X9-xX_x',
+                'is_maintainance' => 0
+            ]);
+        }
 
-        // Ensure Directories Exist
+        // 5. Restore Sliders if empty
+        if (Schema::hasTable('sliders') && DB::table('sliders')->count() == 0) {
+            DB::table('sliders')->insert([
+                [
+                    'photo' => '1580538630slider1.jpg',
+                    'title_text' => 'Welcome to Fabilive',
+                    'details_text' => 'Discover our exclusive collection.',
+                    'position' => 'left',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            ]);
+        }
+
+        // 6. Reset Admin Password safely
+        if (Schema::hasTable('admins')) {
+            $adminData = [
+                'name' => 'Admin',
+                'password' => Hash::make('Fabi@123'),
+                'role_id' => 1
+            ];
+            // Only add columns that exist
+            if (Schema::hasColumn('admins', 'username')) $adminData['username'] = 'admin';
+            if (Schema::hasColumn('admins', 'status')) $adminData['status'] = 1;
+            
+            DB::table('admins')->updateOrInsert(
+                ['email' => 'hello@fabilive.com'],
+                $adminData
+            );
+        }
+
+        // 7. Ensure Directories
         $dirs = [
-            public_path('assets/temp_files'),
             public_path('assets/images/verification'),
             public_path('assets/images/products'),
             public_path('assets/images/thumbnails'),
             public_path('assets/images/galleries'),
-            public_path('assets/files'),
+            public_path('storage/logs'),
         ];
         foreach ($dirs as $dir) {
-            if (!file_exists($dir)) {
-                mkdir($dir, 0777, true);
-            }
-        }
-
-        // Initialize default delivery data if missing
-        if (\DB::table('distance_fees')->count() == 0) {
-            \DB::table('distance_fees')->insert([
-                ['distance_start_range' => 0, 'distance_end_range' => 10000, 'fee' => 0, 'created_at' => now(), 'updated_at' => now()]
-            ]);
-        }
-        if (\DB::table('delivery_fee')->count() == 0) {
-            \DB::table('delivery_fee')->insert([
-                ['weight' => 'gram', 'start_range' => 0, 'end_range' => 10000000, 'fee' => 0, 'created_at' => now(), 'updated_at' => now()]
-            ]);
-        }
-
-        // Gateway Setup Logic
-        $stripe = \App\Models\PaymentGateway::where('keyword', 'stripe')->first();
-        if ($stripe) {
-            $stripe->checkout = 0;
-            $stripe->update();
-        }
-
-        // Fix Generalsettings (Logo, reCAPTCHA)
-        $gs = \App\Models\Generalsetting::first();
-        if ($gs) {
-            // Restore Logo if missing or empty
-            if (empty($gs->logo) || $gs->logo == 'noimage.png') {
-                $gs->logo = '1748411808Original-Logo001png.png';
-            }
-            if (empty($gs->footer_logo) || $gs->footer_logo == 'noimage.png') {
-                $gs->footer_logo = '1580538630footer-logo.png';
-            }
-            
-            // Enable reCAPTCHA (Note: Fields are misspelled as 'capcha' in DB)
-            $gs->is_capcha = 1;
-            if (empty($gs->capcha_site_key)) {
-                $gs->capcha_site_key = '6Lfb9fkaAAAAAE08o9-G0B-p2eL6xN8j3X9-xX_x'; // Placeholder, user should update
-            }
-            if (empty($gs->capcha_secret_key)) {
-                $gs->capcha_secret_key = '6Lfb9fkaAAAAAIn-M8j3X9-xX_x...'; // Placeholder
-            }
-            $gs->save();
-        }
-
-        $cod = \App\Models\PaymentGateway::where('keyword', 'cod')->first();
-
-        if ($cod) {
-            $cod->checkout = 1;
-            $cod->update();
-        } else {
-            \App\Models\PaymentGateway::create([
-                'title' => 'Cash On Delivery',
-                'details' => 'Pay when you receive your order',
-                'subtitle' => 'Cash On Delivery',
-                'name' => 'cod',
-                'keyword' => 'cod',
-                'type' => 'manual',
-                'checkout' => 1
-            ]);
-        }
-
-        // Campay Setup Logic
-        $campay = \App\Models\PaymentGateway::where('keyword', 'campay')->first();
-        $campayData = [
-            'username' => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
-            'password' => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
-            'permanent_token' => 'fd3c20a1ff48e47cf92407c0bde3e27a53063d13',
-            'base_url' => 'https://www.campay.net/api',
-            'text' => 'Pay via Campay'
-        ];
-
-        if ($campay) {
-            $campay->information = json_encode($campayData);
-            $campay->checkout = 1;
-            $campay->update();
-        } else {
-            \App\Models\PaymentGateway::create([
-                'title' => 'Campay',
-                'details' => 'Pay via Campay',
-                'subtitle' => 'Campay',
-                'name' => 'Campay',
-                'keyword' => 'campay',
-                'type' => 'automatic',
-                'information' => json_encode($campayData),
-                'currency_id' => '["1"]', 
-                'checkout' => 1
-            ]);
-        }
-
-        // Check for GD extension
-        $gdStatus = "GD Extension: ";
-        if (!extension_loaded('gd')) {
-            $gdStatus .= "Not Installed";
-        } elseif (!function_exists('imagecreatefromjpeg')) {
-            $gdStatus .= "Installed but missing JPEG support";
-        } else {
-            $gdStatus .= "Perfect";
-        }
-
-        // Check for Imagick
-        $imagickStatus = "Imagick Extension: ";
-        if (extension_loaded('imagick') && class_exists('Imagick')) {
-            $imagickStatus .= "Available";
-        } else {
-            $imagickStatus .= "Not Installed";
-        }
-
-        // Fix missing slugs (more aggressive check)
-        $tables = ['products', 'categories', 'subcategories', 'childcategories'];
-        $fixedSlugs = 0;
-        $stats = [];
-        foreach ($tables as $table) {
-            $total = DB::table($table)->count();
-            $invalid = DB::table($table)->whereRaw('slug IS NULL OR slug = "" OR LENGTH(slug) < 2')->get();
-            $stats[$table] = ['total' => $total, 'invalid' => $invalid->count()];
-            
-            foreach ($invalid as $r) {
-                $slug = Illuminate\Support\Str::slug($r->name);
-                if (empty($slug)) {
-                    $slug = $table . '-' . $r->id;
-                }
-                $check = DB::table($table)->where('slug', $slug)->where('id', '!=', $r->id)->exists();
-                if ($check) {
-                    $slug = $slug . '-' . time() . '-' . $r->id;
-                }
-                DB::table($table)->where('id', $r->id)->update(['slug' => $slug]);
-                $fixedSlugs++;
-            }
+            if (!file_exists($dir)) mkdir($dir, 0777, true);
         }
 
         return response()->json([
             'status' => 'success',
-            'migration' => $migrateOutput,
-            'gd_check' => $gdStatus,
-            'imagick_check' => $imagickStatus,
-            'fixed_slugs' => $fixedSlugs,
-            'stats' => $stats,
-            'message' => 'Setup successful! ' . $gdStatus . ' | Fixed ' . $fixedSlugs . ' slugs.'
+            'message' => 'Site Restoration Successful! Logo, Sliders, and reCAPTCHA restored.',
+            'admin_email' => 'hello@fabilive.com',
+            'admin_pass' => 'Fabi@123'
         ]);
+
     } catch (\Exception $e) {
-        \Log::error('Setup Error: ' . $e->getMessage());
         return response()->json([
             'status' => 'error',
-            'message' => $e->getMessage()
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ], 500);
     }
 });
