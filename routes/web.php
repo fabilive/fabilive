@@ -16,9 +16,9 @@ use App\Http\Controllers\PaymentController;
 Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
 Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
 Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
-Route::get('/run-setup', function() {
     try {
-        Artisan::call('cache:clear');
+        if (function_exists('opcache_reset')) { opcache_reset(); }
+        Artisan::call('optimize:clear');
         
         $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products'];
         $schema = [];
@@ -33,6 +33,7 @@ Route::get('/run-setup', function() {
         return response()->json([
             'status' => 'success',
             'schema' => $schema,
+            'nocaptcha' => config('services.nocaptcha'),
             'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {

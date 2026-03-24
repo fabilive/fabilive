@@ -13,11 +13,14 @@ return new class extends Migration
         // 1. Ensure blog_categories exists and has data
         if (Schema::hasTable('blog_categories')) {
             if (DB::table('blog_categories')->count() == 0) {
-                DB::table('blog_categories')->insert([
+                $data = [
                     'name' => 'News',
-                    'slug' => 'news',
-                    'status' => 1
-                ]);
+                    'slug' => 'news'
+                ];
+                if (Schema::hasColumn('blog_categories', 'status')) {
+                    $data['status'] = 1;
+                }
+                DB::table('blog_categories')->insert($data);
             }
         }
 
@@ -27,18 +30,21 @@ return new class extends Migration
                 $bcat = DB::table('blog_categories')->first();
                 $bcat_id = $bcat ? $bcat->id : 1;
 
-                DB::table('blogs')->insert([
+                $data = [
                     'category_id' => $bcat_id,
                     'title' => 'Welcome to Fabilive Blog',
                     'slug' => 'welcome-to-fabilive-blog',
                     'details' => 'Welcome to our new website! We are happy to have you here.',
-                    'photo' => 'blog_default.jpg', // Placeholder
+                    'photo' => 'blog_default.jpg',
                     'tags' => 'fabilive,welcome,ecommerce',
                     'views' => 0,
-                    'status' => 1,
                     'created_at' => now(),
                     'updated_at' => now()
-                ]);
+                ];
+                if (Schema::hasColumn('blogs', 'status')) {
+                    $data['status'] = 1;
+                }
+                DB::table('blogs')->insert($data);
             }
         }
 

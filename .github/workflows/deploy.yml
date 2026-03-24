@@ -108,8 +108,9 @@ jobs:
             # Only create .env if it doesn't exist
             if [ ! -f /var/www/fabilive/.env ]; then
               echo "Creating .env from .env.example" >> $LOG_FILE
-              cp /var/www/fabilive/.env.example /var/www/fabilive/.env
+              cp .env.example .env
             fi
+            ls -la .env >> $LOG_FILE
             
             echo "--- Permissions Sync ---" >> $LOG_FILE
             chown -R www-data:www-data /var/www/fabilive >> $LOG_FILE 2>&1
@@ -124,23 +125,33 @@ jobs:
             mkdir -p /var/www/fabilive/storage/framework/{sessions,views,cache} >> $LOG_FILE 2>&1
             mkdir -p /var/www/fabilive/storage/app/public >> $LOG_FILE 2>&1
             chmod -R 777 /var/www/fabilive/storage >> $LOG_FILE 2>&1
+            php artisan storage:link >> $LOG_FILE 2>&1 || echo "Storage link already exists"
             
             echo "--- Composer Install (CRITICAL) ---" >> $LOG_FILE
-            composer install --no-dev --optimize-autoloader --ignore-platform-reqs --working-dir=/var/www/fabilive >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
+            composer install --no-dev --optimize-autoloader --ignore-platform-reqs >> $LOG_FILE 2>&1 || echo "Composer Install Failed" >> $LOG_FILE
             
             echo "--- App Key Generation ---" >> $LOG_FILE
-            grep -q "APP_KEY=base64:" /var/www/fabilive/.env || php /var/www/fabilive/artisan key:generate --force >> $LOG_FILE 2>&1
+            if ! grep -q "APP_KEY=base64" .env; then
+                php artisan key:generate --force >> $LOG_FILE 2>&1
+            fi
             
             echo "--- Cache Clear & Migrations ---" >> $LOG_FILE
-            php /var/www/fabilive/artisan optimize:clear >> $LOG_FILE 2>&1 || true
-            php /var/www/fabilive/artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
+            php artisan optimize:clear >> $LOG_FILE 2>&1 || true
+            php artisan migrate --force >> $LOG_FILE 2>&1 || echo "Migration Failed" >> $LOG_FILE
             
             echo "--- Final Health Check ---" >> $LOG_FILE
-            grep "APP_KEY=" /var/www/fabilive/.env >> $LOG_FILE
-            ls -la /var/www/fabilive/vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing!" >> $LOG_FILE
+            grep "APP_KEY=" .env >> $LOG_FILE
+            ls -la vendor/autoload.php >> $LOG_FILE 2>&1 || echo "CRITICAL: Autoloader missing!" >> $LOG_FILE
+            
+            echo "--- PHP Refresh ---" >> $LOG_FILE
+            systemctl restart php8.3-fpm >> $LOG_FILE 2>&1 || service php8.3-fpm restart >> $LOG_FILE 2>&1
             
             echo "--- Log Output ---" >> $LOG_FILE
             tail -n 20 /var/www/fabilive/storage/logs/laravel.log >> $LOG_FILE 2>&1 || true
             
             echo "--- Diagnostic Log Ready at https://fabilive.com/deploy_log.txt ---" >> $LOG_FILE
+            echo "--- Schema Dump Ready at https://fabilive.com/schemas.txt ---" >> $LOG_FILE
+            
+            chmod 644 $LOG_FILE
+            chmod 644 public/schemas.txt
             cat $LOG_FILE
