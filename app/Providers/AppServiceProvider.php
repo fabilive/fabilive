@@ -25,8 +25,13 @@ class AppServiceProvider extends ServiceProvider
             try {
                 // Check if directory is writeable, if not, force database
                 if (!is_writable(storage_path('framework/cache/data'))) {
-                    config(['cache.default' => 'database']);
-                    config(['session.driver' => 'database']);
+                    // Check if cache table exists before forcing database
+                    if (Schema::hasTable('cache')) {
+                        config(['cache.default' => 'database']);
+                        config(['session.driver' => 'database']);
+                    } else {
+                        config(['cache.default' => 'array']);
+                    }
                 }
             } catch (\Exception $e) {
                 config(['cache.default' => 'array']);

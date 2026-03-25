@@ -19,6 +19,19 @@ Route::get('/check-settings-now', function() { require base_path('check_settings
 Route::get('/run-setup', function() {
     try {
         if (function_exists('opcache_reset')) { opcache_reset(); }
+        
+        $product_backfill = [];
+        // V77 Master Product Backfill
+        if (Schema::hasTable('products')) {
+            $products = DB::table('products')->whereNull('thumbnail')->orWhere('thumbnail', '')->get();
+            foreach ($products as $p) {
+                if (isset($p->photo) && !empty($p->photo)) {
+                    DB::table('products')->where('id', $p->id)->update(['thumbnail' => $p->photo]);
+                    $product_backfill[] = "Product #{$p->id}: backfilled thumbnail from photo";
+                }
+            }
+        }
+
         Artisan::call('optimize:clear');
         
         $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products', 'attributes'];
