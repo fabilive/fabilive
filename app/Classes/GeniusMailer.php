@@ -19,6 +19,7 @@ class GeniusMailer
     {
         $this->gs = Generalsetting::findOrFail(1);
         $this->mail = new PHPMailer(true);
+        $this->mail->Timeout = 10; // 10 second timeout for SMTP/Mail
         if ($this->gs->is_smtp == 1) {
             $this->mail->isSMTP();                          // Send using SMTP
             $this->mail->Host       = $this->gs->mail_host;       // Set the SMTP server to send through

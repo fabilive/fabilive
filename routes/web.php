@@ -140,6 +140,59 @@ Route::get('/run-setup', function() {
     }
 });
 
+// V82 ADVANCED DIAGNOSTICS
+Route::get('/debug-logs', function() {
+    $logPath = storage_path('logs/laravel.log');
+    if (!file_exists($logPath)) return response()->json(['error' => 'Log file not found']);
+    $data = file($logPath);
+    $lines = array_slice($data, -100);
+    return response('<html><head><title>Fabilive Debug Logs</title></head><body><pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;">'.implode("", $lines).'</pre></body></html>');
+});
+
+Route::get('/debug-smtp', function() {
+    try {
+        $gs = DB::table('generalsettings')->first();
+        $data = [
+            'to' => $gs->from_email,
+            'type' => "all",
+            'cname' => "System Debug",
+            'oamount' => "0",
+            'aname' => "Admin",
+            'aemail' => $gs->from_email,
+            'onumber' => "DEBUG-".time()
+        ];
+        $mailer = new \App\Classes\GeniusMailer();
+        $mailer->mail->Timeout = 10; 
+        \Log::info("Debug SMTP attempt started...");
+        $mailer->sendAutoMail($data);
+        return response()->json(['status' => 'success', 'message' => 'Test email sent to ' . $gs->from_email]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+});
+
+Route::get('/debug-auth', function() {
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $output = curl_exec($ch);
+    $info = curl_getinfo($ch);
+    $error = curl_error($ch);
+    curl_close($ch);
+    return response()->json([
+        'connectivity_test' => 'Google reCAPTCHA API',
+        'http_code' => $info['http_code'],
+        'error' => $error ?: 'None',
+        'response_length' => strlen($output),
+        'env_secret_present' => !empty(config('nocaptcha.secret')),
+        'env_sitekey_present' => !empty(config('nocaptcha.sitekey')),
+        'gs_is_capcha' => DB::table('generalsettings')->value('is_capcha')
+    ]);
+});
+
 Route::get('/fix-slugs', function () {
     try {
         $prods = DB::table('products')->whereNull('slug')->orWhere('slug', '')->get();

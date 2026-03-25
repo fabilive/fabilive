@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\PriceHelper;
 
 class RegisterController extends Controller
 {

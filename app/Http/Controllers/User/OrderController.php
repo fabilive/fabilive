@@ -93,7 +93,8 @@ class OrderController extends UserBaseController
                 if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
                     $cart = unserialize($raw_cart);
                     if (is_object($cart)) {
-                         $cart = json_decode(json_encode($cart), true);
+
+                        $cart = json_decode(json_encode($cart), true);
                     }
                 }
             } catch (\Exception $e) {}

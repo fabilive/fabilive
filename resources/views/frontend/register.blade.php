@@ -93,9 +93,11 @@
     $(document).ready(function() {
         $("#registerform").off('submit').on('submit', function(e){
             e.preventDefault();
+            e.stopImmediatePropagation();
             if (isSubmitting) return;
             isSubmitting = true;
-            $('.submit-btn').html('Processing...');
+            console.log("Registration submitting...");
+            $('.submit-btn').html('Registering... <i class="fas fa-spinner fa-spin"></i>');
             $.ajax({
                 method: "POST",
                 url: $(this).prop('action'),
@@ -103,7 +105,9 @@
                 contentType: false,
                 cache: false,
                 processData: false,
+                timeout: 15000, // 15 second safety timeout
                 success: function(response){
+                    console.log("Registration response received:", response);
                     if(response == 1) {
                         alert('Registration Successful!');
                         @if(request()->source == 'sell')
@@ -124,9 +128,14 @@
                         isSubmitting = false;
                     }
                 },
-                error: function(xhr){
+                error: function(xhr, status, error){
+                    console.error("Registration AJAX error:", status, error);
                     $('.submit-btn').html('Register');
-                    alert('Registration failed. Please try again.');
+                    if (status === 'timeout') {
+                        alert('The server is taking too long to respond. Please check your internet or try again later.');
+                    } else {
+                        alert('Registration failed. Please try again.');
+                    }
                     isSubmitting = false;
                 }
             });
