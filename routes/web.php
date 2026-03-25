@@ -152,9 +152,10 @@ Route::get('/debug-logs', function() {
 Route::get('/debug-smtp', function() {
     try {
         $gs = DB::table('generalsettings')->first();
+        $template = DB::table('email_templates')->first(); // Just get any template to test
         $data = [
             'to' => $gs->from_email,
-            'type' => "all",
+            'type' => $template ? $template->email_type : "common",
             'cname' => "System Debug",
             'oamount' => "0",
             'aname' => "Admin",
@@ -187,8 +188,9 @@ Route::get('/debug-auth', function() {
         'http_code' => $info['http_code'],
         'error' => $error ?: 'None',
         'response_length' => strlen($output),
-        'env_secret_present' => !empty(config('nocaptcha.secret')),
-        'env_sitekey_present' => !empty(config('nocaptcha.sitekey')),
+        'env_secret' => env('NOCAPTCHA_SECRET') ? 'Present (Hidden)' : 'MISSING',
+        'env_sitekey' => env('NOCAPTCHA_SITEKEY') ?: 'MISSING',
+        'config_secret' => config('nocaptcha.secret') ? 'Present (Hidden)' : 'MISSING',
         'gs_is_capcha' => DB::table('generalsettings')->value('is_capcha')
     ]);
 });
