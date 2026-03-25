@@ -165,12 +165,14 @@
             background: rgba(255,255,255,0.70);
         }
         .category-carousel-wrap .product-info .product-title span {
-            display: block;
+            display: inline-block;
             white-space: normal !important;
             overflow: visible !important;
             text-overflow: clip;
-            line-height: 1.2;
-            font-size: 0.9rem;
+            line-height: 1.1;
+            font-size: 0.82rem;
+            width: 100%;
+            text-align: center;
         }
         .category-carousel-wrap .item {
             min-width: 140px;
