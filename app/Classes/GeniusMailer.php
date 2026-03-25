@@ -68,18 +68,6 @@ class GeniusMailer
         }
         return true;
     }
-    public function sendAutoMail(array $mailData)
-    {
-        $temp = EmailTemplate::where('email_type', '=', $mailData['type'])->first();
-
-        try {
-            $body = preg_replace("/{customer_name}/", $mailData['cname'], $temp->email_body);
-            $body = preg_replace("/{order_amount}/", $mailData['oamount'], $body);
-            $body = preg_replace("/{admin_name}/", $mailData['aname'], $body);
-            $body = preg_replace("/{admin_email}/", $mailData['aemail'], $body);
-            $body = preg_replace("/{order_number}/", $mailData['onumber'], $body);
-            $body = preg_replace("/{website_title}/", $this->gs->title, $body);
-
             $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
             $this->addRecipients($mailData['to']); // ✅ FIX
             $this->mail->isHTML(true);

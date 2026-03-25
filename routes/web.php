@@ -95,6 +95,27 @@ Route::get('/run-setup', function() {
         'product_reset' => DB::table('products')->update(['status' => 1, 'featured' => 1, 'hot' => 1, 'best' => 1]),
         'cache_fix' => cache()->forget('generalsettings'),
         'product_backfill' => $product_backfill,
+        // V83: EMAIL TEMPLATE RECOVERY
+        'template_recovery' => (function() {
+            if (DB::table('email_templates')->count() == 0) {
+                DB::table('email_templates')->insert([
+                    [
+                        'email_type' => 'customer_reg_common',
+                        'email_subject' => 'Welcome to Fabilive',
+                        'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
+                        'status' => 1
+                    ],
+                    [
+                        'email_type' => 'common',
+                        'email_subject' => 'Notification from Fabilive',
+                        'email_body' => '<p>Hello {customer_name},</p><p>This is a notification regarding your recent activity on Fabilive.</p>',
+                        'status' => 1
+                    ]
+                ]);
+                return 'backfilled';
+            }
+            return 'exists';
+        })(),
         'counts' => [
             'products' => DB::table('products')->count(),
             'categories' => DB::table('categories')->count(),

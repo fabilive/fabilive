@@ -33,6 +33,20 @@ class AppServiceProvider extends ServiceProvider
                     } else {
                         config(['cache.default' => 'array']);
                     }
+
+                    // V75-V81: FORCE DRIVERS (Bypass stale config cache)
+                    if (empty(config('cache.default')) || config('cache.default') !== 'database') {
+                        config(['cache.default' => 'database']);
+                    }
+                    if (empty(config('session.driver')) || config('session.driver') !== 'database') {
+                        config(['session.driver' => 'database']);
+                    }
+
+                    // V83: FORCE RECAPTCHA (Critical for Registration)
+                    if (empty(config('nocaptcha.secret'))) {
+                        config(['nocaptcha.secret' => env('NOCAPTCHA_SECRET', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE')]);
+                        config(['nocaptcha.sitekey' => env('NOCAPTCHA_SITEKEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')]);
+                    }
                 }
             } catch (\Exception $e) {
                 config(['cache.default' => 'array']);
