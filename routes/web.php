@@ -64,19 +64,18 @@ Route::get('/run-setup', function() {
                 'count' => $c->products_count ?? 'N/A'
             ];
         }),
-        'counts' => $counts,
-        'visibility_fix' => DB::table('products')->update([
-            'featured' => 1,
-            'hot' => 1,
-            'best' => 1,
-            'latest' => 1,
-            'trending' => 1,
-            'top' => 1,
-            'big' => 1,
-            'status' => 1
+        'product_visibility_fix' => DB::table('products')->update([
+            'featured' => 1, 'hot' => 1, 'best' => 1, 'latest' => 1, 
+            'trending' => 1, 'top' => 1, 'big' => 1, 'status' => 1
         ]),
+        'category_reset' => DB::table('categories')->update(['status' => 1]),
+        'subcategory_reset' => DB::table('subcategories')->update(['status' => 1]),
         'cache_fix' => cache()->forget('generalsettings'),
-        'category_data' => DB::table('categories')->get(['id', 'name', 'slug', 'photo']),
+        'total_counts' => [
+            'products' => DB::table('products')->count(),
+            'categories' => DB::table('categories')->count(),
+            'subcategories' => DB::table('subcategories')->count(),
+        ],
         'category_images_check' => $cat_images,
         'generalsettings_data' => $gs,
         'products_schema_details' => $products_desc,
