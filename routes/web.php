@@ -173,7 +173,9 @@ Route::get('/debug-logs', function() {
 Route::get('/debug-smtp', function() {
     try {
         $gs = DB::table('generalsettings')->first();
-        $template = DB::table('email_templates')->first(); // Just get any template to test
+        if (!$gs) throw new \Exception("generalsettings table is empty");
+        
+        $template = DB::table('email_templates')->first(); 
         $data = [
             'to' => $gs->from_email,
             'type' => $template ? $template->email_type : "common",
@@ -184,36 +186,55 @@ Route::get('/debug-smtp', function() {
             'onumber' => "DEBUG-".time()
         ];
         $mailer = new \App\Classes\GeniusMailer();
-        $mailer->mail->Timeout = 10; 
         \Log::info("Debug SMTP attempt started...");
-        $mailer->sendAutoMail($data);
-        return response()->json(['status' => 'success', 'message' => 'Test email sent to ' . $gs->from_email]);
+        $result = $mailer->sendAutoMail($data);
+        return response()->json([
+            'status' => $result ? 'success' : 'failed', 
+            'message' => $result ? 'Test email sent to ' . $gs->from_email : 'Mailer returned false (template missing?)'
+        ]);
     } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        return response()->json(['status' => 'error', 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
     }
 });
 
 Route::get('/debug-auth', function() {
-    $url = 'https://www.google.com/recaptcha/api/siteverify';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    $output = curl_exec($ch);
-    $info = curl_getinfo($ch);
-    $error = curl_error($ch);
-    curl_close($ch);
     return response()->json([
-        'connectivity_test' => 'Google reCAPTCHA API',
-        'http_code' => $info['http_code'],
-        'error' => $error ?: 'None',
-        'response_length' => strlen($output),
+        'connectivity_test' => 'Google reCAPTCHA API (Check connectivity)',
         'env_secret' => env('NOCAPTCHA_SECRET') ? 'Present (Hidden)' : 'MISSING',
         'env_sitekey' => env('NOCAPTCHA_SITEKEY') ?: 'MISSING',
         'config_secret' => config('nocaptcha.secret') ? 'Present (Hidden)' : 'MISSING',
-        'gs_is_capcha' => DB::table('generalsettings')->value('is_capcha')
+        'config_sitekey' => config('nocaptcha.sitekey') ?: 'MISSING',
+        'gs_is_capcha' => DB::table('generalsettings')->value('is_capcha'),
+        'app_env' => config('app.env'),
+        'cache_driver' => config('cache.default')
     ]);
+});
+
+Route::get('/debug-config', function() {
+    return response()->json([
+        'nocaptcha' => config('nocaptcha'),
+        'mail' => [
+            'driver' => config('mail.driver'),
+            'host' => config('mail.host'),
+            'port' => config('mail.port'),
+            'encryption' => config('mail.encryption')
+        ],
+        'cache' => config('cache.default'),
+        'session' => config('session.driver')
+    ]);
+});
+
+Route::get('/debug-cache-clear', function() {
+    try {
+        Artisan::call('optimize:clear');
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('route:clear');
+        return response()->json(['status' => 'success', 'message' => 'All caches cleared via web.']);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
 });
 
 Route::get('/fix-slugs', function () {

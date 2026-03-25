@@ -17,68 +17,53 @@ class GeniusMailer
     public $gs;
     public function __construct()
     {
-        $this->gs = Generalsetting::findOrFail(1);
+        $this->gs = Generalsetting::first(); // Safer than findOrFail(1)
+        if (!$this->gs) {
+            $this->gs = (object)[
+                'is_smtp' => 0,
+                'from_email' => 'admin@fabilive.com',
+                'from_name' => 'Fabilive',
+                'title' => 'Fabilive'
+            ];
+        }
         $this->mail = new PHPMailer(true);
-        $this->mail->Timeout = 10; // 10 second timeout for SMTP/Mail
-        if ($this->gs->is_smtp == 1) {
-            $this->mail->isSMTP();                          // Send using SMTP
-            $this->mail->Host       = $this->gs->mail_host;       // Set the SMTP server to send through
-            $this->mail->SMTPAuth   = true;                 // Enable SMTP authentication
-            $this->mail->Username   = $this->gs->mail_user;   // SMTP username
-            $this->mail->Password   = $this->gs->mail_pass;   // SMTP password
-            $this->mail->SMTPSecure = $this->gs->mail_encryption;      // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+        $this->mail->Timeout = 10;
+        if (isset($this->gs->is_smtp) && $this->gs->is_smtp == 1) {
+            $this->mail->isSMTP();
+            $this->mail->Host       = $this->gs->mail_host;
+            $this->mail->SMTPAuth   = true;
+            $this->mail->Username   = $this->gs->mail_user;
+            $this->mail->Password   = $this->gs->mail_pass;
+            $this->mail->SMTPSecure = $this->gs->mail_encryption;
             $this->mail->Port       = $this->gs->mail_port;
         }
     }
-    public function sendAutoOrderMail(array $mailData, $id)
+
+    public function sendAutoMail(array $data)
     {
-        $temp = EmailTemplate::where('email_type', '=', $mailData['type'])->first();
-        $order = Order::findOrFail($id);
-        $cart = json_decode($order->cart, true);
+        $temp = DB::table('email_templates')->where('email_type', '=', $data['type'])->first();
+        if (!$temp) {
+            Log::warning("Email template missing: " . $data['type']);
+            return false;
+        }
+
         try {
-            $body = preg_replace("/{customer_name}/", $mailData['cname'], $temp->email_body);
-            $body = preg_replace("/{order_amount}/", $mailData['oamount'], $body);
-            $body = preg_replace("/{admin_name}/", $mailData['aname'], $body);
-            $body = preg_replace("/{admin_email}/", $mailData['aemail'], $body);
-            $body = preg_replace("/{order_number}/", $mailData['onumber'], $body);
+            $body = preg_replace("/{customer_name}/", $data['cname'], $temp->email_body);
+            if (isset($data['oamount'])) $body = preg_replace("/{order_amount}/", $data['oamount'], $body);
+            if (isset($data['aname'])) $body = preg_replace("/{admin_name}/", $data['aname'], $body);
+            if (isset($data['aemail'])) $body = preg_replace("/{admin_email}/", $data['aemail'], $body);
+            if (isset($data['onumber'])) $body = preg_replace("/{order_number}/", $data['onumber'], $body);
             $body = preg_replace("/{website_title}/", $this->gs->title, $body);
-            $dir = public_path('assets/temp_files/');
-            if (!file_exists($dir)) {
-                mkdir($dir, 0777, true);
-            }
-            $fileName = $dir . Str::random(4) . time() . '.pdf';
-            $pdf = PDF::loadView('pdf.order', compact('order', 'cart'))->save($fileName);
-            $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
-            $this->addRecipients($mailData['to']);
 
-            $this->mail->addAttachment($fileName);
+            $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
+            $this->addRecipients($data['to']);
             $this->mail->isHTML(true);
             $this->mail->Subject = $temp->email_subject;
             $this->mail->Body = $body;
             $this->mail->send();
-        } catch (Exception $e) {
-            Log::error("Mailer AutoOrderMail Error: " . $e->getMessage());
-        }
-
-        $files = glob(public_path('assets/temp_files/*')); //get all file names
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file); //delete file
-            }
-        }
-        return true;
-    }
-            $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
-            $this->addRecipients($mailData['to']); // ✅ FIX
-            $this->mail->isHTML(true);
-            $this->mail->Subject = $temp->email_subject;
-            $this->mail->Body = $body;
-            $this->mail->send();
-
         } catch (Exception $e) {
             Log::error("Mailer AutoMail Error: " . $this->mail->ErrorInfo);
         }
-
         return true;
     }
 

@@ -24,7 +24,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        \Log::info('Registration attempt: ', $request->except(['password', 'password_confirmation']));
+        Log::info('Registration attempt: ', $request->except(['password', 'password_confirmation']));
         $gs = Generalsetting::findOrFail(1);
 
         // ------------------- CAPTCHA Validation -------------------
@@ -36,7 +36,7 @@ class RegisterController extends Controller
             ];
             $validator = Validator::make($request->all(), $rules, $customs);
             if ($validator->fails()) {
-                \Log::warning('Registration failed reCAPTCHA: ' . json_encode($validator->getMessageBag()->toArray()));
+                Log::warning('Registration failed reCAPTCHA: ' . json_encode($validator->getMessageBag()->toArray()));
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
         }
@@ -94,7 +94,7 @@ class RegisterController extends Controller
             }
 
             try {
-                \DB::beginTransaction();
+                DB::beginTransaction();
 
                 $user = new User();
                 $input = $request->all();
@@ -139,7 +139,7 @@ class RegisterController extends Controller
                     ]);
 
                     if ($validator->fails()) {
-                        \DB::rollBack();
+                        DB::rollBack();
                         return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                     }
 
@@ -148,7 +148,7 @@ class RegisterController extends Controller
                         !$request->hasFile('national_id_front_image') &&
                         !$request->hasFile('national_id_back_image')
                     ) {
-                        \DB::rollBack();
+                        DB::rollBack();
                         return response()->json([
                             'errors' => ['files' => __('Please upload National ID Front/Back')]
                         ]);
@@ -201,14 +201,14 @@ class RegisterController extends Controller
                         $referralService->applyReferral($request->referral_code, $user, $role);
                     } catch (\Exception $e) {
                         // Log but don't block registration for referral failures
-                        \Log::warning('Referral apply failed: ' . $e->getMessage());
+                        Log::warning('Referral apply failed: ' . $e->getMessage());
                     }
                 }
 
-                \DB::commit();
+                DB::commit();
 
             } catch (\Exception $e) {
-                \DB::rollBack();
+                DB::rollBack();
                 return response()->json(['errors' => [$e->getMessage()]]);
             }
         }
@@ -268,7 +268,7 @@ class RegisterController extends Controller
         foreach ($files as $field => $folder) {
             if ($request->hasFile($field)) {
                 $file = $request->file($field);
-                $filename = \PriceHelper::ImageCreateName($file);
+                $filename = PriceHelper::ImageCreateName($file);
                 $file->move("assets/images/{$folder}", $filename);
                 $user->{$field} = $filename; // Saves the filename in DB
             } elseif ($field === 'selfie_image') {

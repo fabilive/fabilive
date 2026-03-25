@@ -21,31 +21,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        // FAIL-SAFE: If the filesystem is locked, force database or array cache to prevent 500 errors.
+        // V75-V83: GLOBAL CONFIG FORCE (Override stale config cache immediately)
+        if (Schema::hasTable('cache')) {
+            config(['cache.default' => 'database']);
+            config(['session.driver' => 'database']);
+        }
+        
+        // Always force reCAPTCHA from env()
+        config(['nocaptcha.secret' => env('NOCAPTCHA_SECRET', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE')]);
+        config(['nocaptcha.sitekey' => env('NOCAPTCHA_SITEKEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')]);
+
+        // FAIL-SAFE: If the filesystem is locked, force array cache if DB not available
         if (config('cache.default') === 'file') {
             try {
-                // Check if directory is writeable, if not, force database
                 if (!is_writable(storage_path('framework/cache/data'))) {
-                    // Check if cache table exists before forcing database
-                    if (Schema::hasTable('cache')) {
-                        config(['cache.default' => 'database']);
-                        config(['session.driver' => 'database']);
-                    } else {
+                    if (!Schema::hasTable('cache')) {
                         config(['cache.default' => 'array']);
-                    }
-
-                    // V75-V81: FORCE DRIVERS (Bypass stale config cache)
-                    if (empty(config('cache.default')) || config('cache.default') !== 'database') {
-                        config(['cache.default' => 'database']);
-                    }
-                    if (empty(config('session.driver')) || config('session.driver') !== 'database') {
-                        config(['session.driver' => 'database']);
-                    }
-
-                    // V83: FORCE RECAPTCHA (Critical for Registration)
-                    if (empty(config('nocaptcha.secret'))) {
-                        config(['nocaptcha.secret' => env('NOCAPTCHA_SECRET', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE')]);
-                        config(['nocaptcha.sitekey' => env('NOCAPTCHA_SITEKEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')]);
                     }
                 }
             } catch (\Exception $e) {
