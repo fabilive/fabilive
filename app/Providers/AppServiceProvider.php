@@ -20,28 +20,50 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        // FAIL-SAFE: If the filesystem is locked, force database or array cache to prevent 500 errors.
+        if (config('cache.default') === 'file') {
+            try {
+                // Check if directory is writeable, if not, force database
+                if (!is_writable(storage_path('framework/cache/data'))) {
+                    config(['cache.default' => 'database']);
+                    config(['session.driver' => 'database']);
+                }
+            } catch (\Exception $e) {
+                config(['cache.default' => 'array']);
+            }
+        }
 
-        if ($gs) {
-            // Note: NoCaptcha keys are now configured directly in .env 
-            // for more reliable initialization during the boot sequence.
+        $gs = null;
+        try {
+            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
+                return DB::table('generalsettings')->first();
+            });
+        } catch (\Exception $e) {
+            $gs = DB::table('generalsettings')->first();
         }
 
         view()->composer('*', function ($settings) use ($gs) {
             $settings->with('gs', $gs);
 
-            $settings->with('ps', cache()->remember('pagesettings', now()->addDay(), function () {
-                return DB::table('pagesettings')->first();
-            }));
+            try {
+                $ps = cache()->remember('pagesettings', now()->addDay(), function () {
+                    return DB::table('pagesettings')->first();
+                });
+                $seo = cache()->remember('seotools', now()->addDay(), function () {
+                    return DB::table('seotools')->first();
+                });
+                $social = cache()->remember('socialsettings', now()->addDay(), function () {
+                    return DB::table('socialsettings')->first();
+                });
+            } catch (\Exception $e) {
+                $ps = DB::table('pagesettings')->first();
+                $seo = DB::table('seotools')->first();
+                $social = DB::table('socialsettings')->first();
+            }
 
-            $settings->with('seo', cache()->remember('seotools', now()->addDay(), function () {
-                return DB::table('seotools')->first();
-            }));
-            $settings->with('socialsetting', cache()->remember('socialsettings', now()->addDay(), function () {
-                return DB::table('socialsettings')->first();
-            }));
+            $settings->with('ps', $ps);
+            $settings->with('seo', $seo);
+            $settings->with('socialsetting', $social);
 
             $settings->with('default_font', cache()->remember('default_font', now()->addDay(), function () {
                 return Font::whereIsDefault(1)->first();
