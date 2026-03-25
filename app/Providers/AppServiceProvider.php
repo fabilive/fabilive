@@ -25,15 +25,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         if ($gs) {
-            config([
-                'nocaptcha.sitekey' => $gs->capcha_site_key,
-                'nocaptcha.secret' => $gs->capcha_secret_key,
-                'services.nocaptcha.sitekey' => $gs->capcha_site_key,
-                'services.nocaptcha.secret' => $gs->capcha_secret_key,
-                'nocaptcha.options' => [
-                    'timeout' => 30,
-                ],
-            ]);
+            // Note: NoCaptcha keys are now configured directly in .env 
+            // for more reliable initialization during the boot sequence.
         }
 
         view()->composer('*', function ($settings) use ($gs) {

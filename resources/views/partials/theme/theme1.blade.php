@@ -166,12 +166,14 @@
         }
         .category-carousel-wrap .product-info .product-title span {
             display: block;
-            white-space: nowrap;
+            white-space: normal !important;
             overflow: visible !important;
             text-overflow: clip;
+            line-height: 1.2;
+            font-size: 0.9rem;
         }
         .category-carousel-wrap .item {
-            min-width: 140px; /* Ensure enough width for labels */
+            min-width: 140px;
         }
         .category-carousel-wrap .product-info .strok {
             color: #6c63ff;
