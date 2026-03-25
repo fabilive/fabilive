@@ -11,10 +11,12 @@ use App\{
 };
 use App\Services\ReferralService;
 use Illuminate\Http\Request;
-use Auth;
-use Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
@@ -26,13 +28,14 @@ class RegisterController extends Controller
 
         // ------------------- CAPTCHA Validation -------------------
         if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
-            $rules = ['g-recaptcha-response' => 'required'];
+            $rules = ['g-recaptcha-response' => 'required|captcha'];
             $customs = [
                 'g-recaptcha-response.required' => "Please verify that you are not a robot.",
                 'g-recaptcha-response.captcha' => "Captcha error! try again later or contact site admin..",
             ];
             $validator = Validator::make($request->all(), $rules, $customs);
             if ($validator->fails()) {
+                \Log::warning('Registration failed reCAPTCHA: ' . json_encode($validator->getMessageBag()->toArray()));
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
         }

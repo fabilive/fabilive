@@ -106,6 +106,34 @@ Route::get('/run-setup', function() {
         ],
         'category_images_check' => $cat_images,
         'image_dirs' => $image_dirs,
+        // 6. PERMANENT .ENV PERSISTENCE (Final Stabilization)
+        'env_updates' => (function() {
+            try {
+                $envPath = base_path('.env');
+                if (!file_exists($envPath)) return ['status' => 'missing'];
+                $envContent = file_get_contents($envPath);
+                $replacements = [
+                    'NOCAPTCHA_SITEKEY' => '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+                    'NOCAPTCHA_SECRET'  => '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE',
+                    'CACHE_DRIVER'      => 'database',
+                    'SESSION_DRIVER'    => 'database',
+                    'APP_ENV'           => 'production',
+                    'APP_DEBUG'         => 'false'
+                ];
+                foreach ($replacements as $key => $value) {
+                    if (preg_match("/^{$key}=/m", $envContent)) {
+                        $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
+                    } else {
+                        $envContent .= "\n{$key}={$value}";
+                    }
+                }
+                file_put_contents($envPath, $envContent);
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+                return ['status' => 'persisted'];
+            } catch (\Exception $e) {
+                return ['status' => 'failed', 'error' => $e->getMessage()];
+            }
+        })(),
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);

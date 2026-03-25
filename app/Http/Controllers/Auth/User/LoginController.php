@@ -2,8 +2,9 @@
 namespace App\Http\Controllers\Auth\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Auth;
-use Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 class LoginController extends Controller
 {
   public function __construct()
@@ -19,7 +20,7 @@ class LoginController extends Controller
 
     $gs = \App\Models\Generalsetting::findOrFail(1);
     if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
-        $rules['g-recaptcha-response'] = 'required';
+        $rules['g-recaptcha-response'] = 'required|captcha';
     }
     $validator = Validator::make($request->all(), $rules);
     if ($validator->fails()) {
