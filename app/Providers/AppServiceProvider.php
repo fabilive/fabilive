@@ -12,6 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Font;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 
 class AppServiceProvider extends ServiceProvider

@@ -32,6 +32,12 @@ Route::get('/run-setup', function() {
             }
         }
 
+        // V79 Final ENV Polish (Runtime only for immediate effect)
+        config(['cache.default' => 'database']);
+        config(['session.driver' => 'database']);
+        config(['nocaptcha.sitekey' => '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI']);
+        config(['nocaptcha.secret' => '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE']);
+
         Artisan::call('optimize:clear');
         
         $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products', 'attributes'];
