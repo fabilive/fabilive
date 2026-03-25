@@ -80,6 +80,11 @@ Route::get('/run-setup', function() {
             'products' => DB::table('products')->count(),
             'categories' => DB::table('categories')->count(),
         ],
+        'active_drivers' => [
+            'cache' => config('cache.default'),
+            'session' => config('session.driver'),
+            'env_cache' => env('CACHE_DRIVER'),
+        ],
         'category_images_check' => $cat_images,
         'image_dirs' => $image_dirs,
         ]);
