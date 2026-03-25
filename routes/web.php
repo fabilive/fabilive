@@ -66,28 +66,22 @@ Route::get('/run-setup', function() {
         }),
         'category_reset' => [
             DB::table('categories')->update(['status' => 1]),
-            DB::table('categories')->where('id', 1)->update(['name' => 'Electronics', 'slug' => 'electronics', 'photo' => 'category_electronic.png']),
-            DB::table('categories')->where('id', 2)->update(['name' => 'Fashion', 'slug' => 'fashion', 'photo' => 'category_fashion_1774125742762.png']),
-            DB::table('categories')->where('id', 3)->update(['name' => 'Home & Garden', 'slug' => 'home-garden', 'photo' => 'category_home_garden.png']),
-            DB::table('categories')->where('id', 4)->update(['name' => 'Smartphone', 'slug' => 'smartphone', 'photo' => 'category_smartphone_1774125778584.png']),
-            DB::table('categories')->where('id', 5)->update(['name' => 'Camera', 'slug' => 'camera', 'photo' => 'category_camera_1774125762535.png']),
+            DB::table('categories')->where('id', 1)->update(['name' => 'Electronics', 'slug' => 'electronics', 'photo' => 'category_electronic.png', 'image' => 'category_electronic.png']),
+            DB::table('categories')->where('id', 2)->update(['name' => 'Fashion', 'slug' => 'fashion', 'photo' => 'category_fashion_1774125742762.png', 'image' => 'category_fashion_1774125742762.png']),
+            DB::table('categories')->where('id', 3)->update(['name' => 'Home & Garden', 'slug' => 'home-garden', 'photo' => 'category_home_garden.png', 'image' => 'category_home_garden.png']),
+            DB::table('categories')->where('id', 4)->update(['name' => 'Smartphone', 'slug' => 'smartphone', 'photo' => 'category_smartphone_1774125778584.png', 'image' => 'category_smartphone_1774125778584.png']),
+            DB::table('categories')->where('id', 5)->update(['name' => 'Camera', 'slug' => 'camera', 'photo' => 'category_camera_1774125762535.png', 'image' => 'category_camera_1774125762535.png']),
         ],
         'subcategory_reset' => DB::table('subcategories')->update(['status' => 1]),
         'product_reset' => DB::table('products')->update(['status' => 1, 'featured' => 1, 'hot' => 1, 'best' => 1]),
         'cache_fix' => cache()->forget('generalsettings'),
-        'total_counts' => [
+        'product_backfill' => $product_backfill,
+        'counts' => [
             'products' => DB::table('products')->count(),
             'categories' => DB::table('categories')->count(),
         ],
         'category_images_check' => $cat_images,
-        'generalsettings_data' => $gs,
-        'products_schema_details' => $products_desc,
-            'categories_schema_details' => DB::select("DESCRIBE categories"),
         'image_dirs' => $image_dirs,
-            'env_exists' => file_exists(base_path('.env')),
-            'nocaptcha_config' => config('services.nocaptcha'),
-            'migrations_ran' => DB::table('migrations')->pluck('migration'),
-            'log_tail' => shell_exec('tail -n 20 ' . storage_path('logs/laravel.log'))
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
