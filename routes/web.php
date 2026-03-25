@@ -237,6 +237,18 @@ Route::get('/debug-cache-clear', function() {
     }
 });
 
+Route::get('/debug-composer', function() {
+    $autoload = base_path('vendor/autoload.php');
+    $composer_lock = base_path('composer.lock');
+    return response()->json([
+        'autoload_exists' => file_exists($autoload),
+        'composer_lock_exists' => file_exists($composer_lock),
+        'vendor_dir_exists' => is_dir(base_path('vendor')),
+        'php_version' => PHP_VERSION,
+        'base_path' => base_path()
+    ]);
+});
+
 Route::get('/fix-slugs', function () {
     try {
         $prods = DB::table('products')->whereNull('slug')->orWhere('slug', '')->get();
