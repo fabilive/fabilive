@@ -130,10 +130,10 @@ Route::get('/run-setup', function() {
             $gs_check = DB::table('generalsettings')->first();
             if ($gs_check) {
                 $updates = [];
-                if (empty($gs_check->from_email) || $gs_check->from_email == ' ' || $gs_check->from_email == '') {
+                if (empty($gs_check->from_email) || trim($gs_check->from_email) == '') {
                     $updates['from_email'] = 'support@fabilive.com';
                 }
-                if (empty($gs_check->from_name) || $gs_check->from_name == ' ' || $gs_check->from_name == '') {
+                if (empty($gs_check->from_name) || trim($gs_check->from_name) == '') {
                     $updates['from_name'] = 'Fabilive';
                 }
                 if (!empty($updates)) {
@@ -143,9 +143,14 @@ Route::get('/run-setup', function() {
             }
         }
 
+        // Master Return
         return response()->json([
             'status' => 'success',
             'product_backfill' => $product_backfill,
+            'counts' => [
+                'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
+                'categories' => Schema::hasTable('categories') ? DB::table('categories')->count() : 0,
+            ],
             'template_recovery' => (function() {
                 if (DB::table('email_templates')->count() == 0) {
                     DB::table('email_templates')->insert([
@@ -160,10 +165,6 @@ Route::get('/run-setup', function() {
                 }
                 return 'exists';
             })(),
-            'counts' => [
-                'products' => DB::table('products')->count(),
-                'categories' => DB::table('categories')->count(),
-            ],
             'env_updates' => (function() {
                 try {
                     $envPath = base_path('.env');
