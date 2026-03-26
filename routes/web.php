@@ -277,8 +277,8 @@ Route::get('/run-setup', function() {
             'counters_repair' => $counters_repair,
             'gs_hardening' => $gs_hardening,
             'counts' => $counts,
-            'template_recovery' => $template_recovery,
-            'env_updates' => $env_updates,
+            'template_recovery' => $template_recovery_status,
+            'env_updates' => $env_updates_status,
             'redis_sync' => $redis_sync
         ]);
     } catch (\Exception $e) {
