@@ -127,6 +127,29 @@ Route::get('/run-setup', function() {
             return 'exists';
         })();
 
+        // ENV Updates
+        $env_updates_status = (function() {
+            try {
+                $envPath = base_path('.env');
+                if (!file_exists($envPath)) return ['status' => 'missing'];
+                $envContent = file_get_contents($envPath);
+                $replacements = [
+                    'CACHE_DRIVER' => 'database',
+                    'SESSION_DRIVER' => 'database',
+                    'APP_ENV' => 'production'
+                ];
+                foreach ($replacements as $key => $value) {
+                    if (preg_match("/^{$key}=/m", $envContent)) {
+                        $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
+                    } else {
+                        $envContent .= "\n{$key}={$value}";
+                    }
+                }
+                file_put_contents($envPath, $envContent);
+                return ['status' => 'persisted'];
+            } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
+        })();
+
         // Phase 10: Admin Sync
         $admin_sync = (function() {
             try {
