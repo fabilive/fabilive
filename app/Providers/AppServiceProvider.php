@@ -53,6 +53,14 @@ class AppServiceProvider extends ServiceProvider
             $gs = DB::table('generalsettings')->first();
         }
 
+        // Absolute fail-safe for missing properties
+        if ($gs) {
+            if (!isset($gs->rtl)) $gs->rtl = 0;
+            if (!isset($gs->is_capcha)) $gs->is_capcha = 0;
+            if (!isset($gs->is_verification_email)) $gs->is_verification_email = 0;
+            if (!isset($gs->is_guest_checkout)) $gs->is_guest_checkout = 0;
+        }
+
         view()->composer('*', function ($settings) use ($gs) {
             $settings->with('gs', $gs);
 
