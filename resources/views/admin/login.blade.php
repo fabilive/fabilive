@@ -65,14 +65,6 @@
                       </a>
                     </div>
                   </div>
-                  @if($gs->is_capcha == 1)
-                  <div class="form-input mb-4">
-                       {!! NoCaptcha::display() !!}
-                       @error('g-recaptcha-response')
-                       <p class="my-2">{{$message}}</p>
-                       @enderror
-                   </div>
-                   @endif
                   <input id="authdata" type="hidden"  value="{{ __('Authenticating...') }}">
                   <button class="submit-btn">{{ __('Login') }}</button>
                 </form>
@@ -103,9 +95,6 @@
     <!-- AJAX Js-->
     <script src="{{asset('assets/admin/js/myscript.js')}}"></script>
 
-    @if($gs->is_capcha == 1)
-        {!! NoCaptcha::renderJs() !!}
-    @endif
   </body>
 
 </html>
