@@ -69,53 +69,15 @@ Route::get('/run-setup', function() {
         }
     }
 
-    return response()->json([
-        'status' => 'success',
-        'backups' => $backups,
-        'nocaptcha_sitekey' => config('nocaptcha.sitekey'),
-        'nocaptcha_secret' => config('nocaptcha.secret'),
-        'env_app_env' => config('app.env'),
-        'category_encoding_test' => DB::table('categories')->get()->map(function($c) {
+        $cat_data = DB::table('categories')->get()->map(function($c) {
             return [
                 'id' => $c->id,
                 'name' => $c->name,
                 'hex' => bin2hex($c->name),
                 'count' => $c->products_count ?? 'N/A'
             ];
-        }),
-        'category_reset' => [
-            DB::table('categories')->update(['status' => 1]),
-            DB::table('categories')->where('id', 1)->update(['name' => 'Electronics', 'slug' => 'electronics', 'photo' => 'category_electronic.png', 'image' => 'category_electronic.png']),
-            DB::table('categories')->where('id', 2)->update(['name' => 'Fashion', 'slug' => 'fashion', 'photo' => 'category_fashion_1774125742762.png', 'image' => 'category_fashion_1774125742762.png']),
-            DB::table('categories')->where('id', 3)->update(['name' => 'Home & Garden', 'slug' => 'home-garden', 'photo' => 'category_home_garden.png', 'image' => 'category_home_garden.png']),
-            DB::table('categories')->where('id', 4)->update(['name' => 'Smartphone', 'slug' => 'smartphone', 'photo' => 'category_smartphone_1774125778584.png', 'image' => 'category_smartphone_1774125778584.png']),
-            DB::table('categories')->where('id', 5)->update(['name' => 'Camera', 'slug' => 'camera', 'photo' => 'category_camera_1774125762535.png', 'image' => 'category_camera_1774125762535.png']),
-        ],
-        'subcategory_reset' => DB::table('subcategories')->update(['status' => 1]),
-        'product_reset' => DB::table('products')->update(['status' => 1, 'featured' => 1, 'hot' => 1, 'best' => 1]),
-        'cache_fix' => cache()->forget('generalsettings'),
-        'product_backfill' => $product_backfill,
-        // V83: EMAIL TEMPLATE RECOVERY
-        'template_recovery' => (function() {
-            if (DB::table('email_templates')->count() == 0) {
-                DB::table('email_templates')->insert([
-                    [
-                        'email_type' => 'customer_reg_common',
-                        'email_subject' => 'Welcome to Fabilive',
-                        'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
-                        'status' => 1
-                    ],
-                    [
-                        'email_type' => 'common',
-                        'email_subject' => 'Notification from Fabilive',
-                        'email_body' => '<p>Hello {customer_name},</p><p>This is a notification regarding your recent activity on Fabilive.</p>',
-                        'status' => 1
-                    ]
-                ]);
-                return 'backfilled';
-            }
-            return 'exists';
-        })(),
+        });
+
         // V85: DATABASE REPAIR (product_clicks & mailer settings)
         if (!Schema::hasTable('product_clicks')) {
             Schema::create('product_clicks', function ($table) {
@@ -143,6 +105,51 @@ Route::get('/run-setup', function() {
             }
         }
 
+        // V83: EMAIL TEMPLATE RECOVERY
+        $template_recovery_status = (function() {
+            if (DB::table('email_templates')->count() == 0) {
+                DB::table('email_templates')->insert([
+                    [
+                        'email_type' => 'customer_reg_common',
+                        'email_subject' => 'Welcome to Fabilive',
+                        'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
+                        'status' => 1
+                    ],
+                    [
+                        'email_type' => 'common',
+                        'email_subject' => 'Notification from Fabilive',
+                        'email_body' => '<p>Hello {customer_name},</p><p>This is a notification regarding your recent activity on Fabilive.</p>',
+                        'status' => 1
+                    ]
+                ]);
+                return 'backfilled';
+            }
+            return 'exists';
+        })();
+
+        // ENV Updates
+        $env_updates_status = (function() {
+            try {
+                $envPath = base_path('.env');
+                if (!file_exists($envPath)) return ['status' => 'missing'];
+                $envContent = file_get_contents($envPath);
+                $replacements = [
+                    'CACHE_DRIVER' => 'database',
+                    'SESSION_DRIVER' => 'database',
+                    'APP_ENV' => 'production'
+                ];
+                foreach ($replacements as $key => $value) {
+                    if (preg_match("/^{$key}=/m", $envContent)) {
+                        $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
+                    } else {
+                        $envContent .= "\n{$key}={$value}";
+                    }
+                }
+                file_put_contents($envPath, $envContent);
+                return ['status' => 'persisted'];
+            } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
+        })();
+
         // Master Return
         return response()->json([
             'status' => 'success',
@@ -151,41 +158,8 @@ Route::get('/run-setup', function() {
                 'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
                 'categories' => Schema::hasTable('categories') ? DB::table('categories')->count() : 0,
             ],
-            'template_recovery' => (function() {
-                if (DB::table('email_templates')->count() == 0) {
-                    DB::table('email_templates')->insert([
-                        [
-                            'email_type' => 'customer_reg_common',
-                            'email_subject' => 'Welcome to Fabilive',
-                            'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
-                            'status' => 1
-                        ]
-                    ]);
-                    return 'backfilled';
-                }
-                return 'exists';
-            })(),
-            'env_updates' => (function() {
-                try {
-                    $envPath = base_path('.env');
-                    if (!file_exists($envPath)) return ['status' => 'missing'];
-                    $envContent = file_get_contents($envPath);
-                    $replacements = [
-                        'CACHE_DRIVER' => 'database',
-                        'SESSION_DRIVER' => 'database',
-                        'APP_ENV' => 'production'
-                    ];
-                    foreach ($replacements as $key => $value) {
-                        if (preg_match("/^{$key}=/m", $envContent)) {
-                            $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
-                        } else {
-                            $envContent .= "\n{$key}={$value}";
-                        }
-                    }
-                    file_put_contents($envPath, $envContent);
-                    return ['status' => 'persisted'];
-                } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
-            })(),
+            'template_recovery' => $template_recovery_status,
+            'env_updates' => $env_updates_status,
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
