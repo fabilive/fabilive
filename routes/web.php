@@ -172,6 +172,24 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
+        // V87.1: GeneralSettings Hardening
+        $gs_hardening = (function() {
+            try {
+                if (Schema::hasTable('generalsettings')) {
+                    $columns = ['rtl', 'is_capcha', 'is_verification_email', 'is_guest_checkout'];
+                    foreach ($columns as $column) {
+                        if (!Schema::hasColumn('generalsettings', $column)) {
+                            Schema::table('generalsettings', function($table) use ($column) {
+                                $table->integer($column)->default(0);
+                            });
+                        }
+                    }
+                    return 'hardened';
+                }
+                return 'missing_table';
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
         // Phase 10: Admin Sync
         $admin_sync = (function() {
             try {
@@ -200,6 +218,7 @@ Route::get('/run-setup', function() {
             'product_backfill' => $product_backfill,
             'admin_sync' => $admin_sync,
             'counters_repair' => $counters_repair,
+            'gs_hardening' => $gs_hardening,
             'counts' => [
                 'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
                 'categories' => Schema::hasTable('categories') ? DB::table('categories')->count() : 0,
