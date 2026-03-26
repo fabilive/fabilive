@@ -183,6 +183,10 @@ Route::get('/run-setup', function() {
                                 $table->integer($column)->default(0);
                             });
                         }
+                    }
+                    cache()->forget('generalsettings');
+                    cache()->forget('pagesettings');
+                    cache()->forget('seotools');
                     cache()->forget('socialsettings');
 
                     // V87.3: Direct Property Injection (Fail-safe for stubborn caches/schema)
