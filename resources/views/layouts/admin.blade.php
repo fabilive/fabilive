@@ -29,7 +29,10 @@
 	<link rel="stylesheet" href="{{ asset('assets/css/responsive-fixes.css') }}">
 
 	<!-- stylesheet -->
-	@if(DB::table('admin_languages')->where('is_default','=',1)->first()->rtl == 1)
+	@php
+		$admin_lang = DB::table('admin_languages')->where('is_default','=',1)->first();
+	@endphp
+	@if($admin_lang && isset($admin_lang->rtl) && $admin_lang->rtl == 1)
 
 	<link href="{{asset('assets/admin/css/rtl/style.css')}}" rel="stylesheet" />
 	<link href="{{asset('assets/admin/css/rtl/custom.css')}}" rel="stylesheet" />
