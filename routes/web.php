@@ -184,7 +184,11 @@ Route::get('/run-setup', function() {
                             });
                         }
                     }
-                    return 'hardened';
+                    cache()->forget('generalsettings');
+                    cache()->forget('pagesettings');
+                    cache()->forget('seotools');
+                    cache()->forget('socialsettings');
+                    return 'hardened_and_cleared';
                 }
                 return 'missing_table';
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
