@@ -116,45 +116,75 @@ Route::get('/run-setup', function() {
             }
             return 'exists';
         })(),
-        'counts' => [
-            'products' => DB::table('products')->count(),
-            'categories' => DB::table('categories')->count(),
-        ],
-        'active_drivers' => [
-            'cache' => config('cache.default'),
-            'session' => config('session.driver'),
-            'env_cache' => env('CACHE_DRIVER'),
-        ],
-        'category_images_check' => $cat_images,
-        'image_dirs' => $image_dirs,
-        // 6. PERMANENT .ENV PERSISTENCE (Final Stabilization)
-        'env_updates' => (function() {
-            try {
-                $envPath = base_path('.env');
-                if (!file_exists($envPath)) return ['status' => 'missing'];
-                $envContent = file_get_contents($envPath);
-                $replacements = [
-                    'NOCAPTCHA_SITEKEY' => '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-                    'NOCAPTCHA_SECRET'  => '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE',
-                    'CACHE_DRIVER'      => 'database',
-                    'SESSION_DRIVER'    => 'database',
-                    'APP_ENV'           => 'production',
-                    'APP_DEBUG'         => 'false'
-                ];
-                foreach ($replacements as $key => $value) {
-                    if (preg_match("/^{$key}=/m", $envContent)) {
-                        $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
-                    } else {
-                        $envContent .= "\n{$key}={$value}";
-                    }
+        // V85: DATABASE REPAIR (product_clicks & mailer settings)
+        if (!Schema::hasTable('product_clicks')) {
+            Schema::create('product_clicks', function ($table) {
+                $table->increments('id');
+                $table->integer('product_id')->unsigned();
+                $table->string('date')->nullable();
+            });
+            $product_backfill[] = "Table 'product_clicks' created successfully.";
+        }
+
+        if (Schema::hasTable('generalsettings')) {
+            $gs_check = DB::table('generalsettings')->first();
+            if ($gs_check) {
+                $updates = [];
+                if (empty($gs_check->from_email) || $gs_check->from_email == ' ' || $gs_check->from_email == '') {
+                    $updates['from_email'] = 'support@fabilive.com';
                 }
-                file_put_contents($envPath, $envContent);
-                \Illuminate\Support\Facades\Artisan::call('config:clear');
-                return ['status' => 'persisted'];
-            } catch (\Exception $e) {
-                return ['status' => 'failed', 'error' => $e->getMessage()];
+                if (empty($gs_check->from_name) || $gs_check->from_name == ' ' || $gs_check->from_name == '') {
+                    $updates['from_name'] = 'Fabilive';
+                }
+                if (!empty($updates)) {
+                    DB::table('generalsettings')->where('id', $gs_check->id)->update($updates);
+                    $product_backfill[] = "Mailer config repaired: " . json_encode($updates);
+                }
             }
-        })(),
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'product_backfill' => $product_backfill,
+            'template_recovery' => (function() {
+                if (DB::table('email_templates')->count() == 0) {
+                    DB::table('email_templates')->insert([
+                        [
+                            'email_type' => 'customer_reg_common',
+                            'email_subject' => 'Welcome to Fabilive',
+                            'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
+                            'status' => 1
+                        ]
+                    ]);
+                    return 'backfilled';
+                }
+                return 'exists';
+            })(),
+            'counts' => [
+                'products' => DB::table('products')->count(),
+                'categories' => DB::table('categories')->count(),
+            ],
+            'env_updates' => (function() {
+                try {
+                    $envPath = base_path('.env');
+                    if (!file_exists($envPath)) return ['status' => 'missing'];
+                    $envContent = file_get_contents($envPath);
+                    $replacements = [
+                        'CACHE_DRIVER' => 'database',
+                        'SESSION_DRIVER' => 'database',
+                        'APP_ENV' => 'production'
+                    ];
+                    foreach ($replacements as $key => $value) {
+                        if (preg_match("/^{$key}=/m", $envContent)) {
+                            $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $envContent);
+                        } else {
+                            $envContent .= "\n{$key}={$value}";
+                        }
+                    }
+                    file_put_contents($envPath, $envContent);
+                    return ['status' => 'persisted'];
+                } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
+            })(),
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
@@ -177,12 +207,12 @@ Route::get('/debug-smtp', function() {
         
         $template = DB::table('email_templates')->first(); 
         $data = [
-            'to' => $gs->from_email,
+            'to' => $gs->from_email ?: "noreply@fabilive.com",
             'type' => $template ? $template->email_type : "common",
             'cname' => "System Debug",
             'oamount' => "0",
             'aname' => "Admin",
-            'aemail' => $gs->from_email,
+            'aemail' => $gs->from_email ?: "noreply@fabilive.com",
             'onumber' => "DEBUG-".time()
         ];
         $mailer = new \App\Classes\GeniusMailer();
@@ -190,7 +220,13 @@ Route::get('/debug-smtp', function() {
         $result = $mailer->sendAutoMail($data);
         return response()->json([
             'status' => $result ? 'success' : 'failed', 
-            'message' => $result ? 'Test email sent to ' . $gs->from_email : 'Mailer returned false (template missing?)'
+            'message' => $result ? 'Test email sent to ' . ($gs->from_email ?: "noreply@fabilive.com (Fallback)") : 'Mailer returned false (template missing?)',
+            'from_address' => $gs->from_email ?: 'EMPTY (Fallback: support@fabilive.com used in Mailer)',
+            'gs_data' => [
+                'from_email' => $gs->from_email,
+                'from_name' => $gs->from_name,
+                'smtp_host' => $gs->mail_host
+            ]
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

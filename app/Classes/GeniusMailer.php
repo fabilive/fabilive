@@ -37,7 +37,14 @@ class GeniusMailer
             $this->mail->Password   = $this->gs->mail_pass;
             $this->mail->SMTPSecure = $this->gs->mail_encryption;
             $this->mail->Port       = $this->gs->mail_port;
+            $this->mail->Timeout    = 10;
+            $this->mail->CharSet    = 'utf-8';
         }
+        
+        // V85: Fallback From Logic
+        $from_email = (!empty($this->gs->from_email) && trim($this->gs->from_email) != '') ? $this->gs->from_email : 'support@fabilive.com';
+        $from_name = (!empty($this->gs->from_name) && trim($this->gs->from_name) != '') ? $this->gs->from_name : 'Fabilive';
+        $this->mail->setFrom($from_email, $from_name);
     }
 
     public function sendAutoMail(array $data)
@@ -56,7 +63,7 @@ class GeniusMailer
             if (isset($data['onumber'])) $body = preg_replace("/{order_number}/", $data['onumber'], $body);
             $body = preg_replace("/{website_title}/", $this->gs->title, $body);
 
-            $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
+            // From already set in constructor, but can be overridden here if needed
             $this->addRecipients($data['to']);
             $this->mail->isHTML(true);
             $this->mail->Subject = $temp->email_subject;
@@ -71,7 +78,7 @@ class GeniusMailer
     public function sendCustomMail(array $mailData)
     {
         try {
-            $this->mail->setFrom($this->gs->from_email, $this->gs->from_name);
+            // From already set in constructor
             $this->addRecipients($mailData['to']);
 
             $this->mail->isHTML(true);
