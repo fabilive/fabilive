@@ -232,6 +232,26 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
+        // Phase 12: Redis Hardening Sync
+        $redis_sync = (function() {
+            try {
+                $path = base_path('.env');
+                if (file_exists($path)) {
+                    $content = file_get_contents($path);
+                    $new_pass = 'Fab!L1ve@Redis#Secure2026';
+                    
+                    if (strpos($content, 'REDIS_PASSWORD=') !== false) {
+                        $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=' . $new_pass, $content);
+                    } else {
+                        $content .= "\nREDIS_PASSWORD=" . $new_pass;
+                    }
+                    file_put_contents($path, $content);
+                    return 'persisted';
+                }
+                return 'missing_env';
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
         // Master Return
         return response()->json([
             'status' => 'success',
@@ -245,6 +265,7 @@ Route::get('/run-setup', function() {
             ],
             'template_recovery' => $template_recovery_status,
             'env_updates' => $env_updates_status,
+            'redis_sync' => $redis_sync
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
