@@ -269,6 +269,22 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
+        // V90.2: Payment Gateways Repair
+        $pg_repair = (function() {
+            try {
+                if (Schema::hasTable('payment_gateways')) {
+                    if (!Schema::hasColumn('payment_gateways', 'subscription')) {
+                        Schema::table('payment_gateways', function($table) {
+                            $table->integer('subscription')->default(0);
+                        });
+                        return 'column_added';
+                    }
+                    return 'exists';
+                }
+                return 'table_not_found';
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
         // Master Return
         return response()->json([
             'status' => 'success',
@@ -276,7 +292,19 @@ Route::get('/run-setup', function() {
             'admin_sync' => $admin_sync,
             'counters_repair' => $counters_repair,
             'gs_hardening' => $gs_hardening,
-            'counts' => $counts,
+            'pg_repair' => $pg_repair,
+            'counts' => [
+                'generalsettings' => DB::table('generalsettings')->count(),
+                'sliders' => DB::table('sliders')->count(),
+                'blogs' => DB::table('blogs')->count(),
+                'blog_categories' => DB::table('blog_categories')->count(),
+                'categories' => DB::table('categories')->count(),
+                'subcategories' => DB::table('subcategories')->count(),
+                'childcategories' => DB::table('childcategories')->count(),
+                'products' => DB::table('products')->count(),
+                'attributes' => DB::table('attributes')->count(),
+                'payment_gateways' => Schema::hasTable('payment_gateways') ? DB::table('payment_gateways')->count() : 0,
+            ],
             'template_recovery' => $template_recovery_status,
             'env_updates' => $env_updates_status,
             'redis_sync' => $redis_sync
