@@ -183,11 +183,23 @@ Route::get('/run-setup', function() {
                                 $table->integer($column)->default(0);
                             });
                         }
-                    }
-                    cache()->forget('generalsettings');
-                    cache()->forget('pagesettings');
-                    cache()->forget('seotools');
                     cache()->forget('socialsettings');
+
+                    // V87.3: Direct Property Injection (Fail-safe for stubborn caches/schema)
+                    $gs_row = DB::table('generalsettings')->first();
+                    if ($gs_row) {
+                        $needed = ['rtl' => 0, 'is_capcha' => 0, 'is_verification_email' => 0, 'is_guest_checkout' => 0];
+                        $update = [];
+                        foreach ($needed as $key => $val) {
+                            if (!property_exists($gs_row, $key)) {
+                                $update[$key] = $val;
+                            }
+                        }
+                        if (!empty($update)) {
+                            DB::table('generalsettings')->where('id', $gs_row->id)->update($update);
+                        }
+                    }
+                    
                     return 'hardened_and_cleared';
                 }
                 return 'missing_table';
