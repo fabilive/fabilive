@@ -232,23 +232,40 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
-        // Phase 12: Redis Hardening Sync
+        // Phase 12: Redis Hardening Sync & Recovery
         $redis_sync = (function() {
             try {
                 $path = base_path('.env');
-                if (file_exists($path)) {
-                    $content = file_get_contents($path);
-                    $new_pass = 'Fab!L1ve@Redis#Secure2026';
-                    
-                    if (strpos($content, 'REDIS_PASSWORD=') !== false) {
-                        $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=' . $new_pass, $content);
-                    } else {
-                        $content .= "\nREDIS_PASSWORD=" . $new_pass;
-                    }
+                if (!file_exists($path)) return 'missing_env';
+                
+                $content = file_get_contents($path);
+                
+                // RECOVERY MODE: If user visits /run-setup?recover_redis=1
+                if (request()->query('recover_redis')) {
+                    $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=', $content);
                     file_put_contents($path, $content);
-                    return 'persisted';
+                    return 'recovered_null';
                 }
-                return 'missing_env';
+
+                $new_pass = 'Fab!L1ve@Redis#Secure2026';
+                if (strpos($content, 'REDIS_PASSWORD=') !== false) {
+                    $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=' . $new_pass, $content);
+                } else {
+                    $content .= "\nREDIS_PASSWORD=" . $new_pass;
+                }
+                file_put_contents($path, $content);
+
+                // PATH FINDER: Try to help the user find the redis config
+                $possible_paths = ['/etc/redis/redis.conf', '/etc/redis.conf', '/etc/redis/redis-server.conf'];
+                $found_path = 'not_found';
+                foreach($possible_paths as $p) {
+                    if (file_exists($p)) { $found_path = $p; break; }
+                }
+
+                return [
+                    'status' => 'persisted',
+                    'config_hint' => $found_path
+                ];
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
@@ -259,12 +276,9 @@ Route::get('/run-setup', function() {
             'admin_sync' => $admin_sync,
             'counters_repair' => $counters_repair,
             'gs_hardening' => $gs_hardening,
-            'counts' => [
-                'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
-                'categories' => Schema::hasTable('categories') ? DB::table('categories')->count() : 0,
-            ],
-            'template_recovery' => $template_recovery_status,
-            'env_updates' => $env_updates_status,
+            'counts' => $counts,
+            'template_recovery' => $template_recovery,
+            'env_updates' => $env_updates,
             'redis_sync' => $redis_sync
         ]);
     } catch (\Exception $e) {
