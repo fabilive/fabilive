@@ -150,6 +150,28 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
         })();
 
+        // Phase 11: Counters Repair
+        $counters_repair = (function() {
+            try {
+                if (!Schema::hasTable('counters')) {
+                    Schema::create('counters', function($table) {
+                        $table->increments('id');
+                        $table->string('type')->nullable();
+                        $table->integer('total_count')->default(0);
+                        $table->timestamps();
+                    });
+                    return 'created';
+                }
+                if (!Schema::hasColumn('counters', 'type')) {
+                    Schema::table('counters', function($table) {
+                        $table->string('type')->nullable();
+                    });
+                    return 'column_added';
+                }
+                return 'exists';
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
         // Phase 10: Admin Sync
         $admin_sync = (function() {
             try {
@@ -177,6 +199,7 @@ Route::get('/run-setup', function() {
             'status' => 'success',
             'product_backfill' => $product_backfill,
             'admin_sync' => $admin_sync,
+            'counters_repair' => $counters_repair,
             'counts' => [
                 'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
                 'categories' => Schema::hasTable('categories') ? DB::table('categories')->count() : 0,
