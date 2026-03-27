@@ -335,20 +335,15 @@ Route::get('/run-setup', function() {
         })();
 
         $results = [
-            'phase_1_cache' => $cache_clear,
-            'phase_2_env' => $env_hardened,
-            'phase_3_keys' => $keys_generated,
-            'phase_4_migrations' => $migrations_run,
-            'phase_5_symlink' => $storage_link,
-            'phase_6_permissions' => $permissions_set,
-            'phase_7_vendor_sync' => $vendor_sync,
-            'phase_8_gs_repair' => $gs_repair,
-            'phase_9_gs_failsafe' => $gs_failsafe,
-            'phase_10_admin_sync' => $admin_sync,
-            'phase_11_redis_sync' => $redis_sync,
-            'phase_12_redis_recovery' => $redis_recovery,
-            'phase_13_pg_repair' => $pg_repair,
-            'phase_14_schema_polish' => $schema_polish,
+            'phase_1_backfill' => $product_backfill,
+            'phase_2_templates' => $template_recovery_status,
+            'phase_3_env' => $env_updates_status,
+            'phase_4_counters' => $counters_repair,
+            'phase_5_hardening' => $gs_hardening,
+            'phase_6_admin' => $admin_sync,
+            'phase_7_redis' => $redis_sync,
+            'phase_8_pg' => $pg_repair,
+            'phase_9_polish' => $schema_polish,
             'status' => 'Fabilive Recovery V90.2: System Stabilized'
         ];
 
