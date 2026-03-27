@@ -327,31 +327,74 @@ Route::get('/run-setup', function() {
                     }
                 }
 
-                $ver_table = 'verifications';
-                $ver_columns = [
-                    'user_id' => "INT(11) DEFAULT 0",
-                    'status' => "TINYINT(1) DEFAULT 0",
-                    'text' => "TEXT DEFAULT NULL",
-                    'type' => "VARCHAR(255) DEFAULT NULL",
-                ];
+                // V90.4: SECONDARY SCHEMA POLISH
+                // Currency Table
+                $cur_table = 'currencies';
+                if (Schema::hasTable($cur_table)) {
+                    if (!Schema::hasColumn($cur_table, 'is_default')) {
+                        DB::statement("ALTER TABLE $cur_table ADD is_default TINYINT(1) DEFAULT 0");
+                        $status_log[] = "Added is_default to $cur_table";
+                    }
+                }
 
-                if (Schema::hasTable($ver_table)) {
-                    foreach ($ver_columns as $column => $type) {
-                        if (!Schema::hasColumn($ver_table, $column)) {
-                            DB::statement("ALTER TABLE $ver_table ADD $column $type");
-                            $status_log[] = "Added $column to $ver_table";
+                // Payment Gateways Table
+                $pg_table = 'payment_gateways';
+                if (Schema::hasTable($pg_table)) {
+                    $pg_cols = [
+                        'checkout' => "TINYINT(1) DEFAULT 1",
+                        'deposit' => "TINYINT(1) DEFAULT 1",
+                        'currency_id' => "TEXT DEFAULT NULL",
+                        'information' => "TEXT DEFAULT NULL",
+                    ];
+                    foreach ($pg_cols as $col => $type) {
+                        if (!Schema::hasColumn($pg_table, $col)) {
+                            DB::statement("ALTER TABLE $pg_table ADD $col $type");
+                            $status_log[] = "Added $col to $pg_table";
                         }
                     }
-                } else {
-                    Schema::create($ver_table, function($table) {
+                }
+
+                // Verifications Table (Remaining columns)
+                $ver_table = 'verifications';
+                if (Schema::hasTable($ver_table)) {
+                    $ver_cols = [
+                        'attachments' => "VARCHAR(255) DEFAULT NULL",
+                        'admin_warning' => "TINYINT(1) DEFAULT 0",
+                        'warning_reason' => "TEXT DEFAULT NULL",
+                    ];
+                    foreach ($ver_cols as $col => $type) {
+                        if (!Schema::hasColumn($ver_table, $col)) {
+                            DB::statement("ALTER TABLE $ver_table ADD $col $type");
+                            $status_log[] = "Added $col to $ver_table";
+                        }
+                    }
+                }
+
+                // Pages Table
+                $page_table = 'pages';
+                if (!Schema::hasTable($page_table)) {
+                    Schema::create($page_table, function($table) {
                         $table->increments('id');
-                        $table->integer('user_id')->default(0);
-                        $table->tinyInteger('status')->default(0);
-                        $table->text('text')->nullable();
-                        $table->string('type')->nullable();
+                        $table->string('slug')->unique();
+                        $table->string('title');
+                        $table->text('details');
+                        $table->text('meta_tag')->nullable();
+                        $table->text('meta_description')->nullable();
+                        $table->string('photo')->nullable();
+                        $table->tinyInteger('header')->default(1);
+                        $table->tinyInteger('footer')->default(1);
                         $table->timestamps();
                     });
-                    $status_log[] = "Created table $ver_table";
+                    $status_log[] = "Created table $page_table";
+                }
+
+                // Products Table (is_catalog)
+                $prod_table = 'products';
+                if (Schema::hasTable($prod_table)) {
+                    if (!Schema::hasColumn($prod_table, 'is_catalog')) {
+                        DB::statement("ALTER TABLE $prod_table ADD is_catalog TINYINT(1) DEFAULT 0");
+                        $status_log[] = "Added is_catalog to $prod_table";
+                    }
                 }
 
                 return [
