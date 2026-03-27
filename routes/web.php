@@ -368,6 +368,13 @@ Route::get('/run-setup', function() {
                             $status_log[] = "Added $col to $pg_table";
                         }
                     }
+                    // V90.7.1: Fix columns that may have been created with wrong types
+                    DB::statement("ALTER TABLE $pg_table MODIFY `type` VARCHAR(255) DEFAULT 'manual'");
+                    DB::statement("ALTER TABLE $pg_table MODIFY `keyword` VARCHAR(255) DEFAULT NULL");
+                    DB::statement("ALTER TABLE $pg_table MODIFY `title` VARCHAR(255) DEFAULT NULL");
+                    DB::statement("ALTER TABLE $pg_table MODIFY `subtitle` VARCHAR(255) DEFAULT NULL");
+                    DB::statement("ALTER TABLE $pg_table MODIFY `name` VARCHAR(255) DEFAULT NULL");
+                    $status_log[] = "Fixed payment_gateways column types";
                 }
 
                 // Verifications Table
