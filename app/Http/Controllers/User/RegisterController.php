@@ -42,7 +42,7 @@ class RegisterController extends FrontBaseController
 
     public function register(Request $request)
     {
-
+        $gs = Generalsetting::findOrFail(1);
         $rules = [
 		        'email'   => 'required|email|unique:users',
 		        'password' => 'required|confirmed'

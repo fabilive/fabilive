@@ -197,8 +197,8 @@
 	@endphp
 	<script type="text/javascript">
 		var mainurl = "{{url('/')}}";
-			  var admin_loader = {{ $gs->is_admin_loader }};
-			  var whole_sell = {{ $gs->wholesell }};
+			  var admin_loader = {{ $gs->is_admin_loader ?? 0 }};
+			  var whole_sell = {{ $gs->wholesell ?? 0 }};
 			  var getattrUrl = '{{ route('admin-prod-getattributes') }}';
 			  var curr = {!! json_encode($curr) !!};
 			  var lang  = {

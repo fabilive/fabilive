@@ -55,10 +55,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Absolute fail-safe for missing properties
         if ($gs) {
+            $gs->is_capcha = 0; // Force disable Captcha globally for recovery
             if (!isset($gs->rtl)) $gs->rtl = 0;
-            if (!isset($gs->is_capcha)) $gs->is_capcha = 0;
+            if (!isset($gs->is_admin_loader)) $gs->is_admin_loader = 0;
             if (!isset($gs->is_verification_email)) $gs->is_verification_email = 0;
             if (!isset($gs->is_guest_checkout)) $gs->is_guest_checkout = 0;
+            if (!isset($gs->wholesell)) $gs->wholesell = 0;
         }
 
         view()->composer('*', function ($settings) use ($gs) {
