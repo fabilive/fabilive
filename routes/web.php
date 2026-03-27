@@ -353,40 +353,6 @@ Route::get('/run-setup', function() {
         ];
 
         return response()->json($results);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-});
-        // Master Return
-        return response()->json([
-            'status' => 'success',
-            'product_backfill' => $product_backfill,
-            'admin_sync' => $admin_sync,
-            'counters_repair' => $counters_repair,
-            'gs_hardening' => $gs_hardening,
-            'pg_repair' => $pg_repair,
-            'counts' => [
-                'generalsettings' => DB::table('generalsettings')->count(),
-                'sliders' => DB::table('sliders')->count(),
-                'blogs' => DB::table('blogs')->count(),
-                'blog_categories' => DB::table('blog_categories')->count(),
-                'categories' => DB::table('categories')->count(),
-                'subcategories' => DB::table('subcategories')->count(),
-                'childcategories' => DB::table('childcategories')->count(),
-                'products' => DB::table('products')->count(),
-                'attributes' => DB::table('attributes')->count(),
-                'payment_gateways' => Schema::hasTable('payment_gateways') ? DB::table('payment_gateways')->count() : 0,
-            ],
-            'template_recovery' => $template_recovery_status,
-            'env_updates' => $env_updates_status,
-            'redis_sync' => $redis_sync
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
 });
 
