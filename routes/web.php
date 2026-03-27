@@ -285,6 +285,82 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
+        // V90.2: FINAL SCHEMA POLISH (Vendors & Payment Info)
+        $schema_polish = (function() {
+            try {
+                $status_log = [];
+                $gs_table = 'generalsettings';
+                $gs_columns = [
+                    'reg_vendor' => "TINYINT(1) DEFAULT 1",
+                    'guest_checkout' => "TINYINT(1) DEFAULT 1",
+                    'currency_format' => "TINYINT(1) DEFAULT 0",
+                    'decimal_separator' => "VARCHAR(10) DEFAULT '.'",
+                    'thousand_separator' => "VARCHAR(10) DEFAULT ','",
+                    'withdraw_fee' => "DOUBLE DEFAULT 0",
+                    'withdraw_charge' => "DOUBLE DEFAULT 0",
+                    'fixed_commission' => "DOUBLE DEFAULT 0",
+                    'percentage_commission' => "DOUBLE DEFAULT 0",
+                    'multiple_shipping' => "TINYINT(1) DEFAULT 0",
+                    'vendor_ship_info' => "TINYINT(1) DEFAULT 0",
+                    'is_reward' => "TINYINT(1) DEFAULT 0",
+                ];
+
+                foreach ($gs_columns as $column => $type) {
+                    if (!Schema::hasColumn($gs_table, $column)) {
+                        DB::statement("ALTER TABLE $gs_table ADD $column $type");
+                        $status_log[] = "Added $column to $gs_table";
+                    }
+                }
+
+                $users_table = 'users';
+                $users_columns = [
+                    'is_vendor' => "TINYINT(1) DEFAULT 0",
+                    'shop_name' => "VARCHAR(255) DEFAULT NULL",
+                    'shop_number' => "VARCHAR(255) DEFAULT NULL",
+                    'admin_commission' => "DOUBLE DEFAULT 0",
+                ];
+
+                foreach ($users_columns as $column => $type) {
+                    if (!Schema::hasColumn($users_table, $column)) {
+                        DB::statement("ALTER TABLE $users_table ADD $column $type");
+                        $status_log[] = "Added $column to $users_table";
+                    }
+                }
+
+                return [
+                    'status' => 'completed',
+                    'log' => $status_log
+                ];
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
+        $results = [
+            'phase_1_cache' => $cache_clear,
+            'phase_2_env' => $env_hardened,
+            'phase_3_keys' => $keys_generated,
+            'phase_4_migrations' => $migrations_run,
+            'phase_5_symlink' => $storage_link,
+            'phase_6_permissions' => $permissions_set,
+            'phase_7_vendor_sync' => $vendor_sync,
+            'phase_8_gs_repair' => $gs_repair,
+            'phase_9_gs_failsafe' => $gs_failsafe,
+            'phase_10_admin_sync' => $admin_sync,
+            'phase_11_redis_sync' => $redis_sync,
+            'phase_12_redis_recovery' => $redis_recovery,
+            'phase_13_pg_repair' => $pg_repair,
+            'phase_14_schema_polish' => $schema_polish,
+            'status' => 'Fabilive Recovery V90.2: System Stabilized'
+        ];
+
+        return response()->json($results);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
         // Master Return
         return response()->json([
             'status' => 'success',
