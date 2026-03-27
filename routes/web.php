@@ -327,13 +327,21 @@ Route::get('/run-setup', function() {
                     }
                 }
 
-                // V90.4: SECONDARY SCHEMA POLISH
+                // V90.5: EXHAUSTIVE SECONDARY SCHEMA POLISH
                 // Currency Table
                 $cur_table = 'currencies';
                 if (Schema::hasTable($cur_table)) {
-                    if (!Schema::hasColumn($cur_table, 'is_default')) {
-                        DB::statement("ALTER TABLE $cur_table ADD is_default TINYINT(1) DEFAULT 0");
-                        $status_log[] = "Added is_default to $cur_table";
+                    $cur_cols = [
+                        'name' => "VARCHAR(255) DEFAULT NULL",
+                        'sign' => "VARCHAR(10) DEFAULT NULL",
+                        'value' => "DOUBLE DEFAULT 1",
+                        'is_default' => "TINYINT(1) DEFAULT 0",
+                    ];
+                    foreach ($cur_cols as $col => $type) {
+                        if (!Schema::hasColumn($cur_table, $col)) {
+                            DB::statement("ALTER TABLE $cur_table ADD $col $type");
+                            $status_log[] = "Added $col to $cur_table";
+                        }
                     }
                 }
 
@@ -341,10 +349,18 @@ Route::get('/run-setup', function() {
                 $pg_table = 'payment_gateways';
                 if (Schema::hasTable($pg_table)) {
                     $pg_cols = [
+                        'title' => "VARCHAR(255) DEFAULT NULL",
+                        'subtitle' => "VARCHAR(255) DEFAULT NULL",
+                        'details' => "TEXT DEFAULT NULL",
+                        'name' => "VARCHAR(255) DEFAULT NULL",
+                        'type' => "VARCHAR(255) DEFAULT 'manual'",
+                        'keyword' => "VARCHAR(255) DEFAULT NULL",
+                        'information' => "TEXT DEFAULT NULL",
+                        'currency_id' => "TEXT DEFAULT NULL",
                         'checkout' => "TINYINT(1) DEFAULT 1",
                         'deposit' => "TINYINT(1) DEFAULT 1",
-                        'currency_id' => "TEXT DEFAULT NULL",
-                        'information' => "TEXT DEFAULT NULL",
+                        'subscription' => "TINYINT(1) DEFAULT 0",
+                        'status' => "TINYINT(1) DEFAULT 1",
                     ];
                     foreach ($pg_cols as $col => $type) {
                         if (!Schema::hasColumn($pg_table, $col)) {
@@ -354,10 +370,14 @@ Route::get('/run-setup', function() {
                     }
                 }
 
-                // Verifications Table (Remaining columns)
+                // Verifications Table
                 $ver_table = 'verifications';
                 if (Schema::hasTable($ver_table)) {
                     $ver_cols = [
+                        'user_id' => "INT(11) DEFAULT 0",
+                        'status' => "TINYINT(1) DEFAULT 0",
+                        'text' => "TEXT DEFAULT NULL",
+                        'type' => "VARCHAR(255) DEFAULT NULL",
                         'attachments' => "VARCHAR(255) DEFAULT NULL",
                         'admin_warning' => "TINYINT(1) DEFAULT 0",
                         'warning_reason' => "TEXT DEFAULT NULL",
@@ -386,9 +406,26 @@ Route::get('/run-setup', function() {
                         $table->timestamps();
                     });
                     $status_log[] = "Created table $page_table";
+                } else {
+                    $page_cols = [
+                        'slug' => "VARCHAR(255)",
+                        'title' => "VARCHAR(255) DEFAULT NULL",
+                        'details' => "TEXT DEFAULT NULL",
+                        'meta_tag' => "TEXT DEFAULT NULL",
+                        'meta_description' => "TEXT DEFAULT NULL",
+                        'photo' => "VARCHAR(255) DEFAULT NULL",
+                        'header' => "TINYINT(1) DEFAULT 1",
+                        'footer' => "TINYINT(1) DEFAULT 1",
+                    ];
+                    foreach ($page_cols as $col => $type) {
+                        if (!Schema::hasColumn($page_table, $col)) {
+                            DB::statement("ALTER TABLE $page_table ADD $col $type");
+                            $status_log[] = "Added $col to $page_table";
+                        }
+                    }
                 }
 
-                // Products Table (is_catalog)
+                // Products Table
                 $prod_table = 'products';
                 if (Schema::hasTable($prod_table)) {
                     if (!Schema::hasColumn($prod_table, 'is_catalog')) {
