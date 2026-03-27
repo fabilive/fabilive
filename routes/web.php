@@ -327,6 +327,33 @@ Route::get('/run-setup', function() {
                     }
                 }
 
+                $ver_table = 'verifications';
+                $ver_columns = [
+                    'user_id' => "INT(11) DEFAULT 0",
+                    'status' => "TINYINT(1) DEFAULT 0",
+                    'text' => "TEXT DEFAULT NULL",
+                    'type' => "VARCHAR(255) DEFAULT NULL",
+                ];
+
+                if (Schema::hasTable($ver_table)) {
+                    foreach ($ver_columns as $column => $type) {
+                        if (!Schema::hasColumn($ver_table, $column)) {
+                            DB::statement("ALTER TABLE $ver_table ADD $column $type");
+                            $status_log[] = "Added $column to $ver_table";
+                        }
+                    }
+                } else {
+                    Schema::create($ver_table, function($table) {
+                        $table->increments('id');
+                        $table->integer('user_id')->default(0);
+                        $table->tinyInteger('status')->default(0);
+                        $table->text('text')->nullable();
+                        $table->string('type')->nullable();
+                        $table->timestamps();
+                    });
+                    $status_log[] = "Created table $ver_table";
+                }
+
                 return [
                     'status' => 'completed',
                     'log' => $status_log
