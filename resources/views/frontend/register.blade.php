@@ -57,14 +57,15 @@
                                             <p>
                                                 <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('custom_referral_name') ? Session::get('custom_referral_name') : '' }}">
                                             </p>
-                                            @if($gs->is_capcha == 1)
+                                            {{-- V90.7: Captcha DISABLED for recovery --}}
+                                            {{-- @if($gs->is_capcha == 1)
                                             <div class="form-input mb-3">
                                                  {!! NoCaptcha::display() !!}
                                                  @error('g-recaptcha-response')
                                                  <p class="my-2">{{$message}}</p>
                                                  @enderror
                                              </div>
-                                             @endif
+                                             @endif --}}
                                             <input id="processdata" type="hidden" value="{{ __('Processing...') }}">
                                                 <button class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
                                             </p>
@@ -84,9 +85,10 @@
 @endsection
 @section('script')
 
-    @if($gs->is_capcha == 1)
+    {{-- V90.7: Captcha JS DISABLED for recovery --}}
+    {{-- @if($gs->is_capcha == 1)
         {!! NoCaptcha::renderJs() !!}
-    @endif
+    @endif --}}
 
 <script type="text/javascript">
     let isSubmitting = false;

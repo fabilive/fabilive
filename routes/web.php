@@ -375,7 +375,6 @@ Route::get('/run-setup', function() {
                 if (Schema::hasTable($ver_table)) {
                     $ver_cols = [
                         'user_id' => "INT(11) DEFAULT 0",
-                        'status' => "TINYINT(1) DEFAULT 0",
                         'text' => "TEXT DEFAULT NULL",
                         'type' => "VARCHAR(255) DEFAULT NULL",
                         'attachments' => "VARCHAR(255) DEFAULT NULL",
@@ -387,6 +386,14 @@ Route::get('/run-setup', function() {
                             DB::statement("ALTER TABLE $ver_table ADD $col $type");
                             $status_log[] = "Added $col to $ver_table";
                         }
+                    }
+                    // V90.7: Fix status column - must be VARCHAR for string statuses
+                    if (Schema::hasColumn($ver_table, 'status')) {
+                        DB::statement("ALTER TABLE $ver_table MODIFY status VARCHAR(255) DEFAULT 'Pending'");
+                        $status_log[] = "Fixed status column type to VARCHAR in $ver_table";
+                    } else {
+                        DB::statement("ALTER TABLE $ver_table ADD status VARCHAR(255) DEFAULT 'Pending'");
+                        $status_log[] = "Added status (VARCHAR) to $ver_table";
                     }
                 }
 
@@ -441,6 +448,107 @@ Route::get('/run-setup', function() {
             } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
         })();
 
+        // V90.7: DEEP RECOVERY PHASE
+        $deep_recovery = (function() {
+            try {
+                $log = [];
+
+                // 1. Force Captcha OFF in database
+                if (Schema::hasTable('generalsettings')) {
+                    DB::table('generalsettings')->update(['is_capcha' => 0]);
+                    $log[] = "Forced is_capcha=0 in generalsettings";
+                }
+
+                // 2. Fix CamPay gateway: set to automatic type with API field structure
+                if (Schema::hasTable('payment_gateways')) {
+                    $campay = DB::table('payment_gateways')->where('keyword', 'campay')->first();
+                    if ($campay && $campay->type !== 'automatic') {
+                        $info = json_encode([
+                            'campay_username' => '',
+                            'campay_password' => '',
+                            'sandbox_check' => 1
+                        ]);
+                        DB::table('payment_gateways')->where('id', $campay->id)->update([
+                            'type' => 'automatic',
+                            'information' => $info
+                        ]);
+                        $log[] = "Updated CamPay to automatic type with API fields";
+                    }
+
+                    // Also fix HitPay if it exists
+                    $hitpay = DB::table('payment_gateways')->where('keyword', 'hitpay')->first();
+                    if ($hitpay && $hitpay->type !== 'automatic') {
+                        $info = json_encode([
+                            'hitpay_api_key' => '',
+                            'hitpay_salt' => '',
+                            'sandbox_check' => 1
+                        ]);
+                        DB::table('payment_gateways')->where('id', $hitpay->id)->update([
+                            'type' => 'automatic',
+                            'information' => $info
+                        ]);
+                        $log[] = "Updated HitPay to automatic type with API fields";
+                    }
+                }
+
+                // 3. Seed default pages if missing
+                if (Schema::hasTable('pages')) {
+                    $default_pages = [
+                        ['slug' => 'about-us', 'title' => 'About Us', 'details' => '<p>Welcome to Fabilive — your trusted online marketplace in Africa.</p>', 'header' => 1, 'footer' => 1],
+                        ['slug' => 'terms-and-conditions', 'title' => 'Terms & Conditions', 'details' => '<p>Please read our terms and conditions carefully before using our platform.</p>', 'header' => 1, 'footer' => 1],
+                        ['slug' => 'privacy-policy', 'title' => 'Privacy Policy', 'details' => '<p>Your privacy is important to us. This policy explains how we collect and use your data.</p>', 'header' => 1, 'footer' => 1],
+                        ['slug' => 'return-policy', 'title' => 'Return Policy', 'details' => '<p>Learn about our return and refund policies.</p>', 'header' => 0, 'footer' => 1],
+                        ['slug' => 'shipping-info', 'title' => 'Shipping Information', 'details' => '<p>Delivery information and shipping rates for all locations.</p>', 'header' => 0, 'footer' => 1],
+                    ];
+                    foreach ($default_pages as $page) {
+                        if (!DB::table('pages')->where('slug', $page['slug'])->exists()) {
+                            DB::table('pages')->insert(array_merge($page, [
+                                'meta_tag' => $page['title'],
+                                'meta_description' => strip_tags($page['details']),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]));
+                            $log[] = "Seeded page: {$page['title']}";
+                        }
+                    }
+                }
+
+                // 4. Ensure blog tables exist
+                if (!Schema::hasTable('blogs')) {
+                    Schema::create('blogs', function($table) {
+                        $table->increments('id');
+                        $table->integer('category_id')->default(0);
+                        $table->string('title');
+                        $table->text('details');
+                        $table->string('photo')->nullable();
+                        $table->string('source')->nullable();
+                        $table->string('tags')->nullable();
+                        $table->text('meta_tag')->nullable();
+                        $table->text('meta_description')->nullable();
+                        $table->integer('views')->default(0);
+                        $table->timestamps();
+                    });
+                    $log[] = "Created blogs table";
+                }
+
+                if (!Schema::hasTable('blog_categories')) {
+                    Schema::create('blog_categories', function($table) {
+                        $table->increments('id');
+                        $table->string('name');
+                        $table->string('slug');
+                        $table->timestamps();
+                    });
+                    $log[] = "Created blog_categories table";
+                }
+
+                // 5. Clear cache after all DB changes
+                Artisan::call('cache:clear');
+                $log[] = "Cache cleared";
+
+                return ['status' => 'completed', 'log' => $log];
+            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+        })();
+
         $results = [
             'phase_1_backfill' => $product_backfill,
             'phase_2_templates' => $template_recovery_status,
@@ -451,7 +559,8 @@ Route::get('/run-setup', function() {
             'phase_7_redis' => $redis_sync,
             'phase_8_pg' => $pg_repair,
             'phase_9_polish' => $schema_polish,
-            'status' => 'Fabilive Recovery V90.2: System Stabilized'
+            'phase_10_deep_recovery' => $deep_recovery,
+            'status' => 'Fabilive Recovery V90.7: Deep Recovery Complete'
         ];
 
         return response()->json($results);
