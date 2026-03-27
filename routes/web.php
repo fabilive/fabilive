@@ -353,6 +353,12 @@ Route::get('/run-setup', function() {
         ];
 
         return response()->json($results);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
     }
 });
 
