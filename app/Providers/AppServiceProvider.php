@@ -61,6 +61,9 @@ class AppServiceProvider extends ServiceProvider
             if (!isset($gs->is_verification_email)) $gs->is_verification_email = 0;
             if (!isset($gs->is_guest_checkout)) $gs->is_guest_checkout = 0;
             if (!isset($gs->wholesell)) $gs->wholesell = 0;
+            if (!isset($gs->verify_product)) $gs->verify_product = 0;
+            if (!isset($gs->is_affilate)) $gs->is_affilate = 0;
+            if (!isset($gs->affilate_charge)) $gs->affilate_charge = 0;
         }
 
         view()->composer('*', function ($settings) use ($gs) {

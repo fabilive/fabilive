@@ -27,7 +27,7 @@ class RegisterController extends FrontBaseController
         $referrer = User::where('referral_name', $referral_name)->first();
         if ($referrer) {
             Session::put('custom_referral', $referrer->id);
-            Session::put('custom_referral_name', $referrer->name);
+            Session::put('custom_referral_code', $referrer->affilate_code);
         }
         return view('frontend.register');
     }
@@ -86,22 +86,34 @@ class RegisterController extends FrontBaseController
 
             //--- Referral Logic
             $referral_code = $request->referral_code;
+            $referrer = null;
+
+            // Try finding referrer by affilate_code from form input
             if(!empty($referral_code))
             {
-                $referrer = User::where('referral_name', $referral_code)->first();
-                if($referrer)
-                {
-                    $user->reff = $referrer->id;
-                    $user->update();
+                $referrer = User::where('affilate_code', $referral_code)->first();
+            }
 
-                    // Create Custom Referral Record
-                    $referral = new \App\Models\CustomReferral();
-                    $referral->referrer_id = $referrer->id;
-                    $referral->referred_id = $user->id;
-                    $referral->amount = 500; // Default amount from migration
-                    $referral->status = 'locked';
-                    $referral->save();
-                }
+            // Fallback: use session-stored referrer ID (from referral link)
+            if(!$referrer && Session::has('custom_referral'))
+            {
+                $referrer = User::find(Session::get('custom_referral'));
+                Session::forget('custom_referral');
+                Session::forget('custom_referral_code');
+            }
+
+            if($referrer)
+            {
+                $user->reff = $referrer->id;
+                $user->update();
+
+                // Create Custom Referral Record
+                $referral = new \App\Models\CustomReferral();
+                $referral->referrer_id = $referrer->id;
+                $referral->referred_id = $user->id;
+                $referral->amount = 500; // Default amount from migration
+                $referral->status = 'locked';
+                $referral->save();
             }
             //--- Referral Logic Ends
 

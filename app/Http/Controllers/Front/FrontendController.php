@@ -71,10 +71,13 @@ class FrontendController extends FrontBaseController
                 ->where('affilate_code', '=', $request->reff)
                 ->first();
             if (!empty($affilate_user)) {
-                if ($gs->is_affilate == 1) {
-                    Session::put('affilate', $affilate_user->id);
-                    return redirect()->route('user.register');
-                }
+                // Set legacy affiliate session
+                Session::put('affilate', $affilate_user->id);
+                Session::put('affilate_code', $affilate_user->affilate_code);
+                // Set custom referral session for CustomReferral system
+                Session::put('custom_referral', $affilate_user->id);
+                Session::put('custom_referral_code', $affilate_user->affilate_code);
+                return redirect()->route('user.register');
             }
         }
         if (!empty($request->forgot)) {

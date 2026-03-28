@@ -162,17 +162,37 @@ class RegisterController extends Controller
                 $user->fill($input)->save();
 
                 // Custom Referral System
+                $customReferralCreated = false;
                 if (Session::has('custom_referral')) {
                     $customReferrerId = Session::get('custom_referral');
-                    \App\Models\CustomReferral::create([
-                        'referrer_id' => $customReferrerId,
-                        'referred_id' => $user->id,
-                        'amount' => 500,
-                        'status' => 'locked',
-                        'expires_at' => now()->addDays(30),
-                    ]);
+                    // Prevent self-referral
+                    if ($customReferrerId != $user->id) {
+                        \App\Models\CustomReferral::create([
+                            'referrer_id' => $customReferrerId,
+                            'referred_id' => $user->id,
+                            'amount' => 500,
+                            'status' => 'locked',
+                            'expires_at' => now()->addDays(30),
+                        ]);
+                        $customReferralCreated = true;
+                    }
                     Session::forget('custom_referral');
+                    Session::forget('custom_referral_code');
                     Session::forget('custom_referral_name');
+                }
+
+                // Fallback: if user manually typed an affilate_code and no CustomReferral was created yet
+                if (!$customReferralCreated && $request->filled('referral_code')) {
+                    $referrerByCode = User::where('affilate_code', $request->referral_code)->first();
+                    if ($referrerByCode && $referrerByCode->id !== $user->id) {
+                        \App\Models\CustomReferral::create([
+                            'referrer_id' => $referrerByCode->id,
+                            'referred_id' => $user->id,
+                            'amount' => 500,
+                            'status' => 'locked',
+                            'expires_at' => now()->addDays(30),
+                        ]);
+                    }
                 }
 
                 // Handle vendor uploads if vendor

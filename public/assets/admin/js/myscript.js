@@ -628,6 +628,20 @@
             $(".submit-loader").hide();
           }
         },
+        error: function (xhr, status, error) {
+          $("#confirm-delete").modal("toggle");
+          if (admin_loader == 1) {
+            $(".submit-loader").hide();
+          }
+          var msg = "Delete failed. ";
+          try {
+            var resp = JSON.parse(xhr.responseText);
+            if (resp.error) msg += resp.error;
+          } catch(e) {
+            msg += error;
+          }
+          $.notify(msg, "error");
+        },
       });
       return false;
     });

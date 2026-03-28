@@ -18,6 +18,9 @@ class UserController extends UserBaseController
         $user = Auth::user(); // More standard
         // dd($user);
         $sign = \App\Models\Currency::where('is_default', 1)->first();
+        if (!$sign) {
+            $sign = (object) ['sign' => 'FCFA', 'value' => 1, 'name' => 'CFA'];
+        }
         return view('user.dashboard', compact('user', 'sign'));
     }
 
@@ -178,5 +181,20 @@ class UserController extends UserBaseController
         ]);
         broadcast(new MessageSent($message))->toOthers();
         return response()->json(['message' => $message]);
+    }
+
+    public function updateAffilateCode(Request $request)
+    {
+        $user = $this->user;
+        $request->validate([
+            'affilate_code' => 'required|string|max:255|unique:users,affilate_code,' . $user->id
+        ], [
+            'affilate_code.unique' => __('This Referral Code is already taken. Please choose another one.')
+        ]);
+
+        $user->affilate_code = str_replace(' ', '-', trim($request->affilate_code));
+        $user->save();
+
+        return back()->with('success', __('Your custom referral code has been saved successfully.'));
     }
 }

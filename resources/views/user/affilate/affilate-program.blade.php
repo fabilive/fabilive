@@ -43,9 +43,26 @@
                                 <div class="body">
                                         <div class="edit-info-area-form">
                                                 <div class="gocover" style="background: url({{ asset('assets/images/'.$gs->loader) }}) no-repeat scroll center center rgba(45, 45, 45, 0.5);"></div>
-                                                <form>
-                                                    @include('alerts.admin.form-both')
+                                                @include('alerts.admin.form-both')
+                                                
+                                                <form action="{{ route('user-affilate-update') }}" method="POST" class="mb-5 border-bottom pb-4">
+                                                    @csrf
                                                     <div class="row mb-4">
+                                                        <div class="col-lg-4 text-right pt-2 f-14">
+                                                            <label>{{ __('Customize Referral Code *') }}</label>
+                                                            <br>
+                                                            <small>{{ __('Create a readable code for your link.') }}</small>
+                                                        </div>
+                                                        <div class="col-lg-6 pt-2">
+                                                            <input type="text" class="input-field form-control border" name="affilate_code" value="{{ $user->affilate_code }}" required>
+                                                        </div>
+                                                        <div class="col-lg-2 pt-2">
+                                                            <button type="submit" class="btn btn-primary w-100" style="height: 50px;">{{ __('Save Code') }}</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                                <form>
                                                         <div class="col-lg-4 text-right pt-2 f-14">
                                                             <label>{{ __('Your Affilate Link *') }} <a id="affilate_click" data-toggle="tooltip" data-placement="top" title="Copy"  href="javascript:;" class="mybtn1 copy border"><i class="fas fa-copy"></i></a></label>
                                                             <br>
@@ -75,10 +92,49 @@
                                                              <textarea id="affilate_html" class="input-field affilate from-control border w-100 p-4 h--150" name="address" readonly=""><a href="{{ url('/').'/?reff='.$user->affilate_code}}" target="_blank"><img src="{{asset('assets/images/'.$gs->affilate_banner)}}"></a></textarea>
                                                         </div>
                                                     </div>
-                                                </form>
                                             </div>
+
+                                            <div class="row mt-5">
+                                                <div class="col-lg-12">
+                                                    <h5 class="mb-3">{{ __('Your Referred Users & Locked Bonuses') }}</h5>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered table-striped text-center">
+                                                            <thead class="bg-primary text-white">
+                                                                <tr>
+                                                                    <th class="text-white">{{ __('User Name') }}</th>
+                                                                    <th class="text-white">{{ __('Bonus Amount') }}</th>
+                                                                    <th class="text-white">{{ __('Status') }}</th>
+                                                                    <th class="text-white">{{ __('Date Registered') }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @forelse($user->customReferralsSent()->latest()->get() as $referral)
+                                                                <tr>
+                                                                    <td>{{ $referral->referred ? $referral->referred->name : 'Unknown User' }}</td>
+                                                                    <td>{{ \App\Models\Product::vendorConvertPrice($referral->amount) }}</td>
+                                                                    <td>
+                                                                        @if($referral->status == 'locked')
+                                                                            <span class="badge badge-warning text-white px-3 py-2">{{ __('Locked') }}</span>
+                                                                        @else
+                                                                            <span class="badge badge-success px-3 py-2">{{ ucfirst($referral->status) }}</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>{{ $referral->created_at->format('d M, Y h:i A') }}</td>
+                                                                </tr>
+                                                                @empty
+                                                                <tr>
+                                                                    <td colspan="4" class="text-center py-4">{{ __('Nobody has registered with your referral code yet.') }}</td>
+                                                                </tr>
+                                                                @endforelse
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>

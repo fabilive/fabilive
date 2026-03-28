@@ -89,12 +89,18 @@ class VerificationController extends AdminBaseController
 
     public function verificatons($slug)
     {
-        if($slug == 'all'){
-            return view('admin.verify.index');
-        }else if($slug == 'pending'){
-            return view('admin.verify.pending');
+        try {
+            if($slug == 'all'){
+                return response(view('admin.verify.index')->render());
+            }else if($slug == 'pending'){
+                return response(view('admin.verify.pending')->render());
+            }
+            return redirect()->route('admin-vr-index', 'all');
+        } catch (\Exception $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
         }
-        return redirect()->route('admin-vr-index', 'all');
     }
 
     public function show(Request $request)

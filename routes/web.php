@@ -303,6 +303,9 @@ Route::get('/run-setup', function() {
                     'multiple_shipping' => "TINYINT(1) DEFAULT 0",
                     'vendor_ship_info' => "TINYINT(1) DEFAULT 0",
                     'is_reward' => "TINYINT(1) DEFAULT 0",
+                    'verify_product' => "TINYINT(1) DEFAULT 0",
+                    'is_affilate' => "TINYINT(1) DEFAULT 0",
+                    'affilate_charge' => "DOUBLE DEFAULT 0",
                 ];
 
                 foreach ($gs_columns as $column => $type) {
@@ -2175,6 +2178,7 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         Route::get('/affiliate/program', 'User\UserController@affilate_code')->name('user-affilate-program');
         Route::get('/affiliate/history', 'User\UserController@affilate_history')->name('user-affilate-history');
+        Route::post('/affiliate/program/update', 'User\UserController@updateAffilateCode')->name('user-affilate-update');
 
         Route::get('/affiliate/withdraw', 'User\WithdrawController@index')->name('user-wwt-index');
         Route::get('/affiliate/withdraw/create', 'User\WithdrawController@create')->name('user-wwt-create');

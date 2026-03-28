@@ -55,7 +55,7 @@
                                                 <input type="password" name="password_confirmation" class="form-control" required=""  placeholder="{{ __('Confirm Password') }}" >
                                             </p>
                                             <p>
-                                                <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('custom_referral_name') ? Session::get('custom_referral_name') : '' }}">
+                                                <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('affilate_code') ? Session::get('affilate_code') : (Session::has('custom_referral_code') ? Session::get('custom_referral_code') : '') }}">
                                             </p>
                                             {{-- V90.7: Captcha DISABLED for recovery --}}
                                             {{-- @if($gs->is_capcha == 1)

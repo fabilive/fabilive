@@ -68,7 +68,11 @@ class UserController extends AdminBaseController
 
     public function index()
     {
-        return view('admin.user.index');
+        try {
+            return response(view('admin.user.index')->render());
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
     }
 
     public function create()
@@ -78,7 +82,11 @@ class UserController extends AdminBaseController
 
     public function withdraws()
     {
-        return view('admin.user.withdraws');
+        try {
+            return response(view('admin.user.withdraws')->render());
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
     }
 
     //*** GET Request
@@ -191,237 +199,290 @@ class UserController extends AdminBaseController
     //*** GET Request Delete
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
+        try {
+            $user = User::findOrFail($id);
 
-        if ($user->reports->count() > 0) {
-            foreach ($user->reports as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->ratings->count() > 0) {
-            foreach ($user->ratings as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->notifications->count() > 0) {
-            foreach ($user->notifications as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->wishlists->count() > 0) {
-            foreach ($user->wishlists as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->withdraws->count() > 0) {
-            foreach ($user->withdraws as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->socialProviders->count() > 0) {
-            foreach ($user->socialProviders as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->conversations->count() > 0) {
-            foreach ($user->conversations as $gal) {
-                if ($gal->messages->count() > 0) {
-                    foreach ($gal->messages as $key) {
-                        $key->delete();
-                    }
+            // Reports
+            if ($user->reports->count() > 0) {
+                foreach ($user->reports as $gal) {
+                    $gal->delete();
                 }
-                $gal->delete();
             }
-        }
-        if ($user->comments->count() > 0) {
-            foreach ($user->comments as $gal) {
-                if ($gal->replies->count() > 0) {
-                    foreach ($gal->replies as $key) {
-                        $key->delete();
-                    }
+
+            // Ratings
+            if ($user->ratings->count() > 0) {
+                foreach ($user->ratings as $gal) {
+                    $gal->delete();
                 }
-                $gal->delete();
             }
-        }
 
-        if ($user->replies->count() > 0) {
-            foreach ($user->replies as $gal) {
-                if ($gal->subreplies->count() > 0) {
-                    foreach ($gal->subreplies as $key) {
-                        $key->delete();
-                    }
+            // Notifications
+            if ($user->notifications->count() > 0) {
+                foreach ($user->notifications as $gal) {
+                    $gal->delete();
                 }
-                $gal->delete();
             }
-        }
 
-        if ($user->favorites->count() > 0) {
-            foreach ($user->favorites as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->subscribes->count() > 0) {
-            foreach ($user->subscribes as $gal) {
-                $gal->delete();
-            }
-        }
-
-        if ($user->services->count() > 0) {
-            foreach ($user->services as $gal) {
-                if (file_exists(public_path() . '/assets/images/services/' . $gal->photo)) {
-                    unlink(public_path() . '/assets/images/services/' . $gal->photo);
+            // Wishlists
+            if ($user->wishlists->count() > 0) {
+                foreach ($user->wishlists as $gal) {
+                    $gal->delete();
                 }
-                $gal->delete();
             }
-        }
 
-        if ($user->withdraws->count() > 0) {
-            foreach ($user->withdraws as $gal) {
-                $gal->delete();
+            // Withdraws
+            if ($user->withdraws->count() > 0) {
+                foreach ($user->withdraws as $gal) {
+                    $gal->delete();
+                }
             }
-        }
 
-        if ($user->products->count() > 0) {
+            // Social Providers
+            if ($user->socialProviders->count() > 0) {
+                foreach ($user->socialProviders as $gal) {
+                    $gal->delete();
+                }
+            }
 
-            // PRODUCT
-            foreach ($user->products as $prod) {
-                if ($prod->galleries->count() > 0) {
-                    foreach ($prod->galleries as $gal) {
-                        if (file_exists(public_path() . '/assets/images/galleries/' . $gal->photo)) {
-                            unlink(public_path() . '/assets/images/galleries/' . $gal->photo);
+            // Conversations + messages
+            if ($user->conversations->count() > 0) {
+                foreach ($user->conversations as $gal) {
+                    if ($gal->messages->count() > 0) {
+                        foreach ($gal->messages as $key) {
+                            $key->delete();
                         }
-                        $gal->delete();
                     }
+                    $gal->delete();
                 }
-                if ($prod->ratings->count() > 0) {
-                    foreach ($prod->ratings as $gal) {
-                        $gal->delete();
+            }
+
+            // Comments + replies
+            if ($user->comments->count() > 0) {
+                foreach ($user->comments as $gal) {
+                    if ($gal->replies->count() > 0) {
+                        foreach ($gal->replies as $key) {
+                            $key->delete();
+                        }
                     }
+                    $gal->delete();
                 }
-                if ($prod->wishlists->count() > 0) {
-                    foreach ($prod->wishlists as $gal) {
-                        $gal->delete();
+            }
+
+            // Replies (safe — skip subreplies since SubReply model doesn't exist)
+            if ($user->replies->count() > 0) {
+                foreach ($user->replies as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Favorites
+            if ($user->favorites->count() > 0) {
+                foreach ($user->favorites as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Subscribes
+            if ($user->subscribes->count() > 0) {
+                foreach ($user->subscribes as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Services
+            if ($user->services->count() > 0) {
+                foreach ($user->services as $gal) {
+                    if (file_exists(public_path() . '/assets/images/services/' . $gal->photo)) {
+                        @unlink(public_path() . '/assets/images/services/' . $gal->photo);
                     }
+                    $gal->delete();
                 }
-                if ($prod->clicks->count() > 0) {
-                    foreach ($prod->clicks as $gal) {
-                        $gal->delete();
-                    }
-                }
-                if ($prod->comments->count() > 0) {
-                    foreach ($prod->comments as $gal) {
-                        if ($gal->replies->count() > 0) {
-                            foreach ($gal->replies as $key) {
-                                $key->delete();
+            }
+
+            // Products
+            if ($user->products->count() > 0) {
+                foreach ($user->products as $prod) {
+                    if ($prod->galleries->count() > 0) {
+                        foreach ($prod->galleries as $gal) {
+                            if (file_exists(public_path() . '/assets/images/galleries/' . $gal->photo)) {
+                                @unlink(public_path() . '/assets/images/galleries/' . $gal->photo);
                             }
+                            $gal->delete();
                         }
+                    }
+                    if ($prod->ratings->count() > 0) {
+                        foreach ($prod->ratings as $gal) {
+                            $gal->delete();
+                        }
+                    }
+                    if ($prod->wishlists->count() > 0) {
+                        foreach ($prod->wishlists as $gal) {
+                            $gal->delete();
+                        }
+                    }
+                    if ($prod->clicks->count() > 0) {
+                        foreach ($prod->clicks as $gal) {
+                            $gal->delete();
+                        }
+                    }
+                    if ($prod->comments->count() > 0) {
+                        foreach ($prod->comments as $gal) {
+                            if ($gal->replies->count() > 0) {
+                                foreach ($gal->replies as $key) {
+                                    $key->delete();
+                                }
+                            }
+                            $gal->delete();
+                        }
+                    }
+                    if (file_exists(public_path() . '/assets/images/products/' . $prod->photo)) {
+                        @unlink(public_path() . '/assets/images/products/' . $prod->photo);
+                    }
+                    $prod->delete();
+                }
+            }
+
+            // Senders
+            if ($user->senders->count() > 0) {
+                foreach ($user->senders as $gal) {
+                    if ($gal->messages->count() > 0) {
+                        foreach ($gal->messages as $key) {
+                            $key->delete();
+                        }
+                    }
+                    $gal->delete();
+                }
+            }
+
+            // Receivers
+            if ($user->recievers->count() > 0) {
+                foreach ($user->recievers as $gal) {
+                    if ($gal->messages->count() > 0) {
+                        foreach ($gal->messages as $key) {
+                            $key->delete();
+                        }
+                    }
+                    $gal->delete();
+                }
+            }
+
+            // Vendor Orders
+            if ($user->vendororders->count() > 0) {
+                foreach ($user->vendororders as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // User Notifications (notivications)
+            if ($user->notivications->count() > 0) {
+                foreach ($user->notivications as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Shippings
+            if ($user->shippings->count() > 0) {
+                foreach ($user->shippings as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Packages
+            if ($user->packages->count() > 0) {
+                foreach ($user->packages as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Verifications
+            if ($user->verifies->count() > 0) {
+                foreach ($user->verifies as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Social Links
+            if ($user->sociallinks->count() > 0) {
+                foreach ($user->sociallinks as $gal) {
+                    $gal->delete();
+                }
+            }
+
+            // Deposits (safe)
+            try {
+                if ($user->deposits->count() > 0) {
+                    foreach ($user->deposits as $gal) {
                         $gal->delete();
                     }
                 }
-                if (file_exists(public_path() . '/assets/images/products/' . $prod->photo)) {
-                    unlink(public_path() . '/assets/images/products/' . $prod->photo);
-                }
+            } catch (\Exception $e) {}
 
-                $prod->delete();
-            }
-
-            // PRODUCT ENDS
-
-        }
-        // OTHER SECTION
-
-        if ($user->senders->count() > 0) {
-            foreach ($user->senders as $gal) {
-                if ($gal->messages->count() > 0) {
-                    foreach ($gal->messages as $key) {
-                        $key->delete();
+            // Transactions (safe)
+            try {
+                if ($user->transactions->count() > 0) {
+                    foreach ($user->transactions as $gal) {
+                        $gal->delete();
                     }
                 }
-                $gal->delete();
-            }
-        }
+            } catch (\Exception $e) {}
 
-        if ($user->recievers->count() > 0) {
-            foreach ($user->recievers as $gal) {
-                if ($gal->messages->count() > 0) {
-                    foreach ($gal->messages as $key) {
-                        $key->delete();
+            // Wallet Ledgers (safe)
+            try {
+                if ($user->walletLedgers->count() > 0) {
+                    foreach ($user->walletLedgers as $gal) {
+                        $gal->delete();
                     }
                 }
-                $gal->delete();
-            }
-        }
+            } catch (\Exception $e) {}
 
-        if ($user->conversations->count() > 0) {
-            foreach ($user->conversations as $gal) {
-                if ($gal->messages->count() > 0) {
-                    foreach ($gal->messages as $key) {
-                        $key->delete();
+            // Custom Referrals (sent & received - safe)
+            try {
+                if ($user->customReferralsSent->count() > 0) {
+                    foreach ($user->customReferralsSent as $gal) {
+                        $gal->delete();
                     }
                 }
-                $gal->delete();
-            }
-        }
+                $receivedReferral = $user->customReferralReceived;
+                if ($receivedReferral) {
+                    $receivedReferral->delete();
+                }
+            } catch (\Exception $e) {}
 
-        if ($user->vendororders->count() > 0) {
-            foreach ($user->vendororders as $gal) {
-                $gal->delete();
-            }
-        }
+            // Referral Codes (safe)
+            try {
+                \App\Models\ReferralCode::where('user_id', $user->id)->delete();
+            } catch (\Exception $e) {}
 
-        if ($user->notivications->count() > 0) {
-            foreach ($user->notivications as $gal) {
-                $gal->delete();
-            }
-        }
+            // Referral Usages (safe)
+            try {
+                \App\Models\ReferralUsage::where('referred_user_id', $user->id)->delete();
+            } catch (\Exception $e) {}
 
-        if ($user->shippings->count() > 0) {
-            foreach ($user->shippings as $gal) {
-                $gal->delete();
-            }
-        }
+            // Orders (user's own orders - safe)
+            try {
+                if ($user->orders->count() > 0) {
+                    foreach ($user->orders as $order) {
+                        $order->delete();
+                    }
+                }
+            } catch (\Exception $e) {}
 
-        if ($user->packages->count() > 0) {
-            foreach ($user->packages as $gal) {
-                $gal->delete();
+            // Delete user photo
+            if ($user->photo != null) {
+                if (file_exists(public_path() . '/assets/images/users/' . $user->photo)) {
+                    @unlink(public_path() . '/assets/images/users/' . $user->photo);
+                }
             }
-        }
-        if ($user->verifies->count() > 0) {
-            foreach ($user->verifies as $gal) {
-                $gal->delete();
-            }
-        }
-        if ($user->sociallinks->count() > 0) {
-            foreach ($user->sociallinks as $gal) {
-                $gal->delete();
-            }
-        }
-        // OTHER SECTION ENDS
 
-        //If Photo Doesn't Exist
-        if ($user->photo == null) {
             $user->delete();
-            //--- Redirect Section
+
             $msg = __('Data Deleted Successfully.');
             return response()->json($msg);
-            //--- Redirect Section Ends
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('User delete failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Delete failed: ' . $e->getMessage()], 500);
         }
-        //If Photo Exist
-        if (file_exists(public_path() . '/assets/images/users/' . $user->photo)) {
-            unlink(public_path() . '/assets/images/users/' . $user->photo);
-        }
-        $user->delete();
-        //--- Redirect Section
-        $msg = __('Data Deleted Successfully.');
-        return response()->json($msg);
-        //--- Redirect Section Ends
     }
 
     //*** JSON Request

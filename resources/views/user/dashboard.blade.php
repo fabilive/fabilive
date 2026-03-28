@@ -63,8 +63,11 @@
                   <div class="widget border-0 p-30 widget_categories bg-light account-info">
                      <h4 class="widget-title down-line mb-30">{{ __('My Wallet') }}</h4>
                      <div class="user-info">
-                        <h5 class="title">{{ __('Referral Bonus') }}:</h5>
+                        <h5 class="title">{{ __('Unlocked Referral Bonus') }}:</h5>
                         <h5 class="title w-price">{{ App\Models\Product::vendorConvertPrice($user->affilate_income) }}</h5>
+                        
+                        <h5 class="title mt-3">{{ __('Locked Referral Bonus') }}:</h5>
+                        <h5 class="title w-price text-warning">{{ App\Models\Product::vendorConvertPrice($user->customReferralsSent()->where('status', 'locked')->sum('amount')) }}</h5>
                         <hr>
 
                         <h5 class="title w-title">{{ __('Wallet Balance') }}</h5>
