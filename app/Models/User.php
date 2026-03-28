@@ -182,12 +182,16 @@ class User extends Authenticatable implements JWTSubject
 
     public function checkWarning()
     {
-        return count($this->verifies) > 0 ? (empty($this->verifies()->where('admin_warning', '=', '1')->latest('id')->first()) ? false : (empty($this->verifies()->where('admin_warning', '=', '1')->latest('id')->first()->status) ? true : false)) : false;
+        if (count($this->verifies) == 0) return false;
+        $warning = $this->verifies()->where('admin_warning', '=', '1')->latest('id')->first();
+        if (!$warning) return false;
+        return empty($warning->status) ? true : false;
     }
 
     public function displayWarning()
     {
-        return $this->verifies()->where('admin_warning', '=', '1')->latest('id')->first()->warning_reason;
+        $warning = $this->verifies()->where('admin_warning', '=', '1')->latest('id')->first();
+        return $warning ? $warning->warning_reason : '';
     }
 
     public function getJWTIdentifier()

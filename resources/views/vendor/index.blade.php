@@ -3,11 +3,16 @@
 @section('content')
 <div class="content-area">
     @if($user->checkWarning())
+    @php
+        $warningVerify = $user->verifies()->where('admin_warning','=','1')->latest('id')->first();
+    @endphp
+    @if($warningVerify)
     <div class="alert alert-danger validation text-center">
         <h3>{{ $user->displayWarning() }} </h3> <a
-            href="{{ route('vendor-warning',$user->verifies()->where('admin_warning','=','1')->latest('id')->first()->id) }}">
+            href="{{ route('vendor-warning', $warningVerify->id) }}">
             {{ __('Verify Now') }} </a>
     </div>
+    @endif
     @endif
     @include('alerts.form-success')
     <div class="row row-cards-one">
