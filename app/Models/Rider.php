@@ -16,7 +16,7 @@ class Rider extends Authenticatable implements JWTSubject
     ];
     public function orders()
     {
-        return $this->hasMany('App\Models\DeliveryRider');
+        return $this->hasMany('App\Models\DeliveryJob', 'assigned_rider_id');
     }
     public function city()
     {
