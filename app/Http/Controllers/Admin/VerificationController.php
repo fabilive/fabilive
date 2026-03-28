@@ -96,10 +96,8 @@ class VerificationController extends AdminBaseController
                 return response(view('admin.verify.pending')->render());
             }
             return redirect()->route('admin-vr-index', 'all');
-        } catch (\Exception $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
         } catch (\Throwable $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
+            return back()->with('unsuccess', 'Runtime Exception: ' . $e->getMessage());
         }
     }
 

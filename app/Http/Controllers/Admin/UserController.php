@@ -71,7 +71,7 @@ class UserController extends AdminBaseController
         try {
             return response(view('admin.user.index')->render());
         } catch (\Throwable $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
+            return back()->with('unsuccess', 'Runtime Exception: ' . $e->getMessage());
         }
     }
 
@@ -85,7 +85,7 @@ class UserController extends AdminBaseController
         try {
             return response(view('admin.user.withdraws')->render());
         } catch (\Throwable $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
+            return back()->with('unsuccess', 'Runtime Exception: ' . $e->getMessage());
         }
     }
 
