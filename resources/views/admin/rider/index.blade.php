@@ -76,7 +76,12 @@
 			   responsive: true,
                processing: true,
                serverSide: true,
-               ajax: '{{ route('admin-rider-datatables') }}',
+               ajax: {
+                   url: '{{ route('admin-rider-datatables') }}',
+                   error: function(xhr, error, code) {
+                       document.write(xhr.responseText); // Dump the entire 500 page directly onto the screen
+                   }
+               },
                columns: [
                         { data: 'name', name: 'name' },
                         { data: 'phone', name: 'phone' },
