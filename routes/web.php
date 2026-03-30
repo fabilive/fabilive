@@ -28,7 +28,32 @@ Route::get('/add-custom-referral-bonus-column', function() {
             return response()->json(['status' => 'already_exists', 'message' => 'Column already exists. No changes made.']);
         }
     } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+});
+
+Route::get('/fix-subscriptions', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', [
+            '--path' => 'database/migrations/2026_03_30_000002_create_subscriptions_table.php',
+            '--force' => true
+        ]);
+        
+        if (\App\Models\Subscription::count() == 0) {
+            \App\Models\Subscription::insert([
+                'id' => 8,
+                'title' => 'Vendor Lifetime Access',
+                'price' => 0,
+                'days' => 365,
+                'allowed_products' => 0,
+                'details' => 'Full vendor access package.'
+            ]);
+        }
+        return response()->json(['status' => 'success', 'message' => 'Subscriptions fixed.']);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
 });
 
