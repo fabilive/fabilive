@@ -310,7 +310,7 @@ Route::get('/fix-subscriptions', function() {
            });
        }
 
-       if (!\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
             \Illuminate\Support\Facades\Schema::create('childcategories', function ($table) {
                 $table->id();
                 $table->integer('subcategory_id')->nullable();
@@ -318,6 +318,26 @@ Route::get('/fix-subscriptions', function() {
                 $table->string('slug')->nullable();
                 $table->integer('status')->default(1);
             });
+        }
+
+        // SEEDING DATA
+        if (\Illuminate\Support\Facades\DB::table('countries')->count() == 0) {
+            $cid = \Illuminate\Support\Facades\DB::table('countries')->insertGetId(['country_name' => 'Cameroon', 'status' => 1]);
+            $sid = \Illuminate\Support\Facades\DB::table('states')->insertGetId(['state_name' => 'Default State', 'country_id' => $cid, 'status' => 1]);
+            \Illuminate\Support\Facades\DB::table('cities')->insert([
+                ['city_name' => 'Limbe', 'state_id' => $sid, 'status' => 1],
+                ['city_name' => 'Douala', 'state_id' => $sid, 'status' => 1],
+                ['city_name' => 'Yaounde', 'state_id' => $sid, 'status' => 1],
+                ['city_name' => 'Buea', 'state_id' => $sid, 'status' => 1],
+            ]);
+        }
+
+        if (\Illuminate\Support\Facades\DB::table('categories')->count() == 0) {
+            \Illuminate\Support\Facades\DB::table('categories')->insert([
+                ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
+                ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],
+                ['name' => 'Services', 'slug' => 'services', 'status' => 1]
+            ]);
         }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
