@@ -10,10 +10,10 @@ class CampayService
     public function __construct()
     {
         $data = PaymentGateway::whereKeyword('campay')->first();
-        $paydata = $data->convertAutoData();
+        $paydata = $data ? $data->convertAutoData() : [];
 
-        $this->apiKey = $paydata['username'];
-        $this->secret = $paydata['password'];
+        $this->apiKey = $paydata['username'] ?? '';
+        $this->secret = $paydata['password'] ?? '';
         $this->baseUrl = 'https://www.campay.net/api';
     }
     private function getToken()
