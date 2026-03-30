@@ -49,17 +49,29 @@ public function cities()
 
         try {
             $now = \Carbon\Carbon::now();
-            $start = \Carbon\Carbon::parse($this->discount_date_start);
+            
+            // Helper function to handle dd/mm/yyyy or other formats
+            $parseDate = function($dateStr) {
+                if (empty($dateStr)) return null;
+                if (str_contains($dateStr, '/')) {
+                    try {
+                        return \Carbon\Carbon::createFromFormat('d/m/Y', $dateStr);
+                    } catch (\Exception $e) {
+                        return \Carbon\Carbon::parse($dateStr);
+                    }
+                }
+                return \Carbon\Carbon::parse($dateStr);
+            };
 
-            if ($now->lt($start)) {
+            $start = $parseDate($this->discount_date_start);
+            $end = $parseDate($this->discount_date_end);
+
+            if ($start && $now->lt($start)) {
                 return false;
             }
 
-            if (!empty($this->discount_date_end)) {
-                $end = \Carbon\Carbon::parse($this->discount_date_end);
-                if ($now->gt($end)) {
-                    return false;
-                }
+            if ($end && $now->gt($end)) {
+                return false;
             }
         } catch (\Exception $e) {
             return false;

@@ -484,6 +484,35 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('replies')) {
+            \Illuminate\Support\Facades\Schema::create('replies', function ($table) {
+                $table->id();
+                $table->integer('comment_id')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->text('text')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('subreplies')) {
+            \Illuminate\Support\Facades\Schema::create('subreplies', function ($table) {
+                $table->id();
+                $table->integer('reply_id')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->text('text')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('order_logs')) {
+            \Illuminate\Support\Facades\Schema::create('order_logs', function ($table) {
+                $table->id();
+                $table->integer('order_id')->nullable();
+                $table->text('log')->nullable();
+                $table->timestamps();
+            });
+        }
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
             \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
                 $table->id();
