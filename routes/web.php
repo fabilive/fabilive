@@ -300,6 +300,19 @@ Route::get('/fix-subscriptions', function() {
             });
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
+            \Illuminate\Support\Facades\Schema::table('products', function ($table) {
+                $cols = ['minimum_qty', 'ship', 'meta_description', 'features', 'colors', 'youtube', 'category_id', 'subcategory_id', 'childcategory_id', 'meta_tag', 'attributes', 'measure'];
+                foreach ($cols as $col) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('products', $col)) {
+                        $table->string($col)->nullable()->change();
+                    } else {
+                        $table->text($col)->nullable();
+                    }
+                }
+            });
+        }
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
             \Illuminate\Support\Facades\Schema::create('subcategories', function ($table) {
                $table->id();
