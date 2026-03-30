@@ -304,11 +304,29 @@ Route::get('/fix-subscriptions', function () {
         }
 
         if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
+            // Drop foreign keys if they exist to prevent type mismatch errors
+            try {
+                \Illuminate\Support\Facades\Schema::table('products', function ($table) {
+                    $table->dropForeign(['category_id']);
+                    $table->dropForeign(['subcategory_id']);
+                    $table->dropForeign(['childcategory_id']);
+                });
+            } catch (\Exception $e) { /* Ignore if keys don't exist */ }
+
             \Illuminate\Support\Facades\Schema::table('products', function ($table) {
-                $cols = ['minimum_qty', 'ship', 'meta_description', 'features', 'colors', 'youtube', 'category_id', 'subcategory_id', 'childcategory_id', 'meta_tag', 'attributes', 'measure'];
-                foreach ($cols as $col) {
+                // Correctly fix the ID columns
+                $id_cols = ['category_id', 'subcategory_id', 'childcategory_id'];
+                foreach ($id_cols as $col) {
                     if (\Illuminate\Support\Facades\Schema::hasColumn('products', $col)) {
-                        $table->string($col)->nullable()->change();
+                        $table->unsignedBigInteger($col)->nullable()->change();
+                    }
+                }
+
+                // Handle Text/String columns correctly
+                $text_cols = ['minimum_qty', 'ship', 'meta_description', 'features', 'colors', 'youtube', 'meta_tag', 'attributes', 'measure'];
+                foreach ($text_cols as $col) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('products', $col)) {
+                        $table->text($col)->nullable()->change();
                     } else {
                         $table->text($col)->nullable();
                     }
