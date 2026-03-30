@@ -79,6 +79,93 @@ Route::get('/fix-subscriptions', function() {
                 $table->timestamps();
             });
         }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+            \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('language')->nullable();
+                $table->string('file')->nullable();
+                $table->integer('is_default')->default(0);
+                $table->integer('rtl')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('languages')->insert([
+                'id' => 1,
+                'name' => 'English',
+                'language' => 'English',
+                'is_default' => 1
+            ]);
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+            \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('sign')->nullable();
+                $table->double('value')->default(1);
+                $table->integer('is_default')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('currencies')->insert([
+                'id' => 1,
+                'name' => 'CFA',
+                'sign' => 'CFA',
+                'value' => 1,
+                'is_default' => 1
+            ]);
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('verifications')) {
+             \Illuminate\Support\Facades\Schema::create('verifications', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->text('text')->nullable();
+                $table->string('type')->nullable();
+                $table->string('attachments')->nullable();
+                $table->string('status')->default('Pending');
+                $table->integer('admin_warning')->default(0);
+                $table->text('warning_reason')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('vendor_orders')) {
+            \Illuminate\Support\Facades\Schema::create('vendor_orders', function ($table) {
+                $table->id();
+                $table->integer('order_id')->nullable();
+                $table->string('order_number')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->integer('qty')->default(0);
+                $table->double('price')->default(0);
+                $table->string('status')->default('pending');
+                $table->double('delivery_fee')->default(0);
+                $table->timestamp('created_at')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('orders')) {
+            \Illuminate\Support\Facades\Schema::create('orders', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->string('order_number')->nullable();
+                $table->double('pay_amount')->default(0);
+                $table->double('commission')->default(0);
+                $table->string('status')->default('pending');
+                $table->string('currency_sign')->nullable();
+                $table->double('currency_value')->default(1);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+            \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
+                $table->id();
+                $table->integer('sender_id')->nullable();
+                $table->integer('receiver_id')->nullable();
+                $table->text('content')->nullable();
+                $table->boolean('is_read')->default(false);
+                $table->timestamps();
+            });
+        }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
@@ -91,7 +178,7 @@ Route::get('/fix-subscriptions', function() {
             ]);
         }
         
-        return response()->json(['status' => 'success', 'message' => 'All 3 missing vendor tables successfully restored!']);
+        return response()->json(['status' => 'success', 'message' => 'All missing vendor and dashboard tables successfully restored!']);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
