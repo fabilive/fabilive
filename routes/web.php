@@ -231,6 +231,11 @@ Route::get('/fix-subscriptions', function() {
                     $table->string('country_name')->nullable();
                 });
             }
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('countries', 'status')) {
+                \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
+                    $table->integer('status')->default(1);
+                });
+            }
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('states')) {
@@ -244,6 +249,11 @@ Route::get('/fix-subscriptions', function() {
             if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'state_name')) {
                 \Illuminate\Support\Facades\Schema::table('states', function ($table) {
                     $table->string('state_name')->nullable();
+                });
+            }
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'status')) {
+                \Illuminate\Support\Facades\Schema::table('states', function ($table) {
+                    $table->integer('status')->default(1);
                 });
             }
         }
@@ -261,6 +271,11 @@ Route::get('/fix-subscriptions', function() {
                     $table->string('city_name')->nullable();
                 });
             }
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'status')) {
+                \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
+                    $table->integer('status')->default(1);
+                });
+            }
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('categories')) {
@@ -272,6 +287,26 @@ Route::get('/fix-subscriptions', function() {
                 $table->string('photo')->nullable();
                 $table->integer('is_featured')->default(0);
                 $table->string('image')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
+            \Illuminate\Support\Facades\Schema::create('subcategories', function ($table) {
+               $table->id();
+               $table->integer('category_id')->nullable();
+               $table->string('name')->nullable();
+               $table->string('slug')->nullable();
+               $table->integer('status')->default(1);
+           });
+       }
+
+       if (!\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
+            \Illuminate\Support\Facades\Schema::create('childcategories', function ($table) {
+                $table->id();
+                $table->integer('subcategory_id')->nullable();
+                $table->string('name')->nullable();
+                $table->string('slug')->nullable();
+                $table->integer('status')->default(1);
             });
         }
         
