@@ -722,16 +722,16 @@
                                             <div class="col-lg-12">
                                                 <div class="left-area">
                                                     <h4 class="heading">
-                                                        {{ __('Product Current Price') }}*
+                                                        {{ __('Product Sale Price') }}*
                                                     </h4>
                                                     <p class="sub-heading">
-                                                        ({{ __('In') }} {{ $sign->name }})
+                                                        ({{ __('Active Price') }} in {{ $sign->name }})
                                                     </p>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
                                                 <input name="price" type="number" class="input-field"
-                                                    placeholder="{{ __('e.g 20') }}" step="0.1" required=""
+                                                    placeholder="{{ __('e.g 192') }}" step="0.1" required=""
                                                     min="0">
                                             </div>
                                         </div>
@@ -739,14 +739,38 @@
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="left-area">
-                                                    <h4 class="heading">{{ __('Product Discount Price') }}*</h4>
-                                                    <p class="sub-heading">{{ __('(Optional)') }}</p>
+                                                    <h4 class="heading">{{ __('Product Regular Price') }}*</h4>
+                                                    <p class="sub-heading">{{ __('(Price to be crossed out - Optional)') }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
                                                 <input name="previous_price" step="0.1" type="number"
-                                                    class="input-field" placeholder="{{ __('e.g 20') }}"
+                                                    class="input-field" placeholder="{{ __('e.g 200') }}"
                                                     min="0">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">{{ __('Discount Start Date') }}</h4>
+                                                    <p class="sub-heading">{{ __('(When the sale starts)') }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <input name="discount_date_start" type="date" class="input-field">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">{{ __('Discount End Date') }}</h4>
+                                                    <p class="sub-heading">{{ __('(When the sale ends - Optional)') }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <input name="discount_date_end" type="date" class="input-field">
                                             </div>
                                         </div>
 

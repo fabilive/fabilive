@@ -284,11 +284,15 @@
                                     href="{{ route('front.product', $prod['slug']) }}">{{$prod->name }}</a></h3>
                               <div class="product-price">
                                  <div class="price">
-                                    <ins>{{ \PriceHelper::showPrice($prod['price']) }}</ins>
-                                    <del>{{ \PriceHelper::showPrice($prod['previous_price']) }}</del>
+                                    <ins>{{ $prod->showPrice() }}</ins>
+                                    @if($prod->showPreviousPrice())
+                                        <del>{{ $prod->showPreviousPrice() }}</del>
+                                    @endif
                                  </div>
-                                 <div class="on-sale"><span>{{ round($prod->offPercentage())}}</span><span>% off</span>
-                                 </div>
+                                 @if($prod->offPercentage() > 0)
+                                    <div class="on-sale"><span>{{ round($prod->offPercentage())}}</span><span>% off</span>
+                                    </div>
+                                 @endif
                               </div>
                               <div class="shipping-feed-back">
                                  <div class="star-rating">
@@ -399,7 +403,9 @@
                               <div class="product-price">
                                  <div class="price">
                                     <ins>{{ $item->showPrice()}}</ins>
-                                    <del>{{ $item->showPreviousPrice() }}</del>
+                                    @if($item->showPreviousPrice())
+                                        <del>{{ $item->showPreviousPrice() }}</del>
+                                    @endif
                                  </div>
                               </div>
                               <div class="shipping-feed-back">

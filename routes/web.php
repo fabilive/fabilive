@@ -354,8 +354,97 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        // SEEDING DATA
-        if (\Illuminate\Support\Facades\DB::table('countries')->count() == 0) {
+        // NEW STABILITY REPAIRS FOR CHECKOUT & PRODUCT DETAILS
+        if (\Illuminate\Support\Facades\Schema::hasTable('orders')) {
+            \Illuminate\Support\Facades\Schema::table('orders', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('orders', 'currency_name')) {
+                    $table->string('currency_name')->nullable();
+                }
+            });
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
+            \Illuminate\Support\Facades\Schema::table('products', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'discount_date_start')) {
+                    $table->string('discount_date_start')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'discount_date_end')) {
+                    $table->string('discount_date_end')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_servicearea')) {
+                    $table->integer('product_servicearea')->nullable();
+                }
+                // Fix for 500 error on product create: Column 'minimum_qty' cannot be null
+                if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
+                    \Illuminate\Support\Facades\DB::statement("ALTER TABLE products MODIFY COLUMN minimum_qty INT NULL");
+                }
+            });
+        }
+
+        // Fix for missing cities/states columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('states')) {
+            \Illuminate\Support\Facades\Schema::table('states', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
+                    $table->integer('country_id')->unsigned()->nullable();
+                }
+            });
+        }
+        if (\Illuminate\Support\Facades\Schema::hasTable('cities')) {
+            \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'state_id')) {
+                    $table->integer('state_id')->unsigned()->nullable();
+                }
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+            \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
+                $table->id();
+                $table->integer('product_id')->nullable();
+                $table->string('photo')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
+            \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
+                $table->id();
+                $table->string('location')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('shippings')) {
+            \Illuminate\Support\Facades\Schema::create('shippings', function ($table) {
+                $table->id();
+                $table->integer('user_id')->default(0);
+                $table->string('title')->nullable();
+                $table->string('subtitle')->nullable();
+                $table->double('price')->default(0);
+                $table->string('type')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('packages')) {
+            \Illuminate\Support\Facades\Schema::create('packages', function ($table) {
+                $table->id();
+                $table->integer('user_id')->default(0);
+                $table->string('title')->nullable();
+                $table->string('subtitle')->nullable();
+                $table->double('price')->default(0);
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+            \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('latitude')->nullable();
+                $table->string('longitude')->nullable();
+                $table->integer('user_id')->nullable();
+            });
+        }
+
+        // ROBUST SEEDING DATA
+        if (\Illuminate\Support\Facades\DB::table('countries')->where('country_name', 'Cameroon')->count() == 0) {
             $cid = \Illuminate\Support\Facades\DB::table('countries')->insertGetId(['country_name' => 'Cameroon', 'status' => 1]);
             $sid = \Illuminate\Support\Facades\DB::table('states')->insertGetId(['state_name' => 'Default State', 'country_id' => $cid, 'status' => 1]);
             \Illuminate\Support\Facades\DB::table('cities')->insert([
@@ -366,37 +455,41 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
-        if (\Illuminate\Support\Facades\DB::table('categories')->count() == 0) {
-            \Illuminate\Support\Facades\DB::table('categories')->insert([
-                ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
-                ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],
-                ['name' => 'Services', 'slug' => 'services', 'status' => 1]
-            ]);
+        $cats = [
+            ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
+            ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],
+            ['name' => 'Services', 'slug' => 'services', 'status' => 1]
+        ];
+        foreach ($cats as $cat) {
+            if (\Illuminate\Support\Facades\DB::table('categories')->where('slug', $cat['slug'])->count() == 0) {
+                \Illuminate\Support\Facades\DB::table('categories')->insert($cat);
+            }
         }
 
-        if (\Illuminate\Support\Facades\DB::table('subcategories')->count() == 0) {
-            $electronic = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'electronics')->first();
-            $fashion = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'fashion')->first();
-            $services = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'services')->first();
-
-            if ($electronic) {
-                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
-                    ['category_id' => $electronic->id, 'name' => 'Smartphones', 'slug' => 'smartphones', 'status' => 1],
-                    ['category_id' => $electronic->id, 'name' => 'Laptops', 'slug' => 'laptops', 'status' => 1],
-                ]);
-            }
-            if ($fashion) {
-                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
-                    ['category_id' => $fashion->id, 'name' => "Men's Clothing", 'slug' => 'mens-clothing', 'status' => 1],
-                    ['category_id' => $fashion->id, 'name' => "Women's Clothing", 'slug' => 'womens-clothing', 'status' => 1],
-                    ['category_id' => $fashion->id, 'name' => "Shoes", 'slug' => 'shoes', 'status' => 1],
-                    ['category_id' => $fashion->id, 'name' => "Watches", 'slug' => 'watches', 'status' => 1]
-                ]);
-            }
-            if ($services) {
-                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
-                    ['category_id' => $services->id, 'name' => "Digital Services", 'slug' => 'digital-services', 'status' => 1],
-                ]);
+        $subcats = [
+            'electronics' => [
+                ['name' => 'Smartphones', 'slug' => 'smartphones', 'status' => 1],
+                ['name' => 'Laptops', 'slug' => 'laptops', 'status' => 1],
+            ],
+            'fashion' => [
+                ['name' => "Men's Clothing", 'slug' => 'mens-clothing', 'status' => 1],
+                ['name' => "Women's Clothing", 'slug' => 'womens-clothing', 'status' => 1],
+                ['name' => "Shoes", 'slug' => 'shoes', 'status' => 1],
+                ['name' => "Watches", 'slug' => 'watches', 'status' => 1]
+            ],
+            'services' => [
+                ['name' => "Digital Services", 'slug' => 'digital-services', 'status' => 1],
+            ]
+        ];
+        foreach ($subcats as $cat_slug => $subs) {
+            $category = \Illuminate\Support\Facades\DB::table('categories')->where('slug', $cat_slug)->first();
+            if ($category) {
+                foreach ($subs as $sub) {
+                    if (\Illuminate\Support\Facades\DB::table('subcategories')->where('slug', $sub['slug'])->where('category_id', $category->id)->count() == 0) {
+                        $sub['category_id'] = $category->id;
+                        \Illuminate\Support\Facades\DB::table('subcategories')->insert($sub);
+                    }
+                }
             }
         }
 

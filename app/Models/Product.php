@@ -17,8 +17,8 @@ class Product extends Model
           'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
            'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
             'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check','delivery_fee','delivery_unit','product_servicearea',
-             'cross_products', '3d_model'];
-    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model'];
+             'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end'];
     public function user()
     {
         return $this->belongsTo('App\Models\User')->withDefault();
@@ -39,6 +39,44 @@ public function cities()
     public function scopeHome($query)
     {
         return $query->where('status', '=', 1)->select($this->selectable)->latest('id');
+    }
+
+    public function isDiscountActive()
+    {
+        if (empty($this->discount_date_start)) {
+            return false;
+        }
+
+        try {
+            $now = \Carbon\Carbon::now();
+            $start = \Carbon\Carbon::parse($this->discount_date_start);
+            
+            if ($now->lt($start)) {
+                return false;
+            }
+
+            if (!empty($this->discount_date_end)) {
+                $end = \Carbon\Carbon::parse($this->discount_date_end);
+                // If now is past end, discount is expired
+                if ($now->gt($end)) {
+                    return false;
+                }
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getPriceAttribute($value)
+    {
+        // If discount is not active and we have a previous price (Regular Price), 
+        // use it as the main price.
+        if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
+            return $this->previous_price;
+        }
+        return $value;
     }
 
     public function category()
@@ -180,37 +218,35 @@ public function cities()
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
         });
+
+        // getPriceAttribute already handles the Regular vs Sale logic
         $price = $this->price;
 
         if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
+            $price = $price + $gs->fixed_commission + ($price / 100) * $gs->percentage_commission;
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
-
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
-            $attrArr = json_decode($attributes, true);
-        }
+        $attributes = $this->attributes;
+        $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
         if (!empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
                 if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
-
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
-                        // only the first price counts
                         break;
                     }
                 }
             }
         }
-
-        // Attribute Section Ends
 
         if (Session::has('currency')) {
             $curr = cache()->remember('session_currency', now()->addDay(), function () {
@@ -282,6 +318,11 @@ public function cities()
 
     public function showPreviousPrice()
     {
+        // Only show previous price if a discount is active according to the dates
+        if (!$this->isDiscountActive()) {
+            return '';
+        }
+
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
         });
@@ -294,30 +335,26 @@ public function cities()
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
+        $attributes = $this->attributes;
+        $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
-            $attrArr = json_decode($attributes, true);
-        }
-        // dd($attrArr);
         if (!empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
                 if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
-
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
-                        // only the first price counts
                         break;
                     }
                 }
             }
         }
-
-        // Attribute Section Ends
 
         if (Session::has('currency')) {
             $curr = cache()->remember('session_currency', now()->addDay(), function () {
@@ -511,6 +548,9 @@ public function cities()
 
     public function offPercentage()
     {
+        if (!$this->isDiscountActive()) {
+            return 0;
+        }
 
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
@@ -527,8 +567,11 @@ public function cities()
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
-            $preprice += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+                $preprice += $size_prices[0];
+            }
         }
 
         // Attribute Section

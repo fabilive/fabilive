@@ -77,8 +77,10 @@
                                   <span class="woocommerce-Price-amount amount mr-4">
                                       <bdi><span class="woocommerce-Price-currencySymbol" id="sizeprice">{{ $productt->showPrice() }}</bdi>
                                   </span>
-                                  <del class="ml-3"><small>{{ $productt->showPreviousPrice() }}</small></del>
-                                 <span class="on-sale"><span>{{ round($productt->offPercentage() )}}</span>% Off</span>
+                                  @if($productt->showPreviousPrice())
+                                    <del class="ml-3"><small>{{ $productt->showPreviousPrice() }}</small></del>
+                                    <span class="on-sale"><span>{{ round($productt->offPercentage() )}}</span>% Off</span>
+                                  @endif
 
                               </p>
 
