@@ -13,10 +13,13 @@ use App\Http\Controllers\PaymentController;
 // =================================== Admin Section Routes ===================================\\
 
 // ************************************ ADMIN SECTION **********************************************
-Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
-Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
-Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
-Route::get('/add-custom-referral-bonus-column', function() {
+Route::get('/update-categories-now', function () {
+    require base_path('update_categories.php'); });
+Route::get('/delete-all-products-now', function () {
+    require base_path('delete_products.php'); });
+Route::get('/check-settings-now', function () {
+    require base_path('check_settings.php'); });
+Route::get('/add-custom-referral-bonus-column', function () {
     try {
         if (!Schema::hasColumn('generalsettings', 'custom_referral_bonus')) {
             Schema::table('generalsettings', function ($table) {
@@ -32,7 +35,7 @@ Route::get('/add-custom-referral-bonus-column', function() {
     }
 });
 
-Route::get('/fix-subscriptions', function() {
+Route::get('/fix-subscriptions', function () {
     try {
         if (!\Illuminate\Support\Facades\Schema::hasTable('subscriptions')) {
             \Illuminate\Support\Facades\Schema::create('subscriptions', function ($table) {
@@ -46,7 +49,7 @@ Route::get('/fix-subscriptions', function() {
                 $table->text('details')->nullable();
             });
         }
-        
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('user_subscriptions')) {
             \Illuminate\Support\Facades\Schema::create('user_subscriptions', function ($table) {
                 $table->id();
@@ -69,7 +72,7 @@ Route::get('/fix-subscriptions', function() {
                 $table->timestamps();
             });
         }
-        
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('agreements')) {
             \Illuminate\Support\Facades\Schema::create('agreements', function ($table) {
                 $table->id();
@@ -115,7 +118,7 @@ Route::get('/fix-subscriptions', function() {
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('verifications')) {
-             \Illuminate\Support\Facades\Schema::create('verifications', function ($table) {
+            \Illuminate\Support\Facades\Schema::create('verifications', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
                 $table->text('text')->nullable();
@@ -289,7 +292,7 @@ Route::get('/fix-subscriptions', function() {
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('categories')) {
-             \Illuminate\Support\Facades\Schema::create('categories', function ($table) {
+            \Illuminate\Support\Facades\Schema::create('categories', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
                 $table->string('slug')->nullable();
@@ -315,13 +318,13 @@ Route::get('/fix-subscriptions', function() {
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
             \Illuminate\Support\Facades\Schema::create('subcategories', function ($table) {
-               $table->id();
-               $table->integer('category_id')->nullable();
-               $table->string('name')->nullable();
-               $table->string('slug')->nullable();
-               $table->integer('status')->default(1);
-           });
-       }
+                $table->id();
+                $table->integer('category_id')->nullable();
+                $table->string('name')->nullable();
+                $table->string('slug')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
             \Illuminate\Support\Facades\Schema::create('childcategories', function ($table) {
@@ -357,7 +360,7 @@ Route::get('/fix-subscriptions', function() {
             $electronic = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'electronics')->first();
             $fashion = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'fashion')->first();
             $services = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'services')->first();
-            
+
             if ($electronic) {
                 \Illuminate\Support\Facades\DB::table('subcategories')->insert([
                     ['category_id' => $electronic->id, 'name' => 'Smartphones', 'slug' => 'smartphones', 'status' => 1],
@@ -378,7 +381,7 @@ Route::get('/fix-subscriptions', function() {
                 ]);
             }
         }
-        
+
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
                 'id' => 8,
@@ -389,17 +392,19 @@ Route::get('/fix-subscriptions', function() {
                 'details' => 'Full vendor access package.'
             ]);
         }
-        
+
         return response()->json(['status' => 'success', 'message' => 'All missing vendor and dashboard tables successfully restored!']);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
 });
 
-Route::get('/run-setup', function() {
+Route::get('/run-setup', function () {
     try {
-        if (function_exists('opcache_reset')) { opcache_reset(); }
-        
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
+
         $product_backfill = [];
         // V77 Master Product Backfill
         if (Schema::hasTable('products')) {
@@ -419,7 +424,7 @@ Route::get('/run-setup', function() {
         config(['nocaptcha.secret' => '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE']);
 
         Artisan::call('optimize:clear');
-        
+
         $tables = ['generalsettings', 'sliders', 'blogs', 'blog_categories', 'categories', 'subcategories', 'childcategories', 'products', 'attributes'];
         $schema = [];
         $counts = [];
@@ -432,24 +437,25 @@ Route::get('/run-setup', function() {
 
         $gs = DB::table('generalsettings')->first();
         $products_desc = Schema::hasTable('products') ? DB::select('DESCRIBE products') : 'MISSING';
-        $image_dirs = is_dir(public_path('assets/images')) ? array_filter(scandir(public_path('assets/images')), function($d) { return is_dir(public_path('assets/images/'.$d)); }) : 'ASSETS MISSING';
+        $image_dirs = is_dir(public_path('assets/images')) ? array_filter(scandir(public_path('assets/images')), function ($d) {
+            return is_dir(public_path('assets/images/' . $d)); }) : 'ASSETS MISSING';
 
         $cat_images = is_dir(public_path('assets/images/categories')) ? scandir(public_path('assets/images/categories')) : 'DIR MISSING';
 
         $backups = [];
-    $dirs = ['/var/www/fabilive', '/var/www/fabilive/storage', '/tmp'];
-    foreach ($dirs as $dir) {
-        if (is_dir($dir)) {
-            $files = scandir($dir);
-            foreach ($files as $file) {
-                if (str_ends_with($file, '.sql') || str_ends_with($file, '.sql.gz')) {
-                    $backups[] = $dir . '/' . $file;
+        $dirs = ['/var/www/fabilive', '/var/www/fabilive/storage', '/tmp'];
+        foreach ($dirs as $dir) {
+            if (is_dir($dir)) {
+                $files = scandir($dir);
+                foreach ($files as $file) {
+                    if (str_ends_with($file, '.sql') || str_ends_with($file, '.sql.gz')) {
+                        $backups[] = $dir . '/' . $file;
+                    }
                 }
             }
         }
-    }
 
-        $cat_data = DB::table('categories')->get()->map(function($c) {
+        $cat_data = DB::table('categories')->get()->map(function ($c) {
             return [
                 'id' => $c->id,
                 'name' => $c->name,
@@ -486,7 +492,7 @@ Route::get('/run-setup', function() {
         }
 
         // V83: EMAIL TEMPLATE RECOVERY
-        $template_recovery_status = (function() {
+        $template_recovery_status = (function () {
             if (DB::table('email_templates')->count() == 0) {
                 DB::table('email_templates')->insert([
                     [
@@ -508,10 +514,11 @@ Route::get('/run-setup', function() {
         })();
 
         // ENV Updates
-        $env_updates_status = (function() {
+        $env_updates_status = (function () {
             try {
                 $envPath = base_path('.env');
-                if (!file_exists($envPath)) return ['status' => 'missing'];
+                if (!file_exists($envPath))
+                    return ['status' => 'missing'];
                 $envContent = file_get_contents($envPath);
                 $replacements = [
                     'CACHE_DRIVER' => 'database',
@@ -527,14 +534,15 @@ Route::get('/run-setup', function() {
                 }
                 file_put_contents($envPath, $envContent);
                 return ['status' => 'persisted'];
-            } catch (\Exception $e) { return ['status' => 'failed', 'error' => $e->getMessage()]; }
+            } catch (\Exception $e) {
+                return ['status' => 'failed', 'error' => $e->getMessage()]; }
         })();
 
         // Phase 11: Counters Repair
-        $counters_repair = (function() {
+        $counters_repair = (function () {
             try {
                 if (!Schema::hasTable('counters')) {
-                    Schema::create('counters', function($table) {
+                    Schema::create('counters', function ($table) {
                         $table->increments('id');
                         $table->string('type')->nullable();
                         $table->integer('total_count')->default(0);
@@ -543,23 +551,24 @@ Route::get('/run-setup', function() {
                     return 'created';
                 }
                 if (!Schema::hasColumn('counters', 'type')) {
-                    Schema::table('counters', function($table) {
+                    Schema::table('counters', function ($table) {
                         $table->string('type')->nullable();
                     });
                     return 'column_added';
                 }
                 return 'exists';
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // V87.1: GeneralSettings Hardening
-        $gs_hardening = (function() {
+        $gs_hardening = (function () {
             try {
                 if (Schema::hasTable('generalsettings')) {
                     $columns = ['rtl', 'is_capcha', 'is_verification_email', 'is_guest_checkout'];
                     foreach ($columns as $column) {
                         if (!Schema::hasColumn('generalsettings', $column)) {
-                            Schema::table('generalsettings', function($table) use ($column) {
+                            Schema::table('generalsettings', function ($table) use ($column) {
                                 $table->integer($column)->default(0);
                             });
                         }
@@ -583,15 +592,16 @@ Route::get('/run-setup', function() {
                             DB::table('generalsettings')->where('id', $gs_row->id)->update($update);
                         }
                     }
-                    
+
                     return 'hardened_and_cleared';
                 }
                 return 'missing_table';
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // Phase 10: Admin Sync
-        $admin_sync = (function() {
+        $admin_sync = (function () {
             try {
                 $email = 'hello@fabilive.com';
                 $password = 'Fabi@123';
@@ -609,17 +619,19 @@ Route::get('/run-setup', function() {
                     ]);
                     return 'updated';
                 }
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // Phase 12: Redis Hardening Sync & Recovery
-        $redis_sync = (function() {
+        $redis_sync = (function () {
             try {
                 $path = base_path('.env');
-                if (!file_exists($path)) return 'missing_env';
-                
+                if (!file_exists($path))
+                    return 'missing_env';
+
                 $content = file_get_contents($path);
-                
+
                 // RECOVERY MODE: If user visits /run-setup?recover_redis=1
                 if (request()->query('recover_redis')) {
                     $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=', $content);
@@ -638,23 +650,26 @@ Route::get('/run-setup', function() {
                 // PATH FINDER: Try to help the user find the redis config
                 $possible_paths = ['/etc/redis/redis.conf', '/etc/redis.conf', '/etc/redis/redis-server.conf'];
                 $found_path = 'not_found';
-                foreach($possible_paths as $p) {
-                    if (file_exists($p)) { $found_path = $p; break; }
+                foreach ($possible_paths as $p) {
+                    if (file_exists($p)) {
+                        $found_path = $p;
+                        break; }
                 }
 
                 return [
                     'status' => 'persisted',
                     'config_hint' => $found_path
                 ];
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // V90.2: Payment Gateways Repair
-        $pg_repair = (function() {
+        $pg_repair = (function () {
             try {
                 if (Schema::hasTable('payment_gateways')) {
                     if (!Schema::hasColumn('payment_gateways', 'subscription')) {
-                        Schema::table('payment_gateways', function($table) {
+                        Schema::table('payment_gateways', function ($table) {
                             $table->integer('subscription')->default(0);
                         });
                         return 'column_added';
@@ -662,11 +677,12 @@ Route::get('/run-setup', function() {
                     return 'exists';
                 }
                 return 'table_not_found';
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // V90.2: FINAL SCHEMA POLISH (Vendors & Payment Info)
-        $schema_polish = (function() {
+        $schema_polish = (function () {
             try {
                 $status_log = [];
                 $gs_table = 'generalsettings';
@@ -790,7 +806,7 @@ Route::get('/run-setup', function() {
                 // Pages Table
                 $page_table = 'pages';
                 if (!Schema::hasTable($page_table)) {
-                    Schema::create($page_table, function($table) {
+                    Schema::create($page_table, function ($table) {
                         $table->increments('id');
                         $table->string('slug')->unique();
                         $table->string('title');
@@ -835,11 +851,12 @@ Route::get('/run-setup', function() {
                     'status' => 'completed',
                     'log' => $status_log
                 ];
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         // V90.7: DEEP RECOVERY PHASE
-        $deep_recovery = (function() {
+        $deep_recovery = (function () {
             try {
                 $log = [];
 
@@ -905,7 +922,7 @@ Route::get('/run-setup', function() {
 
                 // 4. Ensure blog tables exist
                 if (!Schema::hasTable('blogs')) {
-                    Schema::create('blogs', function($table) {
+                    Schema::create('blogs', function ($table) {
                         $table->increments('id');
                         $table->integer('category_id')->default(0);
                         $table->string('title');
@@ -922,7 +939,7 @@ Route::get('/run-setup', function() {
                 }
 
                 if (!Schema::hasTable('blog_categories')) {
-                    Schema::create('blog_categories', function($table) {
+                    Schema::create('blog_categories', function ($table) {
                         $table->increments('id');
                         $table->string('name');
                         $table->string('slug');
@@ -936,7 +953,8 @@ Route::get('/run-setup', function() {
                 $log[] = "Cache cleared";
 
                 return ['status' => 'completed', 'log' => $log];
-            } catch (\Exception $e) { return 'error: ' . $e->getMessage(); }
+            } catch (\Exception $e) {
+                return 'error: ' . $e->getMessage(); }
         })();
 
         $results = [
@@ -964,20 +982,22 @@ Route::get('/run-setup', function() {
 });
 
 // V82 ADVANCED DIAGNOSTICS
-Route::get('/debug-logs', function() {
+Route::get('/debug-logs', function () {
     $logPath = storage_path('logs/laravel.log');
-    if (!file_exists($logPath)) return response()->json(['error' => 'Log file not found']);
+    if (!file_exists($logPath))
+        return response()->json(['error' => 'Log file not found']);
     $data = file($logPath);
     $lines = array_slice($data, -100);
-    return response('<html><head><title>Fabilive Debug Logs</title></head><body><pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;">'.implode("", $lines).'</pre></body></html>');
+    return response('<html><head><title>Fabilive Debug Logs</title></head><body><pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;">' . implode("", $lines) . '</pre></body></html>');
 });
 
-Route::get('/debug-smtp', function() {
+Route::get('/debug-smtp', function () {
     try {
         $gs = DB::table('generalsettings')->first();
-        if (!$gs) throw new \Exception("generalsettings table is empty");
-        
-        $template = DB::table('email_templates')->first(); 
+        if (!$gs)
+            throw new \Exception("generalsettings table is empty");
+
+        $template = DB::table('email_templates')->first();
         $data = [
             'to' => $gs->from_email ?: "noreply@fabilive.com",
             'type' => $template ? $template->email_type : "common",
@@ -985,13 +1005,13 @@ Route::get('/debug-smtp', function() {
             'oamount' => "0",
             'aname' => "Admin",
             'aemail' => $gs->from_email ?: "noreply@fabilive.com",
-            'onumber' => "DEBUG-".time()
+            'onumber' => "DEBUG-" . time()
         ];
         $mailer = new \App\Classes\GeniusMailer();
         \Log::info("Debug SMTP attempt started...");
         $result = $mailer->sendAutoMail($data);
         return response()->json([
-            'status' => $result ? 'success' : 'failed', 
+            'status' => $result ? 'success' : 'failed',
             'message' => $result ? 'Test email sent to ' . ($gs->from_email ?: "noreply@fabilive.com (Fallback)") : 'Mailer returned false (template missing?)',
             'from_address' => $gs->from_email ?: 'EMPTY (Fallback: support@fabilive.com used in Mailer)',
             'gs_data' => [
@@ -1005,7 +1025,7 @@ Route::get('/debug-smtp', function() {
     }
 });
 
-Route::get('/debug-auth', function() {
+Route::get('/debug-auth', function () {
     return response()->json([
         'connectivity_test' => 'Google reCAPTCHA API (Check connectivity)',
         'env_secret' => env('NOCAPTCHA_SECRET') ? 'Present (Hidden)' : 'MISSING',
@@ -1018,7 +1038,7 @@ Route::get('/debug-auth', function() {
     ]);
 });
 
-Route::get('/debug-config', function() {
+Route::get('/debug-config', function () {
     return response()->json([
         'nocaptcha' => config('nocaptcha'),
         'mail' => [
@@ -1032,7 +1052,7 @@ Route::get('/debug-config', function() {
     ]);
 });
 
-Route::get('/debug-cache-clear', function() {
+Route::get('/debug-cache-clear', function () {
     try {
         Artisan::call('optimize:clear');
         Artisan::call('config:clear');
@@ -1045,7 +1065,7 @@ Route::get('/debug-cache-clear', function() {
     }
 });
 
-Route::get('/debug-composer', function() {
+Route::get('/debug-composer', function () {
     $autoload = base_path('vendor/autoload.php');
     $composer_lock = base_path('composer.lock');
     return response()->json([
@@ -1193,7 +1213,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/order/track/edit/{id}', 'Admin\OrderTrackController@edit')->name('admin-order-track-edit');
         Route::post('/order/track/update/{id}', 'Admin\OrderTrackController@update')->name('admin-order-track-update');
         Route::delete('/order/track/delete/{id}', 'Admin\OrderTrackController@delete')->name('admin-order-track-delete');
-        
+
         // Financial Reports
         Route::get('/reports/financial', [App\Http\Controllers\Admin\FinancialReportController::class, 'index'])->name('admin-financial-report');
         Route::get('/reports/financial/export', [App\Http\Controllers\Admin\FinancialReportController::class, 'exportCsv'])->name('admin-financial-report-export');
@@ -2421,7 +2441,8 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::post('/paystack-submit', 'Payment\Subscription\PaystackController@store')->name('user.paystack.submit');
 
         // PayTM
-        Route::post('/paytm-submit', 'Payment\Subscription\PaytmController@store')->name('user.paytm.submit');;
+        Route::post('/paytm-submit', 'Payment\Subscription\PaytmController@store')->name('user.paytm.submit');
+        ;
         Route::post('/paytm-notify', 'Payment\Subscription\PaytmController@notify')->name('user.paytm.notify');
 
         // Molly
@@ -2496,7 +2517,8 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::post('/deposit/paystack-submit', 'Payment\Deposit\PaystackController@store')->name('deposit.paystack.submit');
 
         // PayTM
-        Route::post('/deposit/paytm-submit', 'Payment\Deposit\PaytmController@store')->name('deposit.paytm.submit');;
+        Route::post('/deposit/paytm-submit', 'Payment\Deposit\PaytmController@store')->name('deposit.paytm.submit');
+        ;
         Route::post('/deposit/paytm-notify', 'Payment\Deposit\PaytmController@notify')->name('deposit.paytm.notify');
 
         // Molly
@@ -2598,11 +2620,13 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('/api/molly/notify', 'Api\Payment\MollyController@notify')->name('api.user.deposit.molly.notify');
 
         //PayTM Routes
-        Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.user.deposit.paytm.submit');;
+        Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.user.deposit.paytm.submit');
+        ;
         Route::post('/api/paytm-callback', 'Api\Payment\PaytmController@paytmCallback')->name('api.user.deposit.paytm.notify');
 
         //RazorPay Routes
-        Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.user.deposit.razorpay.submit');;
+        Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.user.deposit.razorpay.submit');
+        ;
         Route::post('/api/razorpay-callback', 'Api\Payment\RazorpayController@razorCallback')->name('api.user.deposit.razorpay.notify');
 
         // Mercadopago Routes
@@ -2678,7 +2702,7 @@ Route::group(['middleware' => 'maintenance'], function () {
 
 
         Route::get('/conversation', 'Rider\MessageDeliveryController@message')->name('rider-conversation');
-        Route::post('/conversation/messages','Rider\MessageDeliveryController@fetchMessages')->name('rider-chat-messages');
+        Route::post('/conversation/messages', 'Rider\MessageDeliveryController@fetchMessages')->name('rider-chat-messages');
         Route::post('/conversation/send', 'Rider\MessageDeliveryController@sendMessage')->name('rider-chat-send');
 
         // ============ Start: Multi-Seller Delivery System =========================\\
@@ -2709,8 +2733,9 @@ Route::group(['middleware' => 'maintenance'], function () {
 
 
 
-    Route::get('/delete-products-now', function() { require base_path('delete_all_products.php'); });
-Route::get('/', 'Front\FrontendController@index')->name('front.index');
+    Route::get('/delete-products-now', function () {
+        require base_path('delete_all_products.php'); });
+    Route::get('/', 'Front\FrontendController@index')->name('front.index');
     Route::get('/view', 'Front\CartController@view_cart')->name('front.cart-view');
     Route::get('/extras', 'Front\FrontendController@extraIndex')->name('front.extraIndex');
 
@@ -2837,7 +2862,8 @@ Route::get('/', 'Front\FrontendController@index')->name('front.index');
     Route::post('/checkout/payment/paystack-submit', 'Payment\Checkout\PaystackController@store')->name('front.paystack.submit');
 
     // PayTM
-    Route::post('/checkout/payment/paytm-submit', 'Payment\Checkout\PaytmController@store')->name('front.paytm.submit');;
+    Route::post('/checkout/payment/paytm-submit', 'Payment\Checkout\PaytmController@store')->name('front.paytm.submit');
+    ;
     Route::post('/checkout/payment/paytm-notify', 'Payment\Checkout\PaytmController@notify')->name('front.paytm.notify');
 
     // Molly
@@ -2940,13 +2966,15 @@ Route::get('/', 'Front\FrontendController@index')->name('front.index');
     Route::get('/api/molly/notify', 'Api\Payment\MollyController@notify')->name('api.molly.notify');
 
     //PayTM Routes
-    Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.paytm.submit');;
+    Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.paytm.submit');
+    ;
     Route::post('/api/paytm-callback', 'Api\Payment\PaytmController@paytmCallback')->name('api.paytm.notify');
 
     Route::post('/api/authorize-submit', 'Api\Payment\AuthorizeController@store')->name('api.authorize.submit');
 
     //RazorPay Routes
-    Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.razorpay.submit');;
+    Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.razorpay.submit');
+    ;
     Route::post('/api/razorpay-callback', 'Api\Payment\RazorpayController@razorCallback')->name('api.razorpay.notify');
 
     //   Mobile Checkout section
@@ -2995,4 +3023,5 @@ Route::get('/', 'Front\FrontendController@index')->name('front.index');
 });
 
 Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');
-Route::get('/delete-products-now', function() { require base_path('delete_all_products.php'); });
+Route::get('/delete-products-now', function () {
+    require base_path('delete_all_products.php'); });
