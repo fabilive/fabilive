@@ -64,10 +64,10 @@
                      <h4 class="widget-title down-line mb-30">{{ __('My Wallet') }}</h4>
                      <div class="user-info">
                         <h5 class="title">{{ __('Unlocked Referral Bonus') }}:</h5>
-                        <h5 class="title w-price">{{ App\Models\Product::vendorConvertPrice($user->affilate_income) }}</h5>
+                        <h5 class="title w-price">CFA{{ number_format($user->affilate_income, 0) }}</h5>
                         
                         <h5 class="title mt-3">{{ __('Locked Referral Bonus') }}:</h5>
-                        <h5 class="title w-price text-warning">{{ App\Models\Product::vendorConvertPrice($user->customReferralsSent()->where('status', 'locked')->sum('amount')) }}</h5>
+                        <h5 class="title w-price text-warning">CFA{{ number_format($user->customReferralsSent()->where('status', 'locked')->sum('amount'), 0) }}</h5>
                         <hr>
 
                         <h5 class="title w-title">{{ __('Wallet Balance') }}</h5>
