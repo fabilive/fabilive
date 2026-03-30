@@ -194,6 +194,7 @@ class GeneralSettingController extends AdminBaseController
             }
             $input['referral_amount'] = $request->referral_amount;
             $input['referral_bonus'] = $request->referral_bonus;
+            $input['custom_referral_bonus'] = $request->custom_referral_bonus;
             $input['same_servicearea_delivery_fee'] = $request->same_servicearea_delivery_fee;
             $input['rider_percentage_commission'] = $request->rider_percentage_commission;
         cache()->forget('generalsettings');

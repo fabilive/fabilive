@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 
@@ -259,6 +259,22 @@
                             </div>
                           </div>
 
+
+                          <div class="row justify-content-center">
+                            <div class="col-lg-3">
+                              <div class="left-area">
+                                <h4 class="heading">
+                                    {{ __('Vendor Referral Bonus (CFA)') }} *
+                                </h4>
+                                <p style="font-size:12px;color:#888;">{{ __('Fixed CFA amount awarded to referrer when a new user registers via their referral link.') }}</p>
+                              </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="tawk-area">
+                                  <input class="input-field" type="number" min="0" name="custom_referral_bonus" value="{{$gs->custom_referral_bonus ?? 500}}">
+                                </div>
+                            </div>
+                          </div>
 
                         <div class="row justify-content-center">
                             <div class="col-lg-3">

@@ -167,10 +167,11 @@ class RegisterController extends Controller
                     $customReferrerId = Session::get('custom_referral');
                     // Prevent self-referral
                     if ($customReferrerId != $user->id) {
+                        $bonusAmount = (int) ($gs->custom_referral_bonus ?? 500);
                         \App\Models\CustomReferral::create([
                             'referrer_id' => $customReferrerId,
                             'referred_id' => $user->id,
-                            'amount' => 500,
+                            'amount' => $bonusAmount,
                             'status' => 'locked',
                             'expires_at' => now()->addDays(30),
                         ]);
@@ -185,10 +186,11 @@ class RegisterController extends Controller
                 if (!$customReferralCreated && $request->filled('referral_code')) {
                     $referrerByCode = User::where('affilate_code', $request->referral_code)->first();
                     if ($referrerByCode && $referrerByCode->id !== $user->id) {
+                        $bonusAmount = $bonusAmount ?? (int) ($gs->custom_referral_bonus ?? 500);
                         \App\Models\CustomReferral::create([
                             'referrer_id' => $referrerByCode->id,
                             'referred_id' => $user->id,
-                            'amount' => 500,
+                            'amount' => $bonusAmount,
                             'status' => 'locked',
                             'expires_at' => now()->addDays(30),
                         ]);

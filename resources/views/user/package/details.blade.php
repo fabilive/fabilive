@@ -541,7 +541,7 @@
                             total = Math.round(total);
 
                             var handler = PaystackPop.setup({
-                                key: '{{ $paystack['key'] }}',
+                                key: '{{ $paystack['key'] ?? '' }}',
                                 email: '{{ Auth::user()->email }}',
                                 amount: total * 100,
                                 currency: "{{ $curr->name }}",

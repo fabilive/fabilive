@@ -16,6 +16,22 @@ use App\Http\Controllers\PaymentController;
 Route::get('/update-categories-now', function() { require base_path('update_categories.php'); });
 Route::get('/delete-all-products-now', function() { require base_path('delete_products.php'); });
 Route::get('/check-settings-now', function() { require base_path('check_settings.php'); });
+Route::get('/add-custom-referral-bonus-column', function() {
+    try {
+        if (!Schema::hasColumn('generalsettings', 'custom_referral_bonus')) {
+            Schema::table('generalsettings', function ($table) {
+                $table->unsignedInteger('custom_referral_bonus')->default(500)->after('referral_bonus');
+            });
+            DB::table('generalsettings')->where('id', 1)->update(['custom_referral_bonus' => 500]);
+            return response()->json(['status' => 'success', 'message' => 'custom_referral_bonus column added and set to 500 CFA.']);
+        } else {
+            return response()->json(['status' => 'already_exists', 'message' => 'Column already exists. No changes made.']);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
 Route::get('/run-setup', function() {
     try {
         if (function_exists('opcache_reset')) { opcache_reset(); }

@@ -111,7 +111,7 @@
                                                                 @forelse($user->customReferralsSent()->latest()->get() as $referral)
                                                                 <tr>
                                                                     <td>{{ $referral->referred ? $referral->referred->name : 'Unknown User' }}</td>
-                                                                    <td>{{ \App\Models\Product::vendorConvertPrice($referral->amount) }}</td>
+                                                                    <td>{{ $gs->currency_format == 0 ? 'CFA' . number_format($referral->amount, 0) : number_format($referral->amount, 0) . 'CFA' }}</td>
                                                                     <td>
                                                                         @if($referral->status == 'locked')
                                                                             <span class="badge badge-warning text-white px-3 py-2">{{ __('Locked') }}</span>

@@ -38,8 +38,7 @@ class SubscriptionController extends UserBaseController
         }
         $data['gateway'] = PaymentGateway::whereSubscription(1)->where('currency_id', 'like', "%\"{$this->curr->id}\"%")->latest('id')->get();
         $paystackData = PaymentGateway::whereKeyword('paystack')->first();
-        $data['paystack'] = $paystackData->convertAutoData();
-        $voguepayData = PaymentGateway::whereKeyword('voguepay')->first();
+        $data['paystack'] = $paystackData ? $paystackData->convertAutoData() : [];
         $data['agreements'] = \App\Models\ManageAgreement::all();
         return view('user.package.details', $data);
     }
