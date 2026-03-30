@@ -167,6 +167,27 @@ Route::get('/fix-subscriptions', function() {
             });
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
+            \Illuminate\Support\Facades\Schema::create('user_notifications', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('order_id')->nullable();
+                $table->integer('is_read')->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+            \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
+                $table->id();
+                $table->integer('order_id')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->integer('vendor_id')->nullable();
+                $table->integer('is_read')->default(0);
+                $table->timestamps();
+            });
+        }
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('admin_languages')) {
             \Illuminate\Support\Facades\Schema::create('admin_languages', function ($table) {
                 $table->id();
