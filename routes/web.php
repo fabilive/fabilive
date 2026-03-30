@@ -218,6 +218,44 @@ Route::get('/fix-subscriptions', function() {
                 'wholesell' => 1
             ]);
         }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('countries')) {
+            \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
+                $table->id();
+                $table->string('country_name')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('states')) {
+            \Illuminate\Support\Facades\Schema::create('states', function ($table) {
+                $table->id();
+                $table->string('state_name')->nullable();
+                $table->integer('country_id')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('cities')) {
+            \Illuminate\Support\Facades\Schema::create('cities', function ($table) {
+                $table->id();
+                $table->string('city_name')->nullable();
+                $table->integer('state_id')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('categories')) {
+             \Illuminate\Support\Facades\Schema::create('categories', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('slug')->nullable();
+                $table->integer('status')->default(1);
+                $table->string('photo')->nullable();
+                $table->integer('is_featured')->default(0);
+                $table->string('image')->nullable();
+            });
+        }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
