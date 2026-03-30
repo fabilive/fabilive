@@ -374,9 +374,24 @@ Route::get('/fix-subscriptions', function () {
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_servicearea')) {
                     $table->integer('product_servicearea')->nullable();
                 }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'views')) {
+                    $table->integer('views')->default(0);
+                }
                 // Fix for 500 error on product create: Column 'minimum_qty' cannot be null
                 if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
                     \Illuminate\Support\Facades\DB::statement("ALTER TABLE products MODIFY COLUMN minimum_qty INT NULL");
+                }
+            });
+        }
+
+        // Fix for missing generalsettings columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affiliate')) {
+                    $table->integer('is_affiliate')->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affilate')) {
+                    $table->integer('is_affilate')->default(0);
                 }
             });
         }
@@ -405,6 +420,16 @@ Route::get('/fix-subscriptions', function () {
                 $table->integer('rating')->nullable();
                 $table->text('review')->nullable();
                 $table->timestamp('review_date')->nullable();
+                $table->integer('status')->default(1);
+            });
+        } else {
+            \Illuminate\Support\Facades\Schema::table('ratings', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('ratings', 'status')) {
+                    $table->integer('status')->default(1);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('ratings', 'review')) {
+                    $table->text('review')->nullable();
+                }
             });
         }
 
