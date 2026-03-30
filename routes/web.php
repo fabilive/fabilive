@@ -188,28 +188,35 @@ Route::get('/fix-subscriptions', function() {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('admin_languages')) {
-            \Illuminate\Support\Facades\Schema::create('admin_languages', function ($table) {
-                $table->id();
-                $table->string('name')->nullable();
-                $table->string('language')->nullable();
-                $table->string('file')->nullable();
-                $table->integer('is_default')->default(0);
-                $table->integer('rtl')->default(0);
-            });
-            \Illuminate\Support\Facades\DB::table('admin_languages')->insert([
-                'name' => 'English',
-                'language' => 'English',
-                'is_default' => 1,
-                'rtl' => 0
-            ]);
-        } else {
-            // Aggressive Column Check
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('admin_languages', 'rtl')) {
-                \Illuminate\Support\Facades\Schema::table('admin_languages', function ($table) {
-                    $table->integer('rtl')->default(0);
-                });
+        if (DB::table('admin_languages')->where('is_default', 1)->count() == 0) {
+            if (DB::table('admin_languages')->count() > 0) {
+                DB::table('admin_languages')->where('id', DB::table('admin_languages')->min('id'))->update(['is_default' => 1]);
+            } else {
+                DB::table('admin_languages')->insert(['name' => 'English', 'language' => 'English', 'is_default' => 1, 'rtl' => 0]);
             }
+        }
+
+        // Force Enable Product Types & missing GS columns
+        $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->find(1);
+        if ($gs_check) {
+            $gs_cols = ['physical', 'digital', 'license', 'listing', 'vendor_ship_info', 'affilite', 'is_admin_loader', 'wholesell'];
+            foreach ($gs_cols as $col) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                    \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col) {
+                        $table->integer($col)->default(1);
+                    });
+                }
+            }
+            \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
+                'physical' => 1,
+                'digital' => 1,
+                'license' => 1,
+                'listing' => 1,
+                'vendor_ship_info' => 1,
+                'affilite' => 1,
+                'is_admin_loader' => 0,
+                'wholesell' => 1
+            ]);
         }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
