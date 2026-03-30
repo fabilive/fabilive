@@ -34,12 +34,53 @@ Route::get('/add-custom-referral-bonus-column', function() {
 
 Route::get('/fix-subscriptions', function() {
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', [
-            '--path' => 'database/migrations/2026_03_30_000002_create_subscriptions_table.php',
-            '--force' => true
-        ]);
+        if (!\Illuminate\Support\Facades\Schema::hasTable('subscriptions')) {
+            \Illuminate\Support\Facades\Schema::create('subscriptions', function ($table) {
+                $table->id();
+                $table->string('title')->nullable();
+                $table->string('currency')->default('XAF')->nullable();
+                $table->string('currency_code')->default('XAF')->nullable();
+                $table->double('price')->default(0);
+                $table->integer('days')->default(0);
+                $table->integer('allowed_products')->default(0);
+                $table->text('details')->nullable();
+            });
+        }
         
-        if (\App\Models\Subscription::count() == 0) {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_subscriptions')) {
+            \Illuminate\Support\Facades\Schema::create('user_subscriptions', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('subscription_id')->nullable();
+                $table->string('title')->nullable();
+                $table->string('currency_sign')->nullable();
+                $table->string('currency_code')->nullable();
+                $table->double('currency_value')->default(0);
+                $table->double('price')->default(0);
+                $table->integer('days')->default(0);
+                $table->integer('allowed_products')->default(0);
+                $table->text('details')->nullable();
+                $table->string('method')->nullable();
+                $table->string('txnid')->nullable();
+                $table->string('charge_id')->nullable();
+                $table->string('flutter_id')->nullable();
+                $table->string('payment_number')->nullable();
+                $table->integer('status')->default(0);
+                $table->timestamps();
+            });
+        }
+        
+        if (!\Illuminate\Support\Facades\Schema::hasTable('agreements')) {
+            \Illuminate\Support\Facades\Schema::create('agreements', function ($table) {
+                $table->id();
+                $table->string('title')->nullable();
+                $table->text('details')->nullable();
+                $table->string('file')->nullable();
+                $table->timestamps();
+            });
+        }
+        
+        if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
                 'id' => 8,
                 'title' => 'Vendor Lifetime Access',
@@ -49,9 +90,8 @@ Route::get('/fix-subscriptions', function() {
                 'details' => 'Full vendor access package.'
             ]);
         }
-        return response()->json(['status' => 'success', 'message' => 'Subscriptions fixed.']);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        
+        return response()->json(['status' => 'success', 'message' => 'All 3 missing vendor tables successfully restored!']);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
