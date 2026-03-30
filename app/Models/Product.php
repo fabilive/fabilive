@@ -50,14 +50,13 @@ public function cities()
         try {
             $now = \Carbon\Carbon::now();
             $start = \Carbon\Carbon::parse($this->discount_date_start);
-            
+
             if ($now->lt($start)) {
                 return false;
             }
 
             if (!empty($this->discount_date_end)) {
                 $end = \Carbon\Carbon::parse($this->discount_date_end);
-                // If now is past end, discount is expired
                 if ($now->gt($end)) {
                     return false;
                 }

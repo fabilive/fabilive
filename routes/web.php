@@ -426,6 +426,46 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('comments')) {
+            \Illuminate\Support\Facades\Schema::create('comments', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('product_id')->nullable();
+                $table->text('text')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('wishlists')) {
+            \Illuminate\Support\Facades\Schema::create('wishlists', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('product_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('delivery_fees')) {
+            \Illuminate\Support\Facades\Schema::create('delivery_fees', function ($table) {
+                $table->id();
+                $table->integer('category_id')->nullable();
+                $table->integer('subcategory_id')->nullable();
+                $table->integer('childcategory_id')->nullable();
+                $table->double('amount', 8, 2)->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('distance_fees')) {
+            \Illuminate\Support\Facades\Schema::create('distance_fees', function ($table) {
+                $table->id();
+                $table->double('min_distance', 8, 2)->default(0);
+                $table->double('max_distance', 8, 2)->default(0);
+                $table->double('price', 8, 2)->default(0);
+                $table->timestamps();
+            });
+        }
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
             \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
                 $table->id();
