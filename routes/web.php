@@ -177,12 +177,18 @@ Route::get('/fix-subscriptions', function() {
                 $table->integer('rtl')->default(0);
             });
             \Illuminate\Support\Facades\DB::table('admin_languages')->insert([
-                'id' => 1,
                 'name' => 'English',
                 'language' => 'English',
                 'is_default' => 1,
                 'rtl' => 0
             ]);
+        } else {
+            // Aggressive Column Check
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('admin_languages', 'rtl')) {
+                \Illuminate\Support\Facades\Schema::table('admin_languages', function ($table) {
+                    $table->integer('rtl')->default(0);
+                });
+            }
         }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
