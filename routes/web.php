@@ -352,6 +352,32 @@ Route::get('/fix-subscriptions', function() {
                 ['name' => 'Services', 'slug' => 'services', 'status' => 1]
             ]);
         }
+
+        if (\Illuminate\Support\Facades\DB::table('subcategories')->count() == 0) {
+            $electronic = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'electronics')->first();
+            $fashion = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'fashion')->first();
+            $services = \Illuminate\Support\Facades\DB::table('categories')->where('slug', 'services')->first();
+            
+            if ($electronic) {
+                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
+                    ['category_id' => $electronic->id, 'name' => 'Smartphones', 'slug' => 'smartphones', 'status' => 1],
+                    ['category_id' => $electronic->id, 'name' => 'Laptops', 'slug' => 'laptops', 'status' => 1],
+                ]);
+            }
+            if ($fashion) {
+                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
+                    ['category_id' => $fashion->id, 'name' => "Men's Clothing", 'slug' => 'mens-clothing', 'status' => 1],
+                    ['category_id' => $fashion->id, 'name' => "Women's Clothing", 'slug' => 'womens-clothing', 'status' => 1],
+                    ['category_id' => $fashion->id, 'name' => "Shoes", 'slug' => 'shoes', 'status' => 1],
+                    ['category_id' => $fashion->id, 'name' => "Watches", 'slug' => 'watches', 'status' => 1]
+                ]);
+            }
+            if ($services) {
+                \Illuminate\Support\Facades\DB::table('subcategories')->insert([
+                    ['category_id' => $services->id, 'name' => "Digital Services", 'slug' => 'digital-services', 'status' => 1],
+                ]);
+            }
+        }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
