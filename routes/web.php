@@ -166,6 +166,24 @@ Route::get('/fix-subscriptions', function() {
                 $table->timestamps();
             });
         }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('admin_languages')) {
+            \Illuminate\Support\Facades\Schema::create('admin_languages', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('language')->nullable();
+                $table->string('file')->nullable();
+                $table->integer('is_default')->default(0);
+                $table->integer('rtl')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('admin_languages')->insert([
+                'id' => 1,
+                'name' => 'English',
+                'language' => 'English',
+                'is_default' => 1,
+                'rtl' => 0
+            ]);
+        }
         
         if (\App\Models\Subscription::where('id', 8)->count() == 0) {
             \App\Models\Subscription::insert([
