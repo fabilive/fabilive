@@ -225,6 +225,12 @@ Route::get('/fix-subscriptions', function() {
                 $table->string('country_name')->nullable();
                 $table->integer('status')->default(1);
             });
+        } else {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('countries', 'country_name')) {
+                \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
+                    $table->string('country_name')->nullable();
+                });
+            }
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('states')) {
@@ -234,6 +240,12 @@ Route::get('/fix-subscriptions', function() {
                 $table->integer('country_id')->nullable();
                 $table->integer('status')->default(1);
             });
+        } else {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'state_name')) {
+                \Illuminate\Support\Facades\Schema::table('states', function ($table) {
+                    $table->string('state_name')->nullable();
+                });
+            }
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('cities')) {
@@ -243,6 +255,12 @@ Route::get('/fix-subscriptions', function() {
                 $table->integer('state_id')->nullable();
                 $table->integer('status')->default(1);
             });
+        } else {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'city_name')) {
+                \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
+                    $table->string('city_name')->nullable();
+                });
+            }
         }
 
         if (!\Illuminate\Support\Facades\Schema::hasTable('categories')) {
