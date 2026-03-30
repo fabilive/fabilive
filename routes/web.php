@@ -397,6 +397,45 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            \Illuminate\Support\Facades\Schema::create('ratings', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('product_id')->nullable();
+                $table->integer('rating')->nullable();
+                $table->text('review')->nullable();
+                $table->timestamp('review_date')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
+            \Illuminate\Support\Facades\Schema::create('product_clicks', function ($table) {
+                $table->id();
+                $table->integer('product_id')->nullable();
+                $table->string('date')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+            \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('product_id')->nullable();
+                $table->text('note')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+            \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
+                $table->id();
+                $table->integer('sender_id')->nullable();
+                $table->integer('receiver_id')->nullable();
+                $table->text('message')->nullable();
+                $table->timestamps();
+            });
+        }
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
             \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
                 $table->id();

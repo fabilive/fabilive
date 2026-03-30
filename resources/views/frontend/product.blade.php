@@ -263,7 +263,7 @@
                            <div class="product-image">
                               <a href="{{ route('front.product', $prod['slug']) }}"
                                  class="woocommerce-LoopProduct-link"><img
-                                    src="{{ $prod['photo'] ? asset('assets/images/products/'.$prod['photo'] ):asset('assets/images/noimage.png') }}"
+                                    src="{{ $prod['thumbnail'] ? asset('assets/images/thumbnails/'.$prod['thumbnail'] ):asset('assets/images/noimage.png') }}"
                                     alt="Product Image"></a>
                               <div class="wishlist-view">
                                  <div class="quickview-button">
@@ -343,7 +343,7 @@
                            <div class="product-image">
                               <a href="{{ route('front.product', $item->slug) }}"
                                  class="woocommerce-LoopProduct-link"><img
-                                    src="{{ $item->photo ? asset('assets/images/products/'.$item->photo):asset('assets/images/noimage.png')}}"
+                                    src="{{ $item->thumbnail ? asset('assets/images/thumbnails/'.$item->thumbnail):asset('assets/images/noimage.png')}}"
                                     alt="Product Image"></a>
                               <div class="on-sale">-{{ round($item->offPercentage(), 2)}}%</div>
                               <div class="hover-area">
