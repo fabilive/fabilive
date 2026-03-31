@@ -858,6 +858,8 @@ Route::get('/fix-subscriptions', function () {
                 $table->integer('is_default')->default(0);
                 $table->integer('rtl')->default(0);
             });
+        }
+        if (\Illuminate\Support\Facades\DB::table('languages')->count() == 0) {
             \Illuminate\Support\Facades\DB::table('languages')->insert([
                 'name' => 'English',
                 'language' => 'en',
@@ -875,7 +877,16 @@ Route::get('/fix-subscriptions', function () {
                     $table->text($column)->nullable();
                 }
             });
+        }
+        if (\Illuminate\Support\Facades\DB::table('pagesettings')->count() == 0) {
             \Illuminate\Support\Facades\DB::table('pagesettings')->insert(['id' => 1]);
+        }
+
+        // ENSURE GENERALSETTINGS HAS RECORD
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            if (\Illuminate\Support\Facades\DB::table('generalsettings')->count() == 0) {
+                \Illuminate\Support\Facades\DB::table('generalsettings')->insert(['id' => 1]);
+            }
         }
 
         // FORCE CACHE CLEAR
@@ -889,47 +900,31 @@ Route::get('/fix-subscriptions', function () {
             $cache = base_path('bootstrap/cache');
             @chmod($storage, 0775);
             @chmod($cache, 0775);
-            // Recursive (best effort)
-            $it = new RecursiveDirectoryIterator($storage, RecursiveDirectoryIterator::SKIP_DOTS);
-            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
-            foreach($files as $file) {
-                if ($file->isDir()){
-                    @chmod($file->getRealPath(), 0775);
-                } else {
-                    @chmod($file->getRealPath(), 0664);
-                }
-            }
         } catch (\Exception $permEx) {}
 
         // DEEP SYSTEM DIAGNOSTICS
-        $logPath = storage_path('logs/laravel.log');
-        $logContent = "Log file not found at " . $logPath;
-        if (file_exists($logPath)) {
-            $file = @file($logPath);
-            if ($file) {
-                $logContent = implode("", array_slice($file, -100));
-            } else {
-                $logContent = "Log file exists but is NOT readable. Confirm storage permissions.";
+        try {
+            $logPath = storage_path('logs/laravel.log');
+            $logContent = "Log file not found at " . $logPath;
+            if (file_exists($logPath)) {
+                $file = @file($logPath);
+                if ($file) {
+                    $logContent = implode("", array_slice($file, -100));
+                } else {
+                    $logContent = "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.";
+                }
             }
-        }
-
-        $logDirListing = "Not accessible.";
-        if (is_dir(storage_path('logs'))) {
-            $logDirListing = implode(", ", array_diff(scandir(storage_path('logs')), array('..', '.')));
-        }
+        } catch (\Exception $e) { $logContent = "Error reading log: " . $e->getMessage(); }
 
         return response()->json([
             "status" => "success",
-            "php_version" => PHP_VERSION,
-            "required_extensions" => [
-                "gd" => extension_loaded('gd'),
-                "bcmath" => extension_loaded('bcmath'),
-                "intl" => extension_loaded('intl'),
-                "pdo_mysql" => extension_loaded('pdo_mysql'),
-                "mbstring" => extension_loaded('mbstring')
+            "message" => "Phase 10 System Integrity check complete. Default records seeded.",
+            "diagnostics" => [
+                "php" => PHP_VERSION,
+                "storage_writable" => is_writable(storage_path()),
+                "cache_writable" => is_writable(base_path('bootstrap/cache')),
+                "logs_writable" => is_writable(storage_path('logs'))
             ],
-            "message" => "Phase 9 Ultimate Rescue complete. Permissions repaired. Check log_dump below.",
-            "log_files" => $logDirListing,
             "log_dump" => $logContent
         ]);
     } catch (\Exception $e) {
