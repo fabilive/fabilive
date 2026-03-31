@@ -443,6 +443,36 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // REPAIR SERVICE AREAS TABLE
+        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+            \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('location')->nullable();
+                $table->string('latitude')->nullable();
+                $table->string('longitude')->nullable();
+                $table->double('base_fee')->default(0);
+                $table->double('stopover_fee')->default(0);
+                $table->integer('status')->default(1);
+            });
+
+            // Seeding some default service areas
+            \Illuminate\Support\Facades\DB::table('service_areas')->insert([
+                ['name' => 'Yaoundé Central', 'location' => 'Yaoundé', 'base_fee' => 1000, 'stopover_fee' => 500, 'status' => 1],
+                ['name' => 'Douala Littoral', 'location' => 'Douala', 'base_fee' => 1200, 'stopover_fee' => 600, 'status' => 1],
+            ]);
+        }
+
+        // REPAIR RIDER SERVICE AREAS TABLE (Pivot Table)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('rider_service_areas')) {
+            \Illuminate\Support\Facades\Schema::create('rider_service_areas', function ($table) {
+                $table->id();
+                $table->unsignedBigInteger('rider_id');
+                $table->unsignedBigInteger('service_area_id');
+                $table->double('price')->nullable();
+            });
+        }
+
         // Fix for missing generalsettings columns (EXHAUSTIVE ALIGNMENT)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
