@@ -1194,11 +1194,50 @@ Route::get('/fix-subscriptions', function () {
                     $logContent = "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.";
                 }
             }
-        } catch (\Exception $e) { $logContent = "Error reading log: " . $e->getMessage(); }
+        // Phase 16: Image Restoration & Branding
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
+                'logo' => '1580538630footer-logo.png',
+                'breadcrumb_banner' => '1648110638breadpng.png',
+            ]);
+        }
+
+        // REPAIR CATEGORY IMAGES
+        if (\Illuminate\Support\Facades\Schema::hasTable('categories')) {
+            \Illuminate\Support\Facades\DB::table('categories')->get()->each(function ($cat) {
+                $path = public_path('assets/images/categories/' . $cat->image);
+                if (empty($cat->image) || !file_exists($path)) {
+                    $newImage = 'noimage.png';
+                    if (stripos($cat->name, 'phone') !== false || stripos($cat->name, 'mobile') !== false) {
+                        $newImage = '3d_smartphone.png';
+                    } elseif (stripos($cat->name, 'laptop') !== false || stripos($cat->name, 'computer') !== false) {
+                        $newImage = '3d_laptop.png';
+                    }
+                    \Illuminate\Support\Facades\DB::table('categories')->where('id', $cat->id)->update(['image' => $newImage, 'photo' => $newImage]);
+                }
+            });
+        }
+
+        // REPAIR SLIDERS
+        if (\Illuminate\Support\Facades\Schema::hasTable('sliders')) {
+            \Illuminate\Support\Facades\DB::table('sliders')->update(['photo' => 'electronics_hero.png']);
+        }
+
+        // REPAIR PRODUCT THUMBNAILS
+        if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
+            \Illuminate\Support\Facades\DB::table('products')->whereNotNull('photo')->chunk(100, function ($products) {
+                foreach ($products as $prod) {
+                    $path = public_path('assets/images/products/' . $prod->photo);
+                    if (!file_exists($path)) {
+                        \Illuminate\Support\Facades\DB::table('products')->where('id', $prod->id)->update(['photo' => 'noimage.png', 'thumbnail' => 'noimage.png']);
+                    }
+                }
+            });
+        }
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 15 Checkout Architecture Restoration complete. Gateways limited to Campay and COD.",
+            "message" => "Phase 16 Image Restoration & Branding complete. All broken icons fixed.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
