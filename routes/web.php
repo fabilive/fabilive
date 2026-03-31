@@ -381,54 +381,46 @@ Route::get('/fix-subscriptions', function () {
 
         if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
             \Illuminate\Support\Facades\Schema::table('products', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'discount_date_start')) {
-                    $table->string('discount_date_start')->nullable();
+                $columns = ['user_id', 'category_id', 'product_type',
+                'product_location','product_city','affiliate_link', 'sku', 'subcategory_id','country_id',
+                 'childcategory_id', 'attributes', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'details',
+                  'price', 'previous_price', 'stock', 'policy', 'status', 'views', 'tags', 'featured', 'best', 'top', 'hot',
+                  'latest', 'big', 'trending', 'sale', 'features', 'colors', 'product_condition', 'ship', 'meta_tag',
+                   'meta_description', 'youtube', 'type', 'file', 'license', 'license_qty', 'link', 'platform', 'region',
+                    'licence_type', 'measure', 'discount_date', 'is_discount', 'whole_sell_qty', 'whole_sell_discount',
+                     'catalog_id', 'slug', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count',
+                      'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
+                       'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
+                        'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check','delivery_fee','delivery_unit','product_servicearea',
+                         'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+                foreach ($columns as $column) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('products', $column)) {
+                        if (in_array($column, ['views', 'stock', 'status', 'featured', 'best', 'top', 'hot', 'latest', 'big', 'trending', 'sale', 'is_discount'])) {
+                            $table->integer($column)->default(0);
+                        } elseif (in_array($column, ['delivery_fee'])) {
+                            $table->double($column, 15, 2)->default(0);
+                        } else {
+                            $table->text($column)->nullable();
+                        }
+                    }
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'discount_date_end')) {
-                    $table->string('discount_date_end')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_servicearea')) {
-                    $table->integer('product_servicearea')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_location')) {
-                    $table->integer('product_location')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_city')) {
-                    $table->integer('product_city')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'views')) {
-                    $table->integer('views')->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', '3d_model')) {
-                    $table->string('3d_model')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'stock_check')) {
-                    $table->integer('stock_check')->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'preordered')) {
-                    $table->integer('preordered')->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'color_all')) {
-                    $table->text('color_all')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'size_all')) {
-                    $table->text('size_all')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'cross_products')) {
-                    $table->text('cross_products')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'delivery_fee')) {
-                    $table->double('delivery_fee', 8, 2)->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'delivery_unit')) {
-                    $table->string('delivery_unit')->nullable();
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
-                    $table->integer('minimum_qty')->default(1);
-                }
-                // Fix for 500 error on product create: Column 'minimum_qty' cannot be null
-                if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
-                    \Illuminate\Support\Facades\DB::statement("ALTER TABLE products MODIFY COLUMN minimum_qty INT NULL");
+            });
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+            \Illuminate\Support\Facades\Schema::table('users', function ($table) {
+                $columns = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country','country_id', 'address', 'phone','selfie_image',
+                 'lat', 'lng',
+                 'fax', 'email', 'password', 'affilate_code','reff', 'verification_link', 'shop_name', 'owner_name',
+                 'shop_number', 'shop_address', 'reg_number', 'shop_message','business_registration_certificate','taxpayer_card_copy',
+                 'id_card_copy','passport_copy','driver_license_copy','residence_permit', 'is_vendor', 'shop_details',
+                 'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified','current_balance', 'email_token', 'reward',
+                  'national_id_front_image', 'national_id_back_image','submerchant_agreement', 'license_image', 'is_verified',
+                  'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
+                foreach ($columns as $column) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('users', $column)) {
+                        $table->text($column)->nullable();
+                    }
                 }
             });
         }
@@ -465,6 +457,15 @@ Route::get('/fix-subscriptions', function () {
                 'thousand_separator' => \Illuminate\Support\Facades\DB::raw('IFNULL(thousand_separator, ",")'),
                 'currency_format' => \Illuminate\Support\Facades\DB::raw('IFNULL(currency_format, 0)'),
             ]);
+
+            \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_shipping')) {
+                    $table->integer('is_shipping')->default(1);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_comment')) {
+                    $table->integer('is_comment')->default(1);
+                }
+            });
         }
 
         // SEED MISSING ADMIN ID 1 (CRITICAL FOR "SOLD BY")
