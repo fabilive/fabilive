@@ -40,17 +40,17 @@
                           <nav class="breadcrumb-divider-slash" aria-label="breadcrumb">
                               <ol class="breadcrumb pro-bread">
                                   <li class="breadcrumb-item"><a href="{{route('front.index')}}">{{__('Home')}}</a></li>
-                                  <li class="breadcrumb-item"><a href="{{route('front.category',$productt->category->slug)}}">{{$productt->category->name}}</a></li>
+                                  <li class="breadcrumb-item"><a href="{{route('front.category',$productt->category->slug ?? 'all')}}">{{$productt->category->name ?? __('All Categories')}}</a></li>
                                   @if($productt->subcategory_id != null)
                                   <li class="breadcrumb-item">
-                                      <a href="{{ route('front.category',[$productt->category->slug, $productt->subcategory->slug]) }}">
+                                      <a href="{{ route('front.category',[$productt->category->slug ?? 'all', $productt->subcategory->slug ?? 'all']) }}">
                                       {{$productt->subcategory->name}}
                                       </a>
                                   </li>
                                   @endif
                                   @if($productt->childcategory_id != null)
                                   <li class="breadcrumb-item">
-                                      <a href="{{ route('front.category',[ $productt->category->slug,$productt->subcategory->slug,$productt->childcategory->slug]) }}">
+                                      <a href="{{ route('front.category',[ $productt->category->slug ?? 'all',$productt->subcategory->slug ?? 'all',$productt->childcategory->slug ?? 'all']) }}">
                                       {{$productt->childcategory->name}}
                                       </a>
                                   </li>
@@ -409,7 +409,7 @@
                   </a>
                   @endif
                 @else
-                {{ App\Models\Admin::find(1)->shop_name }}
+                {{ optional(App\Models\Admin::find(1))->shop_name ?? 'Fabilive' }}
                 @endif</h5>
                 @if( $productt->user_id  != 0)
                 <h3>{{ App\Models\Product::where('user_id','=',$productt->user_id)->get()->count() }}</h3>
@@ -431,7 +431,7 @@
                 
                 @if( $productt->user_id  != 0)
             <li class="{{ $gs->is_contact_seller == 0 ? 'contact_seller' : '' }} cnt-sell">
-                <a href="{{ route('front.vendor',str_replace(' ', '-', $productt->user->shop_name)) }}" class="view-stor btn--base">
+                <a href="{{ route('front.vendor',str_replace(' ', '-', $productt->user->shop_name ?? 'Fabilive')) }}" class="view-stor btn--base">
                   <i class="icofont-ui-travel"></i>
                   {{ __('Visit Store') }}
                 </a>

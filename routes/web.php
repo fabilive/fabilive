@@ -442,6 +442,9 @@ Route::get('/fix-subscriptions', function () {
                     'title' => 'Fabilive',
                     'logo' => 'logo.png',
                     'favicon' => 'favicon.ico',
+                    'is_affiliate' => 0,
+                    'is_affilate' => 0,
+                    'product_affilate' => 0,
                 ]);
             }
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
@@ -455,6 +458,20 @@ Route::get('/fix-subscriptions', function () {
                     $table->integer('product_affilate')->default(0);
                 }
             });
+        }
+
+        // SEED MISSING ADMIN ID 1 (CRITICAL FOR "SOLD BY")
+        if (\Illuminate\Support\Facades\Schema::hasTable('admins')) {
+            $admin_check = \Illuminate\Support\Facades\DB::table('admins')->where('id', 1)->first();
+            if (!$admin_check) {
+                \Illuminate\Support\Facades\DB::table('admins')->insert([
+                    'id' => 1,
+                    'name' => 'Fabilive Admin',
+                    'email' => 'hello@fabilive.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make('fabilive_default'),
+                    'shop_name' => 'Fabilive',
+                ]);
+            }
         }
 
         // Fix for missing cities/states columns
