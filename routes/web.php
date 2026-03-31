@@ -1269,14 +1269,20 @@ Route::get('/fix-subscriptions', function () {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs) {
                 $updates = [];
-                if (empty($gs->logo) || $gs->logo == 'noimage.png') $updates['logo'] = 'logo.png';
-                if (empty($gs->header_logo) || $gs->header_logo == 'noimage.png') $updates['header_logo'] = 'logo.png';
-                if (empty($gs->footer_logo) || $gs->footer_logo == 'noimage.png') $updates['footer_logo'] = 'logo.png';
-                if (empty($gs->favicon) || $gs->favicon == 'noimage.png') $updates['favicon'] = 'logo.png';
+                $possible_logos = ['logo', 'header_logo', 'footer_logo', 'favicon'];
+                foreach ($possible_logos as $col) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                        if (empty($gs->$col) || $gs->$col == 'noimage.png') {
+                            $updates[$col] = 'logo.png';
+                        }
+                    }
+                }
                 
                 // Deal background panoramic fix
-                if (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png' || $gs->deal_background == 'high_perf_laptop.png') {
-                    $updates['deal_background'] = 'electronics_hero.png';
+                if (\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'deal_background')) {
+                    if (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png' || $gs->deal_background == 'high_perf_laptop.png') {
+                        $updates['deal_background'] = 'electronics_hero.png';
+                    }
                 }
 
                 if (!empty($updates)) {
