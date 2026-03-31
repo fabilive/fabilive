@@ -425,6 +425,24 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // REPAIR RIDERS TABLE
+        if (\Illuminate\Support\Facades\Schema::hasTable('riders')) {
+            \Illuminate\Support\Facades\Schema::table('riders', function ($table) {
+                $columns = ['rider_status', 'onboarding_status', 'rejection_reason', 'approved_at', 'status'];
+                foreach ($columns as $column) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('riders', $column)) {
+                        if ($column == 'approved_at') {
+                            $table->timestamp($column)->nullable();
+                        } elseif ($column == 'status') {
+                            $table->integer($column)->default(0);
+                        } else {
+                            $table->string($column)->default('pending')->nullable();
+                        }
+                    }
+                }
+            });
+        }
+
         // Fix for missing generalsettings columns (EXHAUSTIVE ALIGNMENT)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();

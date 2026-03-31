@@ -72,18 +72,22 @@ class RiderController extends AdminBaseController
     }
     public function statusUpdate(Request $request)
     {
-        $rider = Rider::findOrFail($request->id);
-        $rider->rider_status = $request->status;
-        if($request->status == 'accepted'){
-            $rider->status = 1;
-            $rider->onboarding_status = 'approved';
-            $rider->approved_at = Carbon::now();
-        }elseif($request->status == 'declined'){
-            $rider->status = 0;
-            $rider->onboarding_status = 'rejected';
+        try {
+            $rider = Rider::findOrFail($request->id);
+            $rider->rider_status = $request->status;
+            if ($request->status == 'accepted') {
+                $rider->status = 1;
+                $rider->onboarding_status = 'approved';
+                $rider->approved_at = Carbon::now();
+            } elseif ($request->status == 'declined') {
+                $rider->status = 0;
+                $rider->onboarding_status = 'rejected';
+            }
+            $rider->save();
+            return response()->json(['success' => true, 'message' => __('Status updated successfully')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-        $rider->save();
-        return response()->json(['success' => true]);
     }
     public function withdraws()
     {

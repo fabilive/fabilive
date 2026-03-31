@@ -111,8 +111,16 @@
             id: id,
             status: status
         },
-        success: function () {
-            toastr.success('Status updated successfully');
+        success: function (data) {
+            if (data.success) {
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message);
+            }
+        },
+        error: function(xhr) {
+            let msg = xhr.responseJSON ? xhr.responseJSON.message : 'Something went wrong';
+            toastr.error(msg);
         }
     });
 });
