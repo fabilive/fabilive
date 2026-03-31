@@ -1228,8 +1228,8 @@ Route::get('/fix-subscriptions', function () {
                         $folderPath = ($column == 'thumbnail') ? 'thumbnails' : $folder;
                         $path = public_path("assets/images/{$folderPath}/" . $val);
                         
-                        // Default repair logic (already existing)
-                        if (empty($val) || !file_exists($path)) {
+                        // Default repair logic + UPGRADE from noimage to PREMIUM
+                        if (empty($val) || !file_exists($path) || $val == 'noimage.png') {
                             $newImg = 'noimage.png';
 
                             // --- PREMIUM SAMPLE OVERRIDE ---
@@ -1262,7 +1262,7 @@ Route::get('/fix-subscriptions', function () {
         // --- DEAL OF THE DAY + BRANDING ---
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
-            if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)))) {
+            if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png')) {
                 \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'posture_belt.png']);
             }
         }
@@ -1276,9 +1276,12 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        \Artisan::call('route:clear');
+        \Artisan::call('cache:clear');
+
         return response()->json([
             "status" => "success",
-            "message" => "Phase 16 Master Image Restoration complete. Homepage and all sub-modules repaired.",
+            "message" => "Phase 17 Premium Visual Restoration complete. Homepage and all sub-modules repaired.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
