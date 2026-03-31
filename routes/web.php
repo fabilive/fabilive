@@ -929,6 +929,56 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // RESTORE CORE PILLARS (CURRENCIES, RATINGS, GALLERIES, ATTRIBUTES)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+            \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('sign');
+                $table->double('value');
+                $table->integer('is_default')->default(0);
+            });
+        }
+        if (\Illuminate\Support\Facades\DB::table('currencies')->count() == 0) {
+            \Illuminate\Support\Facades\DB::table('currencies')->insert([
+                'name' => 'CFA',
+                'sign' => 'CFA',
+                'value' => 1,
+                'is_default' => 1
+            ]);
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            \Illuminate\Support\Facades\Schema::create('ratings', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id')->nullable();
+                $table->integer('product_id')->nullable();
+                $table->text('review')->nullable();
+                $table->integer('rating')->default(5);
+                $table->string('review_date')->nullable();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+            \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
+                $table->increments('id');
+                $table->integer('product_id');
+                $table->string('photo');
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('attributes')) {
+            \Illuminate\Support\Facades\Schema::create('attributes', function ($table) {
+                $table->increments('id');
+                $table->integer('attributable_id');
+                $table->string('attributable_type');
+                $table->string('name');
+                $table->string('input_name');
+                $table->integer('price_status')->default(0);
+                $table->integer('details_status')->default(0);
+            });
+        }
+
         // FORCE CACHE CLEAR
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
         \Illuminate\Support\Facades\Artisan::call('view:clear');
@@ -958,7 +1008,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 12 Absolute Content Restoration complete. Blogs and homepage counts aligned.",
+            "message" => "Phase 13 Final Pillar Restoration complete. Currencies and Ratings aligned.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
