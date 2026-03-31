@@ -1292,6 +1292,27 @@ Route::get('/fix-subscriptions', function () {
             }
         }
 
+        // --- DEEP INTEGRITY CLEAN (Fixes NULL Referral/Commission Errors) ---
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            $integrityUpdates = [];
+            $numericColumns = ['referral_amount', 'referral_bonus', 'custom_referral_bonus', 'rider_percentage_commission', 'same_servicearea_delivery_fee'];
+            
+            $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
+            if ($gs) {
+                foreach ($numericColumns as $col) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                        if (is_null($gs->$col)) {
+                            $integrityUpdates[$col] = 0;
+                        }
+                    }
+                }
+                
+                if (!empty($integrityUpdates)) {
+                    \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update($integrityUpdates);
+                }
+            }
+        }
+
         // --- SLIDER VARIETY ---
         if (\Illuminate\Support\Facades\Schema::hasTable('sliders')) {
             $banners = ['electronics_hero.png', 'fashion_hero.png', 'gadgets_hero.png'];
