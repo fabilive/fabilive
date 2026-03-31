@@ -1243,9 +1243,14 @@ Route::get('/fix-subscriptions', function () {
                                 if (str_contains(strtolower($item->title), 'welcome')) $newImg = 'sample_blog.png';
                             }
                             elseif ($table == 'arrival_sections') {
-                                // Rotate between the 3 arrival banners
                                 $arrival_imgs = ['arrival_electronics.png', 'arrival_fashion.png', 'arrival_lifestyle.png'];
                                 $newImg = $arrival_imgs[$item->id % 3];
+                            }
+                            elseif ($table == 'services') {
+                                if (str_contains(strtolower($item->title), 'delivery')) $newImg = 'delivery.png';
+                                elseif (str_contains(strtolower($item->title), 'support')) $newImg = 'support.png';
+                                elseif (str_contains(strtolower($item->title), 'payment')) $newImg = 'payment.png';
+                                elseif (str_contains(strtolower($item->title), 'guarantee') || str_contains(strtolower($item->title), 'money')) $newImg = 'guarantee.png';
                             }
                             elseif ($table == 'categories' && $column == 'image') {
                                 if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
@@ -1263,7 +1268,7 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png')) {
-                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'posture_belt.png']);
+                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'high_perf_laptop.png']);
             }
         }
 
