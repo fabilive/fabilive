@@ -882,18 +882,18 @@ Route::get('/fix-subscriptions', function () {
             \Illuminate\Support\Facades\DB::table('pagesettings')->insert(['id' => 1]);
         }
 
-        // ENSURE GENERALSETTINGS HAS ALL REQUIRED COLUMNS
+        // ENSURE GENERALSETTINGS HAS ALL REQUIRED COLUMNS (DISPLAY COUNTS & TOGGLES)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
-                $columns = ['show_stock','show_cart', 'show_wishlist', 'is_report','is_contact_seller','admin_loader','fixed_commission','percentage_commission','withdraw_fee','withdraw_charge','currency_format'];
+                $columns = ['show_stock','show_cart', 'show_wishlist', 'is_report','is_contact_seller','admin_loader','fixed_commission','percentage_commission','withdraw_fee','withdraw_charge','currency_format','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','post_count','is_capcha','is_maintain'];
                 foreach ($columns as $column) {
                     if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
-                        if (in_array($column, ['fixed_commission','percentage_commission','withdraw_fee','withdraw_charge'])) {
+                        if (str_contains($column, 'count')) {
+                            $table->integer($column)->default(10);
+                        } elseif (in_array($column, ['fixed_commission','percentage_commission','withdraw_fee','withdraw_charge'])) {
                             $table->double($column)->default(0);
-                        } elseif (in_array($column, ['show_stock','show_cart','show_wishlist','is_report','is_contact_seller'])) {
-                            $table->integer($column)->default(1);
                         } else {
-                            $table->string($column)->nullable();
+                            $table->integer($column)->default(1);
                         }
                     }
                 }
@@ -903,12 +903,38 @@ Route::get('/fix-subscriptions', function () {
             }
         }
 
+        // RESTORE BLOG CONTENT TABLES
+        if (!\Illuminate\Support\Facades\Schema::hasTable('blog_categories')) {
+            \Illuminate\Support\Facades\Schema::create('blog_categories', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('slug');
+            });
+        }
+        if (!\Illuminate\Support\Facades\Schema::hasTable('blogs')) {
+            \Illuminate\Support\Facades\Schema::create('blogs', function ($table) {
+                $table->increments('id');
+                $table->integer('category_id');
+                $table->string('title');
+                $table->string('slug');
+                $table->text('details');
+                $table->string('photo')->nullable();
+                $table->string('source')->nullable();
+                $table->integer('views')->default(0);
+                $table->integer('status')->default(1);
+                $table->text('meta_tag')->nullable();
+                $table->text('meta_description')->nullable();
+                $table->text('tags')->nullable();
+                $table->timestamps();
+            });
+        }
+
         // FORCE CACHE CLEAR
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
         \Illuminate\Support\Facades\Artisan::call('view:clear');
         \Illuminate\Support\Facades\Artisan::call('config:clear');
 
-        // REPAIR PERMISSIONS (A common source of silent 500 errors)
+        // REPAIR PERMISSIONS
         try {
             $storage = storage_path();
             $cache = base_path('bootstrap/cache');
@@ -932,7 +958,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 11 Global Settings Alignment complete. All missing columns restored.",
+            "message" => "Phase 12 Absolute Content Restoration complete. Blogs and homepage counts aligned.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
