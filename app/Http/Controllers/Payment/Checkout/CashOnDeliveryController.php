@@ -65,12 +65,12 @@ class CashOnDeliveryController extends CheckoutBaseControlller
             $vendor_packing_ids = $orderCalculate['vendor_packing_ids'];
             $vendor_ids = $orderCalculate['vendor_ids'];
 
-            $input['shipping_title'] = $shipping->title;
-            $input['vendor_shipping_id'] = $shipping->id;
-            $input['packing_title'] = $packeing->title;
-            $input['vendor_packing_id'] = $packeing->id;
-            $input['shipping_cost'] = $packeing->price;
-            $input['packing_cost'] = $packeing->price;
+            $input['shipping_title'] = $shipping ? $shipping->title : null;
+            $input['vendor_shipping_id'] = $shipping ? $shipping->id : null;
+            $input['packing_title'] = $packeing ? $packeing->title : null;
+            $input['vendor_packing_id'] = $packeing ? $packeing->id : null;
+            $input['shipping_cost'] = $shipping ? $shipping->price : 0;
+            $input['packing_cost'] = $packeing ? $packeing->price : 0;
             $input['is_shipping'] = $is_shipping;
             $input['vendor_shipping_ids'] = $vendor_shipping_ids;
             $input['vendor_packing_ids'] = $vendor_packing_ids;
@@ -206,7 +206,7 @@ class CashOnDeliveryController extends CheckoutBaseControlller
         ];
 
         $mailer = new GeniusMailer();
-        $mailer->sendAutoOrderMail($data, $order->id);
+        $mailer->sendAutoMail($data);
 
         //Sending Email To Admin
         $data = [
