@@ -1286,7 +1286,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 18 Final Visual Perfection complete. Homepage fully restored.",
+            "message" => "Phase 18 Final Master Restoration complete. Homepage fully polished.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
