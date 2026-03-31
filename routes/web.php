@@ -848,9 +848,58 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'All missing vendor and dashboard tables successfully restored!']);
+        // Fix for missing languages table (CRITICAL FOR LOCALE)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+            \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('language');
+                $table->string('file');
+                $table->integer('is_default')->default(0);
+                $table->integer('rtl')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('languages')->insert([
+                'name' => 'English',
+                'language' => 'en',
+                'file' => '1605511055.json',
+                'is_default' => 1,
+            ]);
+        }
+
+        // Fix for missing pagesettings table (CRITICAL FOR HEADER/FOOTER)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('pagesettings')) {
+            \Illuminate\Support\Facades\Schema::create('pagesettings', function ($table) {
+                $table->increments('id');
+                $columns = ['contact_email','street','phone','fax','email','site','best_seller_banner','best_seller_banner_link','big_save_banner','big_save_banner_link','best_seller_banner1','best_seller_banner_link1','big_save_banner1','big_save_banner_link1','partners','bottom_small','rightbanner1','rightbanner2','rightbannerlink1','rightbannerlink2','home','blog','faq','contact','category','arrival_section','our_services','popular_products','third_left_banner','slider','flash_deal','deal_of_the_day','best_sellers','partner','top_big_trending','top_brand','big_save_banner_subtitle','big_save_banner_title','big_save_banner_text','top_banner','large_banner','best_selling','bottom_banner','newsletter'];
+                foreach ($columns as $column) {
+                    $table->text($column)->nullable();
+                }
+            });
+            \Illuminate\Support\Facades\DB::table('pagesettings')->insert(['id' => 1]);
+        }
+
+        // FORCE CACHE CLEAR TO LOAD NEW SETTINGS
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+
+        // DIAGNOSTIC LOG VIEWER
+        $logPath = storage_path('logs/laravel.log');
+        $logContent = "Log file not found.";
+        if (file_exists($logPath)) {
+            $file = file($logPath);
+            $logContent = implode("", array_slice($file, -50));
+        }
+
+        return response()->json([
+            "status" => "success",
+            "message" => "All missing global and frontend tables successfully restored!",
+            "log_dump" => $logContent
+        ]);
     } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        return response()->json([
+            "status" => "error",
+            "message" => $e->getMessage(),
+            "trace" => $e->getTraceAsString()
+        ]);
     }
 });
 
