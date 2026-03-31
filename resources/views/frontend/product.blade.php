@@ -319,6 +319,7 @@
    </div>
 </div>
 </div>
+</div>
 <!--==================== Product Description Section End ====================-->
 <!--==================== Related Products Section Start ====================-->
 <div class="full-row pt-0">
@@ -407,6 +408,10 @@
                                         <del>{{ $item->showPreviousPrice() }}</del>
                                     @endif
                                  </div>
+                                 @if($item->offPercentage() > 0)
+                                    <div class="on-sale"><span>{{ round($item->offPercentage())}}</span><span>% off</span>
+                                    </div>
+                                 @endif
                               </div>
                               <div class="shipping-feed-back">
                                  <div class="star-rating">
