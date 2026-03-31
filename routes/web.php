@@ -481,6 +481,60 @@ Route::get('/fix-subscriptions', function () {
             }
         }
 
+        // Fix for missing galleries table
+        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+            \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
+                $table->increments('id');
+                $table->integer('product_id');
+                $table->string('photo');
+            });
+        }
+
+        // Fix for missing product_clicks table
+        if (!\Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
+            \Illuminate\Support\Facades\Schema::create('product_clicks', function ($table) {
+                $table->increments('id');
+                $table->integer('product_id');
+                $table->date('date')->nullable();
+            });
+        }
+
+        // Fix for missing live_messages table
+        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+            \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
+                $table->increments('id');
+                $table->integer('sender_id')->nullable();
+                $table->integer('receiver_id')->nullable();
+                $table->text('content')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Fix for missing reports table
+        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+            \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id');
+                $table->integer('product_id');
+                $table->string('title');
+                $table->text('note')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Fix for missing countries table
+        if (!\Illuminate\Support\Facades\Schema::hasTable('countries')) {
+            \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->integer('status')->default(1);
+            });
+            \Illuminate\Support\Facades\DB::table('countries')->insert([
+                ['name' => 'Cameroon', 'status' => 1],
+                ['name' => 'Nigeria', 'status' => 1]
+            ]);
+        }
+
         // Fix for missing currencies table (CRITICAL FOR PRICING)
         if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
             \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
