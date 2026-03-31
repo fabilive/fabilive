@@ -439,7 +439,7 @@
                                         @endif
                                         <p>
                                             <strong>{{ __('Price') }} :</strong>
-                                            {{ \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $order->currency_sign) }}
+                                            {{ \PriceHelper::showOrderCurrencyPrice(($product['item']['price'] * $order->currency_value), $order->currency_sign) }}
                                         </p>
                                         <p>
                                             <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{
@@ -456,7 +456,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $order->currency_sign) }} <small>{{ ($product['discount'] ?? 0)
+                                        {{ \PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value), $order->currency_sign) }} <small>{{ ($product['discount'] ?? 0)
                                             == 0 ? '' : '('.($product['discount'] ?? 0).'% '.__('Off').')' }}</small>
                                     </td>
                                 </tr>
