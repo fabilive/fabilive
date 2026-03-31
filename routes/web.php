@@ -433,7 +433,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        // Fix for missing generalsettings columns
+        // Fix for missing generalsettings columns (EXHAUSTIVE ALIGNMENT)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if (!$gs_check) {
@@ -442,22 +442,29 @@ Route::get('/fix-subscriptions', function () {
                     'title' => 'Fabilive',
                     'logo' => 'logo.png',
                     'favicon' => 'favicon.ico',
+                    'decimal_separator' => '.',
+                    'thousand_separator' => ',',
+                    'currency_format' => 0,
                     'is_affiliate' => 0,
                     'is_affilate' => 0,
                     'product_affilate' => 0,
                 ]);
             }
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affiliate')) {
-                    $table->integer('is_affiliate')->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affilate')) {
-                    $table->integer('is_affilate')->default(0);
-                }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'product_affilate')) {
-                    $table->integer('product_affilate')->default(0);
+                $columns = ['logo', 'favicon', 'title','copyright','colors','loader','admin_loader','talkto','disqus','currency_format','withdraw_fee','withdraw_charge','shipping_cost','mail_driver','mail_host','mail_port','mail_encryption','mail_user','mail_pass','from_email','from_name','is_affilate','affilate_charge','affilate_banner','fixed_commission','percentage_commission','multiple_shipping','vendor_ship_info','is_verification_email','wholesell','is_capcha','error_banner_404','error_banner_500','popup_title','popup_text','popup_background','invoice_logo','user_image','vendor_color','is_secure','paypal_business','footer_logo','paytm_merchant','maintain_text','flash_count','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','page_count','seller_product_count','wishlist_count','vendor_page_count','min_price','max_price','product_page','post_count','wishlist_page','decimal_separator','thousand_separator','version','is_reward','reward_point','reward_dolar','physical','digital','license','affilite','header_color','capcha_secret_key','capcha_site_key','referral_amount','referral_bonus','breadcrumb_banner','partner_title','partner_text','deal_title','deal_details','deal_time','deal_background','delivery_base_fee','delivery_stopover_fee','rider_percentage_commission','custom_referral_bonus','same_servicearea_delivery_fee'];
+                foreach ($columns as $column) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
+                        $table->text($column)->nullable();
+                    }
                 }
             });
+
+            // Set critical defaults for PriceHelper
+            \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
+                'decimal_separator' => \Illuminate\Support\Facades\DB::raw('IFNULL(decimal_separator, ".")'),
+                'thousand_separator' => \Illuminate\Support\Facades\DB::raw('IFNULL(thousand_separator, ",")'),
+                'currency_format' => \Illuminate\Support\Facades\DB::raw('IFNULL(currency_format, 0)'),
+            ]);
         }
 
         // SEED MISSING ADMIN ID 1 (CRITICAL FOR "SOLD BY")
@@ -473,6 +480,30 @@ Route::get('/fix-subscriptions', function () {
                 ]);
             }
         }
+
+        // Fix for missing currencies table (CRITICAL FOR PRICING)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+            \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('sign');
+                $table->double('value');
+                $table->integer('is_default')->default(0);
+            });
+        }
+
+        $curr_check = \Illuminate\Support\Facades\DB::table('currencies')->where('is_default', 1)->first();
+        if (!$curr_check) {
+            \Illuminate\Support\Facades\DB::table('currencies')->insert([
+                'name' => 'CFA',
+                'sign' => 'FCFA',
+                'value' => 1,
+                'is_default' => 1,
+            ]);
+        }
+
+        // FORCE CACHE CLEAR TO LOAD NEW SETTINGS
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
 
         // Fix for missing cities/states columns
         if (\Illuminate\Support\Facades\Schema::hasTable('states')) {
