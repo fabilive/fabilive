@@ -54,18 +54,12 @@ class LoginController extends FrontBaseController
       if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
         // if successful, then redirect to their intended location
 
-        // Check If Email is verified or not
-          if(Auth::guard('rider')->user()->email_verify == 'No')
-          {
-            Auth::guard('rider')->logout();
-            return response()->json(array('errors' => [ 0 => 'Your Email is not Verified!' ]));
-          }
-
-          if(Auth::guard('rider')->user()->ban == 1)
-          {
-            Auth::guard('rider')->logout();
-            return response()->json(array('errors' => [ 0 => 'Your Account Has Been Banned.' ]));
-          }
+        // Check If Account is Banned
+        if(Auth::guard('rider')->user()->ban == 1)
+        {
+          Auth::guard('rider')->logout();
+          return response()->json(array('errors' => [ 0 => 'Your Account Has Been Banned.' ]));
+        }
 
           // Login as User
           return response()->json(route('rider-dashboard'));

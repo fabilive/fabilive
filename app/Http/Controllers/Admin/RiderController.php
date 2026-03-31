@@ -79,6 +79,8 @@ class RiderController extends AdminBaseController
                 $rider->status = 1;
                 $rider->onboarding_status = 'approved';
                 $rider->approved_at = Carbon::now();
+                $rider->email_verify = 'Yes';
+                $rider->email_verified = 'Yes';
             } elseif ($request->status == 'declined') {
                 $rider->status = 0;
                 $rider->onboarding_status = 'rejected';
