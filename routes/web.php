@@ -882,8 +882,22 @@ Route::get('/fix-subscriptions', function () {
             \Illuminate\Support\Facades\DB::table('pagesettings')->insert(['id' => 1]);
         }
 
-        // ENSURE GENERALSETTINGS HAS RECORD
+        // ENSURE GENERALSETTINGS HAS ALL REQUIRED COLUMNS
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
+                $columns = ['show_stock','show_cart', 'show_wishlist', 'is_report','is_contact_seller','admin_loader','fixed_commission','percentage_commission','withdraw_fee','withdraw_charge','currency_format'];
+                foreach ($columns as $column) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
+                        if (in_array($column, ['fixed_commission','percentage_commission','withdraw_fee','withdraw_charge'])) {
+                            $table->double($column)->default(0);
+                        } elseif (in_array($column, ['show_stock','show_cart','show_wishlist','is_report','is_contact_seller'])) {
+                            $table->integer($column)->default(1);
+                        } else {
+                            $table->string($column)->nullable();
+                        }
+                    }
+                }
+            });
             if (\Illuminate\Support\Facades\DB::table('generalsettings')->count() == 0) {
                 \Illuminate\Support\Facades\DB::table('generalsettings')->insert(['id' => 1]);
             }
@@ -909,7 +923,7 @@ Route::get('/fix-subscriptions', function () {
             if (file_exists($logPath)) {
                 $file = @file($logPath);
                 if ($file) {
-                    $logContent = implode("", array_slice($file, -100));
+                    $logContent = implode("", array_slice($file, -150));
                 } else {
                     $logContent = "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.";
                 }
@@ -918,7 +932,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 10 System Integrity check complete. Default records seeded.",
+            "message" => "Phase 11 Global Settings Alignment complete. All missing columns restored.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
