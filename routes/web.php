@@ -1226,7 +1226,7 @@ Route::get('/fix-subscriptions', function () {
 
         // REPAIR PRODUCT THUMBNAILS
         if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
-            \Illuminate\Support\Facades\DB::table('products')->whereNotNull('photo')->chunk(100, function ($products) {
+            \Illuminate\Support\Facades\DB::table('products')->whereNotNull('photo')->orderBy('id')->chunk(100, function ($products) {
                 foreach ($products as $prod) {
                     $path = public_path('assets/images/products/' . $prod->photo);
                     if (!file_exists($path)) {
