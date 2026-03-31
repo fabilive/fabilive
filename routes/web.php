@@ -1268,8 +1268,9 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs) {
+                // Defensive: Ensure we don't crash if columns are missing
                 $updates = [];
-                $possible_logos = ['logo', 'header_logo', 'footer_logo', 'favicon'];
+                $possible_logos = ['logo', 'header_logo', 'footer_logo', 'favicon', 'referral_amount'];
                 foreach ($possible_logos as $col) {
                     if (\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
                         if (empty($gs->$col) || $gs->$col == 'noimage.png') {
