@@ -11241,3 +11241,25 @@ body *::-webkit-scrollbar-thumb {
 #expirationDate {
 	margin-bottom: 18px;
 }
+
+/* Added by Antigravity: Phase 18 Visual Polish */
+.home-deal {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 60px 0;
+    margin: 40px 0;
+    border: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+}
+.home-deal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+    pointer-events: none;
+}
+

@@ -1268,7 +1268,7 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png')) {
-                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'high_perf_laptop.png']);
+                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'electronics_hero.png']);
             }
         }
 
@@ -1286,7 +1286,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 17 Premium Visual Restoration complete. Homepage and all sub-modules repaired.",
+            "message" => "Phase 18 Final Visual Perfection complete. Homepage fully restored.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
