@@ -374,6 +374,12 @@ Route::get('/fix-subscriptions', function () {
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_servicearea')) {
                     $table->integer('product_servicearea')->nullable();
                 }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_location')) {
+                    $table->integer('product_location')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'product_city')) {
+                    $table->integer('product_city')->nullable();
+                }
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'views')) {
                     $table->integer('views')->default(0);
                 }
@@ -392,6 +398,9 @@ Route::get('/fix-subscriptions', function () {
                 }
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affilate')) {
                     $table->integer('is_affilate')->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'product_affilate')) {
+                    $table->integer('product_affilate')->default(0);
                 }
             });
         }
@@ -496,8 +505,14 @@ Route::get('/fix-subscriptions', function () {
                 $table->id();
                 $table->integer('sender_id')->nullable();
                 $table->integer('receiver_id')->nullable();
-                $table->text('message')->nullable();
+                $table->text('content')->nullable();
                 $table->timestamps();
+            });
+        } else {
+            \Illuminate\Support\Facades\Schema::table('live_messages', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('live_messages', 'content')) {
+                    $table->text('content')->nullable();
+                }
             });
         }
 
@@ -573,6 +588,25 @@ Route::get('/fix-subscriptions', function () {
                 $table->string('latitude')->nullable();
                 $table->string('longitude')->nullable();
                 $table->integer('user_id')->nullable();
+                $table->string('location')->nullable();
+                $table->double('base_fee', 8, 2)->default(0);
+                $table->double('stopover_fee', 8, 2)->default(0);
+                $table->integer('status')->default(1);
+            });
+        } else {
+            \Illuminate\Support\Facades\Schema::table('service_areas', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'base_fee')) {
+                    $table->double('base_fee', 8, 2)->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'stopover_fee')) {
+                    $table->double('stopover_fee', 8, 2)->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'status')) {
+                    $table->integer('status')->default(1);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'location')) {
+                    $table->string('location')->nullable();
+                }
             });
         }
 
