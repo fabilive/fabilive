@@ -979,6 +979,46 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // RESTORE COMMUNITY FEATURES (FAVORITES, COMMENTS, REPLIES, REPORTS)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('favorite_sellers')) {
+            \Illuminate\Support\Facades\Schema::create('favorite_sellers', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id');
+                $table->integer('vendor_id');
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('comments')) {
+            \Illuminate\Support\Facades\Schema::create('comments', function ($table) {
+                $table->increments('id');
+                $table->integer('product_id');
+                $table->integer('user_id');
+                $table->text('text');
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('replies')) {
+            \Illuminate\Support\Facades\Schema::create('replies', function ($table) {
+                $table->increments('id');
+                $table->integer('comment_id');
+                $table->integer('user_id');
+                $table->text('text');
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+            \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id');
+                $table->integer('product_id');
+                $table->string('title')->nullable();
+                $table->text('note')->nullable();
+                $table->timestamps();
+            });
+        }
+
         // FORCE CACHE CLEAR
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
         \Illuminate\Support\Facades\Artisan::call('view:clear');
@@ -1008,7 +1048,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 13 Final Pillar Restoration complete. Currencies and Ratings aligned.",
+            "message" => "Phase 14 Community Feature Restoration complete. Favorites, Comments, and Reports added.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
