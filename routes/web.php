@@ -1204,19 +1204,40 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
-        // REPAIR CATEGORY IMAGES
-        if (\Illuminate\Support\Facades\Schema::hasTable('categories')) {
-            \Illuminate\Support\Facades\DB::table('categories')->get()->each(function ($cat) {
-                if (empty($cat->image) || !file_exists(public_path('assets/images/categories/' . $cat->image))) {
-                    $newImage = 'noimage.png';
-                    if (str_contains(strtolower($cat->name), 'phone') || str_contains(strtolower($cat->name), 'mobile')) $newImage = '3d_smartphone.png';
-                    if (str_contains(strtolower($cat->name), 'laptop') || str_contains(strtolower($cat->name), 'computer')) $newImage = '3d_laptop.png';
-                    \Illuminate\Support\Facades\DB::table('categories')->where('id', $cat->id)->update(['image' => $newImage]);
-                }
-            });
+        // --- MASTER IMAGE REPAIR ENGINE ---
+        $repair_map = [
+            'products' => 'products',
+            'categories' => 'categories',
+            'sliders' => 'sliders',
+            'blogs' => 'blogs',
+            'banners' => 'banners',
+            'featured_banners' => 'banners', // often shares folder
+            'partners' => 'partner',
+            'services' => 'services',
+            'galleries' => 'galleries'
+        ];
+
+        foreach ($repair_map as $table => $folder) {
+            if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
+                $column = ($table == 'categories') ? 'image' : 'photo';
+                \Illuminate\Support\Facades\DB::table($table)->get()->each(function ($item) use ($table, $folder, $column) {
+                    $val = $item->$column;
+                    $path = public_path("assets/images/{$folder}/" . $val);
+                    if (empty($val) || !file_exists($path)) {
+                        $newImg = 'noimage.png';
+                        // Custom logic for categories (preserve my icons)
+                        if ($table == 'categories') {
+                            if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
+                            if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
+                        }
+                        \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
+                        if ($table == 'products') \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update(['thumbnail' => $newImg]);
+                    }
+                });
+            }
         }
 
-        // REPAIR SLIDERS (VARIETY)
+        // --- SLIDER VARIETY ---
         if (\Illuminate\Support\Facades\Schema::hasTable('sliders')) {
             $banners = ['electronics_hero.png', 'fashion_hero.png', 'gadgets_hero.png'];
             \Illuminate\Support\Facades\DB::table('sliders')->get()->each(function ($slider, $index) use ($banners) {
@@ -1225,20 +1246,9 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        // REPAIR PRODUCT THUMBNAILS
-        if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
-            \Illuminate\Support\Facades\DB::table('products')->whereNotNull('photo')->orderBy('id')->chunk(100, function ($products) {
-                foreach ($products as $prod) {
-                    if (!file_exists(public_path('assets/images/products/' . $prod->photo)) && $prod->photo != 'noimage.png') {
-                        \Illuminate\Support\Facades\DB::table('products')->where('id', $prod->id)->update(['photo' => 'noimage.png', 'thumbnail' => 'noimage.png']);
-                    }
-                }
-            });
-        }
-
         return response()->json([
             "status" => "success",
-            "message" => "Phase 16 Image Restoration & Branding complete. All broken icons and placeholders fixed.",
+            "message" => "Phase 16 Master Image Restoration complete. Homepage and all sub-modules repaired.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
