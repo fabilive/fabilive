@@ -354,6 +354,22 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
+            \Illuminate\Support\Facades\Schema::table('subcategories', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('subcategories', 'category_id')) {
+                    $table->integer('category_id')->nullable();
+                }
+            });
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
+            \Illuminate\Support\Facades\Schema::table('childcategories', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('childcategories', 'subcategory_id')) {
+                    $table->integer('subcategory_id')->nullable();
+                }
+            });
+        }
+
         // NEW STABILITY REPAIRS FOR CHECKOUT & PRODUCT DETAILS
         if (\Illuminate\Support\Facades\Schema::hasTable('orders')) {
             \Illuminate\Support\Facades\Schema::table('orders', function ($table) {
@@ -383,6 +399,33 @@ Route::get('/fix-subscriptions', function () {
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'views')) {
                     $table->integer('views')->default(0);
                 }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', '3d_model')) {
+                    $table->string('3d_model')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'stock_check')) {
+                    $table->integer('stock_check')->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'preordered')) {
+                    $table->integer('preordered')->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'color_all')) {
+                    $table->text('color_all')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'size_all')) {
+                    $table->text('size_all')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'cross_products')) {
+                    $table->text('cross_products')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'delivery_fee')) {
+                    $table->double('delivery_fee', 8, 2)->default(0);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'delivery_unit')) {
+                    $table->string('delivery_unit')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
+                    $table->integer('minimum_qty')->default(1);
+                }
                 // Fix for 500 error on product create: Column 'minimum_qty' cannot be null
                 if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'minimum_qty')) {
                     \Illuminate\Support\Facades\DB::statement("ALTER TABLE products MODIFY COLUMN minimum_qty INT NULL");
@@ -392,6 +435,15 @@ Route::get('/fix-subscriptions', function () {
 
         // Fix for missing generalsettings columns
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
+            if (!$gs_check) {
+                \Illuminate\Support\Facades\DB::table('generalsettings')->insert([
+                    'id' => 1,
+                    'title' => 'Fabilive',
+                    'logo' => 'logo.png',
+                    'favicon' => 'favicon.ico',
+                ]);
+            }
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_affiliate')) {
                     $table->integer('is_affiliate')->default(0);
@@ -496,6 +548,28 @@ Route::get('/fix-subscriptions', function () {
                 $table->double('min_distance', 8, 2)->default(0);
                 $table->double('max_distance', 8, 2)->default(0);
                 $table->double('price', 8, 2)->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('attributes')) {
+            \Illuminate\Support\Facades\Schema::create('attributes', function ($table) {
+                $table->id();
+                $table->integer('attributable_id')->nullable();
+                $table->string('attributable_type')->nullable();
+                $table->string('name')->nullable();
+                $table->string('input_name')->nullable();
+                $table->integer('price_status')->default(0);
+                $table->integer('details_status')->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('attribute_options')) {
+            \Illuminate\Support\Facades\Schema::create('attribute_options', function ($table) {
+                $table->id();
+                $table->integer('attribute_id')->nullable();
+                $table->string('name')->nullable();
                 $table->timestamps();
             });
         }
