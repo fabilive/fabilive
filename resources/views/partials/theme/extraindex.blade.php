@@ -114,7 +114,7 @@
 @if($ps->deal_of_the_day==1)
 
 <!--==================== Deal of the day Section Start ====================-->
-<div class="full-row bg-light">
+<div class="full-row home-deal box-shadow-small">
     <div class="container">
         <div class="row offer-product align-items-center">
             <div class="col-xl-5 col-lg-7">

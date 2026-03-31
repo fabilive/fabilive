@@ -1293,7 +1293,7 @@ Route::get('/fix-subscriptions', function () {
                 "cache_writable" => is_writable(base_path('bootstrap/cache')),
                 "logs_writable" => is_writable(storage_path('logs'))
             ],
-            "log_dump" => $logContent
+            "log_dump" => ($logContent === "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.") ? "" : $logContent
         ]);
     } catch (\Exception $e) {
         return response()->json([
