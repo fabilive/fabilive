@@ -329,18 +329,17 @@ public function cities()
 
     public function showPreviousPrice()
     {
-        // Only show previous price if a discount is active according to the dates
-        if (!$this->isDiscountActive()) {
+        // Only show previous price if a discount is active AND previous_price exists
+        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
             return '';
         }
 
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
         });
+        
         $price = $this->previous_price;
-        if (!$price) {
-            return '';
-        }
+        
         if ($this->user_id != 0) {
             $price = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
         }
@@ -559,7 +558,7 @@ public function cities()
 
     public function offPercentage()
     {
-        if (!$this->isDiscountActive()) {
+        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
             return 0;
         }
 
@@ -568,9 +567,6 @@ public function cities()
         });
         $price = $this->price;
         $preprice = $this->previous_price;
-        if (!$preprice) {
-            return 0;
-        }
 
         if ($this->user_id != 0) {
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
@@ -586,27 +582,20 @@ public function cities()
         }
 
         // Attribute Section
-
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
-            $attrArr = json_decode($attributes, true);
-        }
+        $attributes = $this->attributes;
+        $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
         if (!empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
                 if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
-
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
-                        // only the first price counts
                         $preprice += $attrVal['prices'][$optionKey];
                         break;
                     }
                 }
             }
         }
-
-        // Attribute Section Ends
 
         if (Session::has('currency')) {
             $curr = cache()->remember('session_currency', now()->addDay(), function () {
@@ -620,11 +609,13 @@ public function cities()
 
         $price = $price * $curr->value;
         $preprice = $preprice * $curr->value;
-        $Percentage = (($preprice - $price) * 100) / $preprice;
-
-        if ($Percentage) {
-            return $Percentage;
+        
+        if ($preprice > 0 && $preprice > $price) {
+            $Percentage = (($preprice - $price) * 100) / $preprice;
+            return round($Percentage);
         }
+        
+        return 0;
     }
 
     public static function filterProducts($collection)

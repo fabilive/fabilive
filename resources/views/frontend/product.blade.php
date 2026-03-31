@@ -285,7 +285,7 @@
                               <div class="product-price">
                                  <div class="price">
                                     <ins>{{ $prod->showPrice() }}</ins>
-                                    @if($prod->showPreviousPrice())
+                                    @if(!empty($prod->showPreviousPrice()))
                                         <del>{{ $prod->showPreviousPrice() }}</del>
                                     @endif
                                  </div>
@@ -403,7 +403,7 @@
                               <div class="product-price">
                                  <div class="price">
                                     <ins>{{ $item->showPrice()}}</ins>
-                                    @if($item->showPreviousPrice())
+                                    @if(!empty($item->showPreviousPrice()))
                                         <del>{{ $item->showPreviousPrice() }}</del>
                                     @endif
                                  </div>
