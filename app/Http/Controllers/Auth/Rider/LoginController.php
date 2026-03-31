@@ -21,10 +21,6 @@ class LoginController extends Controller
       return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
     }
     if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
-      if (Auth::guard('rider')->user()->email_verified == 'No') {
-        Auth::guard('rider')->logout();
-        return response()->json(array('errors' => [0 => __('Your Email is not Verified!')]));
-      }
       if (Auth::guard('rider')->user()->ban == 1) {
         Auth::guard('rider')->logout();
         return response()->json(array('errors' => [0 => __('Your Account Has Been Banned.')]));
