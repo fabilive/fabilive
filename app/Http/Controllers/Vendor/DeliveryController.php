@@ -74,6 +74,7 @@ class DeliveryController extends VendorBaseController
             ->editColumn('pay_amount', function (Order $data) use ($user) {
                 $order  = Order::findOrFail($data->id);
                 $price  = $order->vendororders()->where('user_id', $user->id)->sum('price');
+                $price = round($price * $order->currency_value, 2);
                 if ($order->is_shipping == 1) {
                     $vendor_shipping = json_decode($order->vendor_shipping_id, true);
                     $shipping_id = $vendor_shipping[$user->id] ?? null;
@@ -92,7 +93,8 @@ class DeliveryController extends VendorBaseController
                         }
                     }
                 }
-                return \PriceHelper::showOrderCurrencyPrice(($price - $order->commission), $data->currency_sign);
+                $commission = round($order->commission * $order->currency_value, 2);
+                return \PriceHelper::showOrderCurrencyPrice(($price - $commission), $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
                 $delevery = DeliveryRider::where('vendor_id', auth()->id())

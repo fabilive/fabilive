@@ -31,6 +31,7 @@ class OrderController extends VendorBaseController
                 $order = Order::findOrFail($data->id);
                 $user = $this->user;
                 $price = $order->vendororders()->where('user_id', '=', $user->id)->sum('price');
+                $price = round($price * $order->currency_value, 2);
                 if ($order->is_shipping == 1 && 0) {
                     $vendor_shipping = json_decode($order->vendor_shipping_id);
                     $user_id = auth()->id();
@@ -46,7 +47,8 @@ class OrderController extends VendorBaseController
                         $price = $price + round($packaging->price * $order->currency_value, 2);
                     }
                 }
-                return \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $data->currency_sign);
+                $commission = round($order->commission * $order->currency_value, 2);
+                return \PriceHelper::showOrderCurrencyPrice(($price-$commission), $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
                 $pending = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'pending')->count() > 0 ? "selected" : "";
