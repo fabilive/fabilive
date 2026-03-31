@@ -1204,7 +1204,7 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
-        // --- MASTER IMAGE REPAIR ENGINE ---
+        // --- MASTER IMAGE REPAIR ENGINE (EXHAUSTIVE V2) ---
         $repair_map = [
             'products' => 'products',
             'categories' => 'categories',
@@ -1214,35 +1214,35 @@ Route::get('/fix-subscriptions', function () {
             'featured_banners' => 'banners',
             'partners' => 'partner',
             'services' => 'services',
-            'galleries' => 'galleries'
+            'galleries' => 'galleries',
+            'arrival_sections' => 'arrival', // New: for the 'arrivals' data
+            'brands' => 'brands'
         ];
 
         foreach ($repair_map as $table => $folder) {
             if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
-                $column = ($table == 'categories') ? 'image' : 'photo';
-                \Illuminate\Support\Facades\DB::table($table)->get()->each(function ($item) use ($table, $folder, $column) {
-                    $val = $item->$column;
-                    $path = public_path("assets/images/{$folder}/" . $val);
-                    if (empty($val) || !file_exists($path)) {
-                        $newImg = 'noimage.png';
-                        // Custom logic for categories (preserve my icons)
-                        if ($table == 'categories') {
-                            if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
-                            if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
-                        }
-                        \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
+                $columns = ($table == 'categories') ? ['image'] : (($table == 'products') ? ['photo', 'thumbnail'] : ['photo']);
+                \Illuminate\Support\Facades\DB::table($table)->get()->each(function ($item) use ($table, $folder, $columns) {
+                    foreach ($columns as $column) {
+                        $val = $item->$column;
+                        $folderPath = ($column == 'thumbnail') ? 'thumbnails' : $folder;
+                        $path = public_path("assets/images/{$folderPath}/" . $val);
                         
-                        // SPECIAL: Product Thumbnails go in 'thumbnails/' folder
-                        if ($table == 'products') {
-                            \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update(['thumbnail' => $newImg]);
-                            // Ensure the thumbnail noimage.png is checked
+                        if (empty($val) || !file_exists($path)) {
+                            $newImg = 'noimage.png';
+                            // Special icons for categories
+                            if ($table == 'categories' && $column == 'image') {
+                                if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
+                                if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
+                            }
+                            \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
                         }
                     }
                 });
             }
         }
 
-        // --- DEAL OF THE DAY BRADING ---
+        // --- DEAL OF THE DAY + BRANDING ---
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)))) {

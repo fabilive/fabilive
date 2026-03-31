@@ -464,6 +464,11 @@ class FrontendController extends FrontBaseController
         $bcats = BlogCategory::withCount('blogs')->get();
         // BLOGS
         $bcat = BlogCategory::where('slug', '=', str_replace(' ', '-', $slug))->first();
+        
+        if (!$bcat) {
+            abort(404);
+        }
+
         $blogs = $bcat->blogs()->latest()->paginate($this->gs->post_count);
         if ($request->ajax()) {
             return view('front.ajax.blog', compact('blogs'));
