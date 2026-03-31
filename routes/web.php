@@ -1194,6 +1194,7 @@ Route::get('/fix-subscriptions', function () {
                     $logContent = "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.";
                 }
             }
+        } catch (\Exception $e) { $logContent = "Log reading failed: " . $e->getMessage(); }
         // Phase 16: Image Restoration & Branding
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
