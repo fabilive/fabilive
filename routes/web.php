@@ -1062,6 +1062,23 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // SEED FAST DELIVERY LOGISTICS
+        try {
+            \Illuminate\Support\Facades\DB::table('shippings')->truncate();
+            $defaultCurr = \App\Models\Currency::where('is_default', 1)->first();
+            $currencyVal = $defaultCurr ? $defaultCurr->value : 1;
+            $shippingPrice = 1000 / $currencyVal;
+            
+            \Illuminate\Support\Facades\DB::table('shippings')->insert([
+                ['user_id' => 0, 'title' => 'Fast Delivery', 'subtitle' => 'within 24 hours', 'price' => $shippingPrice]
+            ]);
+            
+            \Illuminate\Support\Facades\DB::table('packages')->truncate();
+            \Illuminate\Support\Facades\DB::table('packages')->insert([
+                ['user_id' => 0, 'title' => 'Standard Packaging', 'subtitle' => 'Safe box securely packed.', 'price' => 0]
+            ]);
+        } catch (\Exception $e) {}
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
             \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
                 $table->increments('id');

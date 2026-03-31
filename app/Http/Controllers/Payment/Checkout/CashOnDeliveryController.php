@@ -115,12 +115,19 @@ class CashOnDeliveryController extends CheckoutBaseControlller
         $input['pay_amount'] = $orderTotal ;
         $input['order_number'] = Str::random(4) . time();
         $input['wallet_price'] = $request->wallet_price / $this->curr->value;
-        if ($input['tax_type'] == 'state_tax') {
-            $input['tax_location'] = State::findOrFail($input['tax'])->state;
+        if (!empty($input['tax'])) {
+            if ($input['tax_type'] == 'state_tax') {
+                $taxState = State::find($input['tax']);
+                $input['tax_location'] = $taxState ? $taxState->state : null;
+            } else {
+                $taxCountry = Country::find($input['tax']);
+                $input['tax_location'] = $taxCountry ? $taxCountry->country_name : null;
+            }
+            $input['tax'] = Session::get('current_tax');
         } else {
-            $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
+            $input['tax_location'] = null;
+            $input['tax'] = 0;
         }
-        $input['tax'] = Session::get('current_tax');
 
         if (Session::has('affilate')) {
             $val = $request->total / $this->curr->value;
@@ -141,8 +148,10 @@ class CashOnDeliveryController extends CheckoutBaseControlller
         }
 
         $order->fill($input)->save();
-        $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
-        $order->notifications()->create();
+        try {
+            $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
+            $order->notifications()->create();
+        } catch (\Exception $e) {}
 
         if ($input['coupon_id'] != "") {
             OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
@@ -150,18 +159,19 @@ class CashOnDeliveryController extends CheckoutBaseControlller
 
         if (Auth::check()) {
             if ($this->gs->is_reward == 1) {
-                $num = $order->pay_amount;
-                $rewards = Reward::get();
-                foreach ($rewards as $i) {
-                    $smallest[$i->order_amount] = abs($i->order_amount - $num);
-                }
-              
-                if(isset($smallest)){
-                    asort($smallest);
-              $final_reword = Reward::where('order_amount', key($smallest))->first();
-              Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-              }
-              
+                try {
+                    $num = $order->pay_amount;
+                    $rewards = Reward::get();
+                    foreach ($rewards as $i) {
+                        $smallest[$i->order_amount] = abs($i->order_amount - $num);
+                    }
+                  
+                    if(isset($smallest)){
+                        asort($smallest);
+                        $final_reword = Reward::where('order_amount', key($smallest))->first();
+                        Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                    }
+                } catch (\Exception $e) {}
             }
         }
 

@@ -55,15 +55,24 @@ class CampayController extends CheckoutBaseControlller
         $input['payment_status'] = "Pending";
         $input['escrow_status'] = "held";
 
-        if ($input['tax_type'] == 'state_tax') {
-            $input['tax_location'] = State::findOrFail($input['tax'])->state;
+        if (!empty($input['tax'])) {
+            if ($input['tax_type'] == 'state_tax') {
+                $taxState = State::find($input['tax']);
+                $input['tax_location'] = $taxState ? $taxState->state : null;
+            } else {
+                $taxCountry = Country::find($input['tax']);
+                $input['tax_location'] = $taxCountry ? $taxCountry->country_name : null;
+            }
+            $input['tax'] = Session::get('current_tax');
         } else {
-            $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
+            $input['tax_location'] = null;
+            $input['tax'] = 0;
         }
-        $input['tax'] = Session::get('current_tax');
 
         $order->fill($input)->save();
-        $order->tracks()->create(['title' => 'Pending', 'text' => 'Order placed. Waiting for payment.']);
+        try {
+            $order->tracks()->create(['title' => 'Pending', 'text' => 'Order placed. Waiting for payment.']);
+        } catch (\Exception $e) {}
 
         // Initialize Campay Collection
         $campay = new Campay();
@@ -127,8 +136,10 @@ class CampayController extends CheckoutBaseControlller
         OrderHelper::vendor_order_check($cart, $order);
 
         // Notifications and Mail
-        $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
-        $order->notifications()->create();
+        try {
+            $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
+            $order->notifications()->create();
+        } catch (\Exception $e) {}
         
         // mailer logic here (similar to WalletPaymentController)
     }
