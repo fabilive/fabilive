@@ -878,26 +878,66 @@ Route::get('/fix-subscriptions', function () {
             \Illuminate\Support\Facades\DB::table('pagesettings')->insert(['id' => 1]);
         }
 
-        // FORCE CACHE CLEAR TO LOAD NEW SETTINGS
+        // FORCE CACHE CLEAR
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
 
-        // DIAGNOSTIC LOG VIEWER
+        // REPAIR PERMISSIONS (A common source of silent 500 errors)
+        try {
+            $storage = storage_path();
+            $cache = base_path('bootstrap/cache');
+            @chmod($storage, 0775);
+            @chmod($cache, 0775);
+            // Recursive (best effort)
+            $it = new RecursiveDirectoryIterator($storage, RecursiveDirectoryIterator::SKIP_DOTS);
+            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach($files as $file) {
+                if ($file->isDir()){
+                    @chmod($file->getRealPath(), 0775);
+                } else {
+                    @chmod($file->getRealPath(), 0664);
+                }
+            }
+        } catch (\Exception $permEx) {}
+
+        // DEEP SYSTEM DIAGNOSTICS
         $logPath = storage_path('logs/laravel.log');
-        $logContent = "Log file not found.";
+        $logContent = "Log file not found at " . $logPath;
         if (file_exists($logPath)) {
-            $file = file($logPath);
-            $logContent = implode("", array_slice($file, -50));
+            $file = @file($logPath);
+            if ($file) {
+                $logContent = implode("", array_slice($file, -100));
+            } else {
+                $logContent = "Log file exists but is NOT readable. Confirm storage permissions.";
+            }
+        }
+
+        $logDirListing = "Not accessible.";
+        if (is_dir(storage_path('logs'))) {
+            $logDirListing = implode(", ", array_diff(scandir(storage_path('logs')), array('..', '.')));
         }
 
         return response()->json([
             "status" => "success",
-            "message" => "All missing global and frontend tables successfully restored!",
+            "php_version" => PHP_VERSION,
+            "required_extensions" => [
+                "gd" => extension_loaded('gd'),
+                "bcmath" => extension_loaded('bcmath'),
+                "intl" => extension_loaded('intl'),
+                "pdo_mysql" => extension_loaded('pdo_mysql'),
+                "mbstring" => extension_loaded('mbstring')
+            ],
+            "message" => "Phase 9 Ultimate Rescue complete. Permissions repaired. Check log_dump below.",
+            "log_files" => $logDirListing,
             "log_dump" => $logContent
         ]);
     } catch (\Exception $e) {
         return response()->json([
             "status" => "error",
             "message" => $e->getMessage(),
+            "line" => $e->getLine(),
+            "file" => $e->getFile(),
             "trace" => $e->getTraceAsString()
         ]);
     }
