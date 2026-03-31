@@ -1019,6 +1019,70 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // RESTORE CHECKOUT MODULES (GATEWAYS, SHIPPINGS, PACKAGES)
+        if (!\Illuminate\Support\Facades\Schema::hasTable('payment_gateways')) {
+            \Illuminate\Support\Facades\Schema::create('payment_gateways', function ($table) {
+                $table->increments('id');
+                $table->string('title')->nullable();
+                $table->string('subtitle')->nullable();
+                $table->text('details')->nullable();
+                $table->string('name')->nullable();
+                $table->string('type')->nullable();
+                $table->text('information')->nullable();
+                $table->string('keyword')->nullable();
+                $table->string('currency_id')->nullable();
+            });
+        }
+        
+        \Illuminate\Support\Facades\DB::table('payment_gateways')->truncate();
+        \Illuminate\Support\Facades\DB::table('payment_gateways')->insert([
+            ['title' => 'Campay', 'name' => 'Campay', 'type' => 'manual', 'keyword' => 'campay', 'details' => 'Pay with Campay (Mobile Money).', 'currency_id' => '*'],
+            ['title' => 'Cash On Delivery', 'name' => 'Cash On Delivery', 'type' => 'manual', 'keyword' => 'cod', 'details' => 'Pay when you receive the product.', 'currency_id' => '*']
+        ]);
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('shippings')) {
+            \Illuminate\Support\Facades\Schema::create('shippings', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id')->default(0);
+                $table->string('title');
+                $table->string('subtitle')->nullable();
+                $table->double('price')->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('packages')) {
+            \Illuminate\Support\Facades\Schema::create('packages', function ($table) {
+                $table->increments('id');
+                $table->integer('user_id')->default(0);
+                $table->string('title');
+                $table->string('subtitle')->nullable();
+                $table->double('price')->default(0);
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
+            \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
+                $table->increments('id');
+                $table->string('location');
+                $table->timestamps();
+            });
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+            \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('location')->nullable();
+                $table->double('latitude')->nullable();
+                $table->double('longitude')->nullable();
+                $table->double('base_fee')->default(0);
+                $table->double('stopover_fee')->default(0);
+                $table->integer('status')->default(1);
+            });
+        }
+
         // FORCE CACHE CLEAR
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
         \Illuminate\Support\Facades\Artisan::call('view:clear');
@@ -1048,7 +1112,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 14 Community Feature Restoration complete. Favorites, Comments, and Reports added.",
+            "message" => "Phase 15 Checkout Architecture Restoration complete. Gateways limited to Campay and COD.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),

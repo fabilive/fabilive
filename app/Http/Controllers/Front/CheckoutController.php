@@ -216,7 +216,7 @@ private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earth
         $products = $cart->items;
         $service_areas = ServiceArea::all();
         $paystack = PaymentGateway::whereKeyword('paystack')->first();
-        $paystackData = $paystack->convertAutoData();
+        $paystackData = $paystack ? $paystack->convertAutoData() : null;
         // dd(Auth::user());
         if (Auth::check()) {
             if ($this->gs->multiple_shipping == 1) {
