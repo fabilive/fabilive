@@ -1199,6 +1199,7 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
                 'logo' => '1580538630footer-logo.png',
+                'footer_logo' => '1580538630footer-logo.png',
                 'breadcrumb_banner' => '1648110638breadpng.png',
             ]);
         }
@@ -1206,30 +1207,29 @@ Route::get('/fix-subscriptions', function () {
         // REPAIR CATEGORY IMAGES
         if (\Illuminate\Support\Facades\Schema::hasTable('categories')) {
             \Illuminate\Support\Facades\DB::table('categories')->get()->each(function ($cat) {
-                $path = public_path('assets/images/categories/' . $cat->image);
-                if (empty($cat->image) || !file_exists($path)) {
+                if (empty($cat->image) || !file_exists(public_path('assets/images/categories/' . $cat->image))) {
                     $newImage = 'noimage.png';
-                    if (stripos($cat->name, 'phone') !== false || stripos($cat->name, 'mobile') !== false) {
-                        $newImage = '3d_smartphone.png';
-                    } elseif (stripos($cat->name, 'laptop') !== false || stripos($cat->name, 'computer') !== false) {
-                        $newImage = '3d_laptop.png';
-                    }
-                    \Illuminate\Support\Facades\DB::table('categories')->where('id', $cat->id)->update(['image' => $newImage, 'photo' => $newImage]);
+                    if (str_contains(strtolower($cat->name), 'phone') || str_contains(strtolower($cat->name), 'mobile')) $newImage = '3d_smartphone.png';
+                    if (str_contains(strtolower($cat->name), 'laptop') || str_contains(strtolower($cat->name), 'computer')) $newImage = '3d_laptop.png';
+                    \Illuminate\Support\Facades\DB::table('categories')->where('id', $cat->id)->update(['image' => $newImage]);
                 }
             });
         }
 
-        // REPAIR SLIDERS
+        // REPAIR SLIDERS (VARIETY)
         if (\Illuminate\Support\Facades\Schema::hasTable('sliders')) {
-            \Illuminate\Support\Facades\DB::table('sliders')->update(['photo' => 'electronics_hero.png']);
+            $banners = ['electronics_hero.png', 'fashion_hero.png', 'gadgets_hero.png'];
+            \Illuminate\Support\Facades\DB::table('sliders')->get()->each(function ($slider, $index) use ($banners) {
+                $banner = $banners[$index % count($banners)];
+                \Illuminate\Support\Facades\DB::table('sliders')->where('id', $slider->id)->update(['photo' => $banner]);
+            });
         }
 
         // REPAIR PRODUCT THUMBNAILS
         if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
             \Illuminate\Support\Facades\DB::table('products')->whereNotNull('photo')->orderBy('id')->chunk(100, function ($products) {
                 foreach ($products as $prod) {
-                    $path = public_path('assets/images/products/' . $prod->photo);
-                    if (!file_exists($path)) {
+                    if (!file_exists(public_path('assets/images/products/' . $prod->photo)) && $prod->photo != 'noimage.png') {
                         \Illuminate\Support\Facades\DB::table('products')->where('id', $prod->id)->update(['photo' => 'noimage.png', 'thumbnail' => 'noimage.png']);
                     }
                 }
@@ -1238,7 +1238,7 @@ Route::get('/fix-subscriptions', function () {
 
         return response()->json([
             "status" => "success",
-            "message" => "Phase 16 Image Restoration & Branding complete. All broken icons fixed.",
+            "message" => "Phase 16 Image Restoration & Branding complete. All broken icons and placeholders fixed.",
             "diagnostics" => [
                 "php" => PHP_VERSION,
                 "storage_writable" => is_writable(storage_path()),
