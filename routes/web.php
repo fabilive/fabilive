@@ -1211,7 +1211,7 @@ Route::get('/fix-subscriptions', function () {
             'sliders' => 'sliders',
             'blogs' => 'blogs',
             'banners' => 'banners',
-            'featured_banners' => 'banners', // often shares folder
+            'featured_banners' => 'banners',
             'partners' => 'partner',
             'services' => 'services',
             'galleries' => 'galleries'
@@ -1231,9 +1231,22 @@ Route::get('/fix-subscriptions', function () {
                             if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
                         }
                         \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
-                        if ($table == 'products') \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update(['thumbnail' => $newImg]);
+                        
+                        // SPECIAL: Product Thumbnails go in 'thumbnails/' folder
+                        if ($table == 'products') {
+                            \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update(['thumbnail' => $newImg]);
+                            // Ensure the thumbnail noimage.png is checked
+                        }
                     }
                 });
+            }
+        }
+
+        // --- DEAL OF THE DAY BRADING ---
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
+            if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)))) {
+                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'noimage.png']);
             }
         }
 
