@@ -1204,7 +1204,7 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
-        // --- MASTER IMAGE REPAIR ENGINE (EXHAUSTIVE V2) ---
+        // --- MASTER IMAGE REPAIR ENGINE (EXHAUSTIVE V2 + PREMIUM SAMPLING) ---
         $repair_map = [
             'products' => 'products',
             'categories' => 'categories',
@@ -1215,7 +1215,7 @@ Route::get('/fix-subscriptions', function () {
             'partners' => 'partner',
             'services' => 'services',
             'galleries' => 'galleries',
-            'arrival_sections' => 'arrival', // New: for the 'arrivals' data
+            'arrival_sections' => 'arrival',
             'brands' => 'brands'
         ];
 
@@ -1228,13 +1228,30 @@ Route::get('/fix-subscriptions', function () {
                         $folderPath = ($column == 'thumbnail') ? 'thumbnails' : $folder;
                         $path = public_path("assets/images/{$folderPath}/" . $val);
                         
+                        // Default repair logic (already existing)
                         if (empty($val) || !file_exists($path)) {
                             $newImg = 'noimage.png';
-                            // Special icons for categories
-                            if ($table == 'categories' && $column == 'image') {
+
+                            // --- PREMIUM SAMPLE OVERRIDE ---
+                            if ($table == 'products') {
+                                if (str_contains(strtolower($item->name), 'premium laptop')) $newImg = 'premium_laptop.png';
+                                elseif (str_contains(strtolower($item->name), 'high performance laptop')) $newImg = 'high_perf_laptop.png';
+                                elseif (str_contains(strtolower($item->name), 'fashion tee')) $newImg = 'urban_tee.png';
+                                elseif (str_contains(strtolower($item->name), 'posture')) $newImg = 'posture_belt.png';
+                            }
+                            elseif ($table == 'blogs') {
+                                if (str_contains(strtolower($item->title), 'welcome')) $newImg = 'sample_blog.png';
+                            }
+                            elseif ($table == 'arrival_sections') {
+                                // Rotate between the 3 arrival banners
+                                $arrival_imgs = ['arrival_electronics.png', 'arrival_fashion.png', 'arrival_lifestyle.png'];
+                                $newImg = $arrival_imgs[$item->id % 3];
+                            }
+                            elseif ($table == 'categories' && $column == 'image') {
                                 if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
                                 if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
                             }
+
                             \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
                         }
                     }
@@ -1246,7 +1263,7 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs && (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)))) {
-                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'noimage.png']);
+                \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update(['deal_background' => 'posture_belt.png']);
             }
         }
 
