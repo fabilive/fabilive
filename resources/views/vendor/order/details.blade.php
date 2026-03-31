@@ -73,6 +73,9 @@
 
                                     @php
     $price = $order->vendororders()->where('user_id', $user->id)->sum('price');
+    $price = round($price * $order->currency_value, 2);
+    $commission = round($order->commission * $order->currency_value, 2);
+
     if ($order->is_shipping == 1) {
         $user_id = auth()->id();
 
@@ -102,7 +105,7 @@
 
 
                                     <td width="45%">
-                                        {{ \PriceHelper::showOrderCurrencyPrice(($price-$order->commission), $order->currency_sign) }}
+                                        {{ \PriceHelper::showOrderCurrencyPrice(($price - $commission), $order->currency_sign) }}
                                     </td>
                                 </tr>
 
