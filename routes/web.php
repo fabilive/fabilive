@@ -455,21 +455,42 @@ Route::get('/fix-subscriptions', function () {
                 $table->double('stopover_fee')->default(0);
                 $table->integer('status')->default(1);
             });
-
-            // Seeding some default service areas
             \Illuminate\Support\Facades\DB::table('service_areas')->insert([
                 ['name' => 'Yaoundé Central', 'location' => 'Yaoundé', 'base_fee' => 1000, 'stopover_fee' => 500, 'status' => 1],
                 ['name' => 'Douala Littoral', 'location' => 'Douala', 'base_fee' => 1200, 'stopover_fee' => 600, 'status' => 1],
             ]);
+        } else {
+            \Illuminate\Support\Facades\Schema::table('service_areas', function ($table) {
+                $cols = ['name', 'location', 'latitude', 'longitude', 'base_fee', 'stopover_fee', 'status'];
+                foreach ($cols as $c) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', $c)) {
+                        if (in_array($c, ['base_fee', 'stopover_fee'])) $table->double($c)->default(0);
+                        elseif ($c == 'status') $table->integer($c)->default(1);
+                        else $table->string($c)->nullable();
+                    }
+                }
+            });
         }
 
-        // REPAIR RIDER SERVICE AREAS TABLE (Pivot Table)
+        // REPAIR RIDER SERVICE AREAS TABLE
         if (!\Illuminate\Support\Facades\Schema::hasTable('rider_service_areas')) {
             \Illuminate\Support\Facades\Schema::create('rider_service_areas', function ($table) {
                 $table->id();
-                $table->unsignedBigInteger('rider_id');
-                $table->unsignedBigInteger('service_area_id');
+                $table->unsignedBigInteger('rider_id')->index();
+                $table->unsignedBigInteger('service_area_id')->index();
                 $table->double('price')->nullable();
+            });
+        } else {
+            \Illuminate\Support\Facades\Schema::table('rider_service_areas', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'rider_id')) {
+                    $table->unsignedBigInteger('rider_id')->index();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'service_area_id')) {
+                    $table->unsignedBigInteger('service_area_id')->index();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'price')) {
+                    $table->double('price')->nullable();
+                }
             });
         }
 
