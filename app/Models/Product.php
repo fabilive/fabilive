@@ -173,7 +173,10 @@ public function cities()
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
         }
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
@@ -291,7 +294,10 @@ public function cities()
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
@@ -658,7 +664,10 @@ public function cities()
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
@@ -764,7 +773,10 @@ public function cities()
         }
 
         if (!empty($this->size)) {
-            $price += $this->size_price[0];
+            $size_prices = $this->size_price;
+            if(is_array($size_prices) && isset($size_prices[0])) {
+                $price += $size_prices[0];
+            }
         }
 
         // Attribute Section
@@ -805,3 +817,4 @@ public function cities()
         return $price;
     }
 }
+
