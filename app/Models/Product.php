@@ -90,6 +90,22 @@ public function cities()
         return $value;
     }
 
+    /**
+     * Handle Cloudinary or full URLs correctly in the photo attribute.
+     */
+    public function getPhotoAttribute($value)
+    {
+        if (empty($value)) {
+            return 'noimage.png';
+        }
+
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        return $value;
+    }
+
     public function category()
     {
         return $this->belongsTo('App\Models\Category')->withDefault();

@@ -74,20 +74,21 @@ class PhotoEnhancerService extends AIService
         // Cloudinary URL structure: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/v{version}/{public_id}.{format}
         
         // 1. Original (Optimized quality & webp format implicitly via f_auto, q_auto)
-        // Also apply basic AI enhancement (e_improve)
-        $originalUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/f_auto,q_auto,e_improve/{$basePublicId}.webp";
+        // Apply AI enhancement (e_improve) and background removal (e_background_removal)
+        // If background removal fails (no add-on), we pad with white (b_white)
+        $originalUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/f_auto,q_auto,e_improve,e_background_removal,b_white/{$basePublicId}.webp";
 
         // 2. Medium variant (e.g., product detail gallery)
         $medConfig = config('ai.photo.sizes.medium');
         $medW = $medConfig['width'] ?? 600;
         $medH = $medConfig['height'] ?? 600;
-        $mediumUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$medW},h_{$medH},f_auto,q_auto,e_improve/{$basePublicId}.webp";
+        $mediumUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$medW},h_{$medH},f_auto,q_auto,e_improve,e_background_removal,b_white/{$basePublicId}.webp";
 
         // 3. Thumbnail variant (e.g., product grid)
         $thumbConfig = config('ai.photo.sizes.thumbnail');
         $thumbW = $thumbConfig['width'] ?? 150;
         $thumbH = $thumbConfig['height'] ?? 150;
-        $thumbnailUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$thumbW},h_{$thumbH},f_auto,q_auto/{$basePublicId}.webp";
+        $thumbnailUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$thumbW},h_{$thumbH},f_auto,q_auto,e_background_removal,b_white/{$basePublicId}.webp";
 
         return [
             'original' => $originalUrl,
@@ -102,17 +103,14 @@ class PhotoEnhancerService extends AIService
      */
     protected function storeLocalFallback(string $filePath, string $originalName, string $folder): array
     {
-        // For the fallback, since the file is already placed in public_path by the controller, 
-        // we can just return its known URL structure if it's already in the correct folder,
-        // or we can move it if it's a temp file. Since ProductController puts it in assets/images/products,
-        // we will just return that standard URL.
+        // For consistency, we return only the filename for local storage.
+        // The View accessors in Product model will handle the pathing.
         $filename = basename($filePath);
-        $url = asset('assets/images/' . $folder . '/' . $filename);
 
         return [
-            'original' => $url,
-            'medium' => $url,      // Fallback: no real resizing in local unless using Intervention
-            'thumbnail' => $url,   // Fallback: original image
+            'original' => $filename,
+            'medium' => $filename, 
+            'thumbnail' => $filename,
             'provider' => 'local'
         ];
     }
