@@ -13,61 +13,6 @@ use App\Http\Controllers\PaymentController;
 // =================================== Admin Section Routes ===================================\\
 
 // ************************************ ADMIN SECTION **********************************************
-Route::get('/update-categories-now', function () {
-    require base_path('update_categories.php'); });
-Route::get('/delete-all-products-now', function () {
-    require base_path('delete_products.php'); });
-Route::get('/check-settings-now', function () {
-    require base_path('check_settings.php'); });
-
-// LOGO DIAGNOSTIC & REPAIR ROUTE
-Route::get('/fix-logo-now', function () {
-    try {
-        $gs = DB::table('generalsettings')->where('id', 1)->first();
-        if (!$gs) {
-            return response()->json(['status' => 'error', 'message' => 'No generalsettings row found.']);
-        }
-
-        $currentLogo = $gs->logo ?? '';
-        $logoFilePath = public_path('assets/images/' . $currentLogo);
-        $logoFileExists = !empty($currentLogo) && file_exists($logoFilePath);
-
-        // List all logo-related files in the images folder
-        $imagesDir = public_path('assets/images/');
-        $logoFiles = collect(scandir($imagesDir))
-            ->filter(fn($f) => str_contains(strtolower($f), 'logo'))
-            ->values()
-            ->toArray();
-
-        $result = [
-            'current_db_logo' => $currentLogo,
-            'logo_file_exists' => $logoFileExists,
-            'logo_files_in_images_dir' => $logoFiles,
-            'fix_applied' => false,
-        ];
-
-        // If broken, fix it
-        if (!$logoFileExists) {
-            $fallback = 'logo.png';
-            $fallbackPath = public_path('assets/images/' . $fallback);
-            if (file_exists($fallbackPath)) {
-                DB::table('generalsettings')->where('id', 1)->update(['logo' => $fallback]);
-                cache()->forget('generalsettings');
-                $result['fix_applied'] = true;
-                $result['fixed_to'] = $fallback;
-                $result['message'] = 'Logo was broken. Fixed to logo.png and cache cleared.';
-            } else {
-                $result['message'] = 'Logo broken AND logo.png does not exist. Please upload a logo via the admin panel.';
-            }
-        } else {
-            $result['message'] = 'Logo is correctly set and file exists. No fix needed.';
-        }
-
-        return response()->json($result, 200, [], JSON_PRETTY_PRINT);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
-    }
-});
 
 // CAMPAY PAYMENT GATEWAY DB REPAIR ROUTE
 Route::get('/fix-campay-db', function () {

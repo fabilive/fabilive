@@ -65,21 +65,13 @@ class AppServiceProvider extends ServiceProvider
             if (!isset($gs->is_affilate)) $gs->is_affilate = 0;
             if (!isset($gs->affilate_charge)) $gs->affilate_charge = 0;
 
-            // Logo file existence fallback — if DB logo file is missing, use logo.png
+            // Logo file existence fallback — gracefully handle in memory only (don't update DB)
             $logoPath = public_path('assets/images/' . ($gs->logo ?? ''));
             if (empty($gs->logo) || !file_exists($logoPath)) {
-                $fallbackLogo = 'logo.png';
-                $gs->logo = $fallbackLogo;
-                // Also update the DB so it persists
-                try {
-                    DB::table('generalsettings')->where('id', 1)->update(['logo' => $fallbackLogo]);
-                    cache()->forget('generalsettings');
-                } catch (\Exception $e) {
-                    // Silently continue — view will still use logo.png
-                }
+                $gs->logo = 'logo.png';
             }
 
-            // Footer logo fallback
+            // Footer logo fallback — gracefully handle in memory only
             if (!empty($gs->footer_logo)) {
                 $footerLogoPath = public_path('assets/images/' . $gs->footer_logo);
                 if (!file_exists($footerLogoPath)) {

@@ -786,7 +786,7 @@
 
   // NORMAL FORM
 
-  $(document).on("submit", "#geniusform", function (e) {
+    .on("submit", "#geniusform, .uplogo-form", function (e) {
     e.preventDefault();
     if (admin_loader == 1) {
       $(".gocover").show();
