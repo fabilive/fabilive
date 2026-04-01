@@ -58,7 +58,7 @@ class VendorController extends FrontBaseController
       ->get()
       ->reject(function ($item) {
         if ($item->user_id != 0) {
-          if ($item->user->is_vendor != 2) {
+          if (!isset($item->user) || $item->user->is_vendor != 2) {
             return true;
           }
         }
@@ -88,7 +88,7 @@ class VendorController extends FrontBaseController
       ->reject(function ($item) {
 
         if ($item->user_id != 0) {
-          if ($item->user->is_vendor != 2) {
+          if (!isset($item->user) || $item->user->is_vendor != 2) {
             return true;
           }
         }
