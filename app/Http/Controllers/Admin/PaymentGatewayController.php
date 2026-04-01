@@ -161,7 +161,8 @@ class PaymentGatewayController extends AdminBaseController
 
         $data = PaymentGateway::findOrFail($id);
         $prev = '';
-        if($data->type == "automatic"){
+        $isAutomatic = ($data->type == "automatic" || $data->type == 1);
+        if($isAutomatic){
 
             //--- Validation Section
             $rules = [

@@ -68,6 +68,54 @@ Route::get('/fix-logo-now', function () {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
 });
+
+// CAMPAY PAYMENT GATEWAY DB REPAIR ROUTE
+Route::get('/fix-campay-db', function () {
+    try {
+        $campay = DB::table('payment_gateways')->where('keyword', 'campay')->first();
+
+        $information = json_encode([
+            'username'        => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
+            'password'        => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
+            'permanent_token' => 'fd3c20a1ff48e47cf92407c0bde3e27a53063d13',
+            'webhook_key'     => 'SCBmhdWURtCWFui7IKPN6B63Jxaxr6VPsV2voNZs2Vc1axnFFehMpWLE6omBRuVea9UiY42mBb0keoytD597nw',
+            'text'            => 'Pay via Campay',
+        ]);
+
+        if ($campay) {
+            DB::table('payment_gateways')->where('keyword', 'campay')->update([
+                'type'        => 'automatic',
+                'name'        => 'Campay',
+                'title'       => 'Campay',
+                'subtitle'    => 'Pay via mobile money (MTN/Orange)',
+                'information' => $information,
+                'currency_id' => '["*"]',
+                'checkout'    => 1,
+            ]);
+            $action = 'updated';
+        } else {
+            DB::table('payment_gateways')->insert([
+                'title'       => 'Campay',
+                'subtitle'    => 'Pay via mobile money (MTN/Orange)',
+                'name'        => 'Campay',
+                'keyword'     => 'campay',
+                'type'        => 'automatic',
+                'information' => $information,
+                'currency_id' => '["*"]',
+                'checkout'    => 1,
+            ]);
+            $action = 'created';
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'action'  => $action,
+            'message' => 'Campay row ' . $action . ' with type=automatic and all API credentials. Go to Admin > Payment Gateways > Edit Campay to verify.',
+        ], 200, [], JSON_PRETTY_PRINT);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+});
 Route::get('/add-custom-referral-bonus-column', function () {
     try {
         if (!Schema::hasColumn('generalsettings', 'custom_referral_bonus')) {
