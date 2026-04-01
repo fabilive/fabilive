@@ -178,7 +178,7 @@ class GeneralSettingController extends AdminBaseController
                 'is_affilate', 'affilate_charge', 'fixed_commission', 'percentage_commission',
                 'multiple_shipping', 'vendor_ship_info', 'is_verification_email', 'wholesell',
                 'is_capcha', 'popup_title', 'popup_text', 'is_secure', 'paypal_business',
-                'footer_logo', 'paytm_merchant', 'maintain_text', 'header_color', 'capcha_secret_key',
+                'paytm_merchant', 'maintain_text', 'header_color', 'capcha_secret_key',
                 'capcha_site_key', 'partner_title', 'partner_text', 'deal_title', 'deal_details',
                 'deal_time', 'delivery_base_fee', 'delivery_stopover_fee', 'rider_percentage_commission',
                 'referral_amount', 'referral_bonus', 'custom_referral_bonus', 'same_servicearea_delivery_fee',
