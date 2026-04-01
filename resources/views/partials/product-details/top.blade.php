@@ -12,7 +12,7 @@
                                      <model-viewer class="product-3d-viewer" src="{{ asset($productt->{'3d_model'}) }}" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" shadow-intensity="1" auto-rotate></model-viewer>
                                   </div>
                                   @else
-                                  <img  id="single-image-zoom" src="{{filter_var($productt->photo, FILTER_VALIDATE_URL) ?$productt->photo:asset('assets/images/products/'.$productt->photo)}}" alt="Thumb Image" data-zoom-image="{{filter_var($productt->photo, FILTER_VALIDATE_URL) ?$productt->photo:asset('assets/images/products/'.$productt->photo)}}" />
+                                  <img  id="single-image-zoom" src="{{ $productt->photo }}" alt="Thumb Image" data-zoom-image="{{ $productt->photo }}" />
                                   @endif
                               </div>
 

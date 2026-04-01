@@ -6,7 +6,7 @@
       <div class="product type-product">
          <div class="product-wrapper">
             <div class="product-image">
-               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo ? asset('assets/images/products/'.$product->photo):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo }}" alt="Product Image"></a>
                @if (round($product->offPercentage() )>0)
                     <div class="on-sale">- {{ round($product->offPercentage() )}}%</div>
                @endif
@@ -76,7 +76,7 @@
       <div class="product type-product">
          <div class="product-wrapper">
             <div class="product-image">
-               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo ? asset('assets/images/products/'.$product->photo):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo }}" alt="Product Image"></a>
                @if (round($product->offPercentage() )>0)
                <div class="on-sale">- {{ round($product->offPercentage() )}}%</div>
                @endif
@@ -148,7 +148,7 @@
       <div class="product type-product">
          <div class="product-wrapper">
             <div class="product-image">
-               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo ? asset('assets/images/products/'.$product->photo):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+               <a href="{{ !empty($product->slug) ? route('front.product', $product->slug) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->photo }}" alt="Product Image"></a>
                @if (round($product->offPercentage() )>0)
                     <div class="on-sale">- {{ round($product->offPercentage() )}}%</div>
                @endif

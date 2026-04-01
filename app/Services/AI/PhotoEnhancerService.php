@@ -73,22 +73,20 @@ class PhotoEnhancerService extends AIService
 
         // Cloudinary URL structure: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/v{version}/{public_id}.{format}
         
-        // 1. Original (Optimized quality & webp format implicitly via f_auto, q_auto)
-        // Apply AI enhancement (e_improve) and background removal (e_background_removal)
-        // If background removal fails (no add-on), we pad with white (b_white)
-        $originalUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/f_auto,q_auto,e_improve,e_background_removal,b_white/{$basePublicId}.webp";
+        // 1. Original - using free built-in Cloudinary AI (no paid add-ons needed)
+        $originalUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/f_auto,q_auto,e_improve,b_white/{$basePublicId}.webp";
 
-        // 2. Medium variant (e.g., product detail gallery)
+        // 2. Medium variant
         $medConfig = config('ai.photo.sizes.medium');
         $medW = $medConfig['width'] ?? 600;
         $medH = $medConfig['height'] ?? 600;
-        $mediumUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$medW},h_{$medH},f_auto,q_auto,e_improve,e_background_removal,b_white/{$basePublicId}.webp";
+        $mediumUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$medW},h_{$medH},f_auto,q_auto,e_improve,b_white/{$basePublicId}.webp";
 
-        // 3. Thumbnail variant (e.g., product grid)
+        // 3. Thumbnail variant
         $thumbConfig = config('ai.photo.sizes.thumbnail');
         $thumbW = $thumbConfig['width'] ?? 150;
         $thumbH = $thumbConfig['height'] ?? 150;
-        $thumbnailUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$thumbW},h_{$thumbH},f_auto,q_auto,e_background_removal,b_white/{$basePublicId}.webp";
+        $thumbnailUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/c_fill,w_{$thumbW},h_{$thumbH},f_auto,q_auto,e_improve,b_white/{$basePublicId}.webp";
 
         return [
             'original' => $originalUrl,

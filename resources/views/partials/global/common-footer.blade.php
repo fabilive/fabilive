@@ -34,7 +34,7 @@ $pages = App\Models\Page::get();
             <div class="col">
                 <div class="footer-widget my-5">
                     <div class="footer-logo mb-4">
-                        <a href="{{ route('front.index') }}"><img src="{{ asset('assets/images/'.$gs->footer_logo) }}" alt="Image not found!" /></a>
+                        <a href="{{ route('front.index') }}"><img src="{{ asset('assets/images/logo.png') }}" alt="Fabilive Logo" /></a>
                     </div>
                     <div class="widget-ecommerce-contact">
                         @if($ps->phone != null)

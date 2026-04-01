@@ -18,7 +18,7 @@
                    @foreach ($products as $product)
                    <tr class="woocommerce-cart-form__cart-item cart_item">
                       <td class="product-thumbnail">
-                         <a href="{{ route('front.product', $product['item']['slug']) }}"><img src="{{ $product['item']['photo'] ? asset('assets/images/products/'.$product['item']['photo']) : asset('assets/images/noimage.png') }}" alt="Product image"></a>
+                         <a href="{{ route('front.product', $product['item']['slug']) }}"><img src="{{ $product['item']['photo'] }}" alt="Product image"></a>
                       </td>
                       <td class="product-name">
                          <a href="{{ route('front.product', $product['item']['slug']) }}">{{ mb_strlen($product['item']['name'],'UTF-8') > 35 ? mb_substr($product['item']['name'],0,35,'UTF-8').'...' : $product['item']['name']}}</a>

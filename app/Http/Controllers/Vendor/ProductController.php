@@ -195,19 +195,15 @@ class ProductController extends VendorBaseController
                 unlink(public_path() . '/assets/images/products/' . $data->photo);
             }
         }
-        $input['photo'] = $image_name;
-        $data->update($input);
-        if ($data->thumbnail != null) {
-            if (file_exists(public_path() . '/assets/images/thumbnails/' . $data->thumbnail)) {
-                unlink(public_path() . '/assets/images/thumbnails/' . $data->thumbnail);
-            }
+        if ($aiPhotoUrls['provider'] === 'cloudinary') {
+            $input['photo'] = $aiPhotoUrls['original'];
+            $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
+        } else {
+            $input['photo'] = $image_name;
         }
 
-        if (isset($aiPhotoUrls) && $aiPhotoUrls['provider'] === 'cloudinary') {
-            $data->thumbnail = $aiPhotoUrls['thumbnail'];
-            $data->update();
-            return response()->json(['status' => true, 'file_name' => $image_name]);
-        }
+        $data->update($input);
+        return response()->json(['status' => true, 'file_name' => $image_name]);
 
         $img = Image::make(public_path() . '/assets/images/products/' . $data->photo)->resize(285, 285);
         $thumbnail = time() . Str::random(8) . '.jpg';
@@ -416,6 +412,7 @@ class ProductController extends VendorBaseController
             
             if ($aiPhotoUrls['provider'] === 'cloudinary') {
                 $input['photo'] = $aiPhotoUrls['original'];
+                $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
                 @unlink(public_path($path)); // remove local heavy image
             } else {
                 $input['photo'] = $image_name;

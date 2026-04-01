@@ -96,14 +96,30 @@ public function cities()
     public function getPhotoAttribute($value)
     {
         if (empty($value)) {
-            return 'noimage.png';
+            return asset('assets/images/noimage.png');
         }
 
         if (str_starts_with($value, 'http')) {
             return $value;
         }
 
-        return $value;
+        return asset('assets/images/products/' . $value);
+    }
+
+    /**
+     * Handle Cloudinary or full URLs correctly in the thumbnail attribute.
+     */
+    public function getThumbnailAttribute($value)
+    {
+        if (empty($value)) {
+            return asset('assets/images/noimage.png');
+        }
+
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        return asset('assets/images/thumbnails/' . $value);
     }
 
     public function category()

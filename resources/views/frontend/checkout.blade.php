@@ -288,7 +288,7 @@
                                        <div class="product-img">
                                           <div class="d-flex">
                                              <img
-                                                src=" {{ asset('assets/images/products/'.$product['item']['photo']) }}"
+                                                src=" {{ $product['item']['photo'] }}"
                                                 height="80" width="80" class="p-1">
                                           </div>
                                        </div>

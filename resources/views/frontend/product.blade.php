@@ -263,7 +263,7 @@
                            <div class="product-image">
                               <a href="{{ route('front.product', $prod['slug']) }}"
                                  class="woocommerce-LoopProduct-link"><img
-                                    src="{{ $prod['thumbnail'] ? (file_exists(public_path('assets/images/thumbnails/'.$prod['thumbnail'])) ? asset('assets/images/thumbnails/'.$prod['thumbnail']) : asset('assets/images/products/'.$prod['thumbnail'])) : asset('assets/images/noimage.png') }}"
+                                    src="{{ $prod->thumbnail }}"
                                     alt="Product Image"></a>
                               <div class="wishlist-view">
                                  <div class="quickview-button">
