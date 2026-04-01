@@ -15,6 +15,11 @@ if(isset($_GET['header_color']))
 }
 ?>
 
+:root {
+  --theme-primary-color: <?php echo $color; ?>;
+}
+
+
 .hover-text-primary:hover *, a.hover-text-primary:hover, .list-color-secondary li.mixitup-control-active, .list-color-dark li.mixitup-control-active, .tab-simple li.mixitup-control-active, .nav-primary-hover .navbar-nav .nav-link:hover, .nav-primary-hover .navbar-nav .active>.nav-link:hover, .nav-primary-hover .navbar-nav .active>.nav-link, .list-text-hover-primary li a:hover, .media-icon-white a:hover, .text-primary, .pro-details-sidebar-item h3,  .time-box ul li span:first-child {
     color: <?php echo $color; ?> !important;
     

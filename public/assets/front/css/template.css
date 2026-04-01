@@ -83,7 +83,7 @@ a.hover-text-primary:hover,
 .list-text-hover-primary li a:hover,
 .media-icon-white a:hover,
 .text-primary {
-	color: #c9030f;
+	color: var(--theme-primary-color);
 }
 
 .nav-secondary-hover .navbar-nav .nav-link:hover,
@@ -166,7 +166,7 @@ a.hover-text-white:hover {
 .nav-dark-hover .navbar-nav .active > .nav-link:hover,
 .nav-dark-hover .navbar-nav .active > .nav-link:hover,
 .nav-dark .navbar-nav .nav-link:hover {
-	color: #bd2222;
+	color: var(--theme-primary-color);
 }
 
 .list-color-gray li a,
@@ -208,7 +208,7 @@ a.hover-text-extra1:hover {
 .nav-tab-border .nav-link.mixitup-control-active,
 .page-item.active .page-link,
 .down-line::before {
-	background-color: #c9030f;
+	background-color: var(--theme-primary-color);
 }
 
 .fixed-bg-primary.fixed-top,
@@ -234,7 +234,7 @@ a.hover-text-extra1:hover {
 .nav-primary-hover.nav-line-active .navbar-nav .active > .nav-link:before,
 .nav-primary-hover.nav-down-line-active .navbar-nav .active > .nav-link:before,
 .bg-primary {
-	background-color: #c9030f;
+	background-color: var(--theme-primary-color);
 }
 
 .hover-bg-secondary:hover,
@@ -334,22 +334,22 @@ a.hover-text-extra1:hover {
 
 .btn-primary {
 	color: var(--theme-white-color);
-	background-color: #c9030f;
+	background-color: var(--theme-primary-color);
 }
 .btn-primary:hover {
 	background-color: #fff;
-	color: #c9030f;
-	border: 1px solid #c9030f;
+	color: var(--theme-primary-color);
+	border: 1px solid var(--theme-primary-color);
 }
 
 .btn-secondary {
 	color: var(--theme-white-color);
-	background-color: #c9030f;
+	background-color: var(--theme-primary-color);
 }
 .btn-secondary:hover {
 	background-color: #fff;
-	color: #c9030f;
-	border: 1px solid #c9030f;
+	color: var(--theme-primary-color);
+	border: 1px solid var(--theme-primary-color);
 }
 
 .btn-white {
@@ -2140,7 +2140,7 @@ ul.product_list_widget li {
 	text-align: center;
 	font-size: 13px;
 	font-family: var(--theme-hiperlink-font);
-	background-color: #bd2222;
+	background-color: var(--theme-primary-color);
 	color: #fff;
 	width: 100%;
 	text-transform: uppercase;
@@ -2414,7 +2414,7 @@ table.cart .product-subtotal {
 table.cart .actions button {
 	line-height: 40px;
 	border: 0;
-	background-color: #c9030f;
+	background-color: var(--theme-primary-color);
 	padding: 0 15px;
 	color: #fff;
 	display: inline-block;
@@ -2422,7 +2422,7 @@ table.cart .actions button {
 }
 
 .cart_totals .order-total .woocommerce-Price-amount {
-	color: #c9030f;
+	color: var(--theme-primary-color);
 	font-size: 20px;
 }
 
@@ -4069,7 +4069,7 @@ header.nav-leftpush-overlay.fixed-top {
 a.add_to_cart_button:hover,
 .btn-primary:not(:disabled):not(.disabled):active,
 .btn-primary:hover {
-	color: #bd2222;
+	color: var(--theme-primary-color);
 	background-color: white;
 	border-color: transparent;
 	filter: brightness(110%);
@@ -4117,7 +4117,7 @@ a.add_to_cart_button:hover,
 
 .btn.btn-primary.btn-border {
 	border-color: var(--theme-primary-color);
-	color: #c9030f;
+	color: var(--theme-primary-color);
 }
 
 .btn.btn-secondary.btn-border {
@@ -4195,7 +4195,7 @@ a.add_to_cart_button:hover,
 
 .pagination-dotted-active .page-link:hover {
 	background: transparent;
-	color: #c9030f;
+	color: var(--theme-primary-color);
 }
 
 /*==========================================
