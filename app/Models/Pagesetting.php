@@ -10,13 +10,14 @@ class Pagesetting extends Model
 
     public $timestamps = false;
 
-    public function upload($name,$file,$oldname)
+    public function upload($name, $file, $oldname)
     {
-        $file->move('assets/images',$name);
-        if($oldname != null)
-        {
-            if (file_exists(public_path().'/assets/images/'.$oldname)) {
-                unlink(public_path().'/assets/images/'.$oldname);
+        $destination = public_path('assets/images');
+        $file->move($destination, $name);
+        if ($oldname != null) {
+            $oldPath = public_path('assets/images/' . $oldname);
+            if (file_exists($oldPath)) {
+                @unlink($oldPath);
             }
         }
     }

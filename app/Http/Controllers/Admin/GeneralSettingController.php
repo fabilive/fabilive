@@ -96,111 +96,124 @@ class GeneralSettingController extends AdminBaseController
     {
         $validator = Validator::make($request->all(), $this->rules);
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
         }
-        else {
-        $input = $request->all();
-        $data = Generalsetting::findOrFail(1);
-            if ($file = $request->file('logo'))
-            {
+
+        try {
+            $data = Generalsetting::findOrFail(1);
+            $updateData = []; // Only update what is actually POSTed
+
+            // File uploads
+            if ($file = $request->file('logo')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->logo);
-                $input['logo'] = $name;
+                $data->upload($name, $file, $data->logo);
+                $updateData['logo'] = $name;
             }
-            if ($file = $request->file('favicon'))
-            {
+            if ($file = $request->file('favicon')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->favicon);
-                $input['favicon'] = $name;
+                $data->upload($name, $file, $data->favicon);
+                $updateData['favicon'] = $name;
             }
-            if ($file = $request->file('deal_background'))
-            {
+            if ($file = $request->file('deal_background')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->favicon);
-                $input['deal_background'] = $name;
+                $data->upload($name, $file, $data->deal_background);
+                $updateData['deal_background'] = $name;
             }
-            if ($file = $request->file('breadcrumb_banner'))
-            {
+            if ($file = $request->file('breadcrumb_banner')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->breadcrumb_banner);
-                $input['breadcrumb_banner'] = $name;
+                $data->upload($name, $file, $data->breadcrumb_banner);
+                $updateData['breadcrumb_banner'] = $name;
             }
-            if ($file = $request->file('loader'))
-            {
+            if ($file = $request->file('loader')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->loader);
-                $input['loader'] = $name;
+                $data->upload($name, $file, $data->loader);
+                $updateData['loader'] = $name;
             }
-            if ($file = $request->file('admin_loader'))
-            {
+            if ($file = $request->file('admin_loader')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->admin_loader);
-                $input['admin_loader'] = $name;
+                $data->upload($name, $file, $data->admin_loader);
+                $updateData['admin_loader'] = $name;
             }
-            if ($file = $request->file('affilate_banner'))
-            {
+            if ($file = $request->file('affilate_banner')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->affilate_banner);
-                $input['affilate_banner'] = $name;
+                $data->upload($name, $file, $data->affilate_banner);
+                $updateData['affilate_banner'] = $name;
             }
-            if ($file = $request->file('error_banner_404'))
-            {
+            if ($file = $request->file('error_banner_404')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->error_banner_404);
-                $input['error_banner_404'] = $name;
+                $data->upload($name, $file, $data->error_banner_404);
+                $updateData['error_banner_404'] = $name;
             }
-            if ($file = $request->file('error_banner_500'))
-            {
+            if ($file = $request->file('error_banner_500')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->error_banner_500);
-                $input['error_banner_500'] = $name;
+                $data->upload($name, $file, $data->error_banner_500);
+                $updateData['error_banner_500'] = $name;
             }
-            if ($file = $request->file('popup_background'))
-            {
+            if ($file = $request->file('popup_background')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->popup_background);
-                $input['popup_background'] = $name;
+                $data->upload($name, $file, $data->popup_background);
+                $updateData['popup_background'] = $name;
             }
-            if ($file = $request->file('invoice_logo'))
-            {
+            if ($file = $request->file('invoice_logo')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->invoice_logo);
-                $input['invoice_logo'] = $name;
+                $data->upload($name, $file, $data->invoice_logo);
+                $updateData['invoice_logo'] = $name;
             }
-            if ($file = $request->file('user_image'))
-            {
+            if ($file = $request->file('user_image')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->user_image);
-                $input['user_image'] = $name;
+                $data->upload($name, $file, $data->user_image);
+                $updateData['user_image'] = $name;
             }
-            if ($file = $request->file('footer_logo'))
-            {
+            if ($file = $request->file('footer_logo')) {
                 $name = \PriceHelper::ImageCreateName($file);
-                $data->upload($name,$file,$data->footer_logo);
-                $input['footer_logo'] = $name;
+                $data->upload($name, $file, $data->footer_logo);
+                $updateData['footer_logo'] = $name;
             }
-            if (!empty($request->product_page))
-            {
-               $input['product_page'] = implode(',', $request->product_page);
+
+            // Non-file scalar fields — only update if present in request
+            $scalarFields = [
+                'title', 'copyright', 'colors', 'talkto', 'disqus', 'currency_format',
+                'withdraw_fee', 'withdraw_charge', 'shipping_cost', 'mail_driver', 'mail_host',
+                'mail_port', 'mail_encryption', 'mail_user', 'mail_pass', 'from_email', 'from_name',
+                'is_affilate', 'affilate_charge', 'fixed_commission', 'percentage_commission',
+                'multiple_shipping', 'vendor_ship_info', 'is_verification_email', 'wholesell',
+                'is_capcha', 'popup_title', 'popup_text', 'is_secure', 'paypal_business',
+                'footer_logo', 'paytm_merchant', 'maintain_text', 'header_color', 'capcha_secret_key',
+                'capcha_site_key', 'partner_title', 'partner_text', 'deal_title', 'deal_details',
+                'deal_time', 'delivery_base_fee', 'delivery_stopover_fee', 'rider_percentage_commission',
+                'referral_amount', 'referral_bonus', 'custom_referral_bonus', 'same_servicearea_delivery_fee',
+                'vendor_color',
+            ];
+            foreach ($scalarFields as $field) {
+                if ($request->exists($field)) {
+                    $updateData[$field] = $request->input($field);
+                }
             }
-            else {
-                $input['product_page'] = null;
+
+            // Product page checkboxes
+            if ($request->exists('product_page')) {
+                $updateData['product_page'] = !empty($request->product_page)
+                    ? implode(',', $request->product_page)
+                    : null;
             }
-            if($request->capcha_secret_key){
-                $this->setEnv('NOCAPTCHA_SECRET',$request->capcha_secret_key,env('NOCAPTCHA_SECRET'));
+
+            // ENV updates for captcha keys
+            if ($request->capcha_secret_key) {
+                $this->setEnv('NOCAPTCHA_SECRET', $request->capcha_secret_key, env('NOCAPTCHA_SECRET'));
             }
-            if($request->capcha_site_key){
-                $this->setEnv('NOCAPTCHA_SITEKEY',$request->capcha_site_key,env('NOCAPTCHA_SITEKEY'));
+            if ($request->capcha_site_key) {
+                $this->setEnv('NOCAPTCHA_SITEKEY', $request->capcha_site_key, env('NOCAPTCHA_SITEKEY'));
             }
-            $input['referral_amount'] = $request->referral_amount;
-            $input['referral_bonus'] = $request->referral_bonus;
-            $input['custom_referral_bonus'] = $request->custom_referral_bonus;
-            $input['same_servicearea_delivery_fee'] = $request->same_servicearea_delivery_fee;
-            $input['rider_percentage_commission'] = $request->rider_percentage_commission;
-        cache()->forget('generalsettings');
-        $data->update($input);
-        $msg = __('Data Updated Successfully.');
-        return response()->json($msg);
+
+            cache()->forget('generalsettings');
+            $data->update($updateData);
+
+            $msg = __('Data Updated Successfully.');
+            return response()->json($msg);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('GeneralSetting update failed: ' . $e->getMessage());
+            return response()->json(['errors' => ['general' => ['Upload failed: ' . $e->getMessage()]]], 500);
         }
     }
 
