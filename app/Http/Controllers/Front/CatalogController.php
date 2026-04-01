@@ -201,7 +201,7 @@ class CatalogController extends FrontBaseController
       }
     });
 
-    $prods = $prods->where('status', 1)->paginate(isset($pageby) ? $pageby : ($this->gs->page_count ?? 12));
+    $prods = $prods->where('status', 1)->paginate(isset($pageby) && $pageby > 0 ? $pageby : ($this->gs->page_count > 0 ? $this->gs->page_count : 12));
     
     $prods->getCollection()->transform(function ($item) {
         $item->price = $item->vendorSizePrice();
@@ -302,3 +302,4 @@ class CatalogController extends FrontBaseController
     return response()->json($response);
   }
 }
+

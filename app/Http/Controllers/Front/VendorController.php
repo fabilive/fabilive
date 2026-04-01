@@ -102,7 +102,7 @@ class VendorController extends FrontBaseController
 
         $item->price = $item->vendorSizePrice();
         return $item;
-      })->paginate(isset($pageby) ? $pageby : $this->gs->vendor_page_count);
+      })->paginate(isset($pageby) && $pageby > 0 ? $pageby : ($this->gs->vendor_page_count > 0 ? $this->gs->vendor_page_count : 12));
 
 
     $data['vprods'] = $prods;
@@ -165,3 +165,4 @@ class VendorController extends FrontBaseController
     }
   }
 }
+
