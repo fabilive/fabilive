@@ -315,7 +315,7 @@
             if (!file) return;
 
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('attachment', file);
             formData.append('conversation_id', conversationId);
             formData.append('context', currentContext);
 
