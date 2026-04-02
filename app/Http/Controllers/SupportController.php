@@ -169,20 +169,15 @@ class SupportController extends Controller
         }
 
         // Concurrency-safe agent assignment
-        \Illuminate\Support\Facades\DB::transaction(function () use ($conversation) {
-            // Re-fetch conversation to lock it
+        \Illuminate\Support\Facades\DB::transaction(function () use (&$conversation) {
             $lockedConv = \App\Models\SupportConversation::where('id', $conversation->id)->lockForUpdate()->first();
             
             if ($lockedConv->status !== 'bot_active' && $lockedConv->status !== 'waiting_agent') {
                 return;
             }
 
-            // Find an online agent with least active chats who is below max_active_chats limit
-            $availableAgent = \App\Models\SupportAgent::where('is_online', true)
-                ->whereRaw('(SELECT COUNT(*) FROM support_conversations WHERE assigned_agent_admin_id = support_agents.admin_id AND status = "assigned") < max_active_chats')
-                ->orderByRaw('(SELECT COUNT(*) FROM support_conversations WHERE assigned_agent_admin_id = support_agents.admin_id AND status = "assigned") ASC')
-                ->lockForUpdate()
-                ->first();
+            // Simplest lookup for an online agent
+            $availableAgent = \App\Models\SupportAgent::where('is_online', true)->first(); 
 
             if ($availableAgent) {
                 $lockedConv->assigned_agent_admin_id = $availableAgent->admin_id;
@@ -197,15 +192,9 @@ class SupportController extends Controller
                     'meta_json' => ['agent_id' => $availableAgent->admin_id]
                 ]);
 
-                // We would broadcast to the agent here (Ably is configured)
-                // broadcast(new \App\Events\AgentAssigned($lockedConv));
-
-                // Send a bot message confirming assignment
                 \App\Models\SupportMessage::create([
                     'conversation_id' => $lockedConv->id,
                     'sender_type' => 'system',
-                    'sender_id' => null,
-                    'type' => 'text',
                     'body_text' => 'An agent has been assigned and will be with you shortly.'
                 ]);
             } else {
@@ -215,12 +204,10 @@ class SupportController extends Controller
                 \App\Models\SupportMessage::create([
                     'conversation_id' => $lockedConv->id,
                     'sender_type' => 'system',
-                    'sender_id' => null,
-                    'type' => 'text',
-                    'body_text' => 'All agents are currently offline or busy. We will assist you as soon as someone is available.'
+                    'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.'
                 ]);
             }
-            $conversation->refresh();
+            $conversation = $lockedConv;
         });
 
         return response()->json([
