@@ -52,9 +52,9 @@ class SupportFaqCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \Filament\Resources\Pages\ListRecords::route('/'),
-            'create' => \Filament\Resources\Pages\CreateRecord::route('/create'),
-            'edit' => \Filament\Resources\Pages\EditRecord::route('/{record}/edit'),
+            'index' => SupportFaqCategoryResource\Pages\ListRecords::route('/'),
+            'create' => SupportFaqCategoryResource\Pages\CreateRecord::route('/create'),
+            'edit' => SupportFaqCategoryResource\Pages\EditRecord::route('/{record}/edit'),
         ];
     }
 }

@@ -65,8 +65,7 @@ class SupportConversationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \Filament\Resources\Pages\ListRecords::route('/'),
-            'view' => \Filament\Resources\Pages\ViewRecord::route('/{record}'),
+            'index' => SupportConversationResource\Pages\ListRecords::route('/'),
         ];
     }
 }
