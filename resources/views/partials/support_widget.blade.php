@@ -369,6 +369,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
@@ -488,6 +489,10 @@
         }
 
         escalateBtn.addEventListener('click', () => {
+            if (!conversationId) {
+                alert('Connection establishing... please try again in a second.');
+                return;
+            }
             escalateBtn.innerText = 'Requesting...';
             escalateBtn.disabled = true;
 
@@ -495,6 +500,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ conversation_id: conversationId })
@@ -552,6 +558,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
