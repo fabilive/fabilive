@@ -384,7 +384,11 @@
                     conversationId = data.conversation_id;
                     addMessage('bot', data.bot_message.body_text);
                     
-                    if (data.bot_message.body_text.includes('Request Live Support')) {
+                    const msgTextLower = data.bot_message.body_text.toLowerCase();
+                    const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
+                    const shouldShowEscalate = triggerKeywords.some(keyword => msgTextLower.includes(keyword));
+
+                    if (shouldShowEscalate) {
                         escalateBtn.style.display = 'block';
                     }
                 } else if (data.status === 'error') {
