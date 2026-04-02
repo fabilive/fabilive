@@ -504,7 +504,7 @@
                 if (data.status === 'success') {
                     escalateBtn.style.display = 'none';
                     conversationStatus = 'waiting_agent';
-                    addMessage('system', 'Escalation request sent to live agents.');
+                    addMessage('system', 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.');
                 }
             });
         });

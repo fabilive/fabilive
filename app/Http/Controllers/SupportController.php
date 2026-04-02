@@ -100,8 +100,11 @@ class SupportController extends Controller
             $reply = $botService->processMessage($request->message, $request->context);
             if ($reply) {
                 $botResponseText = $reply['response_text'];
-                if ($reply['suggested_faq']) {
-                    $botResponseText .= "\n\n" . $reply['suggested_faq'];
+                
+                // If bot indicates escalation is needed
+                if (isset($reply['escalate']) && $reply['escalate'] === true) {
+                    $conversation->status = 'bot_active'; // Keep bot active so user can click escalate button
+                    $conversation->save();
                 }
             }
         }
