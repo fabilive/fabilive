@@ -169,51 +169,58 @@ class SupportController extends Controller
         }
 
         // Concurrency-safe agent assignment
-        \Illuminate\Support\Facades\DB::transaction(function () use (&$conversation) {
-            $lockedConv = \App\Models\SupportConversation::where('id', $conversation->id)->lockForUpdate()->first();
-            
-            if ($lockedConv->status !== 'bot_active' && $lockedConv->status !== 'waiting_agent') {
-                return;
-            }
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($conversation) {
+                // Re-fetch with lock
+                $lockedConv = \App\Models\SupportConversation::where('id', $conversation->id)->lockForUpdate()->first();
+                
+                if (!$lockedConv || ($lockedConv->status !== 'bot_active' && $lockedConv->status !== 'waiting_agent')) {
+                    return;
+                }
 
-            // Simplest lookup for an online agent
-            $availableAgent = \App\Models\SupportAgent::where('is_online', true)->first(); 
+                $availableAgent = \App\Models\SupportAgent::where('is_online', true)->first(); 
 
-            if ($availableAgent) {
-                $lockedConv->assigned_agent_admin_id = $availableAgent->admin_id;
-                $lockedConv->status = 'assigned';
-                $lockedConv->assigned_at = now();
-                $lockedConv->save();
+                if ($availableAgent) {
+                    $lockedConv->assigned_agent_admin_id = $availableAgent->admin_id;
+                    $lockedConv->status = 'assigned';
+                    $lockedConv->assigned_at = now();
+                    $lockedConv->save();
 
-                \App\Models\SupportConversationEvent::create([
-                    'conversation_id' => $lockedConv->id,
-                    'actor_type' => 'system',
-                    'event' => 'assigned',
-                    'meta_json' => ['agent_id' => $availableAgent->admin_id]
-                ]);
+                    \App\Models\SupportConversationEvent::create([
+                        'conversation_id' => $lockedConv->id,
+                        'actor_type' => 'system',
+                        'event' => 'assigned',
+                        'meta_json' => ['agent_id' => $availableAgent->admin_id]
+                    ]);
 
-                \App\Models\SupportMessage::create([
-                    'conversation_id' => $lockedConv->id,
-                    'sender_type' => 'system',
-                    'body_text' => 'An agent has been assigned and will be with you shortly.'
-                ]);
-            } else {
-                $lockedConv->status = 'waiting_agent';
-                $lockedConv->save();
+                    \App\Models\SupportMessage::create([
+                        'conversation_id' => $lockedConv->id,
+                        'sender_type' => 'system',
+                        'body_text' => 'An agent has been assigned and will be with you shortly.'
+                    ]);
+                } else {
+                    $lockedConv->status = 'waiting_agent';
+                    $lockedConv->save();
 
-                \App\Models\SupportMessage::create([
-                    'conversation_id' => $lockedConv->id,
-                    'sender_type' => 'system',
-                    'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.'
-                ]);
-            }
-            $conversation = $lockedConv;
-        });
+                    \App\Models\SupportMessage::create([
+                        'conversation_id' => $lockedConv->id,
+                        'sender_type' => 'system',
+                        'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.'
+                    ]);
+                }
+            });
 
-        return response()->json([
-            'status' => 'success',
-            'conversation' => $conversation->refresh()
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'conversation' => $conversation->refresh()
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Escalation error: " . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
