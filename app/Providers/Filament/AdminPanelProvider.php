@@ -24,8 +24,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('backoffice')
-            ->path('backoffice')
+            ->id('admin_support')
+            ->path('admin/speedyai')
             ->authGuard('admin')
             ->login()
             ->colors([
