@@ -506,19 +506,22 @@
                 alert('Connection establishing... please try again in a second.');
                 return;
             }
-            escalateBtn.innerText = 'Requesting...';
+
+            escalateBtn.innerText = 'Requesting Live Support...';
             escalateBtn.disabled = true;
 
-            // Safety Timeout: If server hangs, assume success and hide button after 5s
-            const safetyTimeout = setTimeout(() => {
-                if (escalateBtn.disabled && escalateBtn.innerText === 'Requesting...') {
-                    escalateBtn.style.display = 'none';
-                    conversationStatus = 'waiting_agent';
-                    console.warn('Escalation took too long, force-hiding button.');
-                }
-            }, 5000);
+            const updateUIAsWaiting = () => {
+                escalateBtn.style.display = 'none';
+                conversationStatus = 'waiting_agent';
+                console.log('MbokoAi: Scaling to live agent view.');
+            };
 
-            fetch('/support/live/request', {
+            // 1. Race the fetch against a 5-second timeout
+            const escalationTimeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('TIMEOUT')), 5000)
+            );
+
+            const escalationRequest = fetch('/support/live/request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -526,28 +529,35 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ conversation_id: conversationId })
-            })
-            .then(response => {
-                clearTimeout(safetyTimeout);
+            }).then(async response => {
+                if (response.status === 419 || response.status === 401) {
+                    alert('Session expired. Please refresh the page to continue.');
+                    window.location.reload();
+                    throw new Error('SESSION_EXPIRED');
+                }
                 if (!response.ok) {
-                    return response.json().then(err => { throw err; });
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Server Error: ${response.status}`);
                 }
                 return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    escalateBtn.style.display = 'none';
-                    conversationStatus = 'waiting_agent';
-                } else {
-                    throw new Error(data.message || 'Unknown server error');
-                }
-            })
-            .catch(err => {
-                escalateBtn.innerText = 'Request Live Support';
-                escalateBtn.disabled = false;
-                alert('DEBUG ERROR: ' + (err.message || JSON.stringify(err)));
-                console.error('Escalation failed:', err);
             });
+
+            Promise.race([escalationRequest, escalationTimeout])
+                .then(data => {
+                    updateUIAsWaiting();
+                })
+                .catch(err => {
+                    if (err.message === 'TIMEOUT') {
+                        // On timeout, assume the request went through but was slow responding
+                        updateUIAsWaiting();
+                        console.warn('Escalation server response slow, force-moving to waiting state.');
+                    } else if (err.message !== 'SESSION_EXPIRED') {
+                        escalateBtn.innerText = 'Request Live Support';
+                        escalateBtn.disabled = false;
+                        alert('System is busy. Please try again or wait a moment.');
+                        console.error('Escalation failed:', err);
+                    }
+                });
         });
 
         // Rating Star Logic
