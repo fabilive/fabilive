@@ -4280,7 +4280,7 @@ a.add_to_cart_button:hover,
 	width: 30px;
 	height: 30px;
 	background-color: var(--theme-white-color);
-	color: #ffff;
+	color: #000000;
 }
 
 .product-style-1 .product-wrapper .hover-area [class*="-button"] a::after {
