@@ -25,6 +25,13 @@
                 <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we speed up your day today?</p>
                 <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Buyer</button>
                 <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Seller / Vendor</button>
+                
+                <div id="fabi-support-inbox" style="margin-top: 30px; text-align: left; display: none;">
+                    <h4 style="font-size: 13px; color: #888; border-top: 1px solid #eee; padding-top: 15px; margin-bottom: 10px;">Your Recent Chats</h4>
+                    <div id="fabi-inbox-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Inbox items -->
+                    </div>
+                </div>
             </div>
 
             <!-- Step 2: FAQ View -->
@@ -81,36 +88,93 @@
         let conversationId = null;
         const botLogo = "{{asset('assets/images/'.$gs->logo)}}";
 
-        // Initial History Load
-        loadHistory();
+        // Initial Inbox Load
+        loadInbox();
 
-        function loadHistory() {
-            fetch('/support/chat/history')
+        function loadInbox() {
+            fetch('/support/chat/list')
                 .then(res => res.json())
                 .then(data => {
-                    if (data.status === 'success' && data.conversation) {
-                        conversationId = data.conversation.id;
-                        currentContext = data.conversation.messages[0]?.context || 'buyer'; // Best guess if missing
+                    const inboxContainer = document.getElementById('fabi-support-inbox');
+                    const inboxList = document.getElementById('fabi-inbox-list');
+                    
+                    if (data.status === 'success' && data.conversations.length > 0) {
+                        inboxContainer.style.display = 'block';
+                        inboxList.innerHTML = '';
                         
-                        // Populate messages
-                        if (data.messages && data.messages.length > 0) {
-                            data.messages.forEach(msg => {
-                                let sender = msg.sender_type;
-                                if (sender === 'admin' || sender === 'agent') sender = 'bot';
-                                addMessage(sender, msg.body_text || '', !!msg.attachment_url);
-                            });
+                        // Check if any is active - if so, auto-resume only if it's been active recently?
+                        // For now, let user pick from inbox.
+                        data.conversations.forEach(conv => {
+                            const lastMsg = conv.messages[0] ? conv.messages[0].body_text : 'No messages yet';
+                            const item = document.createElement('div');
+                            item.style.padding = '12px';
+                            item.style.border = '1px solid #eee';
+                            item.style.borderRadius = '8px';
+                            item.style.cursor = 'pointer';
+                            item.style.fontSize = '13px';
+                            item.style.background = '#fff';
+                            item.style.transition = '0.2s';
                             
-                            startChat();
-                            backBtn.style.display = 'block';
+                            const statusColor = (conv.status === 'ended' || conv.status === 'rated') ? '#888' : '#2ed573';
+                            const statusLabel = conv.status.replace('_', ' ').charAt(0).toUpperCase() + conv.status.replace('_', ' ').slice(1);
+
+                            item.innerHTML = `
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                    <span style="font-weight:bold; color:#000;">${conv.context.toUpperCase()} Support</span>
+                                    <span style="font-size:10px; color:${statusColor}; font-weight:bold;">${statusLabel}</span>
+                                </div>
+                                <div style="color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lastMsg}</div>
+                            `;
                             
-                            if (data.conversation.status === 'waiting_agent' || data.conversation.status === 'assigned') {
+                            item.onclick = () => openConversation(conv.id, conv.status);
+                            item.onmouseover = () => item.style.borderColor = '#000';
+                            item.onmouseout = () => item.style.borderColor = '#eee';
+                            
+                            inboxList.appendChild(item);
+                        });
+                    }
+                });
+        }
+
+        function openConversation(id, status) {
+            conversationId = id;
+            messageContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#999;">Loading history...</p>';
+            
+            fetch(`/support/chat/history?conversation_id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageContainer.innerHTML = '';
+                        currentContext = data.conversation.context;
+                        
+                        data.messages.forEach(msg => {
+                            let sender = msg.sender_type;
+                            if (sender === 'admin' || sender === 'agent') sender = 'bot';
+                            addMessage(sender, msg.body_text || '', !!msg.attachment_url);
+                        });
+                        
+                        startChat();
+                        backBtn.style.display = 'block';
+                        
+                        // Disable input if ended
+                        if (status === 'ended' || status === 'rated') {
+                            footer.style.display = 'block'; // Show it, but...
+                            document.getElementById('fabi-support-input').placeholder = 'This chat is closed.';
+                            document.getElementById('fabi-support-input').disabled = true;
+                            document.getElementById('fabi-support-send').disabled = true;
+                            document.getElementById('fabi-support-attach').disabled = true;
+                        } else {
+                            document.getElementById('fabi-support-input').placeholder = 'Ask SpeedyAi something...';
+                            document.getElementById('fabi-support-input').disabled = false;
+                            document.getElementById('fabi-support-send').disabled = false;
+                            document.getElementById('fabi-support-attach').disabled = false;
+                            
+                            if (status === 'waiting_agent' || status === 'assigned') {
                                 escalateBtn.style.display = 'none';
-                                addMessage('system', 'Resuming live support session...');
                             }
                         }
                     }
-                })
-                .catch(err => console.log('No active session found.'));
+                });
         }
 
         // Toggle Widget

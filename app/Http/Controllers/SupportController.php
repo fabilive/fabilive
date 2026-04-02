@@ -46,7 +46,8 @@ class SupportController extends Controller
     {
         $request->validate([
             'context' => 'required|in:buyer,vendor',
-            'message' => 'required|string',
+            'message' => 'nullable|string',
+            'attachment' => 'nullable|file|max:5120', // 5MB max
             'conversation_id' => 'nullable|integer'
         ]);
 
@@ -58,7 +59,6 @@ class SupportController extends Controller
         // Fetch or create conversation
         if ($request->conversation_id) {
             $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-            // Ensure auth
             if ($conversation->requester_user_id !== $user->id) {
                 abort(403);
             }
@@ -71,24 +71,42 @@ class SupportController extends Controller
         }
 
         // Save user message
-        \App\Models\SupportMessage::create([
+        $msgData = [
             'conversation_id' => $conversation->id,
             'sender_type' => 'user',
             'sender_id' => $user->id,
             'type' => 'text',
             'body_text' => $request->message
-        ]);
+        ];
 
-        // Process through bot
-        $reply = $botService->processMessage($request->message, $request->context);
-        
-        $botResponseText = "";
-        if ($reply) {
-            $botResponseText = $reply['response_text'];
-            if ($reply['suggested_faq']) {
-                $botResponseText .= "\n\n" . $reply['suggested_faq'];
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $path = $file->store('support_attachments', 'public');
+            $msgData['type'] = 'file';
+            $msgData['attachment_url'] = '/storage/' . $path;
+            $msgData['attachment_mime'] = $file->getMimeType();
+            $msgData['attachment_size'] = $file->getSize();
+            
+            if (str_starts_with($msgData['attachment_mime'], 'image/')) {
+                $msgData['type'] = 'image';
             }
-        } else {
+        }
+
+        \App\Models\SupportMessage::create($msgData);
+
+        // Process through bot (only if there's text)
+        $botResponseText = "";
+        if ($request->message) {
+            $reply = $botService->processMessage($request->message, $request->context);
+            if ($reply) {
+                $botResponseText = $reply['response_text'];
+                if ($reply['suggested_faq']) {
+                    $botResponseText .= "\n\n" . $reply['suggested_faq'];
+                }
+            }
+        }
+        
+        if (!$botResponseText) {
             // Count consecutive misses to trigger escalation
             // We can check the last 2 messages from bot if they were fallback
             $recentBotMessages = \App\Models\SupportMessage::where('conversation_id', $conversation->id)
@@ -365,4 +383,27 @@ class SupportController extends Controller
         ]);
     }
 
+    /**
+     * Get all conversations for the authenticated user.
+     */
+    public function getUserConversations(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        $conversations = \App\Models\SupportConversation::where('requester_user_id', $user->id)
+            ->with(['messages' => function($q) {
+                $q->latest()->limit(1);
+            }, 'assignedAgent'])
+            ->orderBy('updated_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'conversations' => $conversations
+        ]);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Models\SupportConversation;
+use App\Filament\Resources\SupportConversationResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,13 +50,23 @@ class SupportConversationResource extends Resource
                 Tables\Columns\TextColumn::make('assignedAgent.name')->label('Agent'),
                 Tables\Columns\TextColumn::make('started_at')->dateTime()->sortable(),
             ])
-            ->actions([ Tables\Actions\ViewAction::make(), ]);
+            ->actions([ 
+                Tables\Actions\ViewAction::make(), 
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\MessagesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => \Filament\Resources\Pages\ListRecords::route('/'),
+            'view' => \Filament\Resources\Pages\ViewRecord::route('/{record}'),
         ];
     }
 }

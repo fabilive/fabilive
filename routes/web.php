@@ -4031,6 +4031,7 @@ Route::group(['middleware' => 'web'], function() {
         Route::post('/support/chat/end', 'SupportController@endConversation')->name('support.chat.end');
         Route::post('/support/chat/rate', 'SupportController@rateConversation')->name('support.chat.rate');
         Route::get('/support/chat/history', 'SupportController@getChatHistory')->name('support.chat.history');
+        Route::get('/support/chat/list', 'SupportController@getUserConversations')->name('support.chat.list');
     });
 });
 
