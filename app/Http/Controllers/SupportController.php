@@ -109,7 +109,7 @@ class SupportController extends Controller
             }
         }
         
-        if (!$botResponseText) {
+        if (!$botResponseText && $conversation->status === 'bot_active') {
             // Count consecutive misses to trigger escalation
             // We can check the last 2 messages from bot if they were fallback
             $recentBotMessages = \App\Models\SupportMessage::where('conversation_id', $conversation->id)

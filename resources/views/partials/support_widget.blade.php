@@ -270,7 +270,9 @@
                                 const newMessages = data.messages.slice(currentMsgCount);
                                 newMessages.forEach(msg => {
                                     let sender = msg.sender_type;
-                                    if (sender === 'admin' || sender === 'agent') sender = 'bot';
+                                    // Distinguish between bot (AI) and human (agent/admin)
+                                    if (sender === 'admin' || sender === 'agent') sender = 'agent';
+                                    
                                     addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                                 });
                             }
@@ -374,7 +376,12 @@
             addMessage('user', text);
             inputField.value = '';
 
-            fetch('/support/bot/chat', {
+            // 1. Intelligent Routing: Switch to live endpoint if an agent is active/requested
+            const endpoint = (conversationStatus === 'waiting_agent' || conversationStatus === 'assigned') 
+                             ? '/support/chat/send' 
+                             : '/support/bot/chat';
+
+            fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -390,22 +397,25 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    conversationId = data.conversation_id;
-                    addMessage('bot', data.bot_message.body_text);
+                    conversationId = data.conversation_id || (data.message ? data.message.conversation_id : conversationId);
                     
-                    const msgTextLower = data.bot_message.body_text.toLowerCase();
-                    const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
-                    const shouldShowEscalate = triggerKeywords.some(keyword => msgTextLower.includes(keyword));
+                    if (data.bot_message) {
+                        addMessage('bot', data.bot_message.body_text);
+                        
+                        const msgTextLower = data.bot_message.body_text.toLowerCase();
+                        const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
+                        const shouldShowEscalate = triggerKeywords.some(keyword => msgTextLower.includes(keyword));
 
-                    if (shouldShowEscalate) {
-                        escalateBtn.style.display = 'block';
+                        if (shouldShowEscalate) {
+                            escalateBtn.style.display = 'block';
+                        }
                     }
                 } else if (data.status === 'error') {
                     addMessage('system', data.message || 'An error occurred.');
                 }
             })
             .catch(err => {
-                addMessage('system', 'Unable to reach support. Are you logged in?');
+                addMessage('system', 'Unable to reach support. Our team is investigating.');
             });
         }
 
@@ -482,6 +492,11 @@
                 msgEl.style.background = '#f1f1f1';
                 msgEl.style.color = '#000';
                 msgEl.style.borderBottomLeftRadius = '2px';
+            } else if (sender === 'agent') {
+                msgEl.style.background = '#e3f2fd'; // Soft light blue for human agent
+                msgEl.style.color = '#0d47a1';
+                msgEl.style.borderBottomLeftRadius = '2px';
+                msgEl.style.border = '1px solid #bbdefb';
             } else {
                 msgEl.style.background = '#fff3cd';
                 msgEl.style.color = '#856404';
