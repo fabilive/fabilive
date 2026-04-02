@@ -2094,9 +2094,7 @@ Route::get('/fix-slugs', function () {
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
 
-Route::get('/backoffice/{any?}', function () {
-    return redirect()->route('admin.login');
-})->where('any', '.*');
+// Filament Support Panel handles /backoffice
 
 Route::prefix('admin')->group(function () {
 
