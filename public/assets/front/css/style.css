@@ -424,7 +424,7 @@ input[type="checkbox"]+label {
 	padding: 8px 18px;
 	display: inline-block;
 	color: #fff;
-
+	background: #000;
 	border: 0px;
 	cursor: pointer;
 	border-radius: 3px;
