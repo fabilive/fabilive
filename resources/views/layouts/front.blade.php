@@ -285,9 +285,6 @@
   }
   @endphp
 
-	@include('partials.tracking.pixel')
-	@include('partials.tracking.tiktok')
-	
 	@include('partials.support_widget')
 
   @yield('script')
