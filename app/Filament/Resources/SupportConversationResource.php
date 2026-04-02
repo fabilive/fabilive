@@ -37,10 +37,19 @@ class SupportConversationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('requester.name')->label('User')->searchable(),
                 Tables\Columns\TextColumn::make('context'),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('started_at')->dateTime(),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->colors([
+                        'primary' => 'bot_active',
+                        'warning' => 'waiting_agent',
+                        'success' => 'assigned',
+                        'danger' => 'ended',
+                        'secondary' => 'rated',
+                    ]),
+                Tables\Columns\TextColumn::make('assignedAgent.name')->label('Agent'),
+                Tables\Columns\TextColumn::make('started_at')->dateTime()->sortable(),
             ])
             ->actions([ 
                 Tables\Actions\ViewAction::make(), 
