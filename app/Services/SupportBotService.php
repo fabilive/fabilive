@@ -85,17 +85,30 @@ class SupportBotService
                 
             case 'contains':
             default:
-                // Simple substring match
+                // Simple substring and fuzzy match
                 $parts = explode(',', $pattern);
+                $messageWords = explode(' ', preg_replace('/[^\w\s]/', '', $messageLower));
+                
                 foreach ($parts as $part) {
                     $part = trim(Str::lower($part));
+                    // 1. Direct substring match
                     if (Str::contains($messageLower, $part)) {
                         return true;
+                    }
+                    
+                    // 2. Fuzzy match against words (handles typos like 'irder')
+                    foreach ($messageWords as $mWord) {
+                        if (strlen($mWord) > 3 && strlen($part) > 3) {
+                            if (levenshtein($mWord, $part) <= 1) {
+                                return true;
+                            }
+                        }
                     }
                 }
                 break;
         }
 
         return false;
+
     }
 }
