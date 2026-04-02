@@ -503,9 +503,18 @@
             .then(data => {
                 if (data.status === 'success') {
                     escalateBtn.style.display = 'none';
-                    conversationStatus = 'waiting_agent';
-                    addMessage('system', 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.');
+                    conversationStatus = data.conversation.status;
+                    // No need to manually addMessage, the poller will pick up the system message from DB
+                } else {
+                    escalateBtn.innerText = 'Request Live Support';
+                    escalateBtn.disabled = false;
+                    alert('Could not request live support. Please try again.');
                 }
+            })
+            .catch(err => {
+                escalateBtn.innerText = 'Request Live Support';
+                escalateBtn.disabled = false;
+                console.error(err);
             });
         });
 
