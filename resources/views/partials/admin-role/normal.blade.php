@@ -300,23 +300,27 @@
 
 @endif
 
-@if(Auth::guard('admin')->user()->sectionCheck('messages'))
+@endif
 
 <li>
-    <a href="#msg" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
-        <i class="fas fa-fw fa-newspaper"></i>{{ __('Messages') }}
+    <a href="#support_sys" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
+        <i class="fas fa-robot"></i>{{ __('Support System') }}
     </a>
-    <ul class="collapse list-unstyled" id="msg" data-parent="#accordion">
+    <ul class="collapse list-unstyled" id="support_sys" data-parent="#accordion">
         <li>
-            <a href="{{ route('admin-message-index') }}"><span>{{ __('Tickets') }}</span></a>
+            <a href="/backoffice/support-conversations" target="_blank"><span>{{ __('Live Chats') }}</span></a>
         </li>
         <li>
-            <a href="{{ route('admin-message-dispute') }}"><span>{{ __('Disputes') }}</span></a>
+            <a href="/backoffice/support-faqs" target="_blank"><span>{{ __('Knowledge Base') }}</span></a>
+        </li>
+        <li>
+            <a href="/backoffice/support-bot-rules" target="_blank"><span>{{ __('Bot Rules') }}</span></a>
+        </li>
+        <li>
+            <a href="/backoffice" target="_blank"><span>{{ __('AI Dashboard') }}</span></a>
         </li>
     </ul>
 </li>
-
-@endif
 
 @if(Auth::guard('admin')->user()->sectionCheck('blog'))
 

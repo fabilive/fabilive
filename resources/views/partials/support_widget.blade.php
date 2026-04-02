@@ -56,7 +56,9 @@
 
         <!-- Footer / Input -->
         <div id="fabi-support-footer" style="display: none; padding: 15px; border-top: 1px solid #eee; background: #fff;">
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="file" id="fabi-support-attach-input" style="display: none;" accept="image/*">
+                <button id="fabi-support-attach" style="background: transparent; border: none; cursor: pointer; font-size: 22px; color: #666; padding: 5px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">+</button>
                 <input type="text" id="fabi-support-input" placeholder="Ask SpeedyAi something..." style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
                 <button id="fabi-support-send" style="padding: 10px 18px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Send</button>
             </div>
@@ -298,6 +300,47 @@
             })
             .catch(err => {
                 addMessage('system', 'Unable to reach support. Are you logged in?');
+            });
+        }
+
+        // Image Upload Logic
+        const attachBtn = document.getElementById('fabi-support-attach');
+        const fileInput = document.getElementById('fabi-support-attach-input');
+
+        attachBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', uploadImage);
+
+        function uploadImage() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('conversation_id', conversationId);
+            formData.append('context', currentContext);
+
+            addMessage('user', `Uploading ${file.name}...`);
+
+            fetch('/support/bot/chat', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    conversationId = data.conversation_id;
+                    addMessage('bot', data.bot_message.body_text);
+                } else {
+                    addMessage('system', data.message || 'Upload failed.');
+                }
+                fileInput.value = '';
+            })
+            .catch(err => {
+                addMessage('system', 'Error uploading image.');
+                fileInput.value = '';
             });
         }
 
