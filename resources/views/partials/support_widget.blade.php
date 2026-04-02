@@ -138,6 +138,10 @@
                             item.style.background = '#fff';
                             item.style.transition = '0.2s';
                             
+                            item.onmouseover = () => item.style.background = '#f9f9f9';
+                            item.onmouseout = () => item.style.background = '#fff';
+                            item.onclick = () => openConversation(conv.id, conv.status);
+                            
                             const statusColor = (conv.status === 'ended' || conv.status === 'rated') ? '#888' : '#2ed573';
                             const statusLabel = conv.status.replace('_', ' ').charAt(0).toUpperCase() + conv.status.replace('_', ' ').slice(1);
 
