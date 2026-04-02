@@ -167,73 +167,48 @@ class SupportController extends Controller
         if ($conversation->status !== 'bot_active' && $conversation->status !== 'waiting_agent') {
             return response()->json(['status' => 'error', 'message' => 'Conversation is already active or ended']);
         }
-
         try {
             $convId = $request->conversation_id;
-            \Illuminate\Support\Facades\DB::transaction(function () use ($convId, &$conversation) {
-                // Simplest possible locked fetch
-                $lockedConv = \Illuminate\Support\Facades\DB::table('support_conversations')
-                    ->where('id', $convId)
-                    ->lockForUpdate()
-                    ->first();
-                
-                if (!$lockedConv || ($lockedConv->status !== 'bot_active' && $lockedConv->status !== 'waiting_agent')) {
-                    return;
-                }
+            
+            // 1. Instant Status Switch (Direct & Fast)
+            \Illuminate\Support\Facades\DB::table('support_conversations')
+                ->where('id', $convId)
+                ->update([
+                    'status' => 'waiting_agent',
+                    'updated_at' => now(),
+                ]);
 
-                // Simplified agent lookup
-                $agent = \Illuminate\Support\Facades\DB::table('support_agents')
-                    ->where('is_online', true)
-                    ->first();
+            // 2. Insert Handoff Message (No complex triggers)
+            \Illuminate\Support\Facades\DB::table('support_messages')->insert([
+                'conversation_id' => $convId,
+                'sender_type' => 'system',
+                'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-                if ($agent) {
-                    \Illuminate\Support\Facades\DB::table('support_conversations')->where('id', $convId)->update([
-                        'assigned_agent_admin_id' => $agent->admin_id,
-                        'status' => 'assigned',
-                        'assigned_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-
-                    \Illuminate\Support\Facades\DB::table('support_conversation_events')->insert([
-                        'conversation_id' => $convId,
-                        'actor_type' => 'system',
-                        'event' => 'assigned',
-                        'meta_json' => json_encode(['agent_id' => $agent->admin_id]),
-                        'created_at' => now(),
-                    ]);
-
-                    \Illuminate\Support\Facades\DB::table('support_messages')->insert([
-                        'conversation_id' => $convId,
-                        'sender_type' => 'system',
-                        'body_text' => 'An agent has been assigned and will be with you shortly.',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                } else {
-                    \Illuminate\Support\Facades\DB::table('support_conversations')->where('id', $convId)->update([
-                        'status' => 'waiting_agent',
-                        'updated_at' => now(),
-                    ]);
-
-                    \Illuminate\Support\Facades\DB::table('support_messages')->insert([
-                        'conversation_id' => $convId,
-                        'sender_type' => 'system',
-                        'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            });
+            // 3. Log the Event
+            \Illuminate\Support\Facades\DB::table('support_conversation_events')->insert([
+                'conversation_id' => $convId,
+                'actor_type' => 'system',
+                'event' => 'waiting_agent',
+                'meta_json' => json_encode(['requested_at' => now()]),
+                'created_at' => now(),
+            ]);
 
             return response()->json([
                 'status' => 'success',
-                'conversation' => \App\Models\SupportConversation::find($convId)
+                'conversation' => [
+                    'id' => $convId,
+                    'status' => 'waiting_agent'
+                ]
             ]);
+
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Escalation fatal error: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error("ULTRA STABLE ESCALATION FAILED: " . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Escalation failed: ' . $e->getMessage()
+                'message' => 'Escalation error. Our team is investigating.'
             ], 500);
         }
     }
