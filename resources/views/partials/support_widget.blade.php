@@ -499,22 +499,25 @@
                 },
                 body: JSON.stringify({ conversation_id: conversationId })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success') {
                     escalateBtn.style.display = 'none';
                     conversationStatus = data.conversation.status;
-                    // No need to manually addMessage, the poller will pick up the system message from DB
                 } else {
-                    escalateBtn.innerText = 'Request Live Support';
-                    escalateBtn.disabled = false;
-                    alert('Could not request live support. Please try again.');
+                    throw new Error(data.message || 'Unknown server error');
                 }
             })
             .catch(err => {
                 escalateBtn.innerText = 'Request Live Support';
                 escalateBtn.disabled = false;
-                console.error(err);
+                alert('DEBUG ERROR: ' + (err.message || JSON.stringify(err)));
+                console.error('Escalation failed:', err);
             });
         });
 
