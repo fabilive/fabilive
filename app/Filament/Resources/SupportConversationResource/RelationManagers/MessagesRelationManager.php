@@ -36,11 +36,12 @@ class MessagesRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('sender_type')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn (?string $state): string => match ($state) {
                         'user' => 'gray',
                         'bot' => 'info',
                         'agent' => 'success',
                         'admin' => 'success',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('body_text')->wrap()->label('Message'),
                 Tables\Columns\ImageColumn::make('attachment_url')->label('File'),
