@@ -69,7 +69,7 @@
   <link rel="stylesheet" href="{{ asset('assets/front/css/owl.carousel.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/front/css/select2.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/front/css/template.css') }}">
-  <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ time() }}">
   <link rel="stylesheet" href="{{ asset('assets/css/responsive-fixes.css') }}">
 
     <!-- suleman added link -->
