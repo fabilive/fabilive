@@ -52,31 +52,7 @@ class MessagesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Send Reply')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['sender_type'] = 'agent';
-                        $data['sender_id'] = Auth::id();
-                        $data['type'] = isset($data['attachment_url']) ? 'image' : 'text';
-                        return $data;
-                    })
-                    ->after(function ($record) {
-                        // Mark conversation as assigned if waiting
-                        $conversation = $this->getOwnerRecord();
-                        if ($conversation->status === 'waiting_agent' || $conversation->status === 'bot_active') {
-                            $conversation->status = 'assigned';
-                            $conversation->assigned_agent_admin_id = Auth::id();
-                            $conversation->assigned_at = now();
-                            $conversation->save();
-
-                            \App\Models\SupportConversationEvent::create([
-                                'conversation_id' => $conversation->id,
-                                'actor_type' => 'agent',
-                                'actor_id' => Auth::id(),
-                                'event' => 'assigned'
-                            ]);
-                        }
-                    }),
+                // Handled by the persistent chat box on the View page
             ])
             ->actions([
                 //
