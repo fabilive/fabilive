@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\SupportConversation;
 use App\Filament\Resources\SupportConversationResource\RelationManagers;
+use App\Filament\Resources\SupportConversationResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -66,7 +67,8 @@ class SupportConversationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => SupportConversationResource\Pages\ListRecords::route('/'),
+            'index' => Pages\ListRecords::route('/'),
+            'view' => Pages\ViewSupportConversation::route('/{record}'),
         ];
     }
 }

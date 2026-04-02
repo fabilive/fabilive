@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SupportConversationResource\RelationManagers;
 
+use App\Models\SupportConversation;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -62,10 +63,18 @@ class MessagesRelationManager extends RelationManager
                     ->after(function ($record) {
                         // Mark conversation as assigned if waiting
                         $conversation = $this->getOwnerRecord();
-                        if ($conversation->status === 'waiting_agent') {
+                        if ($conversation->status === 'waiting_agent' || $conversation->status === 'bot_active') {
                             $conversation->status = 'assigned';
                             $conversation->assigned_agent_admin_id = Auth::id();
+                            $conversation->assigned_at = now();
                             $conversation->save();
+
+                            \App\Models\SupportConversationEvent::create([
+                                'conversation_id' => $conversation->id,
+                                'actor_type' => 'agent',
+                                'actor_id' => Auth::id(),
+                                'event' => 'assigned'
+                            ]);
                         }
                     }),
             ])

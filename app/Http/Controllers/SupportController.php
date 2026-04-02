@@ -94,9 +94,9 @@ class SupportController extends Controller
 
         \App\Models\SupportMessage::create($msgData);
 
-        // Process through bot (only if there's text)
+        // Process through bot (only if there's text AND it's bot_active)
         $botResponseText = "";
-        if ($request->message) {
+        if ($request->message && $conversation->status === 'bot_active') {
             $reply = $botService->processMessage($request->message, $request->context);
             if ($reply) {
                 $botResponseText = $reply['response_text'];
@@ -124,19 +124,21 @@ class SupportController extends Controller
             }
         }
 
-        // Save bot message
-        $botMsg = \App\Models\SupportMessage::create([
-            'conversation_id' => $conversation->id,
-            'sender_type' => 'bot',
-            'sender_id' => null,
-            'type' => 'text',
-            'body_text' => $botResponseText
-        ]);
+        if ($botResponseText) {
+            // Save bot message
+            $botMsg = \App\Models\SupportMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_type' => 'bot',
+                'sender_id' => null,
+                'type' => 'text',
+                'body_text' => $botResponseText
+            ]);
+        }
 
         return response()->json([
             'status' => 'success', 
             'conversation_id' => $conversation->id,
-            'bot_message' => $botMsg
+            'bot_message' => $botMsg ?? null
         ]);
     }
 
@@ -285,21 +287,26 @@ class SupportController extends Controller
         ]);
 
         $user = Auth::guard('web')->user();
+        $admin = Auth::guard('admin')->user();
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
         
-        if ($conversation->requester_user_id !== $user->id) {
+        if ($user && $conversation->requester_user_id !== $user->id) {
             abort(403);
+        }
+
+        if (!$user && !$admin) {
+            abort(401);
         }
 
         $conversation->status = 'ended';
         $conversation->ended_at = now();
-        $conversation->ended_by = 'user';
+        $conversation->ended_by = $admin ? 'agent' : 'user';
         $conversation->save();
         
         \App\Models\SupportConversationEvent::create([
             'conversation_id' => $conversation->id,
-            'actor_type' => 'user',
-            'actor_id' => $user->id,
+            'actor_type' => $admin ? 'agent' : 'user',
+            'actor_id' => $admin ? $admin->id : $user->id,
             'event' => 'ended'
         ]);
 

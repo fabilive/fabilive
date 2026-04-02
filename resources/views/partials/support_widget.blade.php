@@ -51,6 +51,24 @@
                 <div id="fabi-support-messages" style="flex: 1; overflow-y: auto; margin-bottom: 10px; font-size: 14px; display: flex; flex-direction: column; gap: 12px;">
                     <!-- Messages go here -->
                 </div>
+
+                <!-- Step 4: Rating View (Appears inside chat view) -->
+                <div id="fabi-support-rating-view" style="display: none; padding: 20px; background: #f9f9f9; border-radius: 10px; text-align: center; border: 1px solid #eee; margin-top: auto;">
+                    <h4 style="font-size: 16px; margin-bottom: 10px; color: #000;">How was your experience?</h4>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Please rate your conversation with our agent.</p>
+                    
+                    <div id="fabi-star-rating" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 30px;">
+                        <span class="fabi-star" data-rating="1" style="cursor: pointer; color: #ccc;">★</span>
+                        <span class="fabi-star" data-rating="2" style="cursor: pointer; color: #ccc;">★</span>
+                        <span class="fabi-star" data-rating="3" style="cursor: pointer; color: #ccc;">★</span>
+                        <span class="fabi-star" data-rating="4" style="cursor: pointer; color: #ccc;">★</span>
+                        <span class="fabi-star" data-rating="5" style="cursor: pointer; color: #ccc;">★</span>
+                    </div>
+
+                    <textarea id="fabi-rating-comment" placeholder="Any additional feedback? (Optional)" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 13px; resize: none;"></textarea>
+                    
+                    <button id="fabi-submit-rating" style="width: 100%; padding: 12px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Submit Rating</button>
+                </div>
             </div>
         </div>
 
@@ -88,6 +106,9 @@
 
         let currentContext = null;
         let conversationId = null;
+        let conversationStatus = null;
+        let pollInterval = null;
+        let selectedRating = 0;
         const botLogo = "{{asset('assets/images/'.$gs->logo)}}";
 
         // Initial Inbox Load
@@ -140,6 +161,7 @@
 
         function openConversation(id, status) {
             conversationId = id;
+            conversationStatus = status;
             messageContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#999;">Loading history...</p>';
             
             fetch(`/support/chat/history?conversation_id=${id}`)
@@ -149,34 +171,99 @@
                         messageContainer.innerHTML = '';
                         currentContext = data.conversation.context;
                         
+                        // Clear any existing polling
+                        if (pollInterval) clearInterval(pollInterval);
+                        
                         data.messages.forEach(msg => {
                             let sender = msg.sender_type;
-                            if (sender === 'admin' || sender === 'agent') sender = 'bot';
+                            if (sender === 'admin' || sender === 'agent') sender = 'bot'; // Agents show with bot avatar on user side for consistency or custom agent avatar?
                             addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                         });
                         
                         startChat();
                         backBtn.style.display = 'block';
                         
-                        // Disable input if ended
-                        if (status === 'ended' || status === 'rated') {
-                            footer.style.display = 'block'; // Show it, but...
-                            document.getElementById('fabi-support-input').placeholder = 'This chat is closed.';
-                            document.getElementById('fabi-support-input').disabled = true;
-                            document.getElementById('fabi-support-send').disabled = true;
-                            document.getElementById('fabi-support-attach').disabled = true;
-                        } else {
-                            document.getElementById('fabi-support-input').placeholder = 'Ask SpeedyAi something...';
-                            document.getElementById('fabi-support-input').disabled = false;
-                            document.getElementById('fabi-support-send').disabled = false;
-                            document.getElementById('fabi-support-attach').disabled = false;
-                            
-                            if (status === 'waiting_agent' || status === 'assigned') {
-                                escalateBtn.style.display = 'none';
-                            }
+                        updateChatUI(data.conversation.status);
+                        
+                        // Start polling if active
+                        if (status !== 'ended' && status !== 'rated') {
+                            startPolling();
                         }
                     }
                 });
+        }
+
+        function updateChatUI(status) {
+            conversationStatus = status;
+            const ratingView = document.getElementById('fabi-support-rating-view');
+            const messagesList = document.getElementById('fabi-support-messages');
+            
+            if (status === 'ended' || status === 'rated') {
+                if (pollInterval) clearInterval(pollInterval);
+                footer.style.display = 'block'; 
+                document.getElementById('fabi-support-input').placeholder = 'This chat is closed.';
+                document.getElementById('fabi-support-input').disabled = true;
+                document.getElementById('fabi-support-send').disabled = true;
+                document.getElementById('fabi-support-attach').disabled = true;
+                escalateBtn.style.display = 'none';
+
+                if (status === 'ended') {
+                    ratingView.style.display = 'block';
+                    messagesList.style.display = 'none';
+                } else {
+                    ratingView.style.display = 'none';
+                    messagesList.style.display = 'flex';
+                }
+            } else {
+                ratingView.style.display = 'none';
+                messagesList.style.display = 'flex';
+                document.getElementById('fabi-support-input').placeholder = 'Ask SpeedyAi something...';
+                document.getElementById('fabi-support-input').disabled = false;
+                document.getElementById('fabi-support-send').disabled = false;
+                document.getElementById('fabi-support-attach').disabled = false;
+                
+                if (status === 'waiting_agent' || status === 'assigned') {
+                    escalateBtn.style.display = 'none';
+                } else {
+                    // Check if it should be shown
+                    // Only show if bot indicated it
+                }
+            }
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(() => {
+                if (!conversationId) return;
+                
+                fetch(`/support/chat/history?conversation_id=${conversationId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Check for status change
+                            if (data.conversation.status !== conversationStatus) {
+                                if (data.conversation.status === 'assigned' && conversationStatus === 'waiting_agent') {
+                                    addMessage('system', 'A live agent has joined the chat.');
+                                }
+                                updateChatUI(data.conversation.status);
+                            }
+                            
+                            // Check for new messages
+                            const currentMsgCount = messageContainer.children.length;
+                            const newMsgCount = data.messages.length;
+                            
+                            if (newMsgCount > currentMsgCount) {
+                                // Add only new messages
+                                const newMessages = data.messages.slice(currentMsgCount);
+                                newMessages.forEach(msg => {
+                                    let sender = msg.sender_type;
+                                    if (sender === 'admin' || sender === 'agent') sender = 'bot';
+                                    addMessage(sender, msg.body_text || '', !!msg.attachment_url);
+                                });
+                            }
+                        }
+                    });
+            }, 5000);
         }
 
         // Toggle Widget
@@ -258,6 +345,7 @@
             faqView.style.display = 'none';
             chatView.style.display = 'flex';
             footer.style.display = 'block';
+            startPolling();
         }
 
         // Send Message
@@ -395,7 +483,6 @@
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
 
-        // Handle Escalation
         escalateBtn.addEventListener('click', () => {
             escalateBtn.innerText = 'Requesting...';
             escalateBtn.disabled = true;
@@ -412,7 +499,64 @@
             .then(data => {
                 if (data.status === 'success') {
                     escalateBtn.style.display = 'none';
+                    conversationStatus = 'waiting_agent';
                     addMessage('system', 'Escalation request sent to live agents.');
+                }
+            });
+        });
+
+        // Rating Star Logic
+        const stars = document.querySelectorAll('.fabi-star');
+        stars.forEach(star => {
+            star.addEventListener('click', (e) => {
+                selectedRating = parseInt(e.target.getAttribute('data-rating'));
+                stars.forEach(s => {
+                    if (parseInt(s.getAttribute('data-rating')) <= selectedRating) {
+                        s.style.color = '#ffd700'; // Gold
+                    } else {
+                        s.style.color = '#ccc';
+                    }
+                });
+            });
+        });
+
+        const submitRatingBtn = document.getElementById('fabi-submit-rating');
+        submitRatingBtn.addEventListener('click', () => {
+            if (selectedRating === 0) {
+                alert('Please select a star rating.');
+                return;
+            }
+
+            const comment = document.getElementById('fabi-rating-comment').value;
+
+            submitRatingBtn.innerText = 'Submitting...';
+            submitRatingBtn.disabled = true;
+
+            fetch('/support/chat/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    conversation_id: conversationId,
+                    rating: selectedRating,
+                    comment: comment
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('fabi-support-rating-view').innerHTML = `
+                        <div style="padding:10px;">
+                            <span style="font-size:40px; display:block; margin-bottom:10px;">✅</span>
+                            <h4 style="font-size:16px; margin-bottom:5px;">Thank You!</h4>
+                            <p style="font-size:13px; color:#666;">Your feedback helps us improve SpeedyAi.</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        resetToContext();
+                    }, 3000);
                 }
             });
         });
