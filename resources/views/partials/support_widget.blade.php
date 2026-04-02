@@ -81,6 +81,38 @@
         let conversationId = null;
         const botLogo = "{{asset('assets/images/'.$gs->logo)}}";
 
+        // Initial History Load
+        loadHistory();
+
+        function loadHistory() {
+            fetch('/support/chat/history')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.conversation) {
+                        conversationId = data.conversation.id;
+                        currentContext = data.conversation.messages[0]?.context || 'buyer'; // Best guess if missing
+                        
+                        // Populate messages
+                        if (data.messages && data.messages.length > 0) {
+                            data.messages.forEach(msg => {
+                                let sender = msg.sender_type;
+                                if (sender === 'admin' || sender === 'agent') sender = 'bot';
+                                addMessage(sender, msg.body_text || '', !!msg.attachment_url);
+                            });
+                            
+                            startChat();
+                            backBtn.style.display = 'block';
+                            
+                            if (data.conversation.status === 'waiting_agent' || data.conversation.status === 'assigned') {
+                                escalateBtn.style.display = 'none';
+                                addMessage('system', 'Resuming live support session...');
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.log('No active session found.'));
+        }
+
         // Toggle Widget
         launcher.addEventListener('click', () => {
             windowEl.style.display = windowEl.style.display === 'none' ? 'flex' : 'none';

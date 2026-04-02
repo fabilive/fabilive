@@ -98,7 +98,15 @@ class SupportSystemSeeder extends Seeder
                 'pattern_value' => 'agent,human,person,talk,chat,live',
                 'response_text' => 'If you need a real person, please click the "Request Live Support" button below. I will notify an available agent immediately!',
                 'priority' => 200
-            ]
+            ],
+            [
+                'id' => 5,
+                'context' => 'buyer',
+                'pattern_type' => 'contains',
+                'pattern_value' => 'referral,referal,my code,get code,share code',
+                'response_text' => 'You can find your unique Referral Code in your <strong>Buyer Dashboard > Referral</strong> section. Share it with friends to earn bonuses!',
+                'priority' => 150
+            ],
         ];
 
         foreach ($rules as $rule) {

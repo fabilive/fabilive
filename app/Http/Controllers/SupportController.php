@@ -333,15 +333,29 @@ class SupportController extends Controller
      */
     public function getChatHistory(Request $request)
     {
-        $request->validate([
-            'conversation_id' => 'required|exists:support_conversations,id'
-        ]);
-
         $user = Auth::guard('web')->user();
-        $conversation = \App\Models\SupportConversation::with('messages', 'assignedAgent')->findOrFail($request->conversation_id);
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        $conversationId = $request->query('conversation_id');
         
-        if ($conversation->requester_user_id !== $user->id) {
-            abort(403);
+        if ($conversationId) {
+            $conversation = \App\Models\SupportConversation::with('messages', 'assignedAgent')->findOrFail($conversationId);
+            if ($conversation->requester_user_id !== $user->id) {
+                abort(403);
+            }
+        } else {
+            // Find latest active or recently ended conversation
+            $conversation = \App\Models\SupportConversation::where('requester_user_id', $user->id)
+                ->whereIn('status', ['bot_active', 'waiting_agent', 'assigned'])
+                ->with('messages', 'assignedAgent')
+                ->orderBy('created_at', 'desc')
+                ->first();
+                
+            if (!$conversation) {
+                return response()->json(['status' => 'no_content']);
+            }
         }
 
         return response()->json([
@@ -350,4 +364,5 @@ class SupportController extends Controller
             'messages' => $conversation->messages
         ]);
     }
+
 }
