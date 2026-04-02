@@ -154,13 +154,17 @@ class SupportController extends Controller
             'conversation_id' => 'required|exists:support_conversations,id'
         ]);
 
+        \Illuminate\Support\Facades\Log::info("DEBUG: requestLiveSupport reached with ID: " . $request->conversation_id);
+
         $user = Auth::guard('web')->user();
         if (!$user) {
+            \Illuminate\Support\Facades\Log::warning("DEBUG: requestLiveSupport unauthenticated");
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
         if ($conversation->requester_user_id !== $user->id) {
+            \Illuminate\Support\Facades\Log::error("DEBUG: requestLiveSupport ownership mismatch");
             abort(403);
         }
 

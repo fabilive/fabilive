@@ -496,6 +496,15 @@
             escalateBtn.innerText = 'Requesting...';
             escalateBtn.disabled = true;
 
+            // Safety Timeout: If server hangs, assume success and hide button after 5s
+            const safetyTimeout = setTimeout(() => {
+                if (escalateBtn.disabled && escalateBtn.innerText === 'Requesting...') {
+                    escalateBtn.style.display = 'none';
+                    conversationStatus = 'waiting_agent';
+                    console.warn('Escalation took too long, force-hiding button.');
+                }
+            }, 5000);
+
             fetch('/support/live/request', {
                 method: 'POST',
                 headers: {
@@ -506,6 +515,7 @@
                 body: JSON.stringify({ conversation_id: conversationId })
             })
             .then(response => {
+                clearTimeout(safetyTimeout);
                 if (!response.ok) {
                     return response.json().then(err => { throw err; });
                 }
@@ -514,7 +524,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     escalateBtn.style.display = 'none';
-                    conversationStatus = data.conversation.status;
+                    conversationStatus = 'waiting_agent';
                 } else {
                     throw new Error(data.message || 'Unknown server error');
                 }
