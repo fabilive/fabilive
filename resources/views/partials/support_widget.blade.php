@@ -11,7 +11,7 @@
         <div style="background: #000; color: #fff; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button id="fabi-support-back" style="display: none; background: transparent; border: none; color: #fff; cursor: pointer; font-size: 20px; padding: 0;">←</button>
-                <span style="letter-spacing: 0.5px;">SpeedyAi</span>
+                <span style="letter-spacing: 0.5px;">MbokoAi</span>
             </div>
             <button id="fabi-support-close" style="background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px;">✖</button>
         </div>
@@ -21,7 +21,7 @@
             <!-- Step 1: Select Context -->
             <div id="fabi-support-context-selection" style="padding: 25px; text-align: center;">
                 <img src="{{asset('assets/images/'.$gs->logo)}}" style="width: 80px; margin-bottom: 20px; border-radius: 10px;">
-                <h3 style="margin-bottom: 10px; font-size: 18px; color: #000;">Welcome to SpeedyAi</h3>
+                <h3 style="margin-bottom: 10px; font-size: 18px; color: #000;">Welcome to MbokoAi</h3>
                 <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we speed up your day today?</p>
                 <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Buyer</button>
                 <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Seller / Vendor</button>
@@ -42,7 +42,7 @@
                 </div>
                 <div style="text-align: center;">
                     <p style="font-size: 13px; color: #888; margin-bottom: 10px;">Don't see your answer?</p>
-                    <button id="fabi-start-chat-btn" style="background: #000; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;">Chat with SpeedyAi</button>
+                    <button id="fabi-start-chat-btn" style="background: #000; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;">Chat with MbokoAi</button>
                 </div>
             </div>
 
@@ -77,7 +77,7 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <input type="file" id="fabi-support-attach-input" style="display: none;" accept="image/*">
                 <button id="fabi-support-attach" style="background: transparent; border: none; cursor: pointer; font-size: 22px; color: #666; padding: 5px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">+</button>
-                <input type="text" id="fabi-support-input" placeholder="Ask SpeedyAi something..." style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+                <input type="text" id="fabi-support-input" placeholder="Ask MbokoAi something..." style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
                 <button id="fabi-support-send" style="padding: 10px 18px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Send</button>
             </div>
             <button id="fabi-escalate-btn" style="margin-top: 10px; width: 100%; padding: 10px; background: #ff4757; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: none;">Request Live Support</button>
