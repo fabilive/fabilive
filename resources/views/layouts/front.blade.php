@@ -283,8 +283,13 @@
     toastr.success("'.Session::get('success').'")
   </script>';
   }
-
   @endphp
+
+	@include('partials.tracking.pixel')
+	@include('partials.tracking.tiktok')
+	
+	@include('partials.support_widget')
+
   @yield('script')
 </body>
 

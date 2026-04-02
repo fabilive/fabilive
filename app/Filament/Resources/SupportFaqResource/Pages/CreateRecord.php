@@ -1,0 +1,1 @@
+﻿<?php namespace App\Filament\Resources\SupportFaqResource\Pages; use App\Filament\Resources\SupportFaqResource; use Filament\Actions; use Filament\Resources\Pages\CreateRecord as BaseCreateRecord; class CreateRecord extends BaseCreateRecord { protected static string $resource = SupportFaqResource::class; }

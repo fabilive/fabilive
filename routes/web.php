@@ -4006,7 +4006,7 @@ Route::group(['middleware' => 'maintenance'], function () {
     Route::get('/country/tax/check', 'Front\CartController@country_tax');
     Route::get('/{slug}', 'Front\VendorController@index')->name('front.vendor');
 
-    // VENDOR AND PAGE SECTION ENDS
+// VENDOR AND PAGE SECTION ENDS
 
     // ************************************ FRONT SECTION ENDS**********************************************
 
@@ -4015,3 +4015,22 @@ Route::group(['middleware' => 'maintenance'], function () {
 Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');
 Route::get('/delete-products-now', function () {
     require base_path('delete_all_products.php'); });
+
+// ==========================================
+// SUPPORT SYSTEM ROUTES
+// ==========================================
+Route::group(['middleware' => 'web'], function() {
+    // Public/Guest allowed
+    Route::get('/support/faqs', 'SupportController@getFaqs')->name('support.faqs.get');
+    
+    // Auth required (using a throttle for messages to prevent spam)
+    Route::group(['middleware' => ['auth', 'throttle:60,1']], function() {
+        Route::post('/support/bot/chat', 'SupportController@botChat')->name('support.bot.chat');
+        Route::post('/support/live/request', 'SupportController@requestLiveSupport')->name('support.live.request');
+        Route::post('/support/chat/send', 'SupportController@sendMessage')->name('support.chat.send');
+        Route::post('/support/chat/end', 'SupportController@endConversation')->name('support.chat.end');
+        Route::post('/support/chat/rate', 'SupportController@rateConversation')->name('support.chat.rate');
+        Route::get('/support/chat/history', 'SupportController@getChatHistory')->name('support.chat.history');
+    });
+});
+
