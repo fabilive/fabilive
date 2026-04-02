@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Admin;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Auth;
 use Validator;
 use Datatables;
+use Hash;
 
 class StaffController extends AdminBaseController
 {
@@ -33,7 +35,8 @@ class StaffController extends AdminBaseController
     }
 
     public function create(){
-        return view('admin.staff.create');
+        $roles = Role::get();
+        return view('admin.staff.create',compact('roles'));
     }
 
     //*** POST Request
@@ -75,8 +78,9 @@ class StaffController extends AdminBaseController
 
     public function edit($id)
     {
+        $roles = Role::get();
         $data = Admin::findOrFail($id);  
-        return view('admin.staff.edit',compact('data'));
+        return view('admin.staff.edit',compact('data','roles'));
     }
 
     public function update(Request $request,$id)

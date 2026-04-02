@@ -72,7 +72,7 @@
 														<div class="col-lg-7">
 																<select  name="role_id" required="">
 																	<option value="">{{ __('Select Role') }}</option>
-																	  @foreach(DB::table('roles')->get() as $data)
+																	  @foreach($roles as $data)
 																		<option value="{{ $data->id }}">{{ $data->name }}</option>
 																	  @endforeach
 																  </select>
