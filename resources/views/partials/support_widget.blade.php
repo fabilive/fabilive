@@ -22,9 +22,18 @@
             <div id="fabi-support-context-selection" style="padding: 25px; text-align: center;">
                 <img src="{{asset('assets/images/'.$gs->logo)}}" style="width: 80px; margin-bottom: 20px; border-radius: 10px;">
                 <h3 style="margin-bottom: 10px; font-size: 18px; color: #000;">Welcome to MbokoAi</h3>
-                <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we speed up your day today?</p>
-                <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Buyer</button>
-                <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Seller / Vendor</button>
+                <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we help you today?</p>
+                
+                @auth
+                    <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Buyer</button>
+                    <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Seller / Vendor</button>
+                @else
+                    <div style="background: #fff8e1; color: #856404; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; border: 1px solid #ffe082; font-size: 13.5px; line-height: 1.5;">
+                        <span style="font-size: 18px; margin-bottom: 5px; display: block;">🔒 <strong>Member Access Only</strong></span>
+                        Hello! I am <strong>MbokoAi</strong>. To help you better, please <a href="{{ route('user.login') }}" style="color: #000; text-decoration: underline; font-weight: bold;">Sign In</a> or <a href="{{ route('user.register') }}" style="color: #000; text-decoration: underline; font-weight: bold;">Sign Up</a> so we can access your order details.
+                    </div>
+                    <button style="width: 100%; padding: 14px; background: #f1f1f1; color: #999; border: 1px solid #ddd; border-radius: 8px; cursor: not-allowed; font-weight: 600;" disabled>Chat Restricted to Users</button>
+                @endauth
                 
                 <div id="fabi-support-inbox" style="margin-top: 30px; text-align: left; display: none;">
                     <h4 style="font-size: 13px; color: #888; border-top: 1px solid #eee; padding-top: 15px; margin-bottom: 10px;">Your Recent Chats</h4>
@@ -221,7 +230,7 @@
             } else {
                 ratingView.style.display = 'none';
                 messagesList.style.display = 'flex';
-                document.getElementById('fabi-support-input').placeholder = 'Ask SpeedyAi something...';
+                document.getElementById('fabi-support-input').placeholder = 'Ask MbokoAi something...';
                 document.getElementById('fabi-support-input').disabled = false;
                 document.getElementById('fabi-support-send').disabled = false;
                 document.getElementById('fabi-support-attach').disabled = false;
@@ -342,7 +351,7 @@
 
         startChatBtn.addEventListener('click', () => {
             startChat();
-            addMessage('bot', `Hello! I am SpeedyAi. How can I help you today regarding your ${currentContext} account?`);
+            addMessage('bot', `Hello! I am MbokoAi. How can I help you today regarding your ${currentContext} account?`);
         });
 
         function startChat() {
@@ -588,7 +597,7 @@
                         <div style="padding:10px;">
                             <span style="font-size:40px; display:block; margin-bottom:10px;">✅</span>
                             <h4 style="font-size:16px; margin-bottom:5px;">Thank You!</h4>
-                            <p style="font-size:13px; color:#666;">Your feedback helps us improve SpeedyAi.</p>
+                            <p style="font-size:13px; color:#666;">Your feedback helps us improve MbokoAi.</p>
                         </div>
                     `;
                     setTimeout(() => {
