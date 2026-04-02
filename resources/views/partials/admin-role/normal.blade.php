@@ -308,16 +308,16 @@
     </a>
     <ul class="collapse list-unstyled" id="support_sys" data-parent="#accordion">
         <li>
-            <a href="/admin/speedyai/support-conversations" target="_blank"><span>{{ __('Live Chats') }}</span></a>
+            <a href="/speedyai-admin/support-conversations"><span>{{ __('Live Chats') }}</span></a>
         </li>
         <li>
-            <a href="/admin/speedyai/support-faqs" target="_blank"><span>{{ __('Knowledge Base') }}</span></a>
+            <a href="/speedyai-admin/support-faqs"><span>{{ __('Knowledge Base') }}</span></a>
         </li>
         <li>
-            <a href="/admin/speedyai/support-bot-rules" target="_blank"><span>{{ __('Bot Rules') }}</span></a>
+            <a href="/speedyai-admin/support-bot-rules"><span>{{ __('Bot Rules') }}</span></a>
         </li>
         <li>
-            <a href="/admin/speedyai" target="_blank"><span>{{ __('AI Dashboard') }}</span></a>
+            <a href="/speedyai-admin"><span>{{ __('AI Dashboard') }}</span></a>
         </li>
     </ul>
 </li>
