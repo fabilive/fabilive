@@ -307,18 +307,26 @@
         <i class="fas fa-robot"></i>{{ __('Support System') }}
     </a>
     <ul class="collapse list-unstyled" id="support_sys" data-parent="#accordion">
+        @if(Auth::guard('admin')->user()->sectionCheck('support_live_chats'))
         <li>
             <a href="/speedyai-admin/support-conversations"><span>{{ __('Live Chats') }}</span></a>
         </li>
+        @endif
+        @if(Auth::guard('admin')->user()->sectionCheck('support_kb'))
         <li>
             <a href="/speedyai-admin/support-faqs"><span>{{ __('Knowledge Base') }}</span></a>
         </li>
+        @endif
+        @if(Auth::guard('admin')->user()->sectionCheck('support_bot_rules'))
         <li>
             <a href="/speedyai-admin/support-bot-rules"><span>{{ __('Bot Rules') }}</span></a>
         </li>
+        @endif
+        @if(Auth::guard('admin')->user()->sectionCheck('support_ai_dashboard'))
         <li>
             <a href="/speedyai-admin"><span>{{ __('AI Dashboard') }}</span></a>
         </li>
+        @endif
     </ul>
 </li>
 
