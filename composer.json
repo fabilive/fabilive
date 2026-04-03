@@ -10,6 +10,7 @@
         "anhskohbo/no-captcha": "^3.5",
         "authorizenet/authorizenet": "^2.0",
         "barryvdh/laravel-dompdf": "^2.0",
+        "beyondcode/laravel-websockets": "^1.14",
         "brian2694/laravel-toastr": "^5.57",
         "cartalyst/stripe-laravel": "^15.0",
 
