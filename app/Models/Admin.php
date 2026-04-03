@@ -11,7 +11,7 @@ class Admin extends Authenticatable implements FilamentUser
     protected $guard = 'admin';
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'created_at', 'updated_at', 'remember_token','shop_name'
+        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'section', 'created_at', 'updated_at', 'remember_token','shop_name'
     ];
 
     protected $hidden = [
@@ -31,7 +31,12 @@ class Admin extends Authenticatable implements FilamentUser
     }
 
     public function sectionCheck($value){
-        $sections = explode(" , ", $this->role->section);
+        if(!empty($this->section)){
+            $sections = explode(" , ", $this->section);
+        } else {
+            $sections = explode(" , ", $this->role->section);
+        }
+        
         if (in_array($value, $sections)){
             return true;
         }else{

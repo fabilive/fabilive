@@ -71,6 +71,11 @@ class StaffController extends AdminBaseController
         } 
         $input['role'] = 'Staff';
         $input['password'] = bcrypt($request['password']);
+        
+        if (isset($input['section'])) {
+            $input['section'] = implode(" , ", $input['section']);
+        }
+        
         $data->fill($input)->save();
         //--- Logic Section Ends
 
@@ -129,6 +134,12 @@ class StaffController extends AdminBaseController
             else{
                 $input['password'] = Hash::make($request->password);
             }
+            if (isset($input['section'])) {
+                $input['section'] = implode(" , ", $input['section']);
+            } else {
+                $input['section'] = '';
+            }
+
             $data->update($input);
             $msg = __('Data Updated Successfully.');
             return response()->json($msg);
