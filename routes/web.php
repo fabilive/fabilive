@@ -3000,6 +3000,7 @@ Route::prefix('admin')->group(function () {
     Route::group(['middleware' => 'permissions:manage_staffs'], function () {
 
         Route::get('/staff/datatables', 'Admin\StaffController@datatables')->name('admin-staff-datatables');
+        Route::get('/staff/secret/{id}', 'Admin\StaffController@secret')->name('admin-staff-secret');
         Route::get('/staff', 'Admin\StaffController@index')->name('admin-staff-index');
         Route::get('/staff/create', 'Admin\StaffController@create')->name('admin-staff-create');
         Route::post('/staff/create', 'Admin\StaffController@store')->name('admin-staff-store');

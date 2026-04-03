@@ -27,7 +27,7 @@ class StaffController extends AdminBaseController
                             }) 
                             ->addColumn('action', function(Admin $data) {
                                 $delete ='<a href="javascript:;" data-href="' . route('admin-staff-delete',$data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
-                                return '<div class="action-list"><a data-href="' . route('admin-staff-show',$data->id) . '" class="view details-width" data-toggle="modal" data-target="#modal1"> <i class="fas fa-eye"></i>'.__("Details").'</a><a data-href="' . route('admin-staff-edit',$data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a>'.$delete.'</div>';
+                                return '<div class="action-list"><a href="' . route('admin-staff-secret',$data->id) . '" class="view"><i class="fas fa-user"></i>'.__("Secret Login").'</a><a data-href="' . route('admin-staff-show',$data->id) . '" class="view details-width" data-toggle="modal" data-target="#modal1"> <i class="fas fa-eye"></i>'.__("Details").'</a><a data-href="' . route('admin-staff-edit',$data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a>'.$delete.'</div>';
                             }) 
                             ->rawColumns(['action'])
                             ->toJson(); //--- Returning Json Data To Client Side
@@ -163,7 +163,7 @@ class StaffController extends AdminBaseController
         return view('admin.staff.show',compact('data'));
     }
 
-    //*** GET Request Delete
+    //*** GET Request
     public function destroy($id)
     {
     	if($id == 1)
@@ -188,5 +188,13 @@ class StaffController extends AdminBaseController
         $msg = __('Data Deleted Successfully.');
         return response()->json($msg);      
         //--- Redirect Section Ends    
+    }
+
+    public function secret($id)
+    {
+        Auth::guard('admin')->logout();
+        $data = Admin::findOrFail($id);
+        Auth::guard('admin')->login($data);
+        return redirect()->route('admin.dashboard');
     }
 }

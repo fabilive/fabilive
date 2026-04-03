@@ -1,4 +1,3 @@
-@if(Auth::guard('admin')->user()->role_id != 0)
 
 @if(Auth::guard('admin')->user()->sectionCheck('orders'))
 
@@ -565,7 +564,5 @@
     <a href="{{ route('admin-subs-index') }}" class=" wave-effect"><i class="fas fa-users-cog mr-2"></i>{{
         __('Subscribers') }}</a>
 </li>
-
-@endif
 
 @endif
