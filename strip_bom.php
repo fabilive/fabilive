@@ -9,6 +9,7 @@ $directories = [
     'app/Filament/Resources',
     'tests/Feature',
     'database/seeders',
+    'resources/views',
 ];
 
 foreach ($directories as $directory) {

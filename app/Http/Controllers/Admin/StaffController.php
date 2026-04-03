@@ -34,9 +34,14 @@ class StaffController extends AdminBaseController
         return view('admin.staff.index');
     }
 
-    public function create(){
-        $roles = Role::get();
-        return view('admin.staff.create',compact('roles'));
+    public function create()
+    {
+        try {
+            $roles = Role::get();
+            return view('admin.staff.create', compact('roles'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     //*** POST Request
@@ -78,9 +83,13 @@ class StaffController extends AdminBaseController
 
     public function edit($id)
     {
-        $roles = Role::get();
-        $data = Admin::findOrFail($id);  
-        return view('admin.staff.edit',compact('data','roles'));
+        try {
+            $roles = Role::get();
+            $data = Admin::findOrFail($id);
+            return view('admin.staff.edit', compact('data', 'roles'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request,$id)
