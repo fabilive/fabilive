@@ -35,7 +35,7 @@ class Admin extends Authenticatable implements FilamentUser
         if(!empty($this->section)){
             $sections = explode(" , ", $this->section);
         } else {
-            if (isset($this->role->section)) {
+            if (isset($this->role->section) && !empty($this->role->section)) {
                 $sections = explode(" , ", $this->role->section);
             }
         }
