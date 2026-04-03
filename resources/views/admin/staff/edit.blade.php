@@ -62,6 +62,9 @@
 													</div>
 												</div>
 
+												@php
+													$perms = $data->section ? explode(" , ", $data->section) : [];
+												@endphp
 
                                                 <div class="row justify-content-center">
                                                     <div class="col-lg-4"></div>

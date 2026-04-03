@@ -19,8 +19,11 @@ class StaffController extends AdminBaseController
          //--- Integrating This Collection Into Datatables
          return Datatables::of($datas)
                             ->addColumn('role', function(Admin $data) {
-                                $role = $data->role_id == 0 ? __('No Role') : $data->role->name;
-                                return $role;
+                                if($data->role_id == 0) {
+                                    return $data->section ? __('Custom Permissions') : __('No Role');
+                                } else {
+                                    return $data->role->name;
+                                }
                             }) 
                             ->addColumn('action', function(Admin $data) {
                                 $delete ='<a href="javascript:;" data-href="' . route('admin-staff-delete',$data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
@@ -74,6 +77,8 @@ class StaffController extends AdminBaseController
         
         if (isset($input['section'])) {
             $input['section'] = implode(" , ", $input['section']);
+        } else {
+            $input['section'] = '';
         }
         
         $data->fill($input)->save();
