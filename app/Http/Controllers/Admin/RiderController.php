@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Rider;
 use App\Models\Withdraw;
 use Carbon\Carbon;
-use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class RiderController extends AdminBaseController
 {
@@ -142,7 +143,7 @@ class RiderController extends AdminBaseController
                 $sign = $this->curr;
                 $amount = $data->amount * $sign->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($amount);
+                return PriceHelper::showAdminCurrencyPrice($amount);
             })
             ->addColumn('action', function (Withdraw $data) {
                 $action = '<div class="action-list"><a data-href="'.route('admin-withdraw-rider-show', $data->id).'" class="view details-width" data-toggle="modal" data-target="#modal1"> <i class="fas fa-eye"></i> '.__('Details').'</a>';

@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@php use App\Helpers\PriceHelper; @endphp
 @section('styles')
     <style type="text/css">
         .table-responsive {
@@ -332,7 +333,7 @@
                                                         </td>
                                                         <td>{{ Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }}
                                                         </td>
-                                                        <td>{{ \PriceHelper::showOrderCurrencyPrice(
+                                                        <td>{{ PriceHelper::showOrderCurrencyPrice(
                                                             $order->order->pay_amount * $order->order->currency_value,
                                                             $order->order->currency_sign,
                                                         ) }}

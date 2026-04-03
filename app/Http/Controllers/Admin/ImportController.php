@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Gallery;
 use App\Models\Product;
-use Datatables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Image;
-use Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ImportController extends AdminBaseController
 {
@@ -31,7 +32,7 @@ class ImportController extends AdminBaseController
             ->editColumn('price', function (Product $data) {
                 $price = $data->price * $this->curr->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->editColumn('stock', function (Product $data) {
                 $stck = (string) $data->stock;

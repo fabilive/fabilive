@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Transaction;
-use Datatables;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class UserTransactionController extends AdminBaseController
 {
@@ -26,7 +27,7 @@ class UserTransactionController extends AdminBaseController
             })
             ->editColumn('amount', function (Transaction $data) {
                 $price = $data->amount * $data->currency_value;
-                $price = \PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
+                $price = PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
                 if ($data->type == 'plus') {
                     $price = '+'.$price;
                 } else {

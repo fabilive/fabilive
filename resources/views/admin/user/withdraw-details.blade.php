@@ -1,4 +1,5 @@
 @extends('layouts.load')
+@php use App\Helpers\PriceHelper; @endphp
 @section('content')
 
                         <div class="content-area no-padding">
@@ -22,11 +23,11 @@
                                             </tr>
                                             <tr>
                                                 <th>{{ __("Withdraw Amount") }}</th>
-                                                <td>{{ \PriceHelper::showAdminCurrencyPrice($withdraw->amount * $sign->value) }}</td>
+                                                <td>{{ PriceHelper::showAdminCurrencyPrice($withdraw->amount * $sign->value) }}</td>
                                             </tr>
                                             <tr>
                                                 <th>{{ __("Withdraw Charge") }}</th>
-                                                <td>{{ \PriceHelper::showAdminCurrencyPrice($withdraw->fee * $sign->value) }}</td>
+                                                <td>{{ PriceHelper::showAdminCurrencyPrice($withdraw->fee * $sign->value) }}</td>
                                             </tr>
                                             <tr>
                                                 <th>{{ __("Withdraw Process Date") }}</th>

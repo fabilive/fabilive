@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Blog;
 use App\Models\Counter;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
-use Validator;
 
 class DashboardController extends AdminBaseController
 {
@@ -76,7 +77,7 @@ class DashboardController extends AdminBaseController
         $input = $request->all();
         $data = Auth::guard('admin')->user();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/admins/', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/admins/'.$data->photo)) {

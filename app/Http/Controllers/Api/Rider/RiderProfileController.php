@@ -1,1 +1,233 @@
-<?phpnamespace App\Http\Controllers\Api\Rider;use App\{    Models\Rider,    Models\Notification,    Classes\GeniusMailer,    Models\Generalsetting,    Http\Controllers\Controller};use Illuminate\Http\Request;use Auth;use Validator;use Illuminate\Support\Str;use Illuminate\Support\Facades\Hash;use Illuminate\Support\Facades\DB;use App\Http\Resources\RiderResource;class RiderProfileController extends Controller{    public function myProfile(){        $rider = Rider::find(auth('rider-api')->user()->id);        $rider = $rider->load('serviceAreas');        return response()->json([            'status' => true,            'message' => 'Login successful',            'data' => [                'rider_type' => $rider->rider_type,                'rider' => new \App\Http\Resources\RiderResource($rider)            ]        ]);        if(!$rider){            return response()->json(['message'=>'Record not found'],400);        }        return response()->json([            'status'  => true,            'data'    => new RiderResource($rider)        ]);    }        // public function updateProfile(Request $request)    // {    //     $rider = Rider::findOrFail(auth('rider-api')->user()->id);    //     $rules = [    //         'name'                    => 'sometimes|required|max:36',    //         'email'                   => 'sometimes|required|email|unique:riders,email,' . $rider->id,    //         'password'                => 'nullable|confirmed',    //         'phone'                   => 'sometimes|required|max:14',    //         'address'                 => 'sometimes|required|max:255',    //         'national_id_front_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',    //         'national_id_back_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',    //         'license_image'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',    //         'vehicle_type'            => 'sometimes|required|in:bike,truck,car',    //         'submerchant_agreement'   => 'nullable|file',    //     ];    //     if ($request->filled('password')) {    //         $rules['current_password'] = [    //             'required',    //             function ($attribute, $value, $fail) use ($rider) {    //                 if (!Hash::check($value, $rider->password)) {    //                     $fail('The current password is incorrect.');    //                 }    //             }    //         ];    //     }    //     $request->validate($rules);    //     $input = $request->all();    //     if ($request->filled('password')) {    //         $input['password'] = Hash::make($request['password']);    //     } else {    //         unset($input['password']);    //     }    //     if ($imageFront = $request->file('national_id_front_image')) {    //         if ($rider->national_id_front_image && file_exists(public_path('assets/images/rideridfront/' . $rider->national_id_front_image))) {    //             unlink(public_path('assets/images/rideridfront/' . $rider->national_id_front_image));    //         }    //         $image_name_front = \PriceHelper::ImageCreateName($imageFront);    //         $imageFront->move('assets/images/rideridfront', $image_name_front);    //         $input['national_id_front_image'] = $image_name_front;    //     }    //     if ($imageBack = $request->file('national_id_back_image')) {    //         if ($rider->national_id_back_image && file_exists(public_path('assets/images/rideridback/' . $rider->national_id_back_image))) {    //             unlink(public_path('assets/images/rideridback/' . $rider->national_id_back_image));    //         }    //         $image_name_back = \PriceHelper::ImageCreateName($imageBack);    //         $imageBack->move('assets/images/rideridback', $image_name_back);    //         $input['national_id_back_image'] = $image_name_back;    //     }    //     if ($licenseImage = $request->file('license_image')) {    //         if ($rider->license_image && file_exists(public_path('assets/images/riderlicense/' . $rider->license_image))) {    //             unlink(public_path('assets/images/riderlicense/' . $rider->license_image));    //         }    //         $image_name_license = \PriceHelper::ImageCreateName($licenseImage);    //         $licenseImage->move('assets/images/riderlicense', $image_name_license);    //         $input['license_image'] = $image_name_license;    //     }    //     if ($submerchant_agreement = $request->file('submerchant_agreement')) {    //         if ($rider->submerchant_agreement && file_exists(public_path('assets/images/submerchantagreementrider/' . $rider->submerchant_agreement))) {    //             unlink(public_path('assets/images/submerchantagreementrider/' . $rider->submerchant_agreement));    //         }    //         $agreement_name_license = \PriceHelper::ImageCreateName($submerchant_agreement);    //         $submerchant_agreement->move('assets/images/submerchantagreementrider', $agreement_name_license);    //         $input['submerchant_agreement'] = $agreement_name_license;    //     }    //     $rider->update($input);    //     return response()->json([    //         'status'  => true,    //         'message' => 'Rider updated successfully',    //         'data'    => new RiderResource($rider)    //     ]);    // }        public function updateProfile(Request $request){    $rider = Rider::findOrFail(auth('rider-api')->user()->id);    $rules = [        'name'                    => 'sometimes|required|max:36',        'email'                   => 'sometimes|required|email|unique:riders,email,' . $rider->id,        'password'                => 'nullable|confirmed',        'phone'                   => 'sometimes|required|max:14',        'address'                 => 'sometimes|required|max:255',        'national_id_front_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',        'national_id_back_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',        'license_image'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',        'vehicle_type'            => 'sometimes|required|in:bike,truck,car',        'submerchant_agreement'   => 'nullable|file',    ];    // 🔹 Extra validation for company/individual    if ($request->rider_type === 'company') {        $rules = array_merge($rules, [            'company_registration_document'    => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'id_company_owner'                 => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'live_selfie_company'              => 'nullable|file',            'transport_license'                => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'insurance_certificate_company'    => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'tin_company'                      => 'nullable|string',        ]);    } else {        $rules = array_merge($rules, [            'vehicle_type_individual'          => 'nullable|string',            'tin_individual'                   => 'nullable|string',            'driver_license_individual'        => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'live_selfie_individual'           => 'nullable|file',            'vehicle_registration_certificate' => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'insurance_certificate_individual' => 'nullable|file|mimes:jpg,jpeg,png,pdf',            'criminal_records'                 => 'nullable|file|mimes:jpg,jpeg,png,pdf',        ]);    }    if ($request->filled('password')) {        $rules['current_password'] = [            'required',            function ($attribute, $value, $fail) use ($rider) {                if (!Hash::check($value, $rider->password)) {                    $fail('The current password is incorrect.');                }            }        ];    }    $request->validate($rules);    $input = $request->all();    if ($request->filled('password')) {        $input['password'] = Hash::make($request['password']);    } else {        unset($input['password']);    }    // 🔹 Existing file uploads    if ($imageFront = $request->file('national_id_front_image')) {        if ($rider->national_id_front_image && file_exists(public_path('assets/images/rideridfront/' . $rider->national_id_front_image))) {            unlink(public_path('assets/images/rideridfront/' . $rider->national_id_front_image));        }        $image_name_front = \PriceHelper::ImageCreateName($imageFront);        $imageFront->move('assets/images/rideridfront', $image_name_front);        $input['national_id_front_image'] = $image_name_front;    }    if ($imageBack = $request->file('national_id_back_image')) {        if ($rider->national_id_back_image && file_exists(public_path('assets/images/rideridback/' . $rider->national_id_back_image))) {            unlink(public_path('assets/images/rideridback/' . $rider->national_id_back_image));        }        $image_name_back = \PriceHelper::ImageCreateName($imageBack);        $imageBack->move('assets/images/rideridback', $image_name_back);        $input['national_id_back_image'] = $image_name_back;    }    if ($licenseImage = $request->file('license_image')) {        if ($rider->license_image && file_exists(public_path('assets/images/riderlicense/' . $rider->license_image))) {            unlink(public_path('assets/images/riderlicense/' . $rider->license_image));        }        $image_name_license = \PriceHelper::ImageCreateName($licenseImage);        $licenseImage->move('assets/images/riderlicense', $image_name_license);        $input['license_image'] = $image_name_license;    }    if ($submerchant_agreement = $request->file('submerchant_agreement')) {        if ($rider->submerchant_agreement && file_exists(public_path('assets/images/submerchantagreementrider/' . $rider->submerchant_agreement))) {            unlink(public_path('assets/images/submerchantagreementrider/' . $rider->submerchant_agreement));        }        $agreement_name_license = \PriceHelper::ImageCreateName($submerchant_agreement);        $submerchant_agreement->move('assets/images/submerchantagreementrider', $agreement_name_license);        $input['submerchant_agreement'] = $agreement_name_license;    }    if ($request->hasFile('company_registration_document')) {    if ($rider->company_registration_document && file_exists(public_path('assets/images/companydocs/' . $rider->company_registration_document))) {        unlink(public_path('assets/images/companydocs/' . $rider->company_registration_document));    }    $path = \PriceHelper::ImageCreateName($request->file('company_registration_document'));    $request->file('company_registration_document')->move('assets/images/companydocs', $path);    $input['company_registration_document'] = $path;}if ($request->hasFile('id_company_owner')) {    if ($rider->id_company_owner && file_exists(public_path('assets/images/companyownerid/' . $rider->id_company_owner))) {        unlink(public_path('assets/images/companyownerid/' . $rider->id_company_owner));    }    $path = \PriceHelper::ImageCreateName($request->file('id_company_owner'));    $request->file('id_company_owner')->move('assets/images/companyownerid', $path);    $input['id_company_owner'] = $path;}if ($request->hasFile('live_selfie_company')) {    if ($rider->live_selfie_company && file_exists(public_path('assets/images/liveselfiecompany/' . $rider->live_selfie_company))) {        unlink(public_path('assets/images/liveselfiecompany/' . $rider->live_selfie_company));    }    $path = \PriceHelper::ImageCreateName($request->file('live_selfie_company'));    $request->file('live_selfie_company')->move('assets/images/liveselfiecompany', $path);    $input['live_selfie_company'] = $path;}if ($request->hasFile('transport_license')) {    if ($rider->transport_license && file_exists(public_path('assets/images/transportlicense/' . $rider->transport_license))) {        unlink(public_path('assets/images/transportlicense/' . $rider->transport_license));    }    $path = \PriceHelper::ImageCreateName($request->file('transport_license'));    $request->file('transport_license')->move('assets/images/transportlicense', $path);    $input['transport_license'] = $path;}if ($request->hasFile('insurance_certificate_company')) {    if ($rider->insurance_certificate_company && file_exists(public_path('assets/images/insurancecompany/' . $rider->insurance_certificate_company))) {        unlink(public_path('assets/images/insurancecompany/' . $rider->insurance_certificate_company));    }    $path = \PriceHelper::ImageCreateName($request->file('insurance_certificate_company'));    $request->file('insurance_certificate_company')->move('assets/images/insurancecompany', $path);    $input['insurance_certificate_company'] = $path;}if ($request->hasFile('driver_license_individual')) {    if ($rider->driver_license_individual && file_exists(public_path('assets/images/driverlicenseindividual/' . $rider->driver_license_individual))) {        unlink(public_path('assets/images/driverlicenseindividual/' . $rider->driver_license_individual));    }    $path = \PriceHelper::ImageCreateName($request->file('driver_license_individual'));    $request->file('driver_license_individual')->move('assets/images/driverlicenseindividual', $path);    $input['driver_license_individual'] = $path;}if ($request->hasFile('live_selfie_individual')) {    if ($rider->live_selfie_individual && file_exists(public_path('assets/images/liveselfieindividual/' . $rider->live_selfie_individual))) {        unlink(public_path('assets/images/liveselfieindividual/' . $rider->live_selfie_individual));    }    $path = \PriceHelper::ImageCreateName($request->file('live_selfie_individual'));    $request->file('live_selfie_individual')->move('assets/images/liveselfieindividual', $path);    $input['live_selfie_individual'] = $path;}if ($request->hasFile('vehicle_registration_certificate')) {    if ($rider->vehicle_registration_certificate && file_exists(public_path('assets/images/vehicleregistration/' . $rider->vehicle_registration_certificate))) {        unlink(public_path('assets/images/vehicleregistration/' . $rider->vehicle_registration_certificate));    }    $path = \PriceHelper::ImageCreateName($request->file('vehicle_registration_certificate'));    $request->file('vehicle_registration_certificate')->move('assets/images/vehicleregistration', $path);    $input['vehicle_registration_certificate'] = $path;}if ($request->hasFile('insurance_certificate_individual')) {    if ($rider->insurance_certificate_individual && file_exists(public_path('assets/images/insuranceindividual/' . $rider->insurance_certificate_individual))) {        unlink(public_path('assets/images/insuranceindividual/' . $rider->insurance_certificate_individual));    }    $path = \PriceHelper::ImageCreateName($request->file('insurance_certificate_individual'));    $request->file('insurance_certificate_individual')->move('assets/images/insuranceindividual', $path);    $input['insurance_certificate_individual'] = $path;}if ($request->hasFile('criminal_records')) {    if ($rider->criminal_records && file_exists(public_path('assets/images/criminalrecords/' . $rider->criminal_records))) {        unlink(public_path('assets/images/criminalrecords/' . $rider->criminal_records));    }    $path = \PriceHelper::ImageCreateName($request->file('criminal_records'));    $request->file('criminal_records')->move('assets/images/criminalrecords', $path);    $input['criminal_records'] = $path;}    $rider->update($input);    return response()->json([        'status'  => true,        'message' => 'Rider updated successfully.',        'data'    => new RiderResource($rider)    ]);}        public function updatePassword(Request $request)    {        $rider = Rider::findOrFail(auth('rider-api')->user()->id);        $rules = [            'current_password' => [                'required',                function ($attribute, $value, $fail) use ($rider) {                    if (!Hash::check($value, $rider->password)) {                        $fail('The current password is incorrect.');                    }                }            ],            'password' => 'required|confirmed|min:8',        ];        $validated = $request->validate($rules);        $rider->password = Hash::make($validated['password']);        $rider->save();        auth('rider-api')->invalidate(true);        $token = auth('rider-api')->setTTL(43200)->login($rider);        return response()->json([            'status'  => true,            'message' => 'Password updated successfully',            'data'    => [                'token' => $token,                'rider' => new RiderResource($rider),            ],        ]);    }}
+<?php
+
+namespace App\Http\Controllers\Api\Rider;
+
+use App\Helpers\PriceHelper;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\RiderResource;
+use App\Models\Rider;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class RiderProfileController extends Controller
+{
+    public function myProfile()
+    {
+        $rider = Rider::find(auth('rider-api')->user()->id);
+        $rider = $rider->load('serviceAreas');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'rider_type' => $rider->rider_type,
+                'rider' => new \App\Http\Resources\RiderResource($rider),
+            ],
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $rider = Rider::findOrFail(auth('rider-api')->user()->id);
+        $rules = [
+            'name' => 'sometimes|required|max:36',
+            'email' => 'sometimes|required|email|unique:riders,email,'.$rider->id,
+            'password' => 'nullable|confirmed',
+            'phone' => 'sometimes|required|max:14',
+            'address' => 'sometimes|required|max:255',
+            'national_id_front_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'national_id_back_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'license_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'vehicle_type' => 'sometimes|required|in:bike,truck,car',
+            'submerchant_agreement' => 'nullable|file',
+        ];
+        // 🔹 Extra validation for company/individual
+        if ($request->rider_type === 'company') {
+            $rules = array_merge($rules, [
+                'company_registration_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'id_company_owner' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'live_selfie_company' => 'nullable|file',
+                'transport_license' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'insurance_certificate_company' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'tin_company' => 'nullable|string',
+            ]);
+        } else {
+            $rules = array_merge($rules, [
+                'vehicle_type_individual' => 'nullable|string',
+                'tin_individual' => 'nullable|string',
+                'driver_license_individual' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'live_selfie_individual' => 'nullable|file',
+                'vehicle_registration_certificate' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'insurance_certificate_individual' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'criminal_records' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            ]);
+        }
+        if ($request->filled('password')) {
+            $rules['current_password'] = [
+                'required',
+                function ($attribute, $value, $fail) use ($rider) {
+                    if (! Hash::check($value, $rider->password)) {
+                        $fail('The current password is incorrect.');
+                    }
+                },
+            ];
+        }
+        $request->validate($rules);
+        $input = $request->all();
+        if ($request->filled('password')) {
+            $input['password'] = Hash::make($request['password']);
+        } else {
+            unset($input['password']);
+        }
+        // 🔹 Existing file uploads
+        if ($imageFront = $request->file('national_id_front_image')) {
+            if ($rider->national_id_front_image && file_exists(public_path('assets/images/rideridfront/'.$rider->national_id_front_image))) {
+                unlink(public_path('assets/images/rideridfront/'.$rider->national_id_front_image));
+            }
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
+            $imageFront->move('assets/images/rideridfront', $image_name_front);
+            $input['national_id_front_image'] = $image_name_front;
+        }
+        if ($imageBack = $request->file('national_id_back_image')) {
+            if ($rider->national_id_back_image && file_exists(public_path('assets/images/rideridback/'.$rider->national_id_back_image))) {
+                unlink(public_path('assets/images/rideridback/'.$rider->national_id_back_image));
+            }
+            $image_name_back = PriceHelper::ImageCreateName($imageBack);
+            $imageBack->move('assets/images/rideridback', $image_name_back);
+            $input['national_id_back_image'] = $image_name_back;
+        }
+        if ($licenseImage = $request->file('license_image')) {
+            if ($rider->license_image && file_exists(public_path('assets/images/riderlicense/'.$rider->license_image))) {
+                unlink(public_path('assets/images/riderlicense/'.$rider->license_image));
+            }
+            $image_name_license = PriceHelper::ImageCreateName($licenseImage);
+            $licenseImage->move('assets/images/riderlicense', $image_name_license);
+            $input['license_image'] = $image_name_license;
+        }
+        if ($submerchant_agreement = $request->file('submerchant_agreement')) {
+            if ($rider->submerchant_agreement && file_exists(public_path('assets/images/submerchantagreementrider/'.$rider->submerchant_agreement))) {
+                unlink(public_path('assets/images/submerchantagreementrider/'.$rider->submerchant_agreement));
+            }
+            $agreement_name_license = PriceHelper::ImageCreateName($submerchant_agreement);
+            $submerchant_agreement->move('assets/images/submerchantagreementrider', $agreement_name_license);
+            $input['submerchant_agreement'] = $agreement_name_license;
+        }
+        if ($request->hasFile('company_registration_document')) {
+            if ($rider->company_registration_document && file_exists(public_path('assets/images/companydocs/'.$rider->company_registration_document))) {
+                unlink(public_path('assets/images/companydocs/'.$rider->company_registration_document));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('company_registration_document'));
+            $request->file('company_registration_document')->move('assets/images/companydocs', $path);
+            $input['company_registration_document'] = $path;
+        }
+        if ($request->hasFile('id_company_owner')) {
+            if ($rider->id_company_owner && file_exists(public_path('assets/images/companyownerid/'.$rider->id_company_owner))) {
+                unlink(public_path('assets/images/companyownerid/'.$rider->id_company_owner));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('id_company_owner'));
+            $request->file('id_company_owner')->move('assets/images/companyownerid', $path);
+            $input['id_company_owner'] = $path;
+        }
+        if ($request->hasFile('live_selfie_company')) {
+            if ($rider->live_selfie_company && file_exists(public_path('assets/images/liveselfiecompany/'.$rider->live_selfie_company))) {
+                unlink(public_path('assets/images/liveselfiecompany/'.$rider->live_selfie_company));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('live_selfie_company'));
+            $request->file('live_selfie_company')->move('assets/images/liveselfiecompany', $path);
+            $input['live_selfie_company'] = $path;
+        }
+        if ($request->hasFile('transport_license')) {
+            if ($rider->transport_license && file_exists(public_path('assets/images/transportlicense/'.$rider->transport_license))) {
+                unlink(public_path('assets/images/transportlicense/'.$rider->transport_license));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('transport_license'));
+            $request->file('transport_license')->move('assets/images/transportlicense', $path);
+            $input['transport_license'] = $path;
+        }
+        if ($request->hasFile('insurance_certificate_company')) {
+            if ($rider->insurance_certificate_company && file_exists(public_path('assets/images/insurancecompany/'.$rider->insurance_certificate_company))) {
+                unlink(public_path('assets/images/insurancecompany/'.$rider->insurance_certificate_company));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('insurance_certificate_company'));
+            $request->file('insurance_certificate_company')->move('assets/images/insurancecompany', $path);
+            $input['insurance_certificate_company'] = $path;
+        }
+        if ($request->hasFile('driver_license_individual')) {
+            if ($rider->driver_license_individual && file_exists(public_path('assets/images/driverlicenseindividual/'.$rider->driver_license_individual))) {
+                unlink(public_path('assets/images/driverlicenseindividual/'.$rider->driver_license_individual));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('driver_license_individual'));
+            $request->file('driver_license_individual')->move('assets/images/driverlicenseindividual', $path);
+            $input['driver_license_individual'] = $path;
+        }
+        if ($request->hasFile('live_selfie_individual')) {
+            if ($rider->live_selfie_individual && file_exists(public_path('assets/images/liveselfieindividual/'.$rider->live_selfie_individual))) {
+                unlink(public_path('assets/images/liveselfieindividual/'.$rider->live_selfie_individual));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('live_selfie_individual'));
+            $request->file('live_selfie_individual')->move('assets/images/liveselfieindividual', $path);
+            $input['live_selfie_individual'] = $path;
+        }
+        if ($request->hasFile('vehicle_registration_certificate')) {
+            if ($rider->vehicle_registration_certificate && file_exists(public_path('assets/images/vehicleregistration/'.$rider->vehicle_registration_certificate))) {
+                unlink(public_path('assets/images/vehicleregistration/'.$rider->vehicle_registration_certificate));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('vehicle_registration_certificate'));
+            $request->file('vehicle_registration_certificate')->move('assets/images/vehicleregistration', $path);
+            $input['vehicle_registration_certificate'] = $path;
+        }
+        if ($request->hasFile('insurance_certificate_individual')) {
+            if ($rider->insurance_certificate_individual && file_exists(public_path('assets/images/insuranceindividual/'.$rider->insurance_certificate_individual))) {
+                unlink(public_path('assets/images/insuranceindividual/'.$rider->insurance_certificate_individual));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('insurance_certificate_individual'));
+            $request->file('insurance_certificate_individual')->move('assets/images/insuranceindividual', $path);
+            $input['insurance_certificate_individual'] = $path;
+        }
+        if ($request->hasFile('criminal_records')) {
+            if ($rider->criminal_records && file_exists(public_path('assets/images/criminalrecords/'.$rider->criminal_records))) {
+                unlink(public_path('assets/images/criminalrecords/'.$rider->criminal_records));
+            }
+            $path = PriceHelper::ImageCreateName($request->file('criminal_records'));
+            $request->file('criminal_records')->move('assets/images/criminalrecords', $path);
+            $input['criminal_records'] = $path;
+        }
+        $rider->update($input);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Rider updated successfully.',
+            'data' => new RiderResource($rider),
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $rider = Rider::findOrFail(auth('rider-api')->user()->id);
+        $rules = [
+            'current_password' => [
+                'required',
+                function ($attribute, $value, $fail) use ($rider) {
+                    if (! Hash::check($value, $rider->password)) {
+                        $fail('The current password is incorrect.');
+                    }
+                },
+            ],
+            'password' => 'required|confirmed|min:8',
+        ];
+        $validated = $request->validate($rules);
+        $rider->password = Hash::make($validated['password']);
+        $rider->save();
+        auth('rider-api')->invalidate(true);
+        $token = auth('rider-api')->setTTL(43200)->login($rider);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully',
+            'data' => [
+                'token' => $token,
+                'rider' => new RiderResource($rider),
+            ],
+        ]);
+    }
+}

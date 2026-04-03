@@ -1,4 +1,5 @@
 @extends('layouts.front')
+@php use App\Helpers\PriceHelper; @endphp
 
 @section('content')
 @include('partials.global.common-header')
@@ -77,11 +78,11 @@
                                     @endif
                                  </p>
                                  <p>{{ __('Tax :') }}
-                                    {{ \PriceHelper::showOrderCurrencyPrice((($order->tax) /
+                                    {{ PriceHelper::showOrderCurrencyPrice((($order->tax) /
                                     $order->currency_value),$order->currency_sign) }}
                                  </p>
                                  <p>{{ __('Paid Amount:') }}
-                                    {{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
+                                    {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
                                     $order->currency_value),$order->currency_sign) }}
                                  </p>
                                  <p>{{ __('Payment Method:') }} {{$order->method}}</p>
@@ -158,11 +159,11 @@
                                     @endif
                                  </p>
                                  <p>{{ __('Tax :') }}
-                                    {{ \PriceHelper::showOrderCurrencyPrice((($order->tax) /
+                                    {{ PriceHelper::showOrderCurrencyPrice((($order->tax) /
                                     $order->currency_value),$order->currency_sign) }}
                                  </p>
                                  <p>{{ __('Paid Amount:') }}
-                                    {{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
+                                    {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
                                     $order->currency_value),$order->currency_sign) }}
                                  </p>
                                  <p>{{ __('Payment Method:') }} {{$order->method}}</p>
@@ -289,12 +290,12 @@
                                     </td>
                                     <td data-label="{{ __('Price') }}">
                                        <div>
-                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
+                                          {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
                                        </div>
                                     </td>
                                     <td data-label="{{ __('Total') }}">
                                        <div>
-                                          {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                          {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                        </div>
                                     </td>
                                  </tr>

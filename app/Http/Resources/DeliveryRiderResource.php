@@ -18,5 +18,4 @@ class DeliveryRiderResource extends JsonResource
             'phone_number' => $this->phone_number,
         ];
     }
-
 }

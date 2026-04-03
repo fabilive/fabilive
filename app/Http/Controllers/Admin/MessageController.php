@@ -6,9 +6,9 @@ use App\Classes\GeniusMailer;
 use App\Models\AdminUserConversation;
 use App\Models\AdminUserMessage;
 use App\Models\User;
-use Auth;
-use Datatables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class MessageController extends AdminBaseController
 {

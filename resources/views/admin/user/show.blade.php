@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@php use App\Helpers\PriceHelper; @endphp
 
 @section('styles')
 
@@ -129,7 +130,7 @@ table#example2 {
                                                                         <tr>
             <td><a href="{{ route('admin-order-invoice',$order->id) }}">{{sprintf("%'.08d", $order->id)}}</a></td>
                                                                             <td>{{ date('Y-m-d h:i:s a',strtotime($order->created_at)) }}</td>
-                                                                            <td>{{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value),$order->currency_sign) }}</td>
+                                                                            <td>{{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value),$order->currency_sign) }}</td>
                                                                             <td>{{ $order->status }}</td>
                                                                             <td>
                                                                                 <a href=" {{ route('admin-order-show',$order->id) }}" class="view-details">

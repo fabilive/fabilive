@@ -1,4 +1,5 @@
 @extends('layouts.front')
+@php use App\Helpers\PriceHelper; @endphp
 @section('css')
     <link rel="stylesheet" href="{{asset('assets/front/css/datatables.css')}}">
 @endsection
@@ -62,7 +63,7 @@
                                         {{date('d M Y',strtotime($order->created_at))}}
                                     </td>
                                     <td data-label="{{ __('Order Total') }}">
-                                        {{ \PriceHelper::showAdminCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}
+                                        {{ PriceHelper::showAdminCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}
                                     </td>
                                     <td data-label="{{ __('Order Status') }}">
                                       <div class="order-status {{ $order->status }}">

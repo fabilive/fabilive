@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Subscription;
-use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class SubscriptionController extends AdminBaseController
 {
@@ -18,7 +19,7 @@ class SubscriptionController extends AdminBaseController
             ->editColumn('price', function (Subscription $data) {
                 $price = $data->price * $this->curr->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->editColumn('allowed_products', function (Subscription $data) {
                 $allowed_products = $data->allowed_products == 0 ? 'Unlimited' : $data->allowed_products;

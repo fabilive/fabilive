@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ArrivalSection;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ArrivalsectionController extends Controller
 {
@@ -71,7 +72,7 @@ class ArrivalsectionController extends Controller
         $data = new ArrivalSection();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/arrival', $name);
             $input['photo'] = $name;
         }
@@ -117,7 +118,7 @@ class ArrivalsectionController extends Controller
         $data = ArrivalSection::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/arrival', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/arrival/'.$data->photo)) {

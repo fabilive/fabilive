@@ -1,4 +1,5 @@
 @extends('layouts.load')
+@php use App\Helpers\PriceHelper; @endphp
 @section('content')
 
 						<div class="content-area no-padding">
@@ -16,7 +17,7 @@
                                             </tr>
                                             <tr>
                                                 <th width="50%">{{ __("Amount") }}</th>
-                                                <td>{{ $data->type == 'plus' ? '+':'-' }}{{ \PriceHelper::showOrderCurrencyPrice(($data->amount * $data->currency_value),$data->currency_sign) }}</td>
+                                                <td>{{ $data->type == 'plus' ? '+':'-' }}{{ PriceHelper::showOrderCurrencyPrice(($data->amount * $data->currency_value),$data->currency_sign) }}</td>
                                             </tr>
                                             <tr>
                                                 <th width="50%">{{ __("Transaction ID") }}</th>

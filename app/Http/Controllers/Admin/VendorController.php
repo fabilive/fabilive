@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Classes\GeniusMailer;
+use App\Helpers\PriceHelper;
 use App\Models\Generalsetting;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserSubscription;
 use App\Models\Withdraw;
-use Auth;
 use Carbon\Carbon;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class VendorController extends AdminBaseController
 {
@@ -33,7 +34,7 @@ class VendorController extends AdminBaseController
                     '<option value="'.route('admin-vendor-st', ['id1' => $data->id, 'id2' => 1]).'" '.$ns.'>'.__('Deactivated').'</option></select></div>';
             })
             ->editColumn('admin_commission', function (User $data) {
-                $url = '<div class="action-list"><p class="mx-3 d-inline-block">'.\PriceHelper::showAdminCurrencyPrice($data->admin_commission).'</p><a class="vendor_commission" href="'.route('admin-vendor-commission-collect', $data->id).'" class="edit">'.__('Collect').'</a></div>';
+                $url = '<div class="action-list"><p class="mx-3 d-inline-block">'.PriceHelper::showAdminCurrencyPrice($data->admin_commission).'</p><a class="vendor_commission" href="'.route('admin-vendor-commission-collect', $data->id).'" class="edit">'.__('Collect').'</a></div>';
 
                 return $url;
             })
@@ -214,7 +215,7 @@ class VendorController extends AdminBaseController
                 $sign = $this->curr;
                 $amount = $data->amount * $sign->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($amount);
+                return PriceHelper::showAdminCurrencyPrice($amount);
             })
             ->addColumn('action', function (Withdraw $data) {
                 $action = '<div class="action-list"><a data-href="'.route('admin-vendor-withdraw-show', $data->id).'" class="view details-width" data-toggle="modal" data-target="#modal1"> <i class="fas fa-eye"></i> Details</a>';

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Banner;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class BannerController extends AdminBaseController
 {
@@ -83,7 +84,7 @@ class BannerController extends AdminBaseController
         $data = new Banner();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/banners', $name);
             $input['photo'] = $name;
         }
@@ -124,7 +125,7 @@ class BannerController extends AdminBaseController
         $data = Banner::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/banners', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/banners/'.$data->photo)) {

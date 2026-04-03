@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Language;
-use Datatables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class LanguageController extends AdminBaseController
 {

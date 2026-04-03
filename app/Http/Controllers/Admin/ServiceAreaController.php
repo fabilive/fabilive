@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\ServiceArea;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ServiceAreaController extends AdminBaseController
 {

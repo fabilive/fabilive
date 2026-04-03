@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\{
     Models\Partner
 };
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class PartnerController extends AdminBaseController
 {
@@ -59,7 +60,7 @@ class PartnerController extends AdminBaseController
         $data = new Partner();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/partner', $name);
             $input['photo'] = $name;
         }
@@ -110,7 +111,7 @@ class PartnerController extends AdminBaseController
         $data = Partner::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/partner', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/partner/'.$data->photo)) {

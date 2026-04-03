@@ -1,4 +1,5 @@
 @extends('layouts.load')
+@php use App\Helpers\PriceHelper; @endphp
 @section('content')
 
                         <div class="content-area no-padding">
@@ -94,7 +95,7 @@
 
                                             <tr>
                                                 <th>{{ __("Cost") }}</th>
-                                                <td>{{ \PriceHelper::showOrderCurrencyPrice(($subs->price * $subs->currency_value),$subs->currency_sign) }}</td>
+                                                <td>{{ PriceHelper::showOrderCurrencyPrice(($subs->price * $subs->currency_value),$subs->currency_sign) }}</td>
                                             </tr>
 
                                             <tr>

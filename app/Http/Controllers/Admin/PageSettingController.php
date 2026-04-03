@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Pagesetting;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class PageSettingController extends AdminBaseController
 {
@@ -43,32 +44,32 @@ class PageSettingController extends AdminBaseController
         $input = $request->all();
 
         if ($file = $request->file('best_seller_banner')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->best_seller_banner);
             $input['best_seller_banner'] = $name;
         }
         if ($file = $request->file('big_save_banner')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->big_save_banner);
             $input['big_save_banner'] = $name;
         }
         if ($file = $request->file('best_seller_banner1')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->best_seller_banner1);
             $input['best_seller_banner1'] = $name;
         }
         if ($file = $request->file('big_save_banner1')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->big_save_banner1);
             $input['big_save_banner1'] = $name;
         }
         if ($file = $request->file('rightbanner1')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->rightbanner1);
             $input['rightbanner1'] = $name;
         }
         if ($file = $request->file('rightbanner2')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $data->upload($name, $file, $data->rightbanner2);
             $input['rightbanner2'] = $name;
         }

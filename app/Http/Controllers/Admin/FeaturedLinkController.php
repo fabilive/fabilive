@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Http\Controllers\Controller;
 use App\Models\FeaturedLink;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class FeaturedLinkController extends Controller
 {
@@ -65,7 +66,7 @@ class FeaturedLinkController extends Controller
         $data = new FeaturedLink();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/featuredlink', $name);
             $input['photo'] = $name;
         }
@@ -106,7 +107,7 @@ class FeaturedLinkController extends Controller
         $data = FeaturedLink::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/featuredlink', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/featuredlink/'.$data->photo)) {

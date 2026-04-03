@@ -17,5 +17,4 @@ class StateResource extends JsonResource
             'state' => $this->city_name,
         ];
     }
-
 }

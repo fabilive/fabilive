@@ -8,7 +8,7 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class StaffController extends AdminBaseController

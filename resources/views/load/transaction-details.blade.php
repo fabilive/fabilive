@@ -9,7 +9,7 @@
 
                     <tr>
                         <th width="50%">{{ __('Amount') }}</th>
-                        <td>{{ $data->type == 'plus' ? '+' : '-' }} {{ \PriceHelper::showOrderCurrencyPrice(($data->amount * $data->currency_value),$data->currency_sign) }}</td>
+                        <td>{{ $data->type == 'plus' ? '+' : '-' }} {{ PriceHelper::showOrderCurrencyPrice(($data->amount * $data->currency_value),$data->currency_sign) }}</td>
                     </tr>
                     @if($data->txn_number != null)
                         <tr>

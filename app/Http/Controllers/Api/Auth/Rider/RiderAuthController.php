@@ -179,5 +179,4 @@ class RiderAuthController extends Controller
 
         return $otp;
     }
-
 }

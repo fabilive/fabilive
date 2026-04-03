@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Category;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class CategoryController extends AdminBaseController
 {
@@ -77,12 +78,12 @@ class CategoryController extends AdminBaseController
         $data = new Category();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/categories', $name);
             $input['photo'] = $name;
         }
         if ($file = $request->file('image')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/categories', $name);
             $input['image'] = $name;
         }
@@ -126,7 +127,7 @@ class CategoryController extends AdminBaseController
         $data = Category::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/categories', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/categories/'.$data->photo)) {
@@ -136,7 +137,7 @@ class CategoryController extends AdminBaseController
             $input['photo'] = $name;
         }
         if ($file = $request->file('image')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/categories', $name);
             $input['image'] = $name;
         }

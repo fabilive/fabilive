@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Classes\GeniusMailer;
+use App\Helpers\PriceHelper;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserSubscription;
 use App\Models\Withdraw;
 use Carbon\Carbon;
-use Datatables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class UserController extends AdminBaseController
 {
@@ -120,7 +121,7 @@ class UserController extends AdminBaseController
         $input = $request->all();
         $input['password'] = bcrypt($request['password']);
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/users', $name);
             $input['photo'] = $name;
         }
@@ -173,7 +174,7 @@ class UserController extends AdminBaseController
         $user = User::findOrFail($id);
         $data = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/users', $name);
             if ($user->photo != null) {
                 if (file_exists(public_path().'/assets/images/users/'.$user->photo)) {
@@ -520,7 +521,7 @@ class UserController extends AdminBaseController
                 $sign = $this->curr;
                 $amount = $data->amount * $sign->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($amount);
+                return PriceHelper::showAdminCurrencyPrice($amount);
             })
             ->addColumn('action', function (Withdraw $data) {
                 $action = '<div class="action-list"><a data-href="'.route('admin-withdraw-show', $data->id).'" class="view details-width" data-toggle="modal" data-target="#modal1"> <i class="fas fa-eye"></i> '.__('Details').'</a>';

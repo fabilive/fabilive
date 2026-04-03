@@ -1,4 +1,5 @@
 @extends('layouts.front')
+@php use App\Helpers\PriceHelper; @endphp
 @section('css')
 <link rel="stylesheet" href="{{asset('assets/front/css/datatables.css')}}">
 @endsection
@@ -57,7 +58,7 @@
                                     @foreach($jobs as $job)
                                         <tr>
                                             <td>{{ $job->order->order_number }}</td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
                                             <td>
                                                 <span class="badge badge-dark p-2">{{ ucwords(str_replace('_', ' ', $job->status)) }}</span>
                                             </td>

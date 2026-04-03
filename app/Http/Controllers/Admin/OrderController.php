@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Classes\GeniusMailer;
+use App\Helpers\PriceHelper;
 use App\Models\AffliateBonus;
 use App\Models\Cart;
 use App\Models\DeliveryRider;
@@ -16,10 +17,10 @@ use App\Models\RiderServiceArea;
 use App\Models\Shipping;
 use App\Models\User;
 use App\Models\WalletLedger;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class OrderController extends AdminBaseController
 {
@@ -73,7 +74,7 @@ class OrderController extends AdminBaseController
     //             return $id;
     //         })
     //         ->editColumn('pay_amount', function (Order $data) {
-    //             return \PriceHelper::showOrderCurrencyPrice((($data->pay_amount + $data->wallet_price) * $data->currency_value), $data->currency_sign);
+    //             return PriceHelper::showOrderCurrencyPrice((($data->pay_amount + $data->wallet_price) * $data->currency_value), $data->currency_sign);
     //         })
     //         ->addColumn('action', function (Order $data) {
     //             $orders = '<a href="javascript:;" data-href="' . route('admin-order-edit', $data->id) . '" class="delivery" data-toggle="modal" data-target="#modal1"><i class="fas fa-dollar-sign"></i> ' . __('Delivery Status') . '</a>';
@@ -105,13 +106,13 @@ class OrderController extends AdminBaseController
                 return $id;
             })
             ->editColumn('pay_amount', function (Order $data) use ($defaultCurrency) {
-                return \PriceHelper::showOrderCurrencyPrice(
+                return PriceHelper::showOrderCurrencyPrice(
                     (($data->pay_amount + $data->wallet_price) * $defaultCurrency->value),
                     $defaultCurrency->sign
                 );
             })
             ->addColumn('commission', function (Order $data) use ($defaultCurrency) {
-                return \PriceHelper::showOrderCurrencyPrice(
+                return PriceHelper::showOrderCurrencyPrice(
                     ($data->commission * $defaultCurrency->value),
                     $defaultCurrency->sign
                 );

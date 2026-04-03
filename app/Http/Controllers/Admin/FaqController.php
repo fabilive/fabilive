@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Faq;
-use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class FaqController extends AdminBaseController
 {

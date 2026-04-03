@@ -6,8 +6,8 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserSubscription;
 use Carbon\Carbon;
-use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class VendorSubscriptionController extends AdminBaseController
 {

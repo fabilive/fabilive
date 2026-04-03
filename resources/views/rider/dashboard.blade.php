@@ -1,4 +1,5 @@
 @extends('layouts.front')
+@php use App\Helpers\PriceHelper; @endphp
 @section('css')
 <link rel="stylesheet" href="{{asset('assets/front/css/datatables.css')}}">
 @endsection
@@ -85,7 +86,7 @@
                               @forelse($available_jobs as $job)
                               <tr>
                                  <td>{{ $job->order->order_number }}</td>
-                                 <td>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
+                                 <td>{{ PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</td>
                                  <td>{{ $job->stops->count() }} {{ __('Stops') }}</td>
                                  <td>
                                     <a href="{{ route('rider-delivery-accept', $job->id) }}" class="mybtn1 sm1">
@@ -171,7 +172,7 @@
                     @endif
                 </td>
                 <td data-label="{{ __('Order Total') }}">
-                    {{ \PriceHelper::showAdminCurrencyPrice($total, $order->currency_sign) }}
+                    {{ PriceHelper::showAdminCurrencyPrice($total, $order->currency_sign) }}
                 </td>
                 <td data-label="{{ __('Order Status') }}">
                     <span class="badge badge-dark p-2">{{ ucwords($order->status) }}</span>

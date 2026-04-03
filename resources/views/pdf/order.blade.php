@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+@php use App\Helpers\PriceHelper; @endphp<html>
 <head>
 
   <style type="text/css">
@@ -1427,14 +1427,14 @@ table.dataTable thead .sorting_desc_disabled::after {
                                                 </p>
                                                 @endif
                                                 <p>
-                                                    {{ __('Price') }} : {{ \PriceHelper::showOrderCurrencyPrice(($product['item_price'] * $order->currency_value),$order->currency_sign) }}
+                                                    {{ __('Price') }} : {{ PriceHelper::showOrderCurrencyPrice(($product['item_price'] * $order->currency_value),$order->currency_sign) }}
                                                 </p>
                                                <p>
                                                 {{ __('Qty') }} : {{$product['qty']}} {{ $product['item']['measure'] }}
                                                </p>
                                             </td>
 
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value),$order->currency_sign) }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value),$order->currency_sign) }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                             </td>
                                             @php
                                             $subtotal += round($product['price'] * $order->currency_value, 2);
@@ -1447,14 +1447,14 @@ table.dataTable thead .sorting_desc_disabled::after {
                                         <tr class="semi-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Subtotal') }}</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($subtotal,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($subtotal,$order->currency_sign) }}</td>
 
                                         </tr>
                                         @if($order->shipping_cost != 0)
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Shipping Cost') }}({{$order->currency_sign}})</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($order->shipping_cost,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($order->shipping_cost,$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
 
@@ -1462,7 +1462,7 @@ table.dataTable thead .sorting_desc_disabled::after {
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Packaging Cost') }}({{$order->currency_sign}})</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($order->packing_cost,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($order->packing_cost,$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
 
@@ -1475,7 +1475,7 @@ table.dataTable thead .sorting_desc_disabled::after {
                                             $tax = ($subtotal / 100) * $order->tax;
                                             @endphp
 
-                                            <td>{{  \PriceHelper::showOrderCurrencyPrice($tax,$order->currency_sign)  }}</td>
+                                            <td>{{  PriceHelper::showOrderCurrencyPrice($tax,$order->currency_sign)  }}</td>
                                         </tr>
 
                                         @endif
@@ -1483,13 +1483,13 @@ table.dataTable thead .sorting_desc_disabled::after {
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Coupon Discount') }}({{$order->currency_sign}})</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($order->coupon_discount,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($order->coupon_discount,$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
                                         <tr class="final-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Total') }}</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice((($order->pay_amount + $order->wallet_price)  * $order->currency_value),$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice((($order->pay_amount + $order->wallet_price)  * $order->currency_value),$order->currency_sign) }}</td>
                                         </tr>
 
                                     </tbody>

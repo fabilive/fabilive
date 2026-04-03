@@ -13,5 +13,4 @@ class GeneralController
 
         return response()->json(['status' => true, 'data' => ServiceAreaResource::collection($service_area)]);
     }
-
 }

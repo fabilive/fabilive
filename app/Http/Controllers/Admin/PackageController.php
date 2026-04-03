@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Package;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class PackageController extends AdminBaseController
 {
@@ -19,7 +20,7 @@ class PackageController extends AdminBaseController
             ->editColumn('price', function (Package $data) {
                 $price = $data->price * $this->curr->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->addColumn('action', function (Package $data) {
                 return '<div class="action-list"><a data-href="'.route('admin-package-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('admin-package-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';

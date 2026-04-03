@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Blog;
 use App\Models\BlogCategory;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class BlogController extends AdminBaseController
 {
@@ -72,7 +73,7 @@ class BlogController extends AdminBaseController
         $slug = Str::slug($request->title).Str::random(4);
 
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/blogs', $name);
             $input['photo'] = $name;
         }
@@ -127,7 +128,7 @@ class BlogController extends AdminBaseController
         $data = Blog::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/blogs', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/blogs/'.$data->photo)) {

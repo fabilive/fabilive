@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Review;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ReviewController extends AdminBaseController
 {
@@ -59,7 +60,7 @@ class ReviewController extends AdminBaseController
         $data = new Review();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/reviews', $name);
             $input['photo'] = $name;
         }
@@ -100,7 +101,7 @@ class ReviewController extends AdminBaseController
         $data = Review::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/reviews', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/reviews/'.$data->photo)) {

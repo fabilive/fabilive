@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Service;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ServiceController extends AdminBaseController
 {
@@ -67,7 +68,7 @@ class ServiceController extends AdminBaseController
         $data = new Service();
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/services', $name);
             $input['photo'] = $name;
         }
@@ -108,7 +109,7 @@ class ServiceController extends AdminBaseController
         $data = Service::findOrFail($id);
         $input = $request->all();
         if ($file = $request->file('photo')) {
-            $name = \PriceHelper::ImageCreateName($file);
+            $name = PriceHelper::ImageCreateName($file);
             $file->move('assets/images/services', $name);
             if ($data->photo != null) {
                 if (file_exists(public_path().'/assets/images/services/'.$data->photo)) {

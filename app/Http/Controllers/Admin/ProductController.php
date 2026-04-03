@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Attribute;
 use App\Models\AttributeOption;
 use App\Models\Category;
@@ -12,12 +13,12 @@ use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\Subcategory;
 use App\Services\AI\ThreeDGeneratorService;
-use Datatables;
-use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Image;
-use Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ProductController extends AdminBaseController
 {
@@ -42,7 +43,7 @@ class ProductController extends AdminBaseController
             ->editColumn('price', function (Product $data) {
                 $price = $data->price * $this->curr->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->editColumn('stock', function (Product $data) {
                 $stck = (string) $data->stock;
@@ -88,7 +89,7 @@ class ProductController extends AdminBaseController
             ->editColumn('price', function (Product $data) {
                 $price = $data->price * $this->curr->value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->editColumn('stock', function (Product $data) {
                 $stck = (string) $data->stock;

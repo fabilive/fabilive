@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Classes\GeniusMailer;
 use App\Helpers\OrderHelper;
+use App\Helpers\PriceHelper;
 use App\Models\Cart;
 use App\Models\Country;
 use App\Models\Currency;
@@ -11,10 +12,10 @@ use App\Models\Order;
 use App\Models\Pagesetting;
 use App\Models\Product;
 use App\Models\User;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class OrderCreateController extends AdminBaseController
 {
@@ -254,7 +255,7 @@ class OrderCreateController extends AdminBaseController
         Session::put('admin_cart', $cart);
         $data[0] = count($cart->items);
         $data[1] = $cart->totalPrice;
-        $data[1] = \PriceHelper::showCurrencyPrice($data[1] * $curr->value);
+        $data[1] = PriceHelper::showCurrencyPrice($data[1] * $curr->value);
 
         return view('admin.order.create.product_add_table');
     }

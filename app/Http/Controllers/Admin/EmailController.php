@@ -6,8 +6,8 @@ use App\Classes\GeniusMailer;
 use App\Models\EmailTemplate;
 use App\Models\Generalsetting;
 use App\Models\User;
-use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class EmailController extends AdminBaseController
 {

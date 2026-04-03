@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Notification;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends AdminBaseController
 {

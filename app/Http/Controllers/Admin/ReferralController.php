@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\ReferralUsage;
-use Datatables;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ReferralController extends AdminBaseController
 {

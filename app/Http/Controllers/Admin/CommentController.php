@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Comment;
-use Datatables;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class CommentController extends AdminBaseController
 {

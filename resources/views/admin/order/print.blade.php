@@ -147,7 +147,7 @@ html {
                                                 </p>
                                                 @endif
                                                 <p>
-                                                        <strong>{{ __('Price') }} :</strong> {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ) * $order->currency_value) }}
+                                                        <strong>{{ __('Price') }} :</strong> {{ PriceHelper::showCurrencyPrice(($product['item_price'] ) * $order->currency_value) }}
                                                 </p>
                                                <p>
                                                     <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{ $product['item']['measure'] }}
@@ -168,7 +168,7 @@ html {
                                                
                                             </td>
 
-                                            <td> {{ \PriceHelper::showCurrencyPrice($product['price'] * $order->currency_value)  }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                            <td> {{ PriceHelper::showCurrencyPrice($product['price'] * $order->currency_value)  }} <small>{{ $product['discount'] == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                             </td>
                                             @php
                                             $subtotal += round(($product['price']/ $order->currency_value) * $order->currency_value, 2);
@@ -181,7 +181,7 @@ html {
                                         <tr class="semi-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Subtotal') }}</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice((($subtotal) * $order->currency_value),$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice((($subtotal) * $order->currency_value),$order->currency_sign) }}</td>
 
                                         </tr>
                                         @if($order->shipping_cost != 0)
@@ -192,7 +192,7 @@ html {
                                             <tr class="no-border">
                                                 <td colspan="1"></td>
                                                 <td><strong>{{ DB::table('shippings')->where('price','=',$price)->first()->title }}({{$order->currency_sign}})</strong></td>
-                                                <td>{{ \PriceHelper::showOrderCurrencyPrice($order->shipping_cost,$order->currency_sign) }}</td>
+                                                <td>{{ PriceHelper::showOrderCurrencyPrice($order->shipping_cost,$order->currency_sign) }}</td>
                                             </tr>
                                             @endif
                                         @endif
@@ -205,7 +205,7 @@ html {
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ DB::table('packages')->where('price','=',$pprice)->first()->title }}({{$order->currency_sign}})</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($order->packing_cost,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($order->packing_cost,$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
                                         @endif
@@ -214,14 +214,14 @@ html {
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td>{{ __('Tax') }} </td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
                                         @if($order->coupon_discount != null)
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Coupon Discount') }}({{$order->currency_sign}})</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice($order->coupon_discount,$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice($order->coupon_discount,$order->currency_sign) }}</td>
                                         </tr>
                                         @endif
 
@@ -229,13 +229,13 @@ html {
                                         <tr class="no-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Paid From Wallet') }}</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice(($order->wallet_price * $order->currency_value),$order->currency_sign) }}</td>
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice(($order->wallet_price * $order->currency_value),$order->currency_sign) }}</td>
                                         </tr>
                                             @if($order->method != "Wallet")
                                             <tr class="no-border">
                                                 <td colspan="1"></td>
                                                 <td><strong>{{$order->method}}</strong></td>
-                                                <td>{{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value),$order->currency_sign) }}
+                                                <td>{{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value),$order->currency_sign) }}
                                                 </td>
                                             </tr>
                                             @endif
@@ -246,7 +246,7 @@ html {
                                         <tr class="final-border">
                                             <td colspan="1"></td>
                                             <td><strong>{{ __('Total') }}</strong></td>
-                                            <td>{{ \PriceHelper::showOrderCurrencyPrice((($order->pay_amount + $order->wallet_price) * $order->currency_value),$order->currency_sign) }}
+                                            <td>{{ PriceHelper::showOrderCurrencyPrice((($order->pay_amount + $order->wallet_price) * $order->currency_value),$order->currency_sign) }}
                                             </td>
                                         </tr>
 

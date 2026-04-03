@@ -86,8 +86,8 @@ html {
                                        </div>
                                        <div class="col-md-6">
                                           <h5>{{ __('Payment Information') }}</h5>
-                                          <p>{{ __('Tax:') }}  {{ \PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</p>
-                                          <p>{{ __('Paid Amount:') }} {{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}</p>
+                                          <p>{{ __('Tax:') }}  {{ PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</p>
+                                          <p>{{ __('Paid Amount:') }} {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}</p>
                                           <p>{{ __('Payment Method:') }} {{$order->method}}</p>
                                           @if($order->method != "Cash On Delivery")
                                           @if($order->method=="Stripe")
@@ -112,8 +112,8 @@ html {
                                           {{$order->customer_city}}-{{$order->customer_zip}}
                                        </address>
                                        <h5>{{ __('Payment Information') }}</h5>
-                                       <p>{{ __('Tax:') }}  {{ \PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</p>
-                                       <p>{{ __('Paid Amount:') }} {{ \PriceHelper::showOrderCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}</p>
+                                       <p>{{ __('Tax:') }}  {{ PriceHelper::showOrderCurrencyPrice((($order->tax) / $order->currency_value),$order->currency_sign) }}</p>
+                                       <p>{{ __('Paid Amount:') }} {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}</p>
                                        <p>{{ __('Payment Method:') }} {{$order->method}}</p>
                                        @if($order->method != "Cash On Delivery")
                                        @if($order->method=="Stripe")
@@ -184,10 +184,10 @@ html {
                                                 @endif
                                              </td>
                                              <td>
-                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
+                                                {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
                                              </td>
                                              <td>
-                                                {{ \PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
+                                                {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
                                              </td>
                                           </tr>
                                           @endforeach

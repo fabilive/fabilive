@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Addon;
 use App\Models\Product;
-use Datatables;
-use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 use ZipArchive;
 
 class AddonController extends AdminBaseController

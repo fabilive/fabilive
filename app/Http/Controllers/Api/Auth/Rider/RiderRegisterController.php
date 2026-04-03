@@ -203,5 +203,4 @@ class RiderRegisterController extends Controller
 
         return $otp;
     }
-
 }

@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Category;
 use App\Models\Childcategory;
 use App\Models\Coupon;
 use App\Models\Subcategory;
 use Carbon\Carbon;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class CouponController extends AdminBaseController
 {
@@ -26,7 +27,7 @@ class CouponController extends AdminBaseController
                 return $type;
             })
             ->editColumn('price', function (Coupon $data) {
-                $price = $data->type == 0 ? $data->price.'%' : \PriceHelper::showAdminCurrencyPrice($data->price * $this->curr->value);
+                $price = $data->type == 0 ? $data->price.'%' : PriceHelper::showAdminCurrencyPrice($data->price * $this->curr->value);
 
                 return $price;
             })

@@ -39,5 +39,4 @@ class CustomWithdrawResource extends JsonResource
 
         return $data;
     }
-
 }

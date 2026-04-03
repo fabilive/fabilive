@@ -1,4 +1,5 @@
 @extends('layouts.vendor')
+@php use App\Helpers\PriceHelper; @endphp
 @section('styles')
 @endsection
 @section('content')
@@ -105,7 +106,7 @@
 
 
                                     <td width="45%">
-                                        {{ \PriceHelper::showOrderCurrencyPrice(($price - $commission), $order->currency_sign) }}
+                                        {{ PriceHelper::showOrderCurrencyPrice(($price - $commission), $order->currency_sign) }}
                                     </td>
                                 </tr>
 
@@ -114,7 +115,7 @@
                                     <th width="45%">{{ __('Shipping Method') }}</th>
                                     <td width="10%">:</td>
                                     <td width="45%">{{$shipping->title}} | {{
-                                        \PriceHelper::showOrderCurrencyPrice(($shipping->price *
+                                        PriceHelper::showOrderCurrencyPrice(($shipping->price *
                                         $order->currency_value),$order->currency_sign) }}</td>
                                 </tr>
                                 @endif
@@ -124,7 +125,7 @@
                                     <th width="45%">{{ __('Packaging Method') }}</th>
                                     <td width="10%">:</td>
                                     <td width="45%">{{$packaging->title}} | {{
-                                        \PriceHelper::showOrderCurrencyPrice(($packaging->price *
+                                        PriceHelper::showOrderCurrencyPrice(($packaging->price *
                                         $order->currency_value),$order->currency_sign) }}</td>
                                 </tr>
                                 @endif
@@ -439,7 +440,7 @@
                                         @endif
                                         <p>
                                             <strong>{{ __('Price') }} :</strong>
-                                            {{ \PriceHelper::showOrderCurrencyPrice(($product['item']['price'] * $order->currency_value), $order->currency_sign) }}
+                                            {{ PriceHelper::showOrderCurrencyPrice(($product['item']['price'] * $order->currency_value), $order->currency_sign) }}
                                         </p>
                                         <p>
                                             <strong>{{ __('Qty') }} :</strong> {{$product['qty']}} {{
@@ -456,7 +457,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ \PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value), $order->currency_sign) }} <small>{{ ($product['discount'] ?? 0)
+                                        {{ PriceHelper::showOrderCurrencyPrice(($product['price'] * $order->currency_value), $order->currency_sign) }} <small>{{ ($product['discount'] ?? 0)
                                             == 0 ? '' : '('.($product['discount'] ?? 0).'% '.__('Off').')' }}</small>
                                     </td>
                                 </tr>

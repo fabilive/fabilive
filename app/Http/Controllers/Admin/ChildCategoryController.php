@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Category;
 use App\Models\Childcategory;
 use App\Models\Subcategory;
-use Datatables;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class ChildCategoryController extends AdminBaseController
 {

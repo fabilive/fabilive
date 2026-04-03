@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\PriceHelper;
 use App\Models\Deposit;
 use App\Models\Transaction;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables as Datatables;
 
 class UserDepositController extends AdminBaseController
 {
@@ -25,7 +26,7 @@ class UserDepositController extends AdminBaseController
             ->editColumn('amount', function (Deposit $data) {
                 $price = $data->amount * $data->currency_value;
 
-                return \PriceHelper::showAdminCurrencyPrice($price);
+                return PriceHelper::showAdminCurrencyPrice($price);
             })
             ->addColumn('action', function (Deposit $data) {
                 if ($data->status == 1) {

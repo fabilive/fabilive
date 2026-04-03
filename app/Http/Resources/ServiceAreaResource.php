@@ -14,5 +14,4 @@ class ServiceAreaResource extends JsonResource
             'location' => $this->location,
         ];
     }
-
 }

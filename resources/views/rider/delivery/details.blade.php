@@ -1,4 +1,5 @@
 @extends('layouts.front')
+@php use App\Helpers\PriceHelper; @endphp
 @section('css')
 <style>
     .stop-card { border-left: 5px solid #ccc; margin-bottom: 15px; transition: all 0.3s; }
@@ -151,7 +152,7 @@
                     <div class="order-summary mt-5 p-3 bg-white border rounded">
                         <h5>{{ __('Order Summary') }}</h5>
                         <p>{{ __('Total Items') }}: {{ $job->order->total_qty }}</p>
-                        <p>{{ __('Your Earning') }}: <strong>{{ \PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</strong></p>
+                        <p>{{ __('Your Earning') }}: <strong>{{ PriceHelper::showOrderCurrencyPrice($job->rider_earnings, $job->order->currency_sign) }}</strong></p>
                     </div>
                 </div>
             </div>
