@@ -275,7 +275,12 @@
 
               @if (!empty($product->attributes))
                 @php
-                  $attrArr = is_string($product->attributes) ? json_decode($product->attributes, true) : $product->attributes;
+                  $attrArr = [];
+                  if (is_array($product->attributes)) {
+                      $attrArr = $product->attributes;
+                  } elseif (is_string($product->attributes)) {
+                      $attrArr = json_decode((string)$product->attributes, true);
+                  }
                 @endphp
               @endif
               @if (!empty($attrArr))
