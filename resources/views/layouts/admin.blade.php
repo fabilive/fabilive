@@ -56,6 +56,13 @@
 <body id="page-top">
 
 	<div class="page">
+		@if(Session::has('admin_impersonator_id'))
+		<div class="impersonation-banner">
+			<i class="fas fa-user-secret"></i> 
+			<span>{{ __('You are currently impersonating') }} <strong>{{ Auth::guard('admin')->user()->name }}</strong></span> 
+			<a href="{{ route('admin-staff-return') }}"><i class="fas fa-arrow-left"></i> {{ __('Return to Admin Panel') }}</a>
+		</div>
+		@endif
 		<div class="page-main">
 			<!-- Header Menu Area Start -->
 			<div class="header">

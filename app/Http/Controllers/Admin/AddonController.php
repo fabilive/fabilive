@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables as Datatables;
 use ZipArchive;
+use Yajra\DataTables\Facades\DataTables;
 
 class AddonController extends AdminBaseController
 {

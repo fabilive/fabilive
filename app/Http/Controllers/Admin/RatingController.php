@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Rating;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class RatingController extends AdminBaseController
 {

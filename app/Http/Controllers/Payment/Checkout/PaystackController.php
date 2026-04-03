@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use OrderHelper;
 use Session;
+use App\Helpers\PriceHelper;
+use App\Helpers\OrderHelper;
 
 class PaystackController extends CheckoutBaseControlller
 {

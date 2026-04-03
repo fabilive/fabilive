@@ -156,51 +156,84 @@
          <!--                               </div>-->
          <!--                           </div>-->
          
-                                        <!-- ServiceArea -->
-                                        @php
-                                            $serviceAreas = \App\Models\ServiceArea::all();
-                                        @endphp
+										<!-- ServiceArea Hierarchy -->
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="left-area">
                                                     <h4 class="heading">
-                                                        {{ __('Product Location') }}* <small>(Select city and area)</small>
+                                                        {{ __('Country') }}*
                                                     </h4>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
-                                                <div class="text-editor">
-                                                    <select name="product_location" id="service_area_id" class="form-control" required>
-                                                        <option value="">-- Select Location --</option>
-                                                        @foreach($serviceAreas as $area)
-                                                            <option value="{{ $area->id }}" {{ $data->product_location == $area->id ? 'selected' : '' }}>
-                                                                {{ $area->location }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                <select name="country_id" id="countrycode" class="form-control" required>
+                                                    <option value="">-- Select Country --</option>
+                                                    @foreach($countries as $country)
+                                                        <option value="{{ $country->id }}" {{ $data->country_id == $country->id ? 'selected' : '' }} data-href="{{ route('admin-state-load', $country->id) }}">
+                                                            {{ $country->country_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="left-area">
                                                     <h4 class="heading">
-                                                        {{ __('Product City') }}* <small>(Select City)</small>
+                                                        {{ __('State') }}*
                                                     </h4>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
-                                                <div class="text-editor">
-                                                    <select name="product_city" class="form-control" required>
-                                                        <option value="">-- Select City --</option>
-                                                        @foreach($cities as $id => $name)
-                                                            <option value="{{ $id }}" {{ $data->product_city == $id ? 'selected' : '' }}>
-                                                                {{ $name }}
-                                                            </option>
+                                                <select name="state_id" id="statecode" class="form-control" required {{ !$data->state_id ? 'disabled' : '' }}>
+                                                    <option value="">-- Select State --</option>
+                                                    @if($data->country_id)
+                                                        @foreach($data->country->states as $state)
+                                                            <option value="{{ $state->id }}" {{ $data->state_id == $state->id ? 'selected' : '' }}>{{ $state->state_name }}</option>
                                                         @endforeach
-                                                    </select>
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">
+                                                        {{ __('City') }}*
+                                                    </h4>
                                                 </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <select name="product_city" id="citycode" class="form-control" required {{ !$data->product_city ? 'disabled' : '' }}>
+                                                    <option value="">-- Select City --</option>
+                                                    @if($data->state_id)
+                                                        @foreach($data->state->cities as $city)
+                                                            <option value="{{ $city->id }}" {{ $data->product_city == $city->id ? 'selected' : '' }}>{{ $city->city_name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">
+                                                        {{ __('Service Area') }}* ({{ __('Product Location') }})
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <select name="product_location" id="service_area_id" class="form-control" required {{ !$data->product_location ? 'disabled' : '' }}>
+                                                    <option value="">-- Select Service Area --</option>
+                                                    @if($data->product_city)
+                                                        @foreach($data->cities->service_areas as $area)
+                                                            <option value="{{ $area->id }}" {{ $data->product_location == $area->id ? 'selected' : '' }}>{{ $area->location }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
                                             </div>
                                         </div>
                                         

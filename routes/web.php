@@ -2295,6 +2295,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/state/edit/{id}', 'Admin\StateController@edit')->name('admin-state-edit');
     Route::post('/state/update/{id}', 'Admin\StateController@update')->name('admin-state-update');
     Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin-state-delete');
+    Route::get('/state/load/{id}', 'Admin\StateController@loadState')->name('admin-state-load');
 
     // --------------- ADMIN STATE SECTION --------------------//
 
@@ -2308,6 +2309,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/city/edit/{id}', 'Admin\CityController@edit')->name('admin-city-edit');
     Route::post('/city/update/{id}', 'Admin\CityController@update')->name('admin-city-update');
     Route::delete('/city/delete/{id}', 'Admin\CityController@delete')->name('admin-city-delete');
+    Route::get('/city/load/state-wise', 'Admin\CityController@loadCity')->name('state.wise.city');
 
     // --------------- ADMIN STATE SECTION --------------------//
 
@@ -2758,6 +2760,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/service-areas/edit/{id}', 'Admin\ServiceAreaController@edit')->name('admin-servicearea-edit');
         Route::post('/service-areas/edit/{id}', 'Admin\ServiceAreaController@update')->name('admin-servicearea-update');
         Route::delete('/service-areas/delete/{id}', 'Admin\ServiceAreaController@destroy')->name('admin-servicearea-delete');
+        Route::get('/service-areas/get-service-area', 'Admin\ServiceAreaController@getServiceArea')->name('front.getServiceArea');
 
         //------------ ADMIN SERVICE AREA ENDS ------------
 
@@ -3050,6 +3053,7 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/staff/datatables', 'Admin\StaffController@datatables')->name('admin-staff-datatables');
         Route::get('/staff/secret/{id}', 'Admin\StaffController@secret')->name('admin-staff-secret');
+        Route::get('/staff/return', 'Admin\StaffController@returnToAdmin')->name('admin-staff-return');
         Route::get('/debug/logs', function () {
             if (Auth::guard('admin')->check()) {
                 $path = storage_path('logs/laravel.log');
@@ -3862,6 +3866,7 @@ Route::group(['middleware' => 'maintenance'], function () {
     // routes/web.php
     Route::get('/calculate-distance', 'Front\CheckoutController@calculateDistance')->name('front.calculateDistance');
     Route::get('/checkout', 'Front\CheckoutController@checkout')->name('front.checkout');
+    Route::get('/get-service-area', 'Front\CheckoutController@getServiceArea')->name('front.getServiceArea');
     Route::get('/carts/coupon/check', 'Front\CouponController@couponcheck');
     Route::get('/checkout/payment/return', 'Front\CheckoutController@payreturn')->name('front.payment.return');
     Route::get('/checkout/payment/cancle', 'Front\CheckoutController@paycancle')->name('front.payment.cancle');

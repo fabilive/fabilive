@@ -12,6 +12,48 @@
 												<div class="row">
 													<div class="col-lg-4">
 														<div class="left-area">
+																<h4 class="heading">{{ __('Country') }} *</h4>
+														</div>
+													</div>
+													<div class="col-lg-7">
+														<select id="countrycode" class="input-field" name="country_id" required>
+															<option value="">{{ __('Select Country') }}</option>
+															@foreach($countries as $country)
+																<option value="{{$country->id}}" data-href="{{route('admin-state-load',$country->id)}}">{{$country->country_name}}</option>
+															@endforeach
+														</select>
+													</div>
+												</div>
+
+												<div class="row">
+													<div class="col-lg-4">
+														<div class="left-area">
+																<h4 class="heading">{{ __('State') }} *</h4>
+														</div>
+													</div>
+													<div class="col-lg-7">
+														<select id="statecode" class="input-field" name="state_id" required disabled>
+															<option value="">{{ __('Select State') }}</option>
+														</select>
+													</div>
+												</div>
+
+												<div class="row">
+													<div class="col-lg-4">
+														<div class="left-area">
+																<h4 class="heading">{{ __('City') }} *</h4>
+														</div>
+													</div>
+													<div class="col-lg-7">
+														<select id="citycode" class="input-field" name="city_id" required disabled>
+															<option value="">{{ __('Select City') }}</option>
+														</select>
+													</div>
+												</div>
+
+												<div class="row">
+													<div class="col-lg-4">
+														<div class="left-area">
 																<h4 class="heading">{{ __('Location') }} *</h4>
 																<p class="sub-heading">{{ __('(In Any Language)') }}</p>
 														</div>
@@ -20,6 +62,25 @@
 														<input type="text" class="input-field" name="location" placeholder="{{ __('Location') }}" required value="">
 													</div>
 												</div>
+
+<script type="text/javascript">
+	$(document).on('change','#countrycode',function(){
+		let state_url = $('option:selected', this).attr('data-href');
+		$('#statecode').prop('disabled', false).html('<option value="">{{ __("Select State") }}</option>');
+		$('#citycode').prop('disabled', true).html('<option value="">{{ __("Select City") }}</option>');
+		$.get(state_url,function(response){
+			$('#statecode').html(response.data);
+		});
+	});
+
+	$(document).on('change','#statecode',function(){
+		let state_id = $(this).val();
+		$('#citycode').prop('disabled', false).html('<option value="">{{ __("Select City") }}</option>');
+		$.get("{{route('state.wise.city')}}",{state_id:state_id},function(data){
+			$('#citycode').html(data.data);
+		});
+	});
+</script>
 												<div class="row">
 													<div class="col-lg-4">
 														<div class="left-area">

@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Omnipay\Omnipay;
 use OrderHelper;
 use Session;
+use App\Helpers\OrderHelper;
 
 class PaypalController extends CheckoutBaseControlller
 {

@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\PriceHelper;
 
 class CartController extends FrontBaseController
 {

@@ -6,6 +6,7 @@ use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class CurrencyController extends AdminBaseController
 {

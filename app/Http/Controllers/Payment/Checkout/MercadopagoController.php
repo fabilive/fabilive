@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Str;
 use OrderHelper;
 use Session;
+use App\Helpers\OrderHelper;
 
 class MercadopagoController extends CheckoutBaseControlller
 {

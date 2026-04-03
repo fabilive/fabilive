@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class StaffController extends AdminBaseController
 {
@@ -197,6 +198,7 @@ class StaffController extends AdminBaseController
     public function secret($id)
     {
         try {
+            $admin_id = Auth::guard('admin')->user()->id;
             $data = Admin::findOrFail($id);
             Auth::guard('admin')->logout();
 
@@ -205,10 +207,31 @@ class StaffController extends AdminBaseController
 
             // Regenerate session for security and to prevent inheritance issues
             session()->regenerate();
+            
+            // Store the impersonator ID after logout/login to ensure it persists
+            session()->put('admin_impersonator_id', $admin_id);
 
             return redirect()->route('admin.dashboard');
         } catch (\Exception $e) {
             return redirect()->back()->with('unsuccess', $e->getMessage());
         }
+    }
+
+    public function returnToAdmin()
+    {
+        if (session()->has('admin_impersonator_id')) {
+            $admin_id = session()->get('admin_impersonator_id');
+            $admin = Admin::findOrFail($admin_id);
+            
+            Auth::guard('admin')->logout();
+            Auth::guard('admin')->login($admin);
+            
+            session()->forget('admin_impersonator_id');
+            session()->regenerate();
+            
+            return redirect()->route('admin-staff-index')->with('success', __('Returned to Administrator Panel'));
+        }
+        
+        return redirect()->back();
     }
 }

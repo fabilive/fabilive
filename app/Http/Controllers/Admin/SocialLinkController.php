@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\SocialLink;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class SocialLinkController extends AdminBaseController
 {

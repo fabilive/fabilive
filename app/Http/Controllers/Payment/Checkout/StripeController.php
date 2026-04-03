@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use OrderHelper;
 use Session;
 use Str;
+use App\Helpers\PriceHelper;
+use App\Helpers\OrderHelper;
 
 class StripeController extends CheckoutBaseControlller
 {

@@ -15,6 +15,7 @@ use Auth;
 use DB;
 use Illuminate\Http\Request;
 use Session;
+use App\Helpers\PriceHelper;
 
 class CheckoutController extends FrontBaseController
 {
@@ -377,6 +378,17 @@ class CheckoutController extends FrontBaseController
         }
 
         return response()->json(['data' => $html_cities, 'state' => $user_city]);
+    }
+
+    public function getServiceArea(Request $request)
+    {
+        $areas = ServiceArea::where('city_id', $request->city_id)->where('status', 1)->get();
+        $html_areas = '<option value="" > Select Service Area </option>';
+        foreach ($areas as $area) {
+            $html_areas .= '<option value="'.$area->id.'">'.$area->location.'</option>';
+        }
+
+        return response()->json(['data' => $html_areas]);
     }
 
     // Redirect To Checkout Page If Payment is Cancelled

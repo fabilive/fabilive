@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Image;
+use Intervention\Image\Facades\Image;
 
 class GalleryController extends Controller
 {

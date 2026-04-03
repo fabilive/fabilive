@@ -136,50 +136,86 @@
                                         @php
                                             $serviceAreas = \App\Models\ServiceArea::all();
                                         @endphp
+                                        <!-- Showing Country, State, City, and ServiceArea Hierarchy -->
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="left-area">
                                                     <h4 class="heading">
-                                                        {{ __('Product Location') }}* <small>(Select city and area)</small>
+                                                        {{ __('Country') }}*
                                                     </h4>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
-                                                <div class="text-editor">
-                                                    <select name="product_location" id="service_area_id" class="form-control" required>
-                                                        <option value="">-- Select Location --</option>
-                                                        @foreach($serviceAreas as $area)
-                                                            <option value="{{ $area->id }}" {{ $data->product_location == $area->id ? 'selected' : '' }}>
-                                                                {{ $area->location }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                <select name="country_id" id="countrycode" class="form-control" required>
+                                                    <option value="">-- Select Country --</option>
+                                                    @foreach($countries as $country)
+                                                        <option value="{{ $country->id }}" data-href="{{ route('admin-state-load', $country->id) }}" {{ $data->country_id == $country->id ? 'selected' : '' }}>{{ $country->country_name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
-                                        
-                                        <!-- City -->
+
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="left-area">
                                                     <h4 class="heading">
-                                                        {{ __('Product City') }}* <small>(Select City)</small>
+                                                        {{ __('State') }}*
                                                     </h4>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
-                                                <div class="text-editor">
-                                                    <select name="product_city" class="form-control" required>
-                                                        <option value="">-- Select City --</option>
-                                                        @foreach($cities as $id => $name)
-                                                            <option value="{{ $id }}" {{ $data->product_city == $id ? 'selected' : '' }}>
-                                                                {{ $name }}
-                                                            </option>
+                                                <select name="state_id" id="statecode" class="form-control" {{ !$data->state_id ? 'disabled' : '' }} required>
+                                                    <option value="">-- Select State --</option>
+                                                    @if($data->state_id)
+                                                        @foreach($data->country->states as $state)
+                                                            <option value="{{ $state->id }}" {{ $data->state_id == $state->id ? 'selected' : '' }}>{{ $state->state_name }}</option>
                                                         @endforeach
-                                                    </select>
-                                                </div>
+                                                    @endif
+                                                </select>
                                             </div>
                                         </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">
+                                                        {{ __('City') }}*
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <select name="product_city" id="citycode" class="form-control" {{ !$data->product_city ? 'disabled' : '' }} required>
+                                                    <option value="">-- Select City --</option>
+                                                    @if($data->state_id)
+                                                        @foreach($data->state->cities as $city)
+                                                            <option value="{{ $city->id }}" {{ $data->product_city == $city->id ? 'selected' : '' }}>{{ $city->city_name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                    <h4 class="heading">
+                                                        {{ __('Service Area') }}*
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <select name="product_servicearea" id="service_area_id" class="form-control" {{ !$data->product_servicearea ? 'disabled' : '' }} required>
+                                                    <option value="">-- Select Service Area --</option>
+                                                    @if($data->product_city)
+                                                        @foreach(\App\Models\City::find($data->product_city)->service_areas as $area)
+                                                            <option value="{{ $area->id }}" {{ $data->product_servicearea == $area->id ? 'selected' : '' }}>{{ $area->location }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" name="product_location" value="1">
                                         
                                         <!-- 04/09/2025 ko below Field add ki by suleman -->
                                         <div class="row mt-3">
@@ -817,35 +853,73 @@ $('.cropme').simpleCropper();
 
   </script>
   
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
+  <script type="text/javascript">
     $(document).ready(function() {
-        $('#service_area_id').select2({
-            placeholder: 'Select Service Area',
-            allowClear: true,
-            width: 'resolve'
+        // Handle Country to State
+        $('#countrycode').on('change', function() {
+            var country_id = $(this).val();
+            var state_select = $('#statecode');
+            var city_select = $('#citycode');
+            var area_select = $('#service_area_id');
+
+            state_select.html('<option value="">-- Select State --</option>').prop('disabled', true);
+            city_select.html('<option value="">-- Select City --</option>').prop('disabled', true);
+            area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+            if (country_id) {
+                var url = $(this).find(':selected').data('href');
+                $.get(url, function(data) {
+                    if (data.length > 0) {
+                        $.each(data, function(index, state) {
+                            state_select.append('<option value="' + state.id + '">' + state.state_name + '</option>');
+                        });
+                        state_select.prop('disabled', false);
+                    }
+                });
+            }
+        });
+
+        // Handle State to City
+        $('#statecode').on('change', function() {
+            var state_id = $(this).val();
+            var city_select = $('#citycode');
+            var area_select = $('#service_area_id');
+
+            city_select.html('<option value="">-- Select City --</option>').prop('disabled', true);
+            area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+            if (state_id) {
+                $.get("{{ route('state.wise.city') }}", { state_id: state_id }, function(data) {
+                    if (data.length > 0) {
+                        $.each(data, function(index, city) {
+                            city_select.append('<option value="' + city.id + '">' + city.city_name + '</option>');
+                        });
+                        city_select.prop('disabled', false);
+                    }
+                });
+            }
+        });
+
+        // Handle City to Service Area
+        $('#citycode').on('change', function() {
+            var city_id = $(this).val();
+            var area_select = $('#service_area_id');
+
+            area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+            if (city_id) {
+                $.get("{{ route('front.getServiceArea') }}", { city_id: city_id }, function(data) {
+                    if (data.length > 0) {
+                        $.each(data, function(index, area) {
+                            area_select.append('<option value="' + area.id + '">' + area.location + '</option>');
+                        });
+                        area_select.prop('disabled', false);
+                    }
+                });
+            }
         });
     });
 </script>
-<style>
-    .displayBoxNone .select2-container--default .select2-selection--single{
-            border: none !important;
-    }
-    .displayBoxNone .select2-container--default .select2-selection--single .select2-selection__rendered {
-        margin-top: 7px;
-    }
-    .displayBoxNone .select2-container {
-        border: 1px solid #bdccdb;
-        border-radius: 0.25rem;
-        height: 45px;
-    }
-    .select2-container--default .select2-selection--single {
-        height: 38px;
-        padding: 5px;
-    }
-</style>
   
   
 

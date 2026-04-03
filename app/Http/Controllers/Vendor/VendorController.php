@@ -12,6 +12,7 @@ use App\Models\VendorOrder;
 use App\Models\Verification;
 use Illuminate\Http\Request;
 use Validator;
+use App\Helpers\PriceHelper;
 
 class VendorController extends VendorBaseController
 {

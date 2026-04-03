@@ -7,6 +7,7 @@ use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class PackageController extends AdminBaseController
 {

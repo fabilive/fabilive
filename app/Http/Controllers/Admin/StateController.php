@@ -127,4 +127,11 @@ class StateController extends Controller
 
         return response()->json($mgs);
     }
+
+    public function loadState($id)
+    {
+        $states = State::where('country_id', $id)->get();
+
+        return response()->json($states);
+    }
 }

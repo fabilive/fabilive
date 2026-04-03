@@ -14,5 +14,10 @@ class City extends Model
         return $this->belongsTo(State::class, 'state_id');
     }
 
+    public function service_areas()
+    {
+        return $this->hasMany(ServiceArea::class, 'city_id');
+    }
+
     public $timestamps = false;
 }

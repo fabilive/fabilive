@@ -9,6 +9,7 @@ use App\Models\Rider;
 use Auth;
 use Illuminate\Http\Request;
 use Validator;
+use App\Helpers\PriceHelper;
 
 class RegisterController extends Controller
 {

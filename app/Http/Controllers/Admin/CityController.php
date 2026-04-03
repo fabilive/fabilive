@@ -201,4 +201,11 @@ class CityController extends Controller
 
         return response()->json($mgs);
     }
+
+    public function loadCity(Request $request)
+    {
+        $cities = City::where('state_id', $request->state_id)->get();
+
+        return response()->json($cities);
+    }
 }

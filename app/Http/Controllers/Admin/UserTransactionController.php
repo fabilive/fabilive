@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\PriceHelper;
 use App\Models\Transaction;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class UserTransactionController extends AdminBaseController
 {

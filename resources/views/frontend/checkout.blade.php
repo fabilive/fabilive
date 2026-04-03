@@ -155,11 +155,11 @@
                                           @include('includes.countries')
                                        </select>
                                     </div>
-                                    <div class="col-lg-6 my-2 d-none select_state">
+                                    <div class="col-lg-6 my-2 select_state">
                                        <select class="form-control " id="show_state" name="customer_state">
                                        </select>
                                     </div>
-                                    <div class="col-lg-6 my-2 d-none my-2">
+                                    <div class="col-lg-6 my-2 select_city">
                                        <select class="form-control " id="show_city" name="customer_city">
                                        </select>
                                     </div>

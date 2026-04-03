@@ -17,6 +17,7 @@ use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
 use OrderHelper;
 use Session;
+use App\Helpers\OrderHelper;
 
 class AuthorizeController extends CheckoutBaseControlller
 {

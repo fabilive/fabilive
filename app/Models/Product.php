@@ -5,6 +5,7 @@ namespace App\Models;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\PriceHelper;
 
 class Product extends Model
 {
@@ -19,7 +20,7 @@ class Product extends Model
         'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
         'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
         'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check', 'delivery_fee', 'delivery_unit', 'product_servicearea',
-        'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+        'cross_products', '3d_model', 'discount_date_start', 'discount_date_end', 'state_id'];
 
     public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end'];
 
@@ -36,6 +37,11 @@ class Product extends Model
     public function cities()
     {
         return $this->belongsTo(\App\Models\City::class, 'product_city');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(\App\Models\State::class, 'state_id');
     }
 
     public function country()

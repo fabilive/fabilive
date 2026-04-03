@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Models\SocialLink;
 use Datatables;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class SocialLinkController extends VendorBaseController
 {

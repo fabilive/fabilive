@@ -173,6 +173,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
     ])->toArray(),
     
 
@@ -193,6 +194,7 @@ return [
         'PriceHelper' => App\Helpers\PriceHelper::class,
         'Datatables' => Yajra\DataTables\Facades\DataTables::class,
         'NoCaptcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
+        'Image' => Intervention\Image\Facades\Image::class,
     ])->toArray(),
 
 ];

@@ -8,9 +8,12 @@ use App\Models\AttributeOption;
 use App\Models\Category;
 use App\Models\Childcategory;
 use App\Models\City;
+use App\Models\Country;
+use App\Models\State;
 use App\Models\Currency;
 use App\Models\Gallery;
 use App\Models\Product;
+use App\Models\ServiceArea;
 use App\Models\Subcategory;
 use App\Services\AI\ThreeDGeneratorService;
 use Illuminate\Http\Request;
@@ -19,6 +22,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Image;
 use Yajra\DataTables\Facades\DataTables as Datatables;
+use Intervention\Image\Facades\Image;
+use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends AdminBaseController
 {
@@ -144,6 +149,7 @@ class ProductController extends AdminBaseController
     //*** GET Request
     public function create($slug)
     {
+        $countries = Country::where('status', 1)->get();
         $cities = City::where('status', 1)
             ->whereHas('state', function ($q) {
                 $q->where('status', 1)
@@ -157,13 +163,13 @@ class ProductController extends AdminBaseController
         $cats = Category::all();
         $sign = $this->curr;
         if ($slug == 'physical') {
-            return view('admin.product.create.physical', compact('cats', 'sign', 'cities'));
+            return view('admin.product.create.physical', compact('cats', 'sign', 'cities', 'countries'));
         } elseif ($slug == 'digital') {
-            return view('admin.product.create.digital', compact('cats', 'sign', 'cities'));
+            return view('admin.product.create.digital', compact('cats', 'sign', 'cities', 'countries'));
         } elseif (($slug == 'license')) {
-            return view('admin.product.create.license', compact('cats', 'sign', 'cities'));
+            return view('admin.product.create.license', compact('cats', 'sign', 'cities', 'countries'));
         } elseif (($slug == 'listing')) {
-            return view('admin.product.create.listing', compact('cats', 'sign', 'cities'));
+            return view('admin.product.create.listing', compact('cats', 'sign', 'cities', 'countries'));
         }
     }
 
@@ -447,6 +453,8 @@ class ProductController extends AdminBaseController
             }
             $input['product_location'] = $request->product_location;
             $input['product_city'] = $request->product_city;
+            $input['state_id'] = $request->state_id;
+            $input['country_id'] = $request->country_id;
             $input['delivery_fee'] = $request->delivery_fee ?? '0';
             $input['product_unit'] = $request->delivery_unit ?? '0';
             $data->fill($input)->save();
@@ -652,6 +660,7 @@ class ProductController extends AdminBaseController
     //*** GET Request
     public function edit($id)
     {
+        $countries = Country::where('status', 1)->get();
         $cats = Category::all();
         $data = Product::findOrFail($id);
         $sign = $this->curr;
@@ -667,13 +676,13 @@ class ProductController extends AdminBaseController
             ->pluck('city_name', 'id');
 
         if ($data->type == 'Digital') {
-            return view('admin.product.edit.digital', compact('cats', 'data', 'sign', 'cities'));
+            return view('admin.product.edit.digital', compact('cats', 'data', 'sign', 'cities', 'countries'));
         } elseif ($data->type == 'License') {
-            return view('admin.product.edit.license', compact('cats', 'data', 'sign', 'cities'));
+            return view('admin.product.edit.license', compact('cats', 'data', 'sign', 'cities', 'countries'));
         } elseif ($data->type == 'Listing') {
-            return view('admin.product.edit.listing', compact('cats', 'data', 'sign', 'cities'));
+            return view('admin.product.edit.listing', compact('cats', 'data', 'sign', 'cities', 'countries'));
         } else {
-            return view('admin.product.edit.physical', compact('cats', 'data', 'sign', 'cities'));
+            return view('admin.product.edit.physical', compact('cats', 'data', 'sign', 'cities', 'countries'));
         }
 
     }

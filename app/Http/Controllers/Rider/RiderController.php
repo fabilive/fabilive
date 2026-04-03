@@ -13,6 +13,7 @@ use App\Services\DeliveryAcceptanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+use App\Helpers\PriceHelper;
 
 class RiderController extends RiderBaseController
 {
