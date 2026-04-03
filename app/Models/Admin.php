@@ -31,10 +31,13 @@ class Admin extends Authenticatable implements FilamentUser
     }
 
     public function sectionCheck($value){
+        $sections = [];
         if(!empty($this->section)){
             $sections = explode(" , ", $this->section);
         } else {
-            $sections = explode(" , ", $this->role->section);
+            if (isset($this->role->section)) {
+                $sections = explode(" , ", $this->role->section);
+            }
         }
         
         if (in_array($value, $sections)){

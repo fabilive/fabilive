@@ -61,6 +61,21 @@
 														<input type="text" class="input-field" name="phone" placeholder="{{ __("Phone Number") }}" required="" value="{{ $data->phone }}">
 													</div>
 												</div>
+												<div class="row">
+													<div class="col-lg-4">
+														<div class="left-area">
+																<h4 class="heading">{{ __("Select Role") }} *</h4>
+														</div>
+													</div>
+													<div class="col-lg-7">
+															<select  name="role_id" required="">
+																<option value="">{{ __("Select Role") }}</option>
+																  @foreach($roles as $role)
+																	<option value="{{$role->id}}" {{ $data->role_id == $role->id ? 'selected' : '' }}>{{$role->name}}</option>
+																  @endforeach
+															</select>
+													</div>
+												</div>
 
 												@php
 													$perms = $data->section ? explode(" , ", $data->section) : [];

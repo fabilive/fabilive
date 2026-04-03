@@ -62,6 +62,21 @@
 													</div>
 												</div>
 
+												<div class="row">
+													<div class="col-lg-4">
+														<div class="left-area">
+																<h4 class="heading">{{ __("Select Role") }} *</h4>
+														</div>
+													</div>
+													<div class="col-lg-7">
+															<select  name="role_id" required="">
+																<option value="">{{ __("Select Role") }}</option>
+																  @foreach($roles as $role)
+																	<option value="{{$role->id}}">{{$role->name}}</option>
+																  @endforeach
+															</select>
+													</div>
+												</div>
 
                                                 <div class="row justify-content-center">
                                                     <div class="col-lg-4"></div>
