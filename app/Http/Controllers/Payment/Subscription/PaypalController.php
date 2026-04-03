@@ -2,28 +2,23 @@
 
 namespace App\Http\Controllers\Payment\Subscription;
 
-use App\{
-    Models\User,
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\PaymentGateway,
-    Models\UserSubscription
-};
-
-use Illuminate\{
-    Http\Request,
-    Support\Facades\Session
-};
-use Omnipay\Omnipay;
-
-
-use Illuminate\Support\Str;
+use App\Classes\GeniusMailer;
+use App\Models\PaymentGateway;
+use App\Models\Subscription;
+use App\Models\User;
+use App\Models\UserSubscription;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+use Omnipay\Omnipay;
 
 class PaypalController extends SubscriptionBaseController
 {
     public $_api_context;
+
     public $gateway;
+
     public function __construct()
     {
         parent::__construct();
@@ -40,9 +35,9 @@ class PaypalController extends SubscriptionBaseController
     {
 
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
+            'shop_name' => 'unique:users',
         ], [
-            'shop_name.unique' => __('This shop name has already been taken.')
+            'shop_name.unique' => __('This shop name has already been taken.'),
         ]);
 
         $subs = Subscription::findOrFail($request->subs_id);
@@ -53,7 +48,7 @@ class PaypalController extends SubscriptionBaseController
         $curr = $this->curr;
 
         $supported_currency = json_decode($data->currency_id, true);
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Paypal Payment.'));
         }
 
@@ -70,21 +65,19 @@ class PaypalController extends SubscriptionBaseController
         $sub['details'] = $subs->details;
         $sub['method'] = 'Paypal';
 
-        $order['item_name'] = $subs->title . " Plan";
-        $order['item_number'] = Str::random(4) . time();
+        $order['item_name'] = $subs->title.' Plan';
+        $order['item_number'] = Str::random(4).time();
         $order['item_amount'] = $item_amount;
         $cancel_url = route('user.payment.cancle');
         $notify_url = route('user.paypal.notify');
 
-
-
         try {
-            $response = $this->gateway->purchase(array(
+            $response = $this->gateway->purchase([
                 'amount' => $item_amount,
                 'currency' => $this->curr->name,
                 'returnUrl' => $notify_url,
                 'cancelUrl' => $cancel_url,
-            ))->send();
+            ])->send();
 
             if ($response->isRedirect()) {
                 Session::put('paypal_data', $sub);
@@ -108,7 +101,6 @@ class PaypalController extends SubscriptionBaseController
         $cancel_url = route('user.payment.cancle');
         $input = $request->all();
 
-
         $responseData = $request->all();
         if (empty($responseData['PayerID']) || empty($responseData['token'])) {
             return [
@@ -116,12 +108,11 @@ class PaypalController extends SubscriptionBaseController
                 'message' => __('Unknown error occurred'),
             ];
         }
-        $transaction = $this->gateway->completePurchase(array(
+        $transaction = $this->gateway->completePurchase([
             'payer_id' => $responseData['PayerID'],
             'transactionReference' => $responseData['paymentId'],
-        ));
+        ]);
         $response = $transaction->send();
-
 
         if ($response->isSuccessful()) {
 
@@ -146,20 +137,20 @@ class PaypalController extends SubscriptionBaseController
 
             $today = Carbon::now()->format('Y-m-d');
             $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
-            if (!empty($package)) {
+            if (! empty($package)) {
                 if ($package->subscription_id == $order->subscription_id) {
                     $newday = strtotime($today);
                     $lastday = strtotime($user->date);
                     $secs = $lastday - $newday;
                     $days = $secs / 86400;
                     $total = $days + $subs->days;
-                    $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                    $input['date'] = date('Y-m-d', strtotime($today.' + '.$total.' days'));
                 } else {
-                    $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                    $input['date'] = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                 }
             } else {
 
-                $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                $input['date'] = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
             }
 
             $input['mail_sent'] = 1;
@@ -168,12 +159,12 @@ class PaypalController extends SubscriptionBaseController
 
             $maildata = [
                 'to' => $user->email,
-                'type' => "vendor_accept",
+                'type' => 'vendor_accept',
                 'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($maildata);

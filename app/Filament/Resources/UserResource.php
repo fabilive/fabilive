@@ -7,11 +7,11 @@ use App\Models\User;
 use App\Traits\AuditsAdminActions;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
+use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
@@ -101,11 +101,14 @@ class UserResource extends Resource
                     ->color(fn (User $record) => $record->ban ? 'success' : 'danger')
                     ->requiresConfirmation()
                     ->action(function (User $record) {
-                        $record->ban = !$record->ban;
+                        $record->ban = ! $record->ban;
                         $record->save();
 
-                        (new class { use AuditsAdminActions; })->auditAdminAction($record->ban ? 'Ban User' : 'Unban User', $record, [
-                            'email' => $record->email
+                        (new class
+                        {
+                            use AuditsAdminActions;
+                        })->auditAdminAction($record->ban ? 'Ban User' : 'Unban User', $record, [
+                            'email' => $record->email,
                         ]);
 
                         Notification::make()

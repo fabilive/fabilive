@@ -12,7 +12,6 @@ use App\Models\Generalsetting;
 use App\Models\Message;
 use App\Models\Product;
 use App\Models\User;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -28,8 +27,8 @@ class VendorController extends Controller
             $sort = $request->sort;
             $string = str_replace('-', ' ', $shop_name);
             $vendor = User::where('shop_name', '=', $string)->first();
-            if (!$vendor) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Shop name not found."]]);
+            if (! $vendor) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Shop name not found.']]);
             }
             $data['vendor'] = new VendorResource($vendor);
             $services = DB::table('services')->where('user_id', '=', $vendor->id)->get();
@@ -74,12 +73,12 @@ class VendorController extends Controller
 
             $rules =
                 [
-                'user_id' => 'required',
-                'vendor_id' => 'required',
-                'subject' => 'required',
-                'message' => 'required',
+                    'user_id' => 'required',
+                    'vendor_id' => 'required',
+                    'subject' => 'required',
+                    'message' => 'required',
 
-            ];
+                ];
 
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -87,12 +86,12 @@ class VendorController extends Controller
             }
 
             $user = User::find($request->user_id);
-            if (!$user) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "User not found."]]);
+            if (! $user) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'User not found.']]);
             }
             $vendor = User::find($request->vendor_id);
-            if (!$vendor) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Vendor not found."]]);
+            if (! $vendor) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Vendor not found.']]);
             }
 
             $gs = Generalsetting::find(1);
@@ -100,7 +99,7 @@ class VendorController extends Controller
             $to = $vendor->email;
             $name = $user->name;
             $from = $user->email;
-            $msg = "Name: " . $name . "\nEmail: " . $from . "\nMessage: " . $request->message;
+            $msg = 'Name: '.$name."\nEmail: ".$from."\nMessage: ".$request->message;
             if ($gs->is_smtp) {
                 $data = [
                     'to' => $to,
@@ -111,7 +110,7 @@ class VendorController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMail($data);
             } else {
-                $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+                $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
                 mail($to, $subject, $msg, $headers);
             }
 
@@ -137,7 +136,7 @@ class VendorController extends Controller
 
             }
 
-            return response()->json(['status' => true, 'data' => ["message" => "Message Sent Successfully!"], 'error' => []]);
+            return response()->json(['status' => true, 'data' => ['message' => 'Message Sent Successfully!'], 'error' => []]);
 
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);

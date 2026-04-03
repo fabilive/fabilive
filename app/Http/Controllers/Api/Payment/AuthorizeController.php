@@ -14,19 +14,17 @@ use Validator;
 
 class AuthorizeController extends Controller
 {
-
     public function store(Request $request)
     {
 
-        if (!$request->has('order_number')) {
+        if (! $request->has('order_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
         $settings = Generalsetting::findOrFail(1);
-        $item_name = $settings->title . " Order";
+        $item_name = $settings->title.' Order';
         $order_number = $request->order_number;
         $order = Order::where('order_number', $order_number)->firstOrFail();
-
 
         $curr = Currency::where('sign', '=', $order->currency_sign)->firstOrFail();
         $item_amount = $order->pay_amount;
@@ -49,14 +47,14 @@ class AuthorizeController extends Controller
             $merchantAuthentication->setTransactionKey($paydata['txn_key']);
 
             // Set the transaction's refId
-            $refId = 'ref' . time();
+            $refId = 'ref'.time();
 
             // Create the payment data for a credit card
             $creditCard = new AnetAPI\CreditCardType();
             $creditCard->setCardNumber(str_replace(' ', '', $request->cardNumber));
             $year = $request->year;
             $month = $request->month;
-            $creditCard->setExpirationDate($year . '-' . $month);
+            $creditCard->setExpirationDate($year.'-'.$month);
             $creditCard->setCardCode($request->cardCode);
 
             // Add the payment data to a paymentType object
@@ -70,7 +68,7 @@ class AuthorizeController extends Controller
 
             // Create a TransactionRequestType object and add the previous objects to it
             $transactionRequestType = new AnetAPI\TransactionRequestType();
-            $transactionRequestType->setTransactionType("authCaptureTransaction");
+            $transactionRequestType->setTransactionType('authCaptureTransaction');
             $transactionRequestType->setAmount($item_amount);
             $transactionRequestType->setOrder($orders);
             $transactionRequestType->setPayment($paymentOne);
@@ -92,7 +90,7 @@ class AuthorizeController extends Controller
             if ($response != null) {
 
                 // Check to see if the API request was successfully received and acted upon
-                if ($response->getMessages()->getResultCode() == "Ok") {
+                if ($response->getMessages()->getResultCode() == 'Ok') {
 
                     $tresponse = $response->getTransactionResponse();
 
@@ -101,8 +99,9 @@ class AuthorizeController extends Controller
                         $order['method'] = $request->method;
                         $order['pay_amount'] = round($item_amount / $curr->value, 2);
                         $order['txnid'] = $tresponse->getTransId();
-                        $order['payment_status'] = "Completed";
+                        $order['payment_status'] = 'Completed';
                         $order->update();
+
                         return redirect(route('front.payment.success', 1));
                     } else {
                         return back()->with('unsuccess', 'Payment Failed.');
@@ -115,6 +114,7 @@ class AuthorizeController extends Controller
                 return back()->with('unsuccess', 'Payment Failed.');
             }
         }
+
         return back()->with('unsuccess', 'Invalid Payment Details.');
     }
 }

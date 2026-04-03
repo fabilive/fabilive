@@ -58,18 +58,17 @@ class TicketDisputeController extends Controller
                 return response()->json(['status' => false, 'data' => [], 'error' => $validator->errors()]);
             }
 
-
-            if ($request->type ==  'Dispute') {
+            if ($request->type == 'Dispute') {
                 $order = Order::where('order_number', $request->order_number)->exists();
-                if (!$order) {
-                    return response()->json(['status' => false, 'data' => [], 'error' => ["order_number" => ["Order Number Not Found"]]]);
+                if (! $order) {
+                    return response()->json(['status' => false, 'data' => [], 'error' => ['order_number' => ['Order Number Not Found']]]);
                 }
             }
 
             $type = $request->type;
             $checkType = in_array($type, ['Ticket', 'Dispute']);
-            if (!$checkType) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "This type doesn't exists."]]);
+            if (! $checkType) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => "This type doesn't exists."]]);
             }
 
             $user = auth()->user();
@@ -77,7 +76,7 @@ class TicketDisputeController extends Controller
             $subject = $request->subject;
             $to = Pagesetting::find(1)->contact_email;
             $from = $user->email;
-            $msg = "Email: " . $from . "\nMessage: " . $request->message;
+            $msg = 'Email: '.$from."\nMessage: ".$request->message;
             if ($gs->is_smtp == 1) {
                 $data = [
                     'to' => $to,
@@ -88,7 +87,7 @@ class TicketDisputeController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMail($data);
             } else {
-                $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+                $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
                 mail($to, $subject, $msg, $headers);
             }
 
@@ -105,6 +104,7 @@ class TicketDisputeController extends Controller
                 $msg->message = $request->message;
                 $msg->user_id = $user->id;
                 $msg->save();
+
                 return response()->json(['status' => true, 'data' => new TicketDisputeMessageResource($msg), 'error' => []]);
             } else {
                 $message = new AdminUserConversation();
@@ -124,6 +124,7 @@ class TicketDisputeController extends Controller
                 $msg->message = $request->message;
                 $msg->user_id = $user->id;
                 $msg->save();
+
                 return response()->json(['status' => true, 'data' => new TicketDisputeResource($message), 'error' => []]);
             }
         } catch (\Exception $e) {
@@ -136,8 +137,8 @@ class TicketDisputeController extends Controller
         try {
             $conv = AdminUserConversation::find($id);
 
-            if (!$conv) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Not found."]]);
+            if (! $conv) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Not found.']]);
             }
 
             if ($conv->messages->count() > 0) {
@@ -146,6 +147,7 @@ class TicketDisputeController extends Controller
                 }
             }
             $conv->delete();
+
             return response()->json(['status' => true, 'data' => ['message' => 'Message Deleted Successfully!'], 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);

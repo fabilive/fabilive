@@ -32,7 +32,7 @@ class DeliveryFeeService
             'stopover_fee' => $stopoverFee,
             'total' => $total,
             'platform_commission' => $platformCommission,
-            'rider_earnings' => $riderEarnings
+            'rider_earnings' => $riderEarnings,
         ];
     }
 }

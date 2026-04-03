@@ -16,7 +16,6 @@ use Illuminate\Support\Str;
 
 class HitpayController extends Controller
 {
-
     public function __construct()
     {
 
@@ -38,32 +37,32 @@ class HitpayController extends Controller
             $stripe_secret_key = Config::get('services.stripe.secret');
             \Stripe\Stripe::setApiKey($stripe_secret_key);
             $checkout_session = \Stripe\Checkout\Session::create([
-                "mode" => "payment",
-                "success_url" => route('api.user.deposit.stripe.notify') . '?session_id={CHECKOUT_SESSION_ID}',
-                "cancel_url" => route('front.payment.cancle'),
-                "locale" => "auto",
+                'mode' => 'payment',
+                'success_url' => route('api.user.deposit.stripe.notify').'?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('front.payment.cancle'),
+                'locale' => 'auto',
 
-                "line_items" => [
+                'line_items' => [
                     [
-                        "quantity" => 1,
-                        "price_data" => [
-                            "currency" => $curr->name,
-                            "unit_amount" => $item_amount * 100,
-                            "product_data" => [
-                                "name" => $gs->title . 'Deposit'
-                            ]
-                        ]
+                        'quantity' => 1,
+                        'price_data' => [
+                            'currency' => $curr->name,
+                            'unit_amount' => $item_amount * 100,
+                            'product_data' => [
+                                'name' => $gs->title.'Deposit',
+                            ],
+                        ],
                     ],
-                ]
+                ],
             ]);
 
             Session::put('deposit_id', $request->deposit_number);
+
             return redirect($checkout_session->url);
         } catch (Exception $e) {
             return back()->with('unsuccess', $e->getMessage());
         }
     }
-
 
     public function notify(Request $request)
     {
@@ -72,8 +71,6 @@ class HitpayController extends Controller
         $stripe = new \Stripe\StripeClient(Config::get('services.stripe.secret'));
         $response = $stripe->checkout->sessions->retrieve($request->session_id);
         $deposit = Deposit::where('deposit_number', $deposit_number)->firstOrFail();
-
-
 
         if ($response->status == 'complete') {
             $user = \App\Models\User::findOrFail($deposit->user_id);
@@ -86,7 +83,7 @@ class HitpayController extends Controller
             // store in transaction table
             if ($deposit->status == 1) {
                 $transaction = new Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $deposit->user_id;
                 $transaction->amount = $deposit->amount;
                 $transaction->user_id = $deposit->user_id;
@@ -99,6 +96,7 @@ class HitpayController extends Controller
                 $transaction->type = 'plus';
                 $transaction->save();
             }
+
             return redirect(route('user.success', 1));
         } else {
             return redirect(route('user.success', 0));

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Generalsetting;
 use App\Classes\GeniusMailer;
+use App\Models\Generalsetting;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class SellerOnboardingService
@@ -37,8 +37,8 @@ class SellerOnboardingService
     {
         $missing = $this->hasRequiredDocuments($user);
 
-        if (!empty($missing)) {
-            throw new \Exception('Missing required documents: ' . implode(', ', $missing));
+        if (! empty($missing)) {
+            throw new \Exception('Missing required documents: '.implode(', ', $missing));
         }
 
         $user->vendor_status = 'pending_approval';
@@ -112,13 +112,13 @@ class SellerOnboardingService
                     </ul>
                     <p>Welcome to the {$siteName} marketplace!</p>
                     <p>Best regards,<br>The {$siteName} Team</p>
-                "
+                ",
             ];
 
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } catch (\Exception $e) {
-            Log::error("Failed to send vendor approval email: " . $e->getMessage());
+            Log::error('Failed to send vendor approval email: '.$e->getMessage());
         }
     }
 
@@ -141,13 +141,13 @@ class SellerOnboardingService
                     <blockquote>{$reason}</blockquote>
                     <p>You may resubmit your application after addressing the above concern.</p>
                     <p>Best regards,<br>The {$siteName} Team</p>
-                "
+                ",
             ];
 
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } catch (\Exception $e) {
-            Log::error("Failed to send vendor rejection email: " . $e->getMessage());
+            Log::error('Failed to send vendor rejection email: '.$e->getMessage());
         }
     }
 }

@@ -10,7 +10,6 @@ use MercadoPago;
 
 class MercadopagoController extends Controller
 {
-
     public function store(Request $request)
     {
         $deposit = Deposit::where('deposit_number', $request->deposit_number)->first();
@@ -25,23 +24,23 @@ class MercadopagoController extends Controller
         $payment->token = $input['token'];
         $payment->description = 'MercadoPago Payment';
         $payment->installments = 1;
-        $payment->payer = array(
-            "email" => $user['email'],
-        );
+        $payment->payer = [
+            'email' => $user['email'],
+        ];
         $payment->save();
 
-     
         if ($payment->status == 'approved') {
             $user->balance = $user->balance + ($deposit->amount);
             $user->save();
             $deposit['status'] = 1;
             $deposit['method'] = 'Mercadopago';
-            $deposit['txnid'] =$payment->id;
+            $deposit['txnid'] = $payment->id;
             $deposit->update();
+
             return redirect(route('user.success', 1));
         }
+
         return redirect(route('user.success', 0));
 
     }
-
 }

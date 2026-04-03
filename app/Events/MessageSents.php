@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Events;
 
 use App\Models\ChatMessages;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Queue\SerializesModels;
 
 class MessageSents implements ShouldBroadcastNow
 {
@@ -20,7 +21,7 @@ class MessageSents implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new Channel('chat.' . $this->message->chat_id); // public channel
+        return new Channel('chat.'.$this->message->chat_id); // public channel
     }
 
     public function broadcastAs()
@@ -31,12 +32,12 @@ class MessageSents implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
-            'id'          => $this->message->id,
-            'chat_id'     => $this->message->chat_id,
-            'sender_id'   => $this->message->sender_id,
+            'id' => $this->message->id,
+            'chat_id' => $this->message->chat_id,
+            'sender_id' => $this->message->sender_id,
             'receiver_id' => $this->message->receiver_id,
-            'message'     => $this->message->message,
-            'created_at'  => $this->message->created_at->toDateTimeString(),
+            'message' => $this->message->message,
+            'created_at' => $this->message->created_at->toDateTimeString(),
         ];
     }
 }

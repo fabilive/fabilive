@@ -2,49 +2,46 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\Instamojo,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
+use App\Classes\Instamojo;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Session;
-use OrderHelper;
 use Illuminate\Support\Str;
+use OrderHelper;
+use Session;
 
 class InstamojoController extends CheckoutBaseControlller
 {
-
     public function store(Request $request)
     {
         $input = $request->all();
         $data = PaymentGateway::whereKeyword('instamojo')->first();
         $total = $request->total;
         $paydata = $data->convertAutoData();
-        if ($this->curr->name != "INR") {
+        if ($this->curr->name != 'INR') {
             return redirect()->back()->with('unsuccess', __('Please Select INR Currency For This Payment.'));
         }
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $order['item_name'] = $this->gs->title . " Order";
-        $order['item_number'] = Str::random(4) . time();
+        $order['item_name'] = $this->gs->title.' Order';
+        $order['item_number'] = Str::random(4).time();
         $order['item_amount'] = $total;
         $cancel_url = route('front.payment.cancle');
         $notify_url = route('front.instamojo.notify');
@@ -57,15 +54,14 @@ class InstamojoController extends CheckoutBaseControlller
 
         $total = PriceHelper::getOrderTotalAmount($input, Session::get('cart'));
 
-
         try {
-            $response = $api->paymentRequestCreate(array(
-                "purpose" => $order['item_name'],
-                "amount" => $total,
-                "send_email" => true,
-                "email" => $request->customer_email,
-                "redirect_url" => $notify_url
-            ));
+            $response = $api->paymentRequestCreate([
+                'purpose' => $order['item_name'],
+                'amount' => $total,
+                'send_email' => true,
+                'email' => $request->customer_email,
+                'redirect_url' => $notify_url,
+            ]);
             $redirect_url = $response['longurl'];
             /** add payment ID to session **/
             Session::put('input_data', $input);
@@ -74,7 +70,7 @@ class InstamojoController extends CheckoutBaseControlller
 
             return redirect($redirect_url);
         } catch (Exception $e) {
-            return redirect($cancel_url)->with('unsuccess', 'Error: ' . $e->getMessage());
+            return redirect($cancel_url)->with('unsuccess', 'Error: '.$e->getMessage());
         }
     }
 
@@ -135,7 +131,6 @@ class InstamojoController extends CheckoutBaseControlller
                 $input['vendor_ids'] = $vendor_ids;
             } else {
 
-
                 // multi shipping
 
                 $orderTotal = $orderCalculate['total_amount'];
@@ -162,15 +157,14 @@ class InstamojoController extends CheckoutBaseControlller
                 unset($input['packeging']);
             }
 
-
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
             $input['order_number'] = $order_data['item_number'];
             $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
-            $input['payment_status'] = "Completed";
+            $input['payment_status'] = 'Completed';
             $input['txnid'] = $input_data['payment_id'];
 
             if ($input['tax_type'] == 'state_tax') {
@@ -179,7 +173,6 @@ class InstamojoController extends CheckoutBaseControlller
                 $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
             }
             $input['tax'] = Session::get('current_tax');
-
 
             if ($input['dp'] == 1) {
                 $input['status'] = 'completed';
@@ -205,7 +198,7 @@ class InstamojoController extends CheckoutBaseControlller
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
 
@@ -245,12 +238,12 @@ class InstamojoController extends CheckoutBaseControlller
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
 
@@ -260,14 +253,15 @@ class InstamojoController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
 
             return redirect($success_url);
         }
+
         return redirect($cancel_url);
     }
 }

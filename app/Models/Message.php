@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $fillable = ['conversation_id','delivery_chat_thread_id','message','sent_user','recieved_user'];
-	public function conversation()
-	{
-	    return $this->belongsTo('App\Models\Conversation');
-	}
+    protected $fillable = ['conversation_id', 'delivery_chat_thread_id', 'message', 'sent_user', 'recieved_user'];
+
+    public function conversation()
+    {
+        return $this->belongsTo('App\Models\Conversation');
+    }
 }

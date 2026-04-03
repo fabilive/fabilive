@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\User;
 
-use App\{
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\UserSubscription,
-    Models\PaymentGateway,
-    Models\Verification
-};
+use App\Classes\GeniusMailer;
+use App\Models\PaymentGateway;
+use App\Models\Subscription;
+use App\Models\UserSubscription;
+use App\Models\Verification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -20,6 +18,7 @@ class SubscriptionController extends UserBaseController
         $data['user'] = $this->user;
         $data['subs'] = Subscription::all();
         $data['package'] = $this->user->subscribes()->where('status', 1)->latest('id')->first();
+
         return view('user.package.index', $data);
     }
 
@@ -40,6 +39,7 @@ class SubscriptionController extends UserBaseController
         $paystackData = PaymentGateway::whereKeyword('paystack')->first();
         $data['paystack'] = $paystackData ? $paystackData->convertAutoData() : [];
         $data['agreements'] = \App\Models\ManageAgreement::all();
+
         return view('user.package.details', $data);
     }
 
@@ -153,7 +153,7 @@ class SubscriptionController extends UserBaseController
             return redirect()->back();
         }
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
+            'shop_name' => 'unique:users',
             'business_registration_certificate' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
 
             'passport_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
@@ -176,13 +176,13 @@ class SubscriptionController extends UserBaseController
             'submerchant_agreement.mimetypes' => __('The sub-merchant agreement must be an image (jpg, png, webp, etc.) or PDF.'),
         ]);
         if (
-            !$request->hasFile('passport_copy') &&
-            !$request->hasFile('id_card_copy') &&
-            !$request->hasFile('driver_license_copy')
+            ! $request->hasFile('passport_copy') &&
+            ! $request->hasFile('id_card_copy') &&
+            ! $request->hasFile('driver_license_copy')
         ) {
             return redirect()->back()
                 ->withErrors([
-                    'identity_document' => __('Please upload at least ONE document: Passport, National ID Card, or Driver License.')
+                    'identity_document' => __('Please upload at least ONE document: Passport, National ID Card, or Driver License.'),
                 ])
                 ->withInput();
         }
@@ -201,69 +201,69 @@ class SubscriptionController extends UserBaseController
         $success_url = route('user.payment.return');
         $user = $this->user;
         $uploadPath = public_path('assets/images/attachments');
-        if (!file_exists($uploadPath)) {
+        if (! file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
         $attachments = [];
         if ($request->hasFile('selfie_image')) {
             $file = $request->file('selfie_image');
-            $filename = time() . '_selfie.' . $file->getClientOriginalExtension();
+            $filename = time().'_selfie.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['selfie_image'] = 'assets/images/attachments/' . $filename;
+            $input['selfie_image'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('business_registration_certificate')) {
             $file = $request->file('business_registration_certificate');
-            $filename = time() . '_business.' . $file->getClientOriginalExtension();
+            $filename = time().'_business.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['business_registration_certificate'] = 'assets/images/attachments/' . $filename;
+            $input['business_registration_certificate'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('taxpayer_card_copy')) {
             $file = $request->file('taxpayer_card_copy');
-            $filename = time() . '_taxpayer.' . $file->getClientOriginalExtension();
+            $filename = time().'_taxpayer.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['taxpayer_card_copy'] = 'assets/images/attachments/' . $filename;
+            $input['taxpayer_card_copy'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('id_card_copy')) {
             $file = $request->file('id_card_copy');
-            $filename = time() . '_id.' . $file->getClientOriginalExtension();
+            $filename = time().'_id.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['id_card_copy'] = 'assets/images/attachments/' . $filename;
+            $input['id_card_copy'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('passport_copy')) {
             $file = $request->file('passport_copy');
-            $filename = time() . '_passport.' . $file->getClientOriginalExtension();
+            $filename = time().'_passport.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['passport_copy'] = 'assets/images/attachments/' . $filename;
+            $input['passport_copy'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('driver_license_copy')) {
             $file = $request->file('driver_license_copy');
-            $filename = time() . '_license.' . $file->getClientOriginalExtension();
+            $filename = time().'_license.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['driver_license_copy'] = 'assets/images/attachments/' . $filename;
+            $input['driver_license_copy'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('residence_permit')) {
             $file = $request->file('residence_permit');
-            $filename = time() . '_residence.' . $file->getClientOriginalExtension();
+            $filename = time().'_residence.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['residence_permit'] = 'assets/images/attachments/' . $filename;
+            $input['residence_permit'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         if ($request->hasFile('submerchant_agreement')) {
             $file = $request->file('submerchant_agreement');
-            $filename = time() . '_submerchant.' . $file->getClientOriginalExtension();
+            $filename = time().'_submerchant.'.$file->getClientOriginalExtension();
             $file->move($uploadPath, $filename);
-            $input['submerchant_agreement'] = 'assets/images/attachments/' . $filename;
+            $input['submerchant_agreement'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
         }
         $subs = Subscription::findOrFail($request->subs_id);
         $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
-        $user->date = date('Y-m-d', strtotime(Carbon::now()->format('Y-m-d') . ' + ' . $subs->days . ' days'));
+        $user->date = date('Y-m-d', strtotime(Carbon::now()->format('Y-m-d').' + '.$subs->days.' days'));
         $user->mail_sent = 1;
         $user->update($input);
         $sub = new UserSubscription;
@@ -282,18 +282,18 @@ class SubscriptionController extends UserBaseController
             $ver->user_id = $user->id;
             $ver->attachments = implode(',', $attachments);
             $ver->text = $request->message;
-            $ver->status = "Pending";
+            $ver->status = 'Pending';
             $ver->save();
         }
 
         $data = [
             'to' => $user->email,
-            'type' => "vendor_accept",
+            'type' => 'vendor_accept',
             'cname' => $user->name,
-            'oamount' => "",
-            'aname' => "",
-            'aemail' => "",
-            'onumber' => "",
+            'oamount' => '',
+            'aname' => '',
+            'aemail' => '',
+            'onumber' => '',
         ];
         $mailer = new GeniusMailer();
         $mailer->sendAutoMail($data);
@@ -316,12 +316,13 @@ class SubscriptionController extends UserBaseController
 
         //--- Validation Section
         $input = $request->all();
-        $rules = ['shop_name'   => 'unique:users'];
+        $rules = ['shop_name' => 'unique:users'];
         $customs = ['shop_name.unique' => __('This shop name has already been taken.')];
         $validator = \Validator::make($input, $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
+
         return response()->json('success');
     }
 }

@@ -2,31 +2,27 @@
 
 namespace App\Http\Controllers\Auth\Rider;
 
-use App\{
-    Models\Rider,
-    Models\Notification,
-    Models\Socialsetting,
-    Models\SocialProvider,
-    Http\Controllers\Controller
-};
+use App\Http\Controllers\Controller;
+use App\Models\Notification;
+use App\Models\SocialProvider;
+use App\Models\Socialsetting;
 use Auth;
 use Config;
 use Socialite;
 
 class SocialRegisterController extends Controller
 {
-
     public function __construct()
     {
-      $link = Socialsetting::findOrFail(1);
-      Config::set('services.google.client_id', $link->gclient_id);
-      Config::set('services.google.client_secret', $link->gclient_secret);
-      Config::set('services.google.redirect', url('/auth/google/callback'));
-      Config::set('services.facebook.client_id', $link->fclient_id);
-      Config::set('services.facebook.client_secret', $link->fclient_secret);
-      $url = url('/auth/facebook/callback');
-      $url = preg_replace("/^http:/i", "https:", $url);
-      Config::set('services.facebook.redirect', $url);
+        $link = Socialsetting::findOrFail(1);
+        Config::set('services.google.client_id', $link->gclient_id);
+        Config::set('services.google.client_secret', $link->gclient_secret);
+        Config::set('services.google.redirect', url('/auth/google/callback'));
+        Config::set('services.facebook.client_id', $link->fclient_id);
+        Config::set('services.facebook.client_secret', $link->fclient_secret);
+        $url = url('/auth/facebook/callback');
+        $url = preg_replace('/^http:/i', 'https:', $url);
+        Config::set('services.facebook.redirect', $url);
     }
 
     public function redirectToProvider($provider)
@@ -36,23 +32,19 @@ class SocialRegisterController extends Controller
 
     public function handleProviderCallback($provider)
     {
-        try
-        {
+        try {
             $socialUser = Socialite::driver($provider)->user();
-        }
-        catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect('/');
         }
 
-        $socialProvider = SocialProvider::where('provider_id',$socialUser->getId())->first();
-        if(!$socialProvider)
-        {
-            $ck = User::where('email','=',$socialUser->email)->count();
-            if($ck > 0)
-            {
-                $user = User::where('email','=',$socialUser->email)->first();
-                Auth::login($user); 
+        $socialProvider = SocialProvider::where('provider_id', $socialUser->getId())->first();
+        if (! $socialProvider) {
+            $ck = User::where('email', '=', $socialUser->email)->count();
+            if ($ck > 0) {
+                $user = User::where('email', '=', $socialUser->email)->first();
+                Auth::login($user);
+
                 return redirect()->route('user-dashboard');
             }
             $user = new User;
@@ -70,14 +62,13 @@ class SocialRegisterController extends Controller
             $notification = new Notification;
             $notification->user_id = $user->id;
             $notification->save();
-        }
-        else
-        {
-            
+        } else {
+
             $user = $socialProvider->user;
         }
 
-        Auth::login($user); 
+        Auth::login($user);
+
         return redirect()->route('user-dashboard');
 
     }

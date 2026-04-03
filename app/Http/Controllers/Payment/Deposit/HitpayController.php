@@ -2,23 +2,19 @@
 
 namespace App\Http\Controllers\Payment\Deposit;
 
-use App\{
-    Models\Deposit,
-    Models\Transaction,
-    Classes\GeniusMailer,
-    Models\PaymentGateway,
-};
+use App\Classes\GeniusMailer;
+use App\Models\Deposit;
+use App\Models\PaymentGateway;
+use App\Models\Transaction;
+use App\Services\HitPayService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use App\Services\HitPayService;
-use Illuminate\Support\Facades\Http;
 
 class HitpayController extends DepositBaseController
 {
-
     protected $hipayService;
 
     public function __construct(HitPayService $hipayService)
@@ -79,20 +75,20 @@ class HitpayController extends DepositBaseController
 
         // Call service method
         $response = $this->hipayService->createPaymentRequest($amount, $currency, 'Wallet Deposit');
-        
-       
+
         if (isset($response['url'])) {
             Session::put('input_data', $request->all());
+
             return redirect($response['url']);
         } else {
-            return back()->with('unsuccess', 'Hitpay Error: ' . json_encode($response));
+            return back()->with('unsuccess', 'Hitpay Error: '.json_encode($response));
         }
     }
 
     public function notify(Request $request)
     {
         $input = Session::get('input_data');
-        if (!$input) {
+        if (! $input) {
             return redirect()->route('user-dashboard')->with('unsuccess', __('Session expired.'));
         }
 
@@ -120,11 +116,11 @@ class HitpayController extends DepositBaseController
 
                 // Transaction
                 $transaction = new Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $deposit->user_id;
                 $transaction->amount = $deposit->amount;
-                $transaction->currency_sign  = $deposit->currency;
-                $transaction->currency_code  = $deposit->currency_code;
+                $transaction->currency_sign = $deposit->currency;
+                $transaction->currency_code = $deposit->currency_code;
                 $transaction->currency_value = $deposit->currency_value;
                 $transaction->method = $deposit->method;
                 $transaction->txnid = $deposit->txnid;
@@ -137,14 +133,14 @@ class HitpayController extends DepositBaseController
                 // Email - Move outside transaction or handle carefully
                 $data = [
                     'to' => $user->email,
-                    'type' => "wallet_deposit",
+                    'type' => 'wallet_deposit',
                     'cname' => $user->name,
                     'damount' => $deposit->amount,
                     'wbalance' => $user->balance,
-                    'oamount' => "",
-                    'aname' => "",
-                    'aemail' => "",
-                    'onumber' => "",
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'onumber' => '',
                 ];
                 $mailer = new GeniusMailer();
                 $mailer->sendAutoMail($data);
@@ -152,10 +148,12 @@ class HitpayController extends DepositBaseController
                 return redirect()->route('user-dashboard')->with('success', __('Balance has been added to your account.'));
             } else {
                 \Illuminate\Support\Facades\DB::rollBack();
+
                 return redirect()->route('user-dashboard')->with('unsuccess', __('Payment was not successful.'));
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
+
             return redirect()->route('user-dashboard')->with('unsuccess', $e->getMessage());
         }
     }

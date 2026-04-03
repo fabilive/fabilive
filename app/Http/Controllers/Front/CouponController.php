@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\{
-    Models\Cart,
-    Models\Coupon
-};
+use App\Models\Cart;
+use App\Models\Coupon;
 use App\Models\Product;
 use Session;
 
 class CouponController extends FrontBaseController
 {
-
     public function coupon()
     {
         $gs = $this->gs;
         $code = $_GET['code'];
-        $total = (float)preg_replace('/[^0-9\.]/ui', '', $_GET['total']);;
+        $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
         $fnd = Coupon::where('code', '=', $code)->get()->count();
         $coupon = Coupon::where('code', '=', $code)->first();
 
@@ -50,14 +47,9 @@ class CouponController extends FrontBaseController
             }
         }
 
-
-
         if (in_array(0, $coupon_check_type)) {
             return response()->json(0);
         }
-
-
-
 
         if ($fnd < 1) {
             return response()->json(0);
@@ -65,7 +57,7 @@ class CouponController extends FrontBaseController
             $coupon = Coupon::where('code', '=', $code)->first();
             $curr = $this->curr;
             if ($coupon->times != null) {
-                if ($coupon->times == "0") {
+                if ($coupon->times == '0') {
                     return response()->json(0);
                 }
             }
@@ -85,7 +77,7 @@ class CouponController extends FrontBaseController
                             return response()->json(3);
                         }
                         Session::put('already', $code);
-                        $coupon->price = (int)$coupon->price;
+                        $coupon->price = (int) $coupon->price;
                         $val = $total / 100;
                         $sub = $val * $coupon->price;
                         $total = $total - $sub;
@@ -97,7 +89,7 @@ class CouponController extends FrontBaseController
                         Session::put('coupon_id', $coupon->id);
                         Session::put('coupon_total', $data[0]);
                         $data[3] = $coupon->id;
-                        $data[4] = $coupon->price . "%";
+                        $data[4] = $coupon->price.'%';
                         $data[5] = 1;
 
                         Session::put('coupon_percentage', $data[4]);
@@ -121,6 +113,7 @@ class CouponController extends FrontBaseController
                         $data[0] = \PriceHelper::showCurrencyPrice($data[0]);
                         Session::put('coupon_percentage', 0);
                         $data[5] = 1;
+
                         return response()->json($data);
                     }
                 } else {
@@ -138,7 +131,7 @@ class CouponController extends FrontBaseController
         $code = $_GET['code'];
         $coupon = Coupon::where('code', '=', $code)->first();
 
-        if (!$coupon) {
+        if (! $coupon) {
             return response()->json(0);
         }
 
@@ -163,7 +156,6 @@ class CouponController extends FrontBaseController
             }
         }
 
-
         if (count($discount_items) == 0) {
             return 0;
         }
@@ -176,8 +168,7 @@ class CouponController extends FrontBaseController
             }
         }
 
-
-        $total = (float)preg_replace('/[^0-9\.]/ui', '', $main_discount_price);
+        $total = (float) preg_replace('/[^0-9\.]/ui', '', $main_discount_price);
 
         $fnd = Coupon::where('code', '=', $code)->get()->count();
         if (Session::has('is_tax')) {
@@ -190,7 +181,7 @@ class CouponController extends FrontBaseController
             $coupon = Coupon::where('code', '=', $code)->first();
             $curr = $this->curr;
             if ($coupon->times != null) {
-                if ($coupon->times == "0") {
+                if ($coupon->times == '0') {
                     return response()->json(0);
                 }
             }
@@ -211,7 +202,7 @@ class CouponController extends FrontBaseController
                             return response()->json(3);
                         }
                         Session::put('already', $code);
-                        $coupon->price = (int)$coupon->price;
+                        $coupon->price = (int) $coupon->price;
 
                         $oldCart = Session::get('cart');
                         $cart = new Cart($oldCart);
@@ -233,7 +224,7 @@ class CouponController extends FrontBaseController
                         Session::forget('coupon_total');
 
                         $data[3] = $coupon->id;
-                        $data[4] = $coupon->price . "%";
+                        $data[4] = $coupon->price.'%';
                         $data[5] = 1;
                         $data[6] = round($total, 2);
                         Session::put('coupon_percentage', $data[4]);

@@ -38,7 +38,7 @@ class FinancialReportController extends Controller
         $endDate = $request->input('end_date');
         $data = $this->reportingService->getReconciliationData($startDate, $endDate);
 
-        $filename = "reconciliation_report_" . date('Y-m-d') . ".csv";
+        $filename = 'reconciliation_report_'.date('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($data) {
             $handle = fopen('php://output', 'w');

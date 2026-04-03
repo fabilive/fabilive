@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\DeliveryJob;
-use App\Events\NewDeliveryJobAvailable;
-use App\Models\User;
 
 class DeliveryDispatchService
 {
@@ -31,9 +29,9 @@ class DeliveryDispatchService
         foreach ($riders as $rider) {
             $this->notificationService->send($rider->id, 'new_delivery_job', [
                 'title' => __('New Delivery Job Available'),
-                'text' => __('Order #') . $job->order->order_number . __(' is ready for pickup in your area.'),
+                'text' => __('Order #').$job->order->order_number.__(' is ready for pickup in your area.'),
                 'link' => route('rider-delivery-details', $job->id),
-                'type' => 'delivery'
+                'type' => 'delivery',
             ], 'in_app');
         }
     }
@@ -44,7 +42,7 @@ class DeliveryDispatchService
     public function remindSellers(DeliveryJob $job): void
     {
         $pendingStops = $job->stops()->where('type', 'pickup')->where('status', 'pending')->get();
-        
+
         foreach ($pendingStops as $stop) {
             // Send notification to $stop->seller
         }

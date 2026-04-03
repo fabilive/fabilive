@@ -1,26 +1,29 @@
 <?php
+
 namespace App\Http\Controllers\Rider;
-use App\{
-    Models\Rider,
-    Models\Withdraw,
-    Models\Currency
-};
-use App\Http\Controllers\Rider\RiderBaseController;
+
+use App\Models\Currency;
+use App\Models\Rider;
+use App\Models\Withdraw;
 use Illuminate\Http\Request;
+
 class WithdrawController extends RiderBaseController
 {
     public function index()
     {
         $withdraws = Withdraw::where('user_id', '=', $this->rider->id)->where('type', '=', 'rider')->latest('id')->get();
         $sign = Currency::where('is_default', '=', 1)->first();
+
         return view('rider.withdraw.index', compact('withdraws', 'sign'));
     }
+
     public function create()
     {
         $sign = Currency::where('is_default', '=', 1)->first();
+
         return view('rider.withdraw.withdraw', compact('sign'));
     }
-    
+
     public function store(Request $request)
     {
         try {
@@ -38,6 +41,7 @@ class WithdrawController extends RiderBaseController
 
                     if ($finalamount < 0) {
                         DB::rollBack();
+
                         return response()->json(['errors' => [__('You can not withdraw this amount.')]]);
                     }
 
@@ -68,21 +72,24 @@ class WithdrawController extends RiderBaseController
                     $newwithdraw->save();
 
                     DB::commit();
+
                     return response()->json(__('Withdraw Request Sent Successfully.'));
                 } else {
                     DB::rollBack();
+
                     return response()->json(['errors' => [__('Insufficient Balance.')]]);
                 }
             }
             DB::rollBack();
+
             return response()->json(['errors' => [__('Please enter a valid amount.')]]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['errors' => [$e->getMessage()]], 500);
         }
     }
 
-    
     // public function store(Request $request)
     // {
     //     $from = Rider::findOrFail($this->rider->id);

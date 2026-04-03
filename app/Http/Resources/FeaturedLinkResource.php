@@ -18,7 +18,7 @@ class FeaturedLinkResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'link' => $this->link,
-            'photo' => url('/') . '/assets/images/featuredlink/'.$this->photo,
-          ];
+            'photo' => url('/').'/assets/images/featuredlink/'.$this->photo,
+        ];
     }
 }

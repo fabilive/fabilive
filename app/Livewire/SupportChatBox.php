@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\SupportConversation;
-use App\Models\SupportMessage;
 use App\Models\SupportConversationEvent;
+use App\Models\SupportMessage;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class SupportChatBox extends Component
@@ -14,7 +14,9 @@ class SupportChatBox extends Component
     use WithFileUploads;
 
     public SupportConversation $conversation;
+
     public $message = '';
+
     public $attachment = null;
 
     public function mount(SupportConversation $conversation)
@@ -40,7 +42,7 @@ class SupportChatBox extends Component
         if ($this->attachment) {
             $path = $this->attachment->store('support_attachments', 'public');
             $msgData['type'] = 'image';
-            $msgData['attachment_url'] = '/storage/' . $path;
+            $msgData['attachment_url'] = '/storage/'.$path;
         }
 
         SupportMessage::create($msgData);
@@ -56,15 +58,15 @@ class SupportChatBox extends Component
                 'conversation_id' => $this->conversation->id,
                 'actor_type' => 'agent',
                 'actor_id' => Auth::id(),
-                'event' => 'assigned'
+                'event' => 'assigned',
             ]);
         }
 
         $this->reset(['message', 'attachment']);
 
         // Notify and Refresh
-        $this->dispatch('refreshRelationManager'); 
-        
+        $this->dispatch('refreshRelationManager');
+
         session()->flash('message', 'Reply sent successfully!');
     }
 

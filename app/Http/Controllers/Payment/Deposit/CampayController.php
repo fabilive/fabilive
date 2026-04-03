@@ -2,23 +2,18 @@
 
 namespace App\Http\Controllers\Payment\Deposit;
 
-use App\{
-    Models\Deposit,
-    Models\Transaction,
-    Classes\GeniusMailer,
-    Models\PaymentGateway,
-};
+use App\Classes\GeniusMailer;
+use App\Models\Deposit;
+use App\Models\PaymentGateway;
+use App\Models\Transaction;
+use App\Services\CampayService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use App\Services\CampayService;
-
 
 class CampayController extends DepositBaseController
 {
-
     protected $campayService;
 
     public function __construct(CampayService $campayService)
@@ -26,8 +21,6 @@ class CampayController extends DepositBaseController
         parent::__construct();
         $this->campayService = $campayService;
     }
-
-
 
     public function store(Request $request)
     {
@@ -39,10 +32,9 @@ class CampayController extends DepositBaseController
         $curr = $this->curr;
 
         $supported_currency = json_decode($data->currency_id, true);
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Campay Payment.'));
         }
-
 
         try {
             $response = $this->campayService->generatePaymentLink(
@@ -55,9 +47,10 @@ class CampayController extends DepositBaseController
 
             if (isset($response['link'])) {
                 Session::put('input_data', $request->all());
-                if (!$response || !isset($response['link'])) {
+                if (! $response || ! isset($response['link'])) {
                     return back()->with('error', 'Failed to generate payment link');
                 }
+
                 //return redirect()->route('deposit.campay.notify');
                 return redirect()->away($response['link']);
             } else {
@@ -67,7 +60,6 @@ class CampayController extends DepositBaseController
             return back()->with('unsuccess', $e->getMessage());
         }
     }
-
 
     public function notify(Request $request)
     {
@@ -92,16 +84,15 @@ class CampayController extends DepositBaseController
             $deposit->status = 1;
             $deposit->save();
 
-
             // store in transaction table
             if ($deposit->status == 1) {
                 $transaction = new Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $deposit->user_id;
                 $transaction->amount = $deposit->amount;
                 $transaction->user_id = $deposit->user_id;
-                $transaction->currency_sign  = $deposit->currency;
-                $transaction->currency_code  = $deposit->currency_code;
+                $transaction->currency_sign = $deposit->currency;
+                $transaction->currency_code = $deposit->currency_code;
                 $transaction->currency_value = $deposit->currency_value;
                 $transaction->method = $deposit->method;
                 $transaction->txnid = $deposit->txnid;
@@ -112,21 +103,20 @@ class CampayController extends DepositBaseController
 
             $data = [
                 'to' => $user->email,
-                'type' => "wallet_deposit",
+                'type' => 'wallet_deposit',
                 'cname' => $user->name,
                 'damount' => $deposit->amount,
                 'wbalance' => $user->balance,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($data);
 
-
             return redirect()->route('user-dashboard')->with('success', __('Balance has been added to your account.'));
-        }else{
+        } else {
             return redirect()->route('user-dashboard')->with('unsuccess', __('Failed to Deposit.'));
         }
     }

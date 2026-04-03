@@ -4,7 +4,6 @@ namespace App\Services\AI;
 
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class MultilingualAssistantService extends AIService
 {
@@ -13,12 +12,12 @@ class MultilingualAssistantService extends AIService
      */
     public function reply(int $userId, string $message, array $history = []): array
     {
-        if (!$this->isFeatureEnabled('multilingual_assistant')) {
+        if (! $this->isFeatureEnabled('multilingual_assistant')) {
             return ['error' => 'Assistant feature is not enabled.'];
         }
 
         // Check rate limit (stricter for chat)
-        if (!$this->checkRateLimit($userId, 'assistant')) {
+        if (! $this->checkRateLimit($userId, 'assistant')) {
             return ['error' => 'You are sending messages too quickly. Please try again in a minute.', 'fallback' => true];
         }
 
@@ -40,7 +39,7 @@ class MultilingualAssistantService extends AIService
         if ($context) {
             $messages[] = [
                 'role' => 'system',
-                'content' => "RELEVANT PLATFORM RULES/CONTEXT:\n" . $context
+                'content' => "RELEVANT PLATFORM RULES/CONTEXT:\n".$context,
             ];
         }
 
@@ -66,7 +65,7 @@ class MultilingualAssistantService extends AIService
 
         return [
             'reply' => $this->extractContent($response),
-            'action' => null
+            'action' => null,
         ];
     }
 
@@ -80,7 +79,7 @@ class MultilingualAssistantService extends AIService
             return file_get_contents($path);
         }
 
-        return "You are the Fabilive Assistant. You speak English, French, and Cameroon Pidgin. Be helpful and brief.";
+        return 'You are the Fabilive Assistant. You speak English, French, and Cameroon Pidgin. Be helpful and brief.';
     }
 
     /**
@@ -111,7 +110,7 @@ class MultilingualAssistantService extends AIService
         // Inject a specific prompt to extract the product details
         $messages[] = [
             'role' => 'system',
-            'content' => 'The user wants to sell an item. Extract the item name, condition, and any details. If they did not provide enough info to write a good description, ask them for details. If they did, draft a JSON with title, description, and price (XAF), and also reply with a friendly message.'
+            'content' => 'The user wants to sell an item. Extract the item name, condition, and any details. If they did not provide enough info to write a good description, ask them for details. If they did, draft a JSON with title, description, and price (XAF), and also reply with a friendly message.',
         ];
 
         $response = $this->chatCompletion($messages, $userId, 'assistant');
@@ -120,16 +119,16 @@ class MultilingualAssistantService extends AIService
         // Very naive JSON extraction from the reply
         preg_match('/\{.*\}/s', $content, $matches);
         $draft = [];
-        if (!empty($matches[0])) {
+        if (! empty($matches[0])) {
             $draft = json_decode($matches[0], true) ?? [];
             // Remove the JSON from the text response
             $content = trim(str_replace($matches[0], '', $content));
         }
 
         return [
-            'reply' => $content ?: "I can help you sell that! What condition is it in and how much do you want for it?",
+            'reply' => $content ?: 'I can help you sell that! What condition is it in and how much do you want for it?',
             'action' => 'draft_listing',
-            'data' => $draft
+            'data' => $draft,
         ];
     }
 
@@ -145,10 +144,10 @@ class MultilingualAssistantService extends AIService
         $searchQuery = implode(' ', $terms);
 
         $results = [];
-        if (!empty($searchQuery)) {
+        if (! empty($searchQuery)) {
             $results = DB::table('products')
                 ->where('status', 1)
-                ->where('name', 'LIKE', '%' . current($terms) . '%')
+                ->where('name', 'LIKE', '%'.current($terms).'%')
                 ->select('id', 'name', 'price', 'photo')
                 ->limit(3)
                 ->get()
@@ -159,14 +158,14 @@ class MultilingualAssistantService extends AIService
             return [
                 'reply' => "I couldn't find exactly what you're looking for right now. (A no see that one o). Check back later!",
                 'action' => 'search',
-                'data' => []
+                'data' => [],
             ];
         }
 
         return [
-            'reply' => "Here are some items I found for you:",
+            'reply' => 'Here are some items I found for you:',
             'action' => 'search',
-            'data' => $results
+            'data' => $results,
         ];
     }
 
@@ -178,11 +177,11 @@ class MultilingualAssistantService extends AIService
         $message = strtolower($message);
 
         if (str_contains($message, 'scam') || str_contains($message, 'wayo') || str_contains($message, 'safe')) {
-            return "Fabilive Safety: Never pay outside the platform. All payments go into the Escrow Wallet. The seller only gets paid after Admin verifies delivery. If anyone asks you for WhatsApp or Western Union, it is a scam.";
+            return 'Fabilive Safety: Never pay outside the platform. All payments go into the Escrow Wallet. The seller only gets paid after Admin verifies delivery. If anyone asks you for WhatsApp or Western Union, it is a scam.';
         }
 
         if (str_contains($message, 'delivery') || str_contains($message, 'rider')) {
-            return "Delivery: Buyers and sellers cannot chat directly. Delivery Agents pick up the item from the seller and bring it to the buyer. The seller must provide a code to the rider. The rider must upload proof photos.";
+            return 'Delivery: Buyers and sellers cannot chat directly. Delivery Agents pick up the item from the seller and bring it to the buyer. The seller must provide a code to the rider. The rider must upload proof photos.';
         }
 
         return null; // No specific context

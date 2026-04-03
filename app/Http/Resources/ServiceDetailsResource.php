@@ -18,7 +18,7 @@ class ServiceDetailsResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'details' => $this->details,
-            'photo' => url('/') . '/assets/images/services/'.$this->photo,
+            'photo' => url('/').'/assets/images/services/'.$this->photo,
         ];
     }
 }

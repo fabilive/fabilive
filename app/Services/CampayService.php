@@ -1,12 +1,18 @@
 <?php
+
 namespace App\Services;
-use Illuminate\Support\Facades\Http;
+
 use App\Models\PaymentGateway;
+use Illuminate\Support\Facades\Http;
+
 class CampayService
 {
     private $apiKey;
+
     private $secret;
+
     private $baseUrl;
+
     public function __construct()
     {
         $data = PaymentGateway::whereKeyword('campay')->first();
@@ -16,6 +22,7 @@ class CampayService
         $this->secret = $paydata['password'] ?? '';
         $this->baseUrl = 'https://www.campay.net/api';
     }
+
     private function getToken()
     {
         $response = Http::post("{$this->baseUrl}/token/", [
@@ -39,7 +46,7 @@ class CampayService
 
         $data = $response->json();
 
-        if (!isset($data['token'])) {
+        if (! isset($data['token'])) {
             \Log::error('Campay Auth Response Missing Token', ['body' => $data]);
             throw new \Exception('Campay token not found.');
         }
@@ -47,13 +54,12 @@ class CampayService
         return $data['token'];
     }
 
-
-
     public function initiateCheckout($currency, $amount, $from, $description, $callbackUrl)
     {
         $token = $this->getToken();
-        if (!$token) {
+        if (! $token) {
             \Log::error('Failed to get Campay access token.');
+
             return null;
         }
         $payload = [
@@ -65,8 +71,8 @@ class CampayService
         ];
         \Log::info('Campay Checkout Payload:', $payload);
         $response = Http::withHeaders([
-            'Authorization' => 'Token ' . $token,
-            'Content-Type' => 'application/json'
+            'Authorization' => 'Token '.$token,
+            'Content-Type' => 'application/json',
         ])->post("{$this->baseUrl}/collect/", [
             'amount' => $amount,
             'from' => $from,
@@ -83,24 +89,28 @@ class CampayService
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
             return null;
         }
         $responseData = $response->json();
         if ($responseData === null) {
             \Log::error('Campay API returned an invalid or empty JSON response.');
+
             return null;
         }
         \Log::info('Campay Checkout Response:', $responseData);
+
         return $responseData;
     }
+
     public function generatePaymentLink($currency, $amount, $description, $redirectUrl = null)
     {
         $token = $this->getToken();
-        if (!$token) {
+        if (! $token) {
             return ['error' => 'Failed to get access token'];
         }
         $response = Http::withHeaders([
-            'Authorization' => 'Token ' . $token,
+            'Authorization' => 'Token '.$token,
             'Content-Type' => 'application/json',
         ])->post("{$this->baseUrl}/get_payment_link/", [
             'amount' => $amount,
@@ -118,17 +128,20 @@ class CampayService
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
             return null;
         }
         $responseData = $response->json();
+
         return $responseData;
     }
+
     public function requestPayment($amount, $phone, $firstName, $email, $description, $currency = 'XAF', $externalReference = null)
     {
         $token = $this->getToken();
         $response = Http::withHeaders([
-            'Authorization' => 'Token ' . $token,
-            'Content-Type' => 'application/json'
+            'Authorization' => 'Token '.$token,
+            'Content-Type' => 'application/json',
         ])->post("{$this->baseUrl}/collect/", [
             'amount' => $amount,
             'from' => $phone,
@@ -137,8 +150,10 @@ class CampayService
             'description' => $description,
             'external_reference' => '',
         ]);
+
         return $response->json();
     }
+
     public function checkPaymentStatus($reference)
     {
         $token = $this->getToken();

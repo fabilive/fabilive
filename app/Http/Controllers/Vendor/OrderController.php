@@ -1,28 +1,31 @@
 <?php
+
 namespace App\Http\Controllers\Vendor;
-use App\{
-    Models\Order,
-    Models\VendorOrder
-};
+
+use App\Models\DeliveryJob;
+use App\Models\Order;
 use App\Models\Package;
 use App\Models\Shipping;
-use Illuminate\Http\Request;
-use Datatables;
+use App\Models\VendorOrder;
 use App\Services\DeliveryJobService;
-use App\Models\DeliveryJob;
+use Datatables;
+use Illuminate\Http\Request;
+
 class OrderController extends VendorBaseController
 {
     public function datatables()
     {
         $user = $this->user;
-        $datas = Order::with(array('vendororders' => function ($query) use ($user) {
+        $datas = Order::with(['vendororders' => function ($query) use ($user) {
             $query->where('user_id', $user->id);
-        }))->orderby('id', 'desc')->get()->reject(function ($item) use ($user) {
+        }])->orderby('id', 'desc')->get()->reject(function ($item) use ($user) {
             if ($item->vendororders()->where('user_id', '=', $user->id)->count() == 0) {
                 return true;
             }
+
             return false;
         });
+
         return Datatables::of($datas)
             ->editColumn('totalQty', function (Order $data) {
                 return $data->vendororders()->where('user_id', '=', $this->user->id)->sum('qty');
@@ -48,31 +51,35 @@ class OrderController extends VendorBaseController
                     }
                 }
                 $commission = round($order->commission * $order->currency_value, 2);
-                return \PriceHelper::showOrderCurrencyPrice(($price-$commission), $data->currency_sign);
+
+                return \PriceHelper::showOrderCurrencyPrice(($price - $commission), $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
-                $pending = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'pending')->count() > 0 ? "selected" : "";
-                $processing = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'processing')->count() > 0 ? "selected" : "";
-                $completed = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'completed')->count() > 0 ? "selected" : "";
-                $declined =  $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'declined')->count() > 0 ? "selected" : "";
+                $pending = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'pending')->count() > 0 ? 'selected' : '';
+                $processing = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'processing')->count() > 0 ? 'selected' : '';
+                $completed = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'completed')->count() > 0 ? 'selected' : '';
+                $declined = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'declined')->count() > 0 ? 'selected' : '';
+
                 return '
                                 <div class="action-list">
-                                <a href="' . route("vendor-order-show", $data->order_number) . '" class="btn btn-primary product-btn"><i class="fa fa-eye"></i>  ' . __("Details") . ' </a>
-                                    <select class="vendor-btn  ' . $data->vendororders()->where('user_id', '=', $this->user->id)->first()->status . ' ">
-                                    <option value=" ' . route("vendor-order-status", ["id1" => $data->order_number, "status" => "pending"]) . ' "   ' . $pending . '  > ' . __("Pending") . ' </option>
-                                    <option value=" ' . route("vendor-order-status", ["id1" => $data->order_number, "status" => "processing"]) . ' "  ' . $processing . '   > ' . __("Processing") . ' </option>
-                                    <option value=" ' . route("vendor-order-status", ["id1" => $data->order_number, "status" => "completed"]) . ' "  ' . $completed . '   > ' . __("Completed") . ' </option>
-                                    <option value=" ' . route("vendor-order-status", ["id1" => $data->order_number, "status" => "declined"]) . ' "  ' . $declined . '   > ' . __("Declined") . ' </option>
+                                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-primary product-btn"><i class="fa fa-eye"></i>  '.__('Details').' </a>
+                                    <select class="vendor-btn  '.$data->vendororders()->where('user_id', '=', $this->user->id)->first()->status.' ">
+                                    <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'pending']).' "   '.$pending.'  > '.__('Pending').' </option>
+                                    <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'processing']).' "  '.$processing.'   > '.__('Processing').' </option>
+                                    <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'completed']).' "  '.$completed.'   > '.__('Completed').' </option>
+                                    <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'declined']).' "  '.$declined.'   > '.__('Declined').' </option>
                                     </select>
                                 </div>';
             })
             ->rawColumns(['id', 'action'])
             ->toJson(); //--- Returning Json Data To Client Side
     }
+
     public function index()
     {
         return view('vendor.order.index');
     }
+
     // public function show($slug)
     // {
     //     $user = $this->user;
@@ -81,38 +88,42 @@ class OrderController extends VendorBaseController
     //     return view('vendor.order.details', compact('user', 'order', 'cart'));
     // }
     public function show($slug)
-{
-    $user  = $this->user;
-    $order = Order::with(['customerCity','shippingCity'])
-                  ->where('order_number', $slug)
-                  ->firstOrFail();
-    $raw_cart = $order->cart;
-    $cart = json_decode($raw_cart, true);
-    if ($cart === null && !empty($raw_cart)) {
-        try {
-            if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
-                $cart = unserialize($raw_cart);
-                if (is_object($cart)) {
-                     $cart = json_decode(json_encode($cart), true);
+    {
+        $user = $this->user;
+        $order = Order::with(['customerCity', 'shippingCity'])
+            ->where('order_number', $slug)
+            ->firstOrFail();
+        $raw_cart = $order->cart;
+        $cart = json_decode($raw_cart, true);
+        if ($cart === null && ! empty($raw_cart)) {
+            try {
+                if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                    $cart = unserialize($raw_cart);
+                    if (is_object($cart)) {
+                        $cart = json_decode(json_encode($cart), true);
+                    }
                 }
+            } catch (\Exception $e) {
             }
-        } catch (\Exception $e) {}
-    }
-    if (!is_array($cart)) $cart = ['items' => []];
-    if (!isset($cart['items'])) {
-        if (!empty($cart) && is_array(reset($cart))) {
-            $cart = ['items' => $cart];
-        } else {
-            $cart['items'] = [];
         }
-    }
-    foreach($cart['items'] as $k => $v) {
-        if (is_array($v) && !isset($v['item'])) {
-            $cart['items'][$k]['item'] = $v;
+        if (! is_array($cart)) {
+            $cart = ['items' => []];
         }
+        if (! isset($cart['items'])) {
+            if (! empty($cart) && is_array(reset($cart))) {
+                $cart = ['items' => $cart];
+            } else {
+                $cart['items'] = [];
+            }
+        }
+        foreach ($cart['items'] as $k => $v) {
+            if (is_array($v) && ! isset($v['item'])) {
+                $cart['items'][$k]['item'] = $v;
+            }
+        }
+
+        return view('vendor.order.details', compact('user', 'order', 'cart'));
     }
-    return view('vendor.order.details', compact('user', 'order', 'cart'));
-}
 
     public function license(Request $request, $slug)
     {
@@ -123,6 +134,7 @@ class OrderController extends VendorBaseController
         $order->cart = $new_cart;
         $order->update();
         $msg = __('Successfully Changed The License Key.');
+
         return redirect()->back()->with('license', $msg);
     }
 
@@ -132,29 +144,33 @@ class OrderController extends VendorBaseController
         $order = Order::where('order_number', '=', $slug)->first();
         $raw_cart = $order->cart;
         $cart = json_decode($raw_cart, true);
-        if ($cart === null && !empty($raw_cart)) {
+        if ($cart === null && ! empty($raw_cart)) {
             try {
                 if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
                     $cart = unserialize($raw_cart);
                     if (is_object($cart)) {
-                         $cart = json_decode(json_encode($cart), true);
+                        $cart = json_decode(json_encode($cart), true);
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
-        if (!is_array($cart)) $cart = ['items' => []];
-        if (!isset($cart['items'])) {
-            if (!empty($cart) && is_array(reset($cart))) {
+        if (! is_array($cart)) {
+            $cart = ['items' => []];
+        }
+        if (! isset($cart['items'])) {
+            if (! empty($cart) && is_array(reset($cart))) {
                 $cart = ['items' => $cart];
             } else {
                 $cart['items'] = [];
             }
         }
-        foreach($cart['items'] as $k => $v) {
-            if (is_array($v) && !isset($v['item'])) {
+        foreach ($cart['items'] as $k => $v) {
+            if (is_array($v) && ! isset($v['item'])) {
                 $cart['items'][$k]['item'] = $v;
             }
         }
+
         return view('vendor.order.invoice', compact('user', 'order', 'cart'));
     }
 
@@ -164,49 +180,51 @@ class OrderController extends VendorBaseController
         $order = Order::where('order_number', '=', $slug)->first();
         $raw_cart = $order->cart;
         $cart = json_decode($raw_cart, true);
-        if ($cart === null && !empty($raw_cart)) {
+        if ($cart === null && ! empty($raw_cart)) {
             try {
                 if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
                     $cart = unserialize($raw_cart);
                     if (is_object($cart)) {
-                         $cart = json_decode(json_encode($cart), true);
+                        $cart = json_decode(json_encode($cart), true);
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
-        if (!is_array($cart)) $cart = ['items' => []];
-        if (!isset($cart['items'])) {
-            if (!empty($cart) && is_array(reset($cart))) {
+        if (! is_array($cart)) {
+            $cart = ['items' => []];
+        }
+        if (! isset($cart['items'])) {
+            if (! empty($cart) && is_array(reset($cart))) {
                 $cart = ['items' => $cart];
             } else {
                 $cart['items'] = [];
             }
         }
-        foreach($cart['items'] as $k => $v) {
-            if (is_array($v) && !isset($v['item'])) {
+        foreach ($cart['items'] as $k => $v) {
+            if (is_array($v) && ! isset($v['item'])) {
                 $cart['items'][$k]['item'] = $v;
             }
         }
+
         return view('vendor.order.print', compact('user', 'order', 'cart'));
     }
-
-    
 
     public function status($slug, $status)
     {
         $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
         $order = \App\Models\Order::where('id', $mainorder->order_id)->first();
-        if ($mainorder->status == "completed") {
+        if ($mainorder->status == 'completed') {
             return redirect()->back()->with('success', __('This Order is Already Completed'));
         } else {
             $user = $this->user;
             VendorOrder::where('order_number', '=', $slug)->where('user_id', '=', $user->id)->update(['status' => $status]);
-            
+
             // If status is "ready", trigger the Delivery System logic
             if ($status === 'ready') {
                 $jobService = app(DeliveryJobService::class);
                 $job = DeliveryJob::where('order_id', $order->id)->first();
-                if (!$job) {
+                if (! $job) {
                     $job = $jobService->createJobFromOrder($order);
                 }
 
@@ -214,7 +232,7 @@ class OrderController extends VendorBaseController
                 if ($stop && $stop->status === 'pending') {
                     $stop->update([
                         'status' => 'ready',
-                        'ready_at' => now()
+                        'ready_at' => now(),
                     ]);
 
                     // Sync main order status for buyer awareness
@@ -230,94 +248,91 @@ class OrderController extends VendorBaseController
                     }
                 }
             }
-            
+
             return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
         }
     }
-    
-//     public function status($slug, $status)
-//     {
-//     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
-//     if ($mainorder->status == "completed") {
-//         return redirect()->back()->with('success', __('This Order is Already Completed'));
-//     }
-//     $user = $this->user;
-//     VendorOrder::where('order_number', '=', $slug)
-//         ->where('user_id', '=', $user->id)
-//         ->update(['status' => $status]);
-//     if ($status == 'completed') {
-//         $order = \App\Models\Order::where('order_number', $slug)->first();
-//         if ($order) {
-//             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
-//                 ->where('status', 'delivered')
-//                 ->first();
-//             if ($riderDelivery) {
-//                 $shipping = \App\Models\Shipping::find($order->shipping_id);
-//                 if ($shipping) {
-//                     $rider = \App\Models\Rider::find($riderDelivery->rider_id);
-//                     if ($rider) {
-//                         $rider->balance += $shipping->price;
-//                         $rider->save();
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
-// }  
 
-//     public function status($slug, $status)
-//     {
-//     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
-//     if (!$mainorder) {
-//         return redirect()->back()->with('error', __('Order not found.'));
-//     }
-//     if ($mainorder->status == "completed") {
-//         return redirect()->back()->with('success', __('This Order is Already Completed'));
-//     }
-//     $user = $this->user;
-//     VendorOrder::where('order_number', '=', $slug)
-//         ->where('user_id', '=', $user->id)
-//         ->update(['status' => $status]);
-//     if ($status === 'completed') {
-//         $order = \App\Models\Order::where('id', $mainorder->order_id)->first();
-//         if ($order) {
-//             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
-//                 ->where('status', 'delivered')
-//                 ->first();
-//             if ($riderDelivery) {
-//                 $rider = \App\Models\Rider::find($riderDelivery->rider_id);
+    //     public function status($slug, $status)
+    //     {
+    //     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
+    //     if ($mainorder->status == "completed") {
+    //         return redirect()->back()->with('success', __('This Order is Already Completed'));
+    //     }
+    //     $user = $this->user;
+    //     VendorOrder::where('order_number', '=', $slug)
+    //         ->where('user_id', '=', $user->id)
+    //         ->update(['status' => $status]);
+    //     if ($status == 'completed') {
+    //         $order = \App\Models\Order::where('order_number', $slug)->first();
+    //         if ($order) {
+    //             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
+    //                 ->where('status', 'delivered')
+    //                 ->first();
+    //             if ($riderDelivery) {
+    //                 $shipping = \App\Models\Shipping::find($order->shipping_id);
+    //                 if ($shipping) {
+    //                     $rider = \App\Models\Rider::find($riderDelivery->rider_id);
+    //                     if ($rider) {
+    //                         $rider->balance += $shipping->price;
+    //                         $rider->save();
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
+    // }
 
-//                 if ($rider) {
-//                     $rider->balance += $order->shipping_cost;
-//                     $rider->save();
-//                 }
-//             }
-//         }
-//     }
-//     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
-// }
+    //     public function status($slug, $status)
+    //     {
+    //     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
+    //     if (!$mainorder) {
+    //         return redirect()->back()->with('error', __('Order not found.'));
+    //     }
+    //     if ($mainorder->status == "completed") {
+    //         return redirect()->back()->with('success', __('This Order is Already Completed'));
+    //     }
+    //     $user = $this->user;
+    //     VendorOrder::where('order_number', '=', $slug)
+    //         ->where('user_id', '=', $user->id)
+    //         ->update(['status' => $status]);
+    //     if ($status === 'completed') {
+    //         $order = \App\Models\Order::where('id', $mainorder->order_id)->first();
+    //         if ($order) {
+    //             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
+    //                 ->where('status', 'delivered')
+    //                 ->first();
+    //             if ($riderDelivery) {
+    //                 $rider = \App\Models\Rider::find($riderDelivery->rider_id);
 
-
-
+    //                 if ($rider) {
+    //                     $rider->balance += $order->shipping_cost;
+    //                     $rider->save();
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
+    // }
 
     public function emailsub(Request $request)
     {
         $vendor_id = auth()->id();
-        
+
         // Rate Limiter: Max 5 emails per 10 minutes from a specific vendor to prevent spam
-        $key = 'vendor-email-attempt:' . $vendor_id;
+        $key = 'vendor-email-attempt:'.$vendor_id;
         if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json(0);
         }
-        
+
         // Ensure vendor is authorized to email this buyer (has an order with this email)
         $hasOrder = \App\Models\Order::where('customer_email', $request->to)
-            ->whereHas('vendororders', function($q) use ($vendor_id) {
+            ->whereHas('vendororders', function ($q) use ($vendor_id) {
                 $q->where('user_id', $vendor_id);
             })->exists();
-            
-        if (!$hasOrder) {
+
+        if (! $hasOrder) {
             return response()->json(0);
         }
 
@@ -344,11 +359,10 @@ class OrderController extends VendorBaseController
             $mailer = new \App\Classes\GeniusMailer();
             $mailer->sendCustomMail($data);
         } else {
-            $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+            $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
             mail($request->to, $request->subject, $request->message, $headers);
         }
 
         return response()->json(1);
     }
-
 }

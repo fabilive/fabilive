@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Language;
 use Datatables;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Str;
 use Validator;
 
@@ -15,12 +14,14 @@ class LanguageController extends AdminBaseController
     public function datatables()
     {
         $datas = Language::latest('id')->get();
+
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->addColumn('action', function (Language $data) {
-                $delete = $data->id == 1 ? '' : '<a href="javascript:;" data-href="' . route('admin-lang-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
-                $default = $data->is_default == 1 ? '<a><i class="fa fa-check"></i> ' . __('Default') . '</a>' : '<a class="status" data-href="' . route('admin-lang-st', ['id1' => $data->id, 'id2' => 1]) . '">' . __('Set Default') . '</a>';
-                return '<div class="action-list"><a href="' . route('admin-lang-edit', $data->id) . '"> <i class="fas fa-edit"></i>' . __('Edit') . '</a><a href="' . route('admin-lang-export', $data->id) . '"> <i class="fas fa-download"></i>' . __('Export') . '</a>' . $delete . $default . '</div>';
+                $delete = $data->id == 1 ? '' : '<a href="javascript:;" data-href="'.route('admin-lang-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
+                $default = $data->is_default == 1 ? '<a><i class="fa fa-check"></i> '.__('Default').'</a>' : '<a class="status" data-href="'.route('admin-lang-st', ['id1' => $data->id, 'id2' => 1]).'">'.__('Set Default').'</a>';
+
+                return '<div class="action-list"><a href="'.route('admin-lang-edit', $data->id).'"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="'.route('admin-lang-export', $data->id).'"> <i class="fas fa-download"></i>'.__('Export').'</a>'.$delete.$default.'</div>';
             })
             ->rawColumns(['action'])
             ->toJson(); //--- Returning Json Data To Client Side
@@ -33,7 +34,8 @@ class LanguageController extends AdminBaseController
 
     public function create()
     {
-        $lang = json_decode(file_get_contents(public_path() . '/project/resources/lang/default.json'), true);
+        $lang = json_decode(file_get_contents(public_path().'/project/resources/lang/default.json'), true);
+
         return view('admin.language.create', compact('lang'));
     }
 
@@ -51,7 +53,7 @@ class LanguageController extends AdminBaseController
         $customs = ['language.unique' => 'This language has already been taken.'];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -60,9 +62,9 @@ class LanguageController extends AdminBaseController
         $input = $request->all();
         $data = new Language();
         $data->language = $input['language'];
-        $name = time() . Str::random(8);
+        $name = time().Str::random(8);
         $data->name = $name;
-        $data->file = $name . '.json';
+        $data->file = $name.'.json';
         $data->rtl = $input['rtl'];
         $data->save();
         unset($input['_token']);
@@ -70,15 +72,16 @@ class LanguageController extends AdminBaseController
         $keys = $request->keys;
         $values = $request->values;
         foreach (array_combine($keys, $values) as $key => $value) {
-            $n = str_replace("_", " ", $key);
+            $n = str_replace('_', ' ', $key);
             $new[$n] = $value;
         }
         $mydata = json_encode($new);
-        file_put_contents(public_path() . '/project/resources/lang/' . $data->file, $mydata);
+        file_put_contents(public_path().'/project/resources/lang/'.$data->file, $mydata);
         //--- Logic Section Ends
 
         //--- Redirect Section
         $msg = __('New Data Added Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -95,7 +98,7 @@ class LanguageController extends AdminBaseController
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -103,7 +106,7 @@ class LanguageController extends AdminBaseController
 
         $filename = '';
         if ($file = $request->file('csvfile')) {
-            $filename = time() . '-' . str_replace(' ', '', $file->getClientOriginalName());
+            $filename = time().'-'.str_replace(' ', '', $file->getClientOriginalName());
             $file->move('assets/temp_files', $filename);
         }
 
@@ -111,21 +114,21 @@ class LanguageController extends AdminBaseController
         $input = $request->all();
         $data = new Language();
         $data->language = $input['language'];
-        $name = time() . Str::random(8);
+        $name = time().Str::random(8);
         $data->name = $name;
-        $data->file = $name . '.json';
+        $data->file = $name.'.json';
         $data->rtl = $input['rtl'];
         $data->save();
         unset($input['_token']);
         unset($input['language']);
 
-        $file = fopen(public_path('assets/temp_files/' . $filename), "r");
+        $file = fopen(public_path('assets/temp_files/'.$filename), 'r');
         $i = 1;
-        $keys = array();
-        $values = array();
+        $keys = [];
+        $values = [];
         while (($line = fgetcsv($file)) !== false) {
             if ($i != 1) {
-                if (!empty($line[0])) {
+                if (! empty($line[0])) {
                     $keys[] = $line[0];
                     $values[] = mb_convert_encoding($line[1], 'UTF-8', 'UTF-8');
                 }
@@ -138,7 +141,7 @@ class LanguageController extends AdminBaseController
             $new[$key] = $value;
         }
         $mydata = json_encode($new);
-        file_put_contents(public_path() . '/project/resources/lang/' . $data->file, $mydata);
+        file_put_contents(public_path().'/project/resources/lang/'.$data->file, $mydata);
         $files = glob('assets/temp_files/*'); //get all file names
         foreach ($files as $file) {
             if (is_file($file)) {
@@ -151,6 +154,7 @@ class LanguageController extends AdminBaseController
 
         //--- Redirect Section
         $msg = __('Data Imported Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -159,8 +163,9 @@ class LanguageController extends AdminBaseController
     public function edit($id)
     {
         $data = Language::findOrFail($id);
-        $data_results = file_get_contents('project/resources/lang/' . $data->file);
+        $data_results = file_get_contents('project/resources/lang/'.$data->file);
         $lang = json_decode($data_results, true);
+
         return view('admin.language.edit', compact('data', 'lang'));
     }
 
@@ -168,7 +173,7 @@ class LanguageController extends AdminBaseController
     public function export($id)
     {
         $data = Language::findOrFail($id);
-        $data_results = file_get_contents('project/resources/lang/' . $data->file);
+        $data_results = file_get_contents('project/resources/lang/'.$data->file);
         $lang = json_decode($data_results, true);
         $files = glob('assets/temp_files/*'); //get all file names
         foreach ($files as $file) {
@@ -177,7 +182,7 @@ class LanguageController extends AdminBaseController
             }
             //delete file
         }
-        $f = fopen('assets/temp_files/language.csv', "w");
+        $f = fopen('assets/temp_files/language.csv', 'w');
         $hline[0] = 'Main Languages';
         $hline[1] = 'Translations';
         fputcsv($f, $hline);
@@ -196,11 +201,11 @@ class LanguageController extends AdminBaseController
     {
 
         //--- Validation Section
-        $rules = ['language' => 'unique:languages,language,' . $id];
+        $rules = ['language' => 'unique:languages,language,'.$id];
         $customs = ['language.unique' => 'This language has already been taken.'];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -208,8 +213,8 @@ class LanguageController extends AdminBaseController
         $new = null;
         $input = $request->all();
         $data = Language::findOrFail($id);
-        if (file_exists('project/resources/lang/' . $data->file)) {
-            unlink('project/resources/lang/' . $data->file);
+        if (file_exists('project/resources/lang/'.$data->file)) {
+            unlink('project/resources/lang/'.$data->file);
         }
         $data->language = $input['language'];
         $data->rtl = $input['rtl'];
@@ -219,15 +224,16 @@ class LanguageController extends AdminBaseController
         $keys = $request->keys;
         $values = $request->values;
         foreach (array_combine($keys, $values) as $key => $value) {
-            $n = str_replace("_", " ", $key);
+            $n = str_replace('_', ' ', $key);
             $new[$n] = $value;
         }
         $mydata = json_encode($new);
-        file_put_contents('project/resources/lang/' . $data->file, $mydata);
+        file_put_contents('project/resources/lang/'.$data->file, $mydata);
         //--- Logic Section Ends
 
         //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -240,6 +246,7 @@ class LanguageController extends AdminBaseController
         $data = Language::where('id', '!=', $id1)->update(['is_default' => 0]);
         //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -252,15 +259,16 @@ class LanguageController extends AdminBaseController
         }
         $data = Language::findOrFail($id);
         if ($data->is_default == 1) {
-            return __("You can not remove default language.");
+            return __('You can not remove default language.');
         }
-        if (file_exists(public_path() . '/project/resources/lang/' . $data->file)) {
-            unlink(public_path() . '/project/resources/lang/' . $data->file);
+        if (file_exists(public_path().'/project/resources/lang/'.$data->file)) {
+            unlink(public_path().'/project/resources/lang/'.$data->file);
         }
 
         $data->delete();
         //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }

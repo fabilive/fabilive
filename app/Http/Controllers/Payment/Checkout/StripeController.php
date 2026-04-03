@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Models\PaymentGateway,
-    Classes\GeniusMailer
-};
+use App\Classes\GeniusMailer;
+use App\Models\Cart;
 use App\Models\Country;
 use App\Models\Generalsetting;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
+use Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Session;
 use OrderHelper;
-use Config;
+use Session;
 use Str;
 
 class StripeController extends CheckoutBaseControlller
@@ -34,15 +32,14 @@ class StripeController extends CheckoutBaseControlller
     {
         $input = $request->all();
 
-
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
@@ -53,36 +50,35 @@ class StripeController extends CheckoutBaseControlller
             $total = $request->total / $this->curr->value;
             $total = $total * $this->curr->value;
 
-
             $stripe_secret_key = Config::get('services.stripe.secret');
             \Stripe\Stripe::setApiKey($stripe_secret_key);
             $checkout_session = \Stripe\Checkout\Session::create([
-                "mode" => "payment",
-                "success_url" => route('front.stripe.notify') . '?session_id={CHECKOUT_SESSION_ID}',
-                "cancel_url" => route('front.payment.cancle'),
-                "locale" => "auto",
-                "line_items" => [
+                'mode' => 'payment',
+                'success_url' => route('front.stripe.notify').'?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('front.payment.cancle'),
+                'locale' => 'auto',
+                'line_items' => [
                     [
-                        "quantity" => $cart->totalQty,
-                        "price_data" => [
-                            "currency" => $this->curr->name,
-                            "unit_amount" => round($total / $cart->totalQty, 2) * 100,
-                            "product_data" => [
-                                "name" => $gs->title . 'Payment'
-                            ]
-                        ]
+                        'quantity' => $cart->totalQty,
+                        'price_data' => [
+                            'currency' => $this->curr->name,
+                            'unit_amount' => round($total / $cart->totalQty, 2) * 100,
+                            'product_data' => [
+                                'name' => $gs->title.'Payment',
+                            ],
+                        ],
                     ],
 
-                ]
+                ],
             ]);
 
             Session::put('input_data', $input);
+
             return redirect($checkout_session->url);
         } catch (Exception $e) {
             return back()->with('unsuccess', $e->getMessage());
         }
     }
-
 
     public function notify(Request $request)
     {
@@ -90,7 +86,6 @@ class StripeController extends CheckoutBaseControlller
         $input = Session::get('input_data');
         $stripe = new \Stripe\StripeClient(Config::get('services.stripe.secret'));
         $response = $stripe->checkout->sessions->retrieve($request->session_id);
-
 
         if ($response->status == 'complete') {
             $oldCart = Session::get('cart');
@@ -105,7 +100,6 @@ class StripeController extends CheckoutBaseControlller
             $new_cart = json_encode($new_cart);
             $temp_affilate_users = \OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
-
 
             $orderCalculate = \PriceHelper::getOrderTotal($input, $cart);
 
@@ -134,7 +128,6 @@ class StripeController extends CheckoutBaseControlller
                 $input['vendor_ids'] = $vendor_ids;
             } else {
 
-
                 // multi shipping
 
                 $orderTotal = $orderCalculate['total_amount'];
@@ -161,15 +154,12 @@ class StripeController extends CheckoutBaseControlller
                 unset($input['packeging']);
             }
 
-
-
-
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
-            $input['order_number'] = Str::random(4) . time();
+            $input['order_number'] = Str::random(4).time();
             $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
             $input['payment_status'] = 'Completed';
             $input['txnid'] = $response->payment_intent;
@@ -206,15 +196,13 @@ class StripeController extends CheckoutBaseControlller
             $input['shipping'] = null;
             $input['packeging'] = null;
 
-
             $order->fill($input)->save();
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
-
 
             if (Auth::check()) {
                 if ($this->gs->is_reward == 1) {
@@ -252,12 +240,12 @@ class StripeController extends CheckoutBaseControlller
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
 
@@ -267,11 +255,12 @@ class StripeController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
+
             return redirect(route('front.payment.return'));
         } else {
             return redirect(route('front.payment.cancle'));

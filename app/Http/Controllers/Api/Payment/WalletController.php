@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class WalletController extends Controller
 {
-
     public function store(Request $request)
     {
-
 
         if ($request->has('order_number')) {
             $order_number = $request->order_number;
@@ -37,8 +34,6 @@ class WalletController extends Controller
 
             $user->balance = $user->balance - $item_amount;
             $user->save();
-
-
 
             return redirect(route('front.payment.success', 1));
         } else {

@@ -3,16 +3,14 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Models\WebhookEvent;
-use App\Models\Order;
 use App\Models\Deposit;
-use App\Models\Transaction;
+use App\Models\Order;
 use App\Models\User;
 use App\Models\WalletLedger;
+use App\Models\WebhookEvent;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CampayWebhookController extends Controller
 {
@@ -22,7 +20,7 @@ class CampayWebhookController extends Controller
         $eventId = $payload['reference'] ?? null;
         $status = $payload['status'] ?? null;
 
-        if (!$eventId) {
+        if (! $eventId) {
             return response()->json(['message' => 'Missing reference'], 400);
         }
 
@@ -37,7 +35,7 @@ class CampayWebhookController extends Controller
         $webhookEvent = WebhookEvent::create([
             'event_id' => $eventId,
             'payload' => $payload,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         if (strtolower($status) === 'successful') {
@@ -61,8 +59,9 @@ class CampayWebhookController extends Controller
                     ]);
                 }, 5);
             } catch (\Exception $e) {
-                Log::error('Campay Webhook Error: ' . $e->getMessage());
+                Log::error('Campay Webhook Error: '.$e->getMessage());
                 $webhookEvent->update(['status' => 'failed']);
+
                 return response()->json(['message' => 'Processing failed'], 500);
             }
         }
@@ -83,9 +82,9 @@ class CampayWebhookController extends Controller
             'order_id' => $order->id,
             'reference' => $order->txnid,
             'status' => 'completed',
-            'details' => 'Payment held in escrow via Campay Webhook'
+            'details' => 'Payment held in escrow via Campay Webhook',
         ]);
-        
+
         $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
     }
 
@@ -105,7 +104,7 @@ class CampayWebhookController extends Controller
                 'type' => 'deposit',
                 'reference' => $deposit->txnid,
                 'status' => 'completed',
-                'details' => 'Wallet deposit via Campay'
+                'details' => 'Wallet deposit via Campay',
             ]);
         }
     }

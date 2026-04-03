@@ -2,30 +2,26 @@
 
 namespace App\Http\Controllers\User;
 
-use App\{
-    Models\User,
-    Models\Message,
-    Models\Notification,
-    Models\Conversation,
-    Classes\GeniusMailer,
-    Models\AdminUserMessage,
-    Models\AdminUserConversation,
-};
+use App\Classes\GeniusMailer;
 use App\Events\UserMessageSent;
+use App\Models\AdminUserConversation;
+use App\Models\AdminUserMessage;
 use App\Models\Chat;
 use App\Models\ChatMessages;
-use App\Models\DeliveryRider;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\Notification;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MessageController extends UserBaseController
 {
-
-
     public function messages()
     {
         $user = $this->user;
         $convs = Conversation::where('sent_user', '=', $user->id)->orWhere('recieved_user', '=', $user->id)->get();
+
         return view('user.message.index', compact('user', 'convs'));
     }
 
@@ -33,6 +29,7 @@ class MessageController extends UserBaseController
     {
         $user = $this->user;
         $conv = Conversation::findOrfail($id);
+
         return view('user.message.create', compact('user', 'conv'));
     }
 
@@ -45,12 +42,14 @@ class MessageController extends UserBaseController
             }
         }
         $conv->delete();
+
         return redirect()->back()->with('success', __('Message Deleted Successfully'));
     }
 
     public function msgload($id)
     {
         $conv = Conversation::findOrfail($id);
+
         return view('load.usermsg', compact('conv'));
     }
 
@@ -63,8 +62,7 @@ class MessageController extends UserBaseController
         $vendor = User::where('email', '=', $request->email)->first();
         $seller = User::findOrFail($request->vendor_id);
 
-
-        if (!$vendor) {
+        if (! $vendor) {
             return response()->json(['error' => true, 'message' => 'Email Not Found']);
         }
 
@@ -75,7 +73,7 @@ class MessageController extends UserBaseController
         $subject = $request->subject;
         $name = $request->name;
         $from = $request->email;
-        $msg = "Name: " . $name . "\nEmail: " . $from . "\nMessage: " . $request->message;
+        $msg = 'Name: '.$name."\nEmail: ".$from."\nMessage: ".$request->message;
 
         $data = [
             'to' => $seller->email,
@@ -94,6 +92,7 @@ class MessageController extends UserBaseController
             $msg->message = $request->message;
             $msg->sent_user = $user->id;
             $msg->save();
+
             return response()->json($data);
         } else {
             $message = new Conversation();
@@ -106,8 +105,9 @@ class MessageController extends UserBaseController
             $msg = new Message();
             $msg->conversation_id = $message->id;
             $msg->message = $request->message;
-            $msg->sent_user = $request->user_id;;
+            $msg->sent_user = $request->user_id;
             $msg->save();
+
             return response()->json(['error' => false, 'message' => 'Message sent successfully']);
         }
     }
@@ -119,6 +119,7 @@ class MessageController extends UserBaseController
         $msg->fill($input)->save();
         //--- Redirect Section
         $msg = __('Message Sent!');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -127,6 +128,7 @@ class MessageController extends UserBaseController
     {
         $user = $this->user;
         $convs = AdminUserConversation::where('type', '=', 'Ticket')->where('user_id', '=', $user->id)->get();
+
         return view('user.ticket.index', compact('convs'));
     }
 
@@ -134,18 +136,21 @@ class MessageController extends UserBaseController
     {
         $user = $this->user;
         $convs = AdminUserConversation::where('type', '=', 'Dispute')->where('user_id', '=', $user->id)->get();
+
         return view('user.dispute.index', compact('convs'));
     }
 
     public function messageload($id)
     {
         $conv = AdminUserConversation::findOrfail($id);
+
         return view('load.usermessage', compact('conv'));
     }
 
     public function adminmessage($id)
     {
         $conv = AdminUserConversation::findOrfail($id);
+
         return view('user.ticket.create', compact('conv'));
     }
 
@@ -158,6 +163,7 @@ class MessageController extends UserBaseController
             }
         }
         $conv->delete();
+
         return redirect()->back()->with('success', __('Message Deleted Successfully'));
     }
 
@@ -171,6 +177,7 @@ class MessageController extends UserBaseController
         $notification->save();
         //--- Redirect Section
         $msg = __('Message Sent!');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -178,20 +185,19 @@ class MessageController extends UserBaseController
     public function adminusercontact(Request $request)
     {
 
-        if ($request->type ==  'Dispute') {
+        if ($request->type == 'Dispute') {
             $order = Order::where('order_number', $request->order)->exists();
-            if (!$order) {
+            if (! $order) {
                 return response()->json(['success' => false, 'message' => 'Order Number Not Found']);
             }
         }
-
 
         $user = $this->user;
         $gs = $this->gs;
         $subject = $request->subject;
         $to = \DB::table('pagesettings')->first()->contact_email;
         $from = $user->email;
-        $msg = "Email: " . $from . "\nMessage: " . $request->message;
+        $msg = 'Email: '.$from."\nMessage: ".$request->message;
 
         $data = [
             'to' => $to,
@@ -201,9 +207,6 @@ class MessageController extends UserBaseController
 
         $mailer = new GeniusMailer();
         $mailer->sendCustomMail($data);
-
-
-
 
         if ($request->type == 'Ticket') {
             $conv = AdminUserConversation::whereType('Ticket')->whereUserId($user->id)->whereSubject($subject)->first();
@@ -217,6 +220,7 @@ class MessageController extends UserBaseController
             $msg->message = $request->message;
             $msg->user_id = $user->id;
             $msg->save();
+
             return response()->json(['success' => true, 'message' => 'Message sent successfully']);
         } else {
             $message = new AdminUserConversation();
@@ -234,13 +238,10 @@ class MessageController extends UserBaseController
             $msg->message = $request->message;
             $msg->user_id = $user->id;
             $msg->save();
+
             return response()->json(['success' => true, 'message' => 'Message sent successfully']);
         }
     }
-
-
-
-
 
     public function messages2()
     {
@@ -252,7 +253,7 @@ class MessageController extends UserBaseController
                 'order:id,cart',
                 'messages' => function ($query) {
                     $query->orderBy('id', 'asc');
-                }
+                },
             ])
             ->orderBy('updated_at', 'desc')
             ->get();
@@ -265,9 +266,9 @@ class MessageController extends UserBaseController
             if ($chat->order && $chat->order->cart) {
                 $cart = json_decode($chat->order->cart, true);
 
-                if (!empty($cart['items'])) {
+                if (! empty($cart['items'])) {
                     foreach ($cart['items'] as $item) {
-                        if (!empty($item['item']['name'])) {
+                        if (! empty($item['item']['name'])) {
                             $productNames[] = $item['item']['name'];
                         }
                     }
@@ -280,7 +281,6 @@ class MessageController extends UserBaseController
 
         return view('user.messagedelivery.index', compact('chats'));
     }
-
 
     // Fetch messages for selected chat
     public function fetchMessages(Request $request)
@@ -299,7 +299,7 @@ class MessageController extends UserBaseController
 
         return response()->json([
             'status' => true,
-            'messages' => $messages
+            'messages' => $messages,
         ]);
     }
 
@@ -310,7 +310,7 @@ class MessageController extends UserBaseController
 
         $request->validate([
             'chat_id' => 'required|exists:delivery_chat_threads,id',
-            'message' => 'required|string|max:2000'
+            'message' => 'required|string|max:2000',
         ]);
 
         $chat = Chat::where('id', $request->chat_id)
@@ -334,7 +334,7 @@ class MessageController extends UserBaseController
         return response()->json([
             'status' => true,
             'message' => 'Message sent successfully.',
-            'message_data' => $message
+            'message_data' => $message,
         ]);
     }
 }

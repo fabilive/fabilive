@@ -4,7 +4,6 @@ namespace App\Services\AI;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ReputationService
 {
@@ -159,6 +158,7 @@ class ReputationService
             ->get()
             ->map(function ($badge) {
                 $info = self::BADGES[$badge->badge_type] ?? [];
+
                 return [
                     'type' => $badge->badge_type,
                     'label' => $info['label'] ?? $badge->badge_type,

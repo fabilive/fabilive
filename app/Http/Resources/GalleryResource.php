@@ -14,9 +14,9 @@ class GalleryResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'image' => url('/') . '/assets/images/galleries/'.$this->photo,
-      ];
+        return [
+            'id' => $this->id,
+            'image' => url('/').'/assets/images/galleries/'.$this->photo,
+        ];
     }
 }

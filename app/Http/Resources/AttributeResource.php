@@ -14,15 +14,15 @@ class AttributeResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'attributable_id' => $this->attributable_id,
-        'attributable_type' => $this->attributable_type,
-        'name' => $this->name,
-        'input_name' => $this->input_name,
-        'attribute_options' => route('attibute.options', $this->id),
-        'created_at' => $this->created_at,
-        'updated_at' => $this->updated_at
-      ];
+        return [
+            'id' => $this->id,
+            'attributable_id' => $this->attributable_id,
+            'attributable_type' => $this->attributable_type,
+            'name' => $this->name,
+            'input_name' => $this->input_name,
+            'attribute_options' => route('attibute.options', $this->id),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
-use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Http;
+use Filament\Pages\Page;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 
 class SystemActivation extends Page
 {
@@ -36,11 +35,12 @@ class SystemActivation extends Page
     {
         if (File::exists(public_path('project/license.txt'))) {
             $license = File::get(public_path('project/license.txt'));
-            if (!empty($license)) {
-                return "Your System is Activated! License Key: " . $license;
+            if (! empty($license)) {
+                return 'Your System is Activated! License Key: '.$license;
             }
         }
-        return "Your System is not Activated.";
+
+        return 'Your System is not Activated.';
     }
 
     public function activate()
@@ -54,13 +54,13 @@ class SystemActivation extends Page
         $purchase_code = $this->pcode;
 
         $baseUrl = config('services.genius.ocean');
-        $varUrl = $baseUrl . 'purchase112662activate.php?code=' . $purchase_code . '&domain=' . $my_domain . '&script=' . $my_script;
+        $varUrl = $baseUrl.'purchase112662activate.php?code='.$purchase_code.'&domain='.$my_domain.'&script='.$my_script;
 
         try {
             $response = Http::get($varUrl);
             $chk = $response->json();
 
-            if ($chk['status'] != "success") {
+            if ($chk['status'] != 'success') {
                 $msg = $chk['message'] ?? 'Purchase Code Invalid.';
                 Notification::make()
                     ->title($msg)

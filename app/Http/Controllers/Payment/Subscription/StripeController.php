@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Payment\Subscription;
 
-use App\{
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\PaymentGateway,
-    Models\UserSubscription
-};
+use App\Classes\GeniusMailer;
+use App\Models\PaymentGateway;
+use App\Models\Subscription;
 use App\Models\User;
+use App\Models\UserSubscription;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,7 +15,6 @@ use Illuminate\Support\Facades\Session;
 
 class StripeController extends SubscriptionBaseController
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -31,9 +28,9 @@ class StripeController extends SubscriptionBaseController
     {
 
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
+            'shop_name' => 'unique:users',
         ], [
-            'shop_name.unique' => __('This shop name has already been taken.')
+            'shop_name.unique' => __('This shop name has already been taken.'),
         ]);
 
         $subs = Subscription::findOrFail($request->subs_id);
@@ -44,10 +41,9 @@ class StripeController extends SubscriptionBaseController
         $curr = $this->curr;
 
         $supported_currency = json_decode($data->currency_id, true);
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Stripe Payment.'));
         }
-
 
         $sub['user_id'] = $user->id;
         $sub['subscription_id'] = $subs->id;
@@ -62,37 +58,36 @@ class StripeController extends SubscriptionBaseController
         $sub['details'] = $subs->details;
         $sub['method'] = 'Stripe';
 
-
         try {
             $stripe_secret_key = Config::get('services.stripe.secret');
             \Stripe\Stripe::setApiKey($stripe_secret_key);
             $checkout_session = \Stripe\Checkout\Session::create([
-                "mode" => "payment",
-                "success_url" => route('user.stripe.notify') . '?session_id={CHECKOUT_SESSION_ID}',
-                "cancel_url" => route('user.payment.cancle'),
-                "customer_email" => $user->email,
-                "locale" => "auto",
-                "line_items" => [
+                'mode' => 'payment',
+                'success_url' => route('user.stripe.notify').'?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('user.payment.cancle'),
+                'customer_email' => $user->email,
+                'locale' => 'auto',
+                'line_items' => [
                     [
-                        "quantity" => 1,
-                        "price_data" => [
-                            "currency" => $this->curr->name,
-                            "unit_amount" => $item_amount * 100,
-                            "product_data" => [
-                                "name" => $this->gs->title . ' ' . $subs->title . ' Plan',
-                            ]
-                        ]
+                        'quantity' => 1,
+                        'price_data' => [
+                            'currency' => $this->curr->name,
+                            'unit_amount' => $item_amount * 100,
+                            'product_data' => [
+                                'name' => $this->gs->title.' '.$subs->title.' Plan',
+                            ],
+                        ],
                     ],
-                ]
+                ],
             ]);
 
             Session::put('subscription_data', $sub);
+
             return redirect($checkout_session->url);
         } catch (Exception $e) {
             return back()->with('unsuccess', $e->getMessage());
         }
     }
-
 
     public function notify(Request $request)
     {
@@ -125,19 +120,19 @@ class StripeController extends SubscriptionBaseController
 
             $today = Carbon::now()->format('Y-m-d');
             $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
-            if (!empty($package)) {
+            if (! empty($package)) {
                 if ($package->subscription_id == $order->subscription_id) {
                     $newday = strtotime($today);
                     $lastday = strtotime($user->date);
                     $secs = $lastday - $newday;
                     $days = $secs / 86400;
                     $total = $days + $subs->days;
-                    $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                    $input['date'] = date('Y-m-d', strtotime($today.' + '.$total.' days'));
                 } else {
-                    $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                    $input['date'] = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                 }
             } else {
-                $input['date'] = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                $input['date'] = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
             }
 
             $input['mail_sent'] = 1;
@@ -146,16 +141,17 @@ class StripeController extends SubscriptionBaseController
 
             $maildata = [
                 'to' => $user->email,
-                'type' => "vendor_accept",
+                'type' => 'vendor_accept',
                 'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($maildata);
             Session::forget('subscription_data');
+
             return redirect()->route('user-dashboard')->with('success', isset($user) && $user->is_vendor == 2 ? __('Subscription Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
         }
     }

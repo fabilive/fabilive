@@ -14,10 +14,10 @@ class PartnerResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'image' => url('/') . '/assets/images/partner/'.$this->photo,
-        'link' => $this->link
-      ];
+        return [
+            'id' => $this->id,
+            'image' => url('/').'/assets/images/partner/'.$this->photo,
+            'link' => $this->link,
+        ];
     }
 }

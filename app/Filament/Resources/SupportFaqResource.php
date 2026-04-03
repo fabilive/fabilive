@@ -12,7 +12,9 @@ use Filament\Tables\Table;
 class SupportFaqResource extends Resource
 {
     protected static ?string $model = SupportFaq::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
+
     protected static ?string $navigationGroup = 'Support System';
 
     public static function form(Form $form): Form
@@ -54,7 +56,7 @@ class SupportFaqResource extends Resource
                 Tables\Columns\TextColumn::make('sort_order')->sortable(),
                 Tables\Columns\BooleanColumn::make('is_active'),
             ])
-            ->actions([ Tables\Actions\EditAction::make(), ]);
+            ->actions([Tables\Actions\EditAction::make()]);
     }
 
     public static function getPages(): array

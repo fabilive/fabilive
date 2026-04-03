@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers\Payment\Deposit;
 
-use App\{
-    Models\Deposit,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
-
+use App\Classes\GeniusMailer;
+use App\Models\Deposit;
+use App\Models\PaymentGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Redirect;
-use Session;
 use Omnipay\Omnipay;
+use Session;
 
 class PaypalController extends DepositBaseController
 {
     public $_api_context;
+
     public $gateway;
+
     public function __construct()
     {
         parent::__construct();
@@ -41,11 +39,11 @@ class PaypalController extends DepositBaseController
 
         $supported_currency = json_decode($data->currency_id, true);
 
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Paypal Payment.'));
         }
 
-        $item_name = "Deposit via Paypal Payment";
+        $item_name = 'Deposit via Paypal Payment';
         $cancel_url = route('deposit.payment.cancle');
         $notify_url = route('deposit.paypal.notify');
 
@@ -57,12 +55,12 @@ class PaypalController extends DepositBaseController
         $dep['method'] = 'Paypal';
 
         try {
-            $response = $this->gateway->purchase(array(
+            $response = $this->gateway->purchase([
                 'amount' => $item_amount,
                 'currency' => $curr->name,
                 'returnUrl' => $notify_url,
                 'cancelUrl' => $cancel_url,
-            ))->send();
+            ])->send();
 
             if ($response->isRedirect()) {
                 Session::put('input_data', $request->all());
@@ -84,13 +82,12 @@ class PaypalController extends DepositBaseController
     {
         $responseData = $request->all();
         $dep = Session::get('deposit');
-        if (!$dep) {
+        if (! $dep) {
             return redirect()->route('user-dashboard')->with('unsuccess', __('Session expired.'));
         }
 
         $success_url = route('deposit.payment.return');
         $cancel_url = route('deposit.payment.cancle');
-
 
         if (empty($responseData['PayerID']) || empty($responseData['token'])) {
             return [
@@ -100,10 +97,10 @@ class PaypalController extends DepositBaseController
         }
 
         try {
-            $transaction_omnipay = $this->gateway->completePurchase(array(
+            $transaction_omnipay = $this->gateway->completePurchase([
                 'payer_id' => $responseData['PayerID'],
                 'transactionReference' => $responseData['paymentId'],
-            ));
+            ]);
 
             $response = $transaction_omnipay->send();
 
@@ -128,7 +125,7 @@ class PaypalController extends DepositBaseController
                 // store in transaction table
                 if ($deposit->status == 1) {
                     $transaction = new \App\Models\Transaction;
-                    $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                    $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                     $transaction->user_id = $deposit->user_id;
                     $transaction->amount = $deposit->amount;
                     $transaction->currency_sign = $deposit->currency;
@@ -145,14 +142,14 @@ class PaypalController extends DepositBaseController
 
                 $maildata = [
                     'to' => $user->email,
-                    'type' => "wallet_deposit",
+                    'type' => 'wallet_deposit',
                     'cname' => $user->name,
                     'damount' => $deposit->amount,
                     'wbalance' => $user->balance,
-                    'oamount' => "",
-                    'aname' => "",
-                    'aemail' => "",
-                    'onumber' => "",
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'onumber' => '',
                 ];
 
                 $mailer = new GeniusMailer();
@@ -160,12 +157,16 @@ class PaypalController extends DepositBaseController
 
                 Session::forget('deposit');
                 Session::forget('paypal_payment_id');
+
                 return redirect($success_url);
             } else {
                 return redirect($cancel_url);
             }
         } catch (\Exception $e) {
-            if (\DB::transactionLevel() > 0) \DB::rollBack();
+            if (\DB::transactionLevel() > 0) {
+                \DB::rollBack();
+            }
+
             return redirect($cancel_url)->with('unsuccess', $e->getMessage());
         }
     }

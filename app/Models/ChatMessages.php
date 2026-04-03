@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ChatMessages extends Model
 {
     use HasFactory;
-    protected $table='chat_messages';
-    protected $guarded=[];
+
+    protected $table = 'chat_messages';
+
+    protected $guarded = [];
 }

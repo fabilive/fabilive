@@ -2,29 +2,28 @@
 
 namespace App\Http\Controllers\Api\User\Payment;
 
-use App\Models\Generalsetting;
-use App\Models\Deposit;
 use App\Http\Controllers\Controller;
+use App\Models\Deposit;
+use App\Models\Generalsetting;
 use App\Models\PaymentGateway;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Str;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
-use App\Models\Transaction;
-use Illuminate\Support\Str;
+use Validator;
 
 class AuthorizeController extends Controller
 {
-
     public function store(Request $request)
     {
         $data = PaymentGateway::whereKeyword('authorize.net')->first();
-        if (!$request->has('deposit_number')) {
+        if (! $request->has('deposit_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
         $settings = Generalsetting::findOrFail(1);
-        $item_name = $settings->title . " Deposit";
+        $item_name = $settings->title.' Deposit';
         $deposit_number = $request->deposit_number;
         $order = Deposit::where('deposit_number', $deposit_number)->first();
 
@@ -47,14 +46,14 @@ class AuthorizeController extends Controller
             $merchantAuthentication->setTransactionKey($paydata['txn_key']);
 
             // Set the transaction's refId
-            $refId = 'ref' . time();
+            $refId = 'ref'.time();
 
             // Create the payment data for a credit card
             $creditCard = new AnetAPI\CreditCardType();
             $creditCard->setCardNumber(str_replace(' ', '', $request->cardNumber));
             $year = $request->year;
             $month = $request->month;
-            $creditCard->setExpirationDate($year . '-' . $month);
+            $creditCard->setExpirationDate($year.'-'.$month);
             $creditCard->setCardCode($request->cardCode);
 
             // Add the payment data to a paymentType object
@@ -68,7 +67,7 @@ class AuthorizeController extends Controller
 
             // Create a TransactionRequestType object and add the previous objects to it
             $transactionRequestType = new AnetAPI\TransactionRequestType();
-            $transactionRequestType->setTransactionType("authCaptureTransaction");
+            $transactionRequestType->setTransactionType('authCaptureTransaction');
             $transactionRequestType->setAmount($item_amount);
             $transactionRequestType->setOrder($orders);
             $transactionRequestType->setPayment($paymentOne);
@@ -80,7 +79,6 @@ class AuthorizeController extends Controller
 
             // Create the controller and get the response
             $controller = new AnetController\CreateTransactionController($requestt);
-
 
             if ($paydata['sandbox_check'] == 1) {
                 $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
@@ -94,7 +92,6 @@ class AuthorizeController extends Controller
                 // Check to see if the API request was successfully received and acted upon
                 if ($tresponse->getresponseCode() == 1) {
 
-
                     $user = \App\Models\User::findOrFail($order->user_id);
                     $user->balance = $user->balance + ($order->amount);
                     $user->save();
@@ -107,7 +104,7 @@ class AuthorizeController extends Controller
                     // store in transaction table
                     if ($order->status == 1) {
                         $transaction = new Transaction;
-                        $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                        $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                         $transaction->user_id = $order->user_id;
                         $transaction->amount = $order->amount;
                         $transaction->user_id = $order->user_id;
@@ -131,6 +128,7 @@ class AuthorizeController extends Controller
                 return redirect(route('user.success', 0));
             }
         }
+
         return redirect(route('user.success', 0));
     }
 }

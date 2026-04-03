@@ -1,14 +1,12 @@
 <?php
+
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\LiveMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Queue\SerializesModels;
-use App\Models\LiveMessage;
 
 class MessageSent implements ShouldBroadcastNow
 {
@@ -23,7 +21,7 @@ class MessageSent implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new PrivateChannel('private-chat.' . $this->message->receiver_id);
+        return new PrivateChannel('private-chat.'.$this->message->receiver_id);
     }
 
     public function broadcastWith()

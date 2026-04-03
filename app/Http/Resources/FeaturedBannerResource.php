@@ -17,7 +17,7 @@ class FeaturedBannerResource extends JsonResource
         return [
             'id' => $this->id,
             'link' => $this->link,
-            'photo' => url('/') . '/assets/images/featuredbanner/'.$this->photo,
-          ];
+            'photo' => url('/').'/assets/images/featuredbanner/'.$this->photo,
+        ];
     }
 }

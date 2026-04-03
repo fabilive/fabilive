@@ -12,11 +12,11 @@ class DeliveryChatThread extends Model
         'seller_id',
         'buyer_id',
         'rider_id',
-        'hidden_at'
+        'hidden_at',
     ];
 
     protected $casts = [
-        'hidden_at' => 'datetime'
+        'hidden_at' => 'datetime',
     ];
 
     public function deliveryJob()

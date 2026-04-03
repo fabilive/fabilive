@@ -2,26 +2,22 @@
 
 namespace App\Http\Controllers\Auth\User;
 
-use App\{
-    Models\User,
-    Models\Notification,
-    Classes\GeniusMailer,
-    Models\Generalsetting,
-    Http\Controllers\Controller
-};
+use App\Classes\GeniusMailer;
+use App\Helpers\PriceHelper;
+use App\Http\Controllers\Controller;
+use App\Models\Generalsetting;
+use App\Models\Notification;
+use App\Models\User;
 use App\Services\ReferralService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use App\Helpers\PriceHelper;
 
 class RegisterController extends Controller
 {
-
     public function register(Request $request)
     {
         Log::info('Registration attempt: ', $request->except(['password', 'password_confirmation']));
@@ -31,12 +27,13 @@ class RegisterController extends Controller
         if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
             $rules = ['g-recaptcha-response' => 'required|captcha'];
             $customs = [
-                'g-recaptcha-response.required' => "Please verify that you are not a robot.",
-                'g-recaptcha-response.captcha' => "Captcha error! try again later or contact site admin..",
+                'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
+                'g-recaptcha-response.captcha' => 'Captcha error! try again later or contact site admin..',
             ];
             $validator = Validator::make($request->all(), $rules, $customs);
             if ($validator->fails()) {
-                Log::warning('Registration failed reCAPTCHA: ' . json_encode($validator->getMessageBag()->toArray()));
+                Log::warning('Registration failed reCAPTCHA: '.json_encode($validator->getMessageBag()->toArray()));
+
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
         }
@@ -48,22 +45,22 @@ class RegisterController extends Controller
             // Prevent duplicate vendor submission
             if ($existingUser->is_vendor == 1) {
                 return response()->json([
-                    'errors' => ['email' => __('You have already submitted a vendor request. Please wait for approval.')]
+                    'errors' => ['email' => __('You have already submitted a vendor request. Please wait for approval.')],
                 ]);
             }
 
             if ($existingUser->is_vendor == 2) {
                 return response()->json([
-                    'errors' => ['email' => __('You are already an approved vendor.')]
+                    'errors' => ['email' => __('You are already an approved vendor.')],
                 ]);
             }
 
             $user = $existingUser;
 
             // ------------------- Upgrade to Vendor -------------------
-            if (!empty($request->vendor)) {
+            if (! empty($request->vendor)) {
                 $validator = Validator::make($request->all(), [
-                    'shop_name' => 'unique:users,shop_name,' . $user->id,
+                    'shop_name' => 'unique:users,shop_name,'.$user->id,
                     'reg_number' => 'required',
                 ], [
                     'shop_name.unique' => __('This Shop Name has already been taken.'),
@@ -99,16 +96,15 @@ class RegisterController extends Controller
                 $user = new User();
                 $input = $request->all();
                 $input['password'] = bcrypt($request['password']);
-                $token = md5(time() . $request->name . $request->email);
+                $token = md5(time().$request->name.$request->email);
                 $input['verification_link'] = $token;
-                $input['affilate_code'] = md5($request->name . $request->email);
+                $input['affilate_code'] = md5($request->name.$request->email);
 
                 // Handle affiliate bonus
                 if (Session::has('affilate')) {
                     $affiliateId = Session::get('affilate');
                     $referrer = User::lockForUpdate()->find($affiliateId);
                     $general = Generalsetting::first();
-
 
                     // dd($general);
                     $affiliateBonus = $general->referral_bonus ?? 0;
@@ -124,7 +120,7 @@ class RegisterController extends Controller
                 }
 
                 // Vendor registration during new signup
-                if (!empty($request->vendor)) {
+                if (! empty($request->vendor)) {
 
                     // Validate shop fields + selfie
                     $validator = Validator::make($request->all(), [
@@ -140,24 +136,24 @@ class RegisterController extends Controller
 
                     if ($validator->fails()) {
                         DB::rollBack();
+
                         return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                     }
 
                     // Custom validation: at least one ID document is required
                     if (
-                        !$request->hasFile('national_id_front_image') &&
-                        !$request->hasFile('national_id_back_image')
+                        ! $request->hasFile('national_id_front_image') &&
+                        ! $request->hasFile('national_id_back_image')
                     ) {
                         DB::rollBack();
+
                         return response()->json([
-                            'errors' => ['files' => __('Please upload National ID Front/Back')]
+                            'errors' => ['files' => __('Please upload National ID Front/Back')],
                         ]);
                     }
 
                     $input['is_vendor'] = 1;
                 }
-
-
 
                 $user->fill($input)->save();
 
@@ -183,7 +179,7 @@ class RegisterController extends Controller
                 }
 
                 // Fallback: if user manually typed an affilate_code and no CustomReferral was created yet
-                if (!$customReferralCreated && $request->filled('referral_code')) {
+                if (! $customReferralCreated && $request->filled('referral_code')) {
                     $referrerByCode = User::where('affilate_code', $request->referral_code)->first();
                     if ($referrerByCode && $referrerByCode->id !== $user->id) {
                         $bonusAmount = $bonusAmount ?? (int) ($gs->custom_referral_bonus ?? 500);
@@ -198,7 +194,7 @@ class RegisterController extends Controller
                 }
 
                 // Handle vendor uploads if vendor
-                if (!empty($request->vendor)) {
+                if (! empty($request->vendor)) {
                     $this->handleVendorUploads($request, $user);
                     $user->save();
 
@@ -206,13 +202,13 @@ class RegisterController extends Controller
                     $user->verifies()->create([
                         'attachments' => implode(',', array_filter([$user->selfie_image, $user->national_id_front_image, $user->national_id_back_image])),
                         'status' => 'Pending',
-                        'text' => 'New vendor registration verification.'
+                        'text' => 'New vendor registration verification.',
                     ]);
                 }
 
                 // --- Referral System: apply code + generate user's own code ---
                 $referralService = app(ReferralService::class);
-                $role = !empty($request->vendor) ? 'seller' : 'buyer';
+                $role = ! empty($request->vendor) ? 'seller' : 'buyer';
 
                 // Generate a referral code for the new user
                 $referralService->generateCode($user, $role);
@@ -223,7 +219,7 @@ class RegisterController extends Controller
                         $referralService->applyReferral($request->referral_code, $user, $role);
                     } catch (\Exception $e) {
                         // Log but don't block registration for referral failures
-                        Log::warning('Referral apply failed: ' . $e->getMessage());
+                        Log::warning('Referral apply failed: '.$e->getMessage());
                     }
                 }
 
@@ -231,15 +227,16 @@ class RegisterController extends Controller
 
             } catch (\Exception $e) {
                 DB::rollBack();
+
                 return response()->json(['errors' => [$e->getMessage()]]);
             }
         }
 
         // ------------------- Email Verification / Auto Login -------------------
-        if ($gs->is_verification_email == 1 && !$existingUser) {
+        if ($gs->is_verification_email == 1 && ! $existingUser) {
             $to = $user->email;
             $subject = 'Verify your email address.';
-            $msg = "Dear Customer,<br>Please click the link below to verify your email address: <a href=" . url('user/register/verify/' . $user->verification_link) . ">" . url('user/register/verify/' . $user->verification_link) . "</a>";
+            $msg = 'Dear Customer,<br>Please click the link below to verify your email address: <a href='.url('user/register/verify/'.$user->verification_link).'>'.url('user/register/verify/'.$user->verification_link).'</a>';
             $data = ['to' => $to, 'subject' => $subject, 'body' => $msg];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
@@ -256,17 +253,18 @@ class RegisterController extends Controller
 
             $data = [
                 'to' => $user->email,
-                'type' => "new_registration",
+                'type' => 'new_registration',
                 'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($data);
 
             Auth::login($user);
+
             return response()->json(1);
         }
     }
@@ -284,7 +282,7 @@ class RegisterController extends Controller
             'national_id_front_image' => 'vendorfront',
             'national_id_back_image' => 'vendorback',
             'license_image' => 'vendorlicense',
-            'submerchant_agreement' => 'submerchantagreement'
+            'submerchant_agreement' => 'submerchantagreement',
         ];
 
         foreach ($files as $field => $folder) {
@@ -298,7 +296,6 @@ class RegisterController extends Controller
             }
         }
     }
-
 
     public function token($token)
     {
@@ -317,18 +314,18 @@ class RegisterController extends Controller
 
                 $data = [
                     'to' => $user->email,
-                    'type' => "new_registration",
+                    'type' => 'new_registration',
                     'cname' => $user->name,
-                    'oamount' => "",
-                    'aname' => "",
-                    'aemail' => "",
-                    'onumber' => "",
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'onumber' => '',
                 ];
                 $mailer = new GeniusMailer();
                 $mailer->sendAutoMail($data);
 
-
                 Auth::login($user);
+
                 return redirect()->route('user-dashboard')->with('success', __('Email Verified Successfully'));
             }
         } else {

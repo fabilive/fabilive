@@ -3,7 +3,6 @@
 namespace App\Services\AI;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
 
 class ListingGeneratorService extends AIService
 {
@@ -12,27 +11,27 @@ class ListingGeneratorService extends AIService
      */
     public function generateFromPhoto(int $userId, string $categoryName, string $serviceArea = '', string $userNotes = ''): array
     {
-        if (!$this->isFeatureEnabled('listing_generator')) {
+        if (! $this->isFeatureEnabled('listing_generator')) {
             return ['error' => 'Listing generator is not enabled.'];
         }
 
         $messages = [
             [
                 'role' => 'system',
-                'content' => "You are a marketplace listing assistant for Fabilive, a Cameroon-based marketplace.
+                'content' => 'You are a marketplace listing assistant for Fabilive, a Cameroon-based marketplace.
 Generate a product listing in JSON format with these fields:
 - title: catchy, descriptive title (max 100 chars)
 - description: detailed product description (150-300 words), mention quality, condition, features
 - suggested_price_xaf: price in XAF (Central African CFA franc), based on local market rates
 - tags: array of 3-5 relevant tags
 
-Respond ONLY with valid JSON, no markdown."
+Respond ONLY with valid JSON, no markdown.',
             ],
             [
                 'role' => 'user',
                 'content' => "Generate a listing for category: {$categoryName}"
-                    . ($serviceArea ? ", location: {$serviceArea}" : '')
-                    . ($userNotes ? ". Seller notes: {$userNotes}" : ''),
+                    .($serviceArea ? ", location: {$serviceArea}" : '')
+                    .($userNotes ? ". Seller notes: {$userNotes}" : ''),
             ],
         ];
 
@@ -46,7 +45,7 @@ Respond ONLY with valid JSON, no markdown."
 
         // Parse JSON response
         $data = json_decode($content, true);
-        if (!$data) {
+        if (! $data) {
             return ['error' => 'Failed to parse AI suggestion.'];
         }
 
@@ -79,7 +78,7 @@ Respond ONLY with valid JSON, no markdown."
         }
 
         $count = $prices->count();
-        $mid = (int)($count / 2);
+        $mid = (int) ($count / 2);
 
         return $count % 2 === 0
             ? ($prices[$mid - 1] + $prices[$mid]) / 2

@@ -1,17 +1,19 @@
 <?php
+
 namespace App\Http\Controllers\Vendor;
+
 use App\Models\Attribute;
 use App\Models\AttributeOption;
 use App\Models\Category;
 use App\Models\Childcategory;
-use App\Models\Currency;
-use App\Models\Country;
 use App\Models\City;
+use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Gallery;
 use App\Models\Generalsetting;
 use App\Models\Product;
 use App\Models\Subcategory;
-use Illuminate\Support\Facades\Log;
+use App\Services\AI\ThreeDGeneratorService;
 use Datatables;
 use DB;
 use Illuminate\Http\Request;
@@ -19,11 +21,9 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Image;
 use Validator;
-use App\Services\AI\ThreeDGeneratorService;
 
 class ProductController extends VendorBaseController
 {
-
     //*** JSON Request
     public function datatables()
     {
@@ -33,22 +33,25 @@ class ProductController extends VendorBaseController
 
         return Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
-                $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8') . '...' : strip_tags($data->name);
-                $id = '<small>' . __('Product ID') . ': <a href="' . route('front.product', $data->slug) . '" target="_blank">' . sprintf("%'.08d", $data->id) . '</a></small>';
-                return $name . '<br>' . $id;
+                $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
+                $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
+
+                return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
                 $price = round($data->price * $this->curr->value, 2);
+
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
             ->addColumn('status', function (Product $data) {
                 $class = $data->status == 1 ? 'drop-success' : 'drop-danger';
                 $s = $data->status == 1 ? 'selected' : '';
                 $ns = $data->status == 0 ? 'selected' : '';
-                return '<div class="action-list"><select class="process select droplinks ' . $class . '"><option data-val="1" value="' . route('vendor-prod-status', ['id1' => $data->id, 'id2' => 1]) . '" ' . $s . '>' . __('Activated') . '</option><<option data-val="0" value="' . route('vendor-prod-status', ['id1' => $data->id, 'id2' => 0]) . '" ' . $ns . '>' . __('Deactivated') . '</option>/select></div>';
+
+                return '<div class="action-list"><select class="process select droplinks '.$class.'"><option data-val="1" value="'.route('vendor-prod-status', ['id1' => $data->id, 'id2' => 1]).'" '.$s.'>'.__('Activated').'</option><<option data-val="0" value="'.route('vendor-prod-status', ['id1' => $data->id, 'id2' => 0]).'" '.$ns.'>'.__('Deactivated').'</option>/select></div>';
             })
             ->addColumn('action', function (Product $data) {
-                return '<div class="action-list"><a href="' . route('vendor-prod-edit', $data->id) . '"> <i class="fas fa-edit"></i>' . __('Edit') . '</a><a href="javascript" class="set-gallery" data-toggle="modal" data-target="#setgallery"><input type="hidden" value="' . $data->id . '"><i class="fas fa-eye"></i> ' . __('View Gallery') . '</a><a href="javascript:;" data-href="' . route('vendor-prod-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+                return '<div class="action-list"><a href="'.route('vendor-prod-edit', $data->id).'"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript" class="set-gallery" data-toggle="modal" data-target="#setgallery"><input type="hidden" value="'.$data->id.'"><i class="fas fa-eye"></i> '.__('View Gallery').'</a><a href="javascript:;" data-href="'.route('vendor-prod-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
             })
             ->rawColumns(['name', 'status', 'action'])
             ->toJson();
@@ -62,19 +65,22 @@ class ProductController extends VendorBaseController
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
-                $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8') . '...' : strip_tags($data->name);
-                $id = '<small>' . __('Product ID') . ': <a href="' . route('front.product', $data->slug) . '" target="_blank">' . sprintf("%'.08d", $data->id) . '</a></small>';
-                return $name . '<br>' . $id;
+                $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
+                $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
+
+                return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
                 $price = round($data->price * $this->curr->value, 2);
+
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
             ->addColumn('action', function (Product $data) {
                 $user = $this->user;
                 $ck = $user->products()->where('catalog_id', '=', $data->id)->count() > 0;
-                $catalog = $ck ? '<a href="javascript:;"> ' . __('Added To Catalog') . '</a>' : '<a href="' . route('vendor-prod-catalog-edit', $data->id) . '"><i class="fas fa-plus"></i> ' . __('Add To Catalog') . '</a>';
-                return '<div class="action-list">' . $catalog . '</div>';
+                $catalog = $ck ? '<a href="javascript:;"> '.__('Added To Catalog').'</a>' : '<a href="'.route('vendor-prod-catalog-edit', $data->id).'"><i class="fas fa-plus"></i> '.__('Add To Catalog').'</a>';
+
+                return '<div class="action-list">'.$catalog.'</div>';
             })
             ->rawColumns(['name', 'status', 'action'])
             ->toJson(); //--- Returning Json Data To Client Side
@@ -94,53 +100,55 @@ class ProductController extends VendorBaseController
     {
         return view('vendor.product.catalogs');
     }
+
     public function create($slug)
     {
         $user = $this->user;
         if (Generalsetting::find(1)->verify_product == 1) {
-            if (!$user->checkStatus()) {
+            if (! $user->checkStatus()) {
                 // Session::flash('unsuccess', __('You must complete your verfication first.'));
                 Session::flash('unsuccess', __("To guarantee Trust & Security for buyers and the marketplace, and also to prevent fraud and ensure legal accountability, please provide the following requirements: 
 - Business Registration Certificate [if available]
 - Taxpayer Card copy or Taxpayer Identification Number (TIN) document copy [must]
 - Your Valid Government ID (National ID Card copy, Passport copy, driver's license copy, Residence Permit for foreigners) [must]"));
+
                 return redirect()->route('vendor-verify');
             }
         }
         $cats = Category::all();
         $countries = Country::where('status', 1)->get();
         $sign = $this->curr;
-        
+
         $cities = City::where('status', 1)
-    ->whereHas('state', function ($q) {
-        $q->where('status', 1)
-          ->whereHas('country', function ($qq) {
-              $qq->where('status', 1);
-          });
-    })
-    ->orderBy('city_name')
-    ->pluck('city_name', 'id'); 
+            ->whereHas('state', function ($q) {
+                $q->where('status', 1)
+                    ->whereHas('country', function ($qq) {
+                        $qq->where('status', 1);
+                    });
+            })
+            ->orderBy('city_name')
+            ->pluck('city_name', 'id');
         if ($slug == 'physical') {
             if ($this->gs->physical == 1) {
-                return view('vendor.product.create.physical', compact('cats','countries', 'sign','cities'));
+                return view('vendor.product.create.physical', compact('cats', 'countries', 'sign', 'cities'));
             } else {
                 return back();
             }
-        } else if ($slug == 'digital') {
+        } elseif ($slug == 'digital') {
             if ($this->gs->digital == 1) {
-                return view('vendor.product.create.digital', compact('cats','countries', 'sign','cities'));
+                return view('vendor.product.create.digital', compact('cats', 'countries', 'sign', 'cities'));
             } else {
                 return back();
             }
-        } else if (($slug == 'license')) {
+        } elseif (($slug == 'license')) {
             if ($this->gs->license == 1) {
-                return view('vendor.product.create.license', compact('cats','countries', 'sign','cities'));
+                return view('vendor.product.create.license', compact('cats', 'countries', 'sign', 'cities'));
             } else {
                 return back();
             }
-        } else if (($slug == 'listing')) {
+        } elseif (($slug == 'listing')) {
             if ($this->gs->listing == 1) {
-                return view('vendor.product.create.listing', compact('cats','countries', 'sign','cities'));
+                return view('vendor.product.create.listing', compact('cats', 'countries', 'sign', 'cities'));
             } else {
                 return back();
             }
@@ -155,6 +163,7 @@ class ProductController extends VendorBaseController
         $data->update();
         //--- Redirect Section
         $msg = __('Status Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -168,31 +177,31 @@ class ProductController extends VendorBaseController
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
 
         $data = Product::findOrFail($id);
 
         //--- Validation Section Ends
         $image = $request->image;
-        list($type, $image) = explode(';', $image);
-        list(, $image) = explode(',', $image);
+        [$type, $image] = explode(';', $image);
+        [, $image] = explode(',', $image);
         $image = base64_decode($image);
-        $image_name = time() . Str::random(8) . '.png';
-        $path = 'assets/images/products/' . $image_name;
+        $image_name = time().Str::random(8).'.png';
+        $path = 'assets/images/products/'.$image_name;
         file_put_contents(public_path($path), $image);
-        
+
         // --- AI PHOTO ENHANCER OPTIMIZATION ---
         $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
         $aiPhotoUrls = $enhancer->optimizeAndStore(public_path($path), $image_name, 'products');
-        
+
         if ($aiPhotoUrls['provider'] === 'cloudinary') {
             $image_name = $aiPhotoUrls['original'];
             @unlink(public_path($path)); // remove local heavy image
         }
         if ($data->photo != null) {
-            if (file_exists(public_path() . '/assets/images/products/' . $data->photo)) {
-                unlink(public_path() . '/assets/images/products/' . $data->photo);
+            if (file_exists(public_path().'/assets/images/products/'.$data->photo)) {
+                unlink(public_path().'/assets/images/products/'.$data->photo);
             }
         }
         if ($aiPhotoUrls['provider'] === 'cloudinary') {
@@ -203,11 +212,12 @@ class ProductController extends VendorBaseController
         }
 
         $data->update($input);
+
         return response()->json(['status' => true, 'file_name' => $image_name]);
 
-        $img = Image::make(public_path() . '/assets/images/products/' . $data->photo)->resize(285, 285);
-        $thumbnail = time() . Str::random(8) . '.jpg';
-        $img->save(public_path() . '/assets/images/thumbnails/' . $thumbnail);
+        $img = Image::make(public_path().'/assets/images/products/'.$data->photo)->resize(285, 285);
+        $thumbnail = time().Str::random(8).'.jpg';
+        $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
         $data->thumbnail = $thumbnail;
         $data->update();
 
@@ -228,6 +238,7 @@ class ProductController extends VendorBaseController
     {
         $cats = Category::all();
         $sign = $this->curr;
+
         return view('vendor.product.productcsv', compact('cats', 'sign'));
     }
 
@@ -237,34 +248,34 @@ class ProductController extends VendorBaseController
         $package = $user->subscribes()->orderBy('id', 'desc')->first();
         $prods = $user->products()->orderBy('id', 'desc')->get()->count();
         if (Generalsetting::find(1)->verify_product == 1) {
-            if (!$user->checkStatus()) {
-                return response()->json(array('errors' => [0 => __('You must complete your verfication first.')]));
+            if (! $user->checkStatus()) {
+                return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
             }
         }
         if ($prods < $package->allowed_products || $package->allowed_products == 0) {
-            $log = "";
+            $log = '';
             $rules = [
                 'csvfile' => 'required|mimes:csv,txt',
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
             $filename = '';
             if ($file = $request->file('csvfile')) {
                 $extensions = ['csv'];
-                if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                    return response()->json(array('errors' => ['Image format not supported']));
+                if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                    return response()->json(['errors' => ['Image format not supported']]);
                 }
-                $filename = time() . '-' . $file->getClientOriginalName();
+                $filename = time().'-'.$file->getClientOriginalName();
                 $file->move(public_path('assets/temp_files'), $filename);
             }
-            $datas = "";
-            $file = fopen(public_path('assets/temp_files/' . $filename), "r");
+            $datas = '';
+            $file = fopen(public_path('assets/temp_files/'.$filename), 'r');
             $i = 1;
             while (($line = fgetcsv($file)) !== false) {
                 if ($i != 1) {
-                    if (!Product::where('sku', $line[0])->exists()) {
+                    if (! Product::where('sku', $line[0])->exists()) {
                         $data = new Product;
                         $sign = Currency::where('is_default', '=', 1)->first();
                         $input['type'] = 'Physical';
@@ -276,13 +287,13 @@ class ProductController extends VendorBaseController
                         //$mcat = Category::where("name", $line[1]);
                         if ($mcat->exists()) {
                             $input['category_id'] = $mcat->first()->id;
-                            if ($line[2] != "") {
+                            if ($line[2] != '') {
                                 $scat = Subcategory::where(DB::raw('lower(name)'), strtolower($line[2]));
                                 if ($scat->exists()) {
                                     $input['subcategory_id'] = $scat->first()->id;
                                 }
                             }
-                            if ($line[3] != "") {
+                            if ($line[3] != '') {
                                 $chcat = Childcategory::where(DB::raw('lower(name)'), strtolower($line[3]));
                                 if ($chcat->exists()) {
                                     $input['childcategory_id'] = $chcat->first()->id;
@@ -296,7 +307,7 @@ class ProductController extends VendorBaseController
                             //                $input['childcategory_id'] = $request->childcategory_id;
                             $input['color'] = $line[13];
                             $input['price'] = $line[7];
-                            $input['previous_price'] = $line[8] != "" ? $line[8] : null;
+                            $input['previous_price'] = $line[8] != '' ? $line[8] : null;
                             $input['stock'] = $line[9];
                             $input['size'] = $line[10];
                             $input['size_qty'] = $line[11];
@@ -308,7 +319,7 @@ class ProductController extends VendorBaseController
                             $input['tags'] = $line[14];
                             $input['product_type'] = $line[19];
                             $input['affiliate_link'] = $line[20];
-                            $input['slug'] = Str::slug($input['name'], '-') . '-' . strtolower($input['sku']);
+                            $input['slug'] = Str::slug($input['name'], '-').'-'.strtolower($input['sku']);
                             $image_url = $line[5];
                             $ch = curl_init();
                             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -323,20 +334,20 @@ class ProductController extends VendorBaseController
                             $thumb_url = '';
                             if (strpos($contentType, 'image/') !== false) {
                                 $fimg = Image::make($line[5])->resize(800, 800);
-                                $fphoto = time() . Str::random(8) . '.jpg';
-                                $fimg->save(public_path() . '/assets/images/products/' . $fphoto);
+                                $fphoto = time().Str::random(8).'.jpg';
+                                $fimg->save(public_path().'/assets/images/products/'.$fphoto);
                                 $input['photo'] = $fphoto;
                                 $thumb_url = $line[5];
                             } else {
-                                $fimg = Image::make(public_path() . '/assets/images/noimage.png')->resize(800, 800);
-                                $fphoto = time() . Str::random(8) . '.jpg';
-                                $fimg->save(public_path() . '/assets/images/products/' . $fphoto);
+                                $fimg = Image::make(public_path().'/assets/images/noimage.png')->resize(800, 800);
+                                $fphoto = time().Str::random(8).'.jpg';
+                                $fimg->save(public_path().'/assets/images/products/'.$fphoto);
                                 $input['photo'] = $fphoto;
-                                $thumb_url = public_path() . '/assets/images/noimage.png';
+                                $thumb_url = public_path().'/assets/images/noimage.png';
                             }
                             $timg = Image::make($thumb_url)->resize(285, 285);
-                            $thumbnail = time() . Str::random(8) . '.jpg';
-                            $timg->save(public_path() . '/assets/images/thumbnails/' . $thumbnail);
+                            $thumbnail = time().Str::random(8).'.jpg';
+                            $timg->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
                             $input['thumbnail'] = $thumbnail;
                             $input['price'] = ($input['price'] / $sign->value);
                             $input['previous_price'] = ($input['previous_price'] / $sign->value);
@@ -344,327 +355,328 @@ class ProductController extends VendorBaseController
                             // Save Data
                             $data->fill($input)->save();
                         } else {
-                            $log .= "<br>" . __('Row No') . ": " . $i . " - " . __('No Category Found!') . "<br>";
+                            $log .= '<br>'.__('Row No').': '.$i.' - '.__('No Category Found!').'<br>';
                         }
                     } else {
-                        $log .= "<br>" . __('Row No') . ": " . $i . " - " . __('Duplicate Product Code!') . "<br>";
+                        $log .= '<br>'.__('Row No').': '.$i.' - '.__('Duplicate Product Code!').'<br>';
                     }
                 }
 
                 $i++;
             }
             fclose($file);
-            $msg = __("New Product Added Successfully.") . $log;
+            $msg = __('New Product Added Successfully.').$log;
+
             return response()->json($msg);
         } else {
-            return response()->json(array('errors' => [0 => 'You Can\'t Add More Products.']));
+            return response()->json(['errors' => [0 => 'You Can\'t Add More Products.']]);
         }
     }
 
     //*** POST Request
     public function store(Request $request)
     {
-        if (!function_exists('imagecreatefromjpeg')) {
-            return response()->json(array('errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']));
+        if (! function_exists('imagecreatefromjpeg')) {
+            return response()->json(['errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']]);
         }
         try {
-        $user = $this->user;
-        $package = $user->subscribes()->latest('id')->first();
-        $prods = $user->products()->latest('id')->get()->count();
-        if (Generalsetting::find(1)->verify_product == 1) {
-            if (!$user->checkStatus()) {
-                return response()->json(array('errors' => [0 => __('You must complete your verfication first.')]));
-            }
-        }
-        if (!$package || $package->allowed_products == 0 || $prods < $package->allowed_products) {
-            $rules = [
-                'photo' => 'required',
-                'file' => 'mimes:zip',
-            ];
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
-            }
-            $data = new Product;
-            $sign = $this->curr;
-            $input = $request->all();
-            if ($file = $request->file('file')) {
-                $extensions = ['zip'];
-                if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                    return response()->json(array('errors' => ['Image format not supported']));
+            $user = $this->user;
+            $package = $user->subscribes()->latest('id')->first();
+            $prods = $user->products()->latest('id')->get()->count();
+            if (Generalsetting::find(1)->verify_product == 1) {
+                if (! $user->checkStatus()) {
+                    return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
                 }
-                $name = \PriceHelper::ImageCreateName($file);
-                                $file->move(public_path('assets/files'), $name);
-
-                $input['file'] = $name;
             }
-            $image = $request->photo;
-            list($type, $image) = explode(';', $image);
-            list(, $image) = explode(',', $image);
-            $image = base64_decode($image);
-            $image_name = time() . Str::random(8) . '.png';
-            $path = 'assets/images/products/' . $image_name;
-            file_put_contents(public_path($path), $image);
-            
-            // --- AI PHOTO ENHANCER OPTIMIZATION ---
-            $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
-            $aiPhotoUrls = $enhancer->optimizeAndStore(public_path($path), $image_name, 'products');
-            
-            if ($aiPhotoUrls['provider'] === 'cloudinary') {
-                $input['photo'] = $aiPhotoUrls['original'];
-                $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
-                @unlink(public_path($path)); // remove local heavy image
-            } else {
-                $input['photo'] = $image_name;
-            }
-            if ($request->type == "Physical" || $request->type == "Listing") {
-                $rules = ['sku' => 'min:8|unique:products'];
+            if (! $package || $package->allowed_products == 0 || $prods < $package->allowed_products) {
+                $rules = [
+                    'photo' => 'required',
+                    'file' => 'mimes:zip',
+                ];
                 $validator = Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
-                    return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                    return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                 }
-                if ($request->product_condition_check == "") {
-                    $input['product_condition'] = 0;
+                $data = new Product;
+                $sign = $this->curr;
+                $input = $request->all();
+                if ($file = $request->file('file')) {
+                    $extensions = ['zip'];
+                    if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                        return response()->json(['errors' => ['Image format not supported']]);
+                    }
+                    $name = \PriceHelper::ImageCreateName($file);
+                    $file->move(public_path('assets/files'), $name);
+
+                    $input['file'] = $name;
                 }
-                if ($request->preordered_check == "") {
-                    $input['preordered'] = 0;
-                }
-                if ($request->minimum_qty_check == "") {
-                    $input['minimum_qty'] = null;
-                }
-                if ($request->shipping_time_check == "") {
-                    $input['ship'] = null;
-                }
-                if (empty($request->stock_check)) {
-                    $input['stock_check'] = 0;
-                    $input['size'] = null;
-                    $input['size_qty'] = null;
-                    $input['size_price'] = null;
-                    $input['color'] = null;
+                $image = $request->photo;
+                [$type, $image] = explode(';', $image);
+                [, $image] = explode(',', $image);
+                $image = base64_decode($image);
+                $image_name = time().Str::random(8).'.png';
+                $path = 'assets/images/products/'.$image_name;
+                file_put_contents(public_path($path), $image);
+
+                // --- AI PHOTO ENHANCER OPTIMIZATION ---
+                $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
+                $aiPhotoUrls = $enhancer->optimizeAndStore(public_path($path), $image_name, 'products');
+
+                if ($aiPhotoUrls['provider'] === 'cloudinary') {
+                    $input['photo'] = $aiPhotoUrls['original'];
+                    $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
+                    @unlink(public_path($path)); // remove local heavy image
                 } else {
-                    if (in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price)) {
+                    $input['photo'] = $image_name;
+                }
+                if ($request->type == 'Physical' || $request->type == 'Listing') {
+                    $rules = ['sku' => 'min:8|unique:products'];
+                    $validator = Validator::make($request->all(), $rules);
+                    if ($validator->fails()) {
+                        return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+                    }
+                    if ($request->product_condition_check == '') {
+                        $input['product_condition'] = 0;
+                    }
+                    if ($request->preordered_check == '') {
+                        $input['preordered'] = 0;
+                    }
+                    if ($request->minimum_qty_check == '') {
+                        $input['minimum_qty'] = null;
+                    }
+                    if ($request->shipping_time_check == '') {
+                        $input['ship'] = null;
+                    }
+                    if (empty($request->stock_check)) {
                         $input['stock_check'] = 0;
                         $input['size'] = null;
                         $input['size_qty'] = null;
                         $input['size_price'] = null;
                         $input['color'] = null;
                     } else {
-                        $input['stock_check'] = 1;
-                        $input['color'] = implode(',', $request->colors);
-                        $input['size'] = implode(',', $request->size);
-                        $input['size_qty'] = implode(',', $request->size_qty);
-                        $size_prices = $request->size_price;
-                        $s_price = array();
-                        foreach ($size_prices as $key => $sPrice) {
-                            $s_price[$key] = $sPrice / $sign->value;
+                        if (in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price)) {
+                            $input['stock_check'] = 0;
+                            $input['size'] = null;
+                            $input['size_qty'] = null;
+                            $input['size_price'] = null;
+                            $input['color'] = null;
+                        } else {
+                            $input['stock_check'] = 1;
+                            $input['color'] = implode(',', $request->colors);
+                            $input['size'] = implode(',', $request->size);
+                            $input['size_qty'] = implode(',', $request->size_qty);
+                            $size_prices = $request->size_price;
+                            $s_price = [];
+                            foreach ($size_prices as $key => $sPrice) {
+                                $s_price[$key] = $sPrice / $sign->value;
+                            }
+                            $input['size_price'] = implode(',', $s_price);
                         }
-                        $input['size_price'] = implode(',', $s_price);
                     }
-                }
-                if (empty($request->color_check)) {
-                    $input['color_all'] = null;
-                } else {
-                    $input['color_all'] = implode(',', $request->color_all);
-                }
-                if (empty($request->size_check)) {
-                    $input['size_all'] = null;
-                } else {
-                    if(is_array($request->size_all)){
-                        $input['size_all'] = implode(',', $request->size_all);
-                    }else{
-                        $input['size_all'] =  $request->size_all;
+                    if (empty($request->color_check)) {
+                        $input['color_all'] = null;
+                    } else {
+                        $input['color_all'] = implode(',', $request->color_all);
                     }
-                }
-                if (empty($request->whole_check)) {
-                    $input['whole_sell_qty'] = null;
-                    $input['whole_sell_discount'] = null;
-                } else {
-                    if (in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount)) {
+                    if (empty($request->size_check)) {
+                        $input['size_all'] = null;
+                    } else {
+                        if (is_array($request->size_all)) {
+                            $input['size_all'] = implode(',', $request->size_all);
+                        } else {
+                            $input['size_all'] = $request->size_all;
+                        }
+                    }
+                    if (empty($request->whole_check)) {
                         $input['whole_sell_qty'] = null;
                         $input['whole_sell_discount'] = null;
                     } else {
-                        $input['whole_sell_qty'] = implode(',', $request->whole_sell_qty);
-                        $input['whole_sell_discount'] = implode(',', $request->whole_sell_discount);
+                        if (in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount)) {
+                            $input['whole_sell_qty'] = null;
+                            $input['whole_sell_discount'] = null;
+                        } else {
+                            $input['whole_sell_qty'] = implode(',', $request->whole_sell_qty);
+                            $input['whole_sell_discount'] = implode(',', $request->whole_sell_discount);
+                        }
+                    }
+                    if (empty($request->color_check)) {
+                        $input['color'] = null;
+                    } else {
+                        $input['color'] = implode(',', $request->colors);
+                    }
+                    if ($request->mesasure_check == '') {
+                        $input['measure'] = null;
                     }
                 }
-                if (empty($request->color_check)) {
-                    $input['color'] = null;
+                if (empty($request->seo_check)) {
+                    $input['meta_tag'] = null;
+                    $input['meta_description'] = null;
                 } else {
-                    $input['color'] = implode(',', $request->colors);
+                    if (! empty($request->meta_tag)) {
+                        $input['meta_tag'] = implode(',', $request->meta_tag);
+                    }
                 }
-                if ($request->mesasure_check == "") {
-                    $input['measure'] = null;
+                if ($request->type == 'License') {
+                    if (in_array(null, $request->license) || in_array(null, $request->license_qty)) {
+                        $input['license'] = null;
+                        $input['license_qty'] = null;
+                    } else {
+                        $input['license'] = implode(',,', $request->license);
+                        $input['license_qty'] = implode(',', $request->license_qty);
+                    }
                 }
-            }
-            if (empty($request->seo_check)) {
-                $input['meta_tag'] = null;
-                $input['meta_description'] = null;
-            } else {
-                if (!empty($request->meta_tag)) {
-                    $input['meta_tag'] = implode(',', $request->meta_tag);
-                }
-            }
-            if ($request->type == "License") {
-                if (in_array(null, $request->license) || in_array(null, $request->license_qty)) {
-                    $input['license'] = null;
-                    $input['license_qty'] = null;
+                if (in_array(null, $request->features) || in_array(null, $request->colors)) {
+                    $input['features'] = null;
+                    $input['colors'] = null;
                 } else {
-                    $input['license'] = implode(',,', $request->license);
-                    $input['license_qty'] = implode(',', $request->license_qty);
+                    $input['features'] = implode(',', str_replace(',', ' ', $request->features));
+                    $input['colors'] = implode(',', str_replace(',', ' ', $request->colors));
                 }
-            }
-            if (in_array(null, $request->features) || in_array(null, $request->colors)) {
-                $input['features'] = null;
-                $input['colors'] = null;
-            } else {
-                $input['features'] = implode(',', str_replace(',', ' ', $request->features));
-                $input['colors'] = implode(',', str_replace(',', ' ', $request->colors));
-            }
-            if (!empty($request->tags)) {
-                $input['tags'] = implode(',', $request->tags);
-            }
-            $input['price'] = ($input['price'] / $sign->value);
-            $input['previous_price'] = ($input['previous_price'] / $sign->value);
-            $input['user_id'] = $this->user->id;
-            $attrArr = [];
-            if (!empty($request->category_id)) {
-                $catAttrs = Attribute::where('attributable_id', $request->category_id)->where('attributable_type', 'App\Models\Category')->get();
-                if (!empty($catAttrs)) {
-                    foreach ($catAttrs as $key => $catAttr) {
-                        $in_name = $catAttr->input_name;
-                        if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
-                            }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
-                            if ($catAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
-                            } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
+                if (! empty($request->tags)) {
+                    $input['tags'] = implode(',', $request->tags);
+                }
+                $input['price'] = ($input['price'] / $sign->value);
+                $input['previous_price'] = ($input['previous_price'] / $sign->value);
+                $input['user_id'] = $this->user->id;
+                $attrArr = [];
+                if (! empty($request->category_id)) {
+                    $catAttrs = Attribute::where('attributable_id', $request->category_id)->where('attributable_type', 'App\Models\Category')->get();
+                    if (! empty($catAttrs)) {
+                        foreach ($catAttrs as $key => $catAttr) {
+                            $in_name = $catAttr->input_name;
+                            if ($request->has("$in_name")) {
+                                $attrArr["$in_name"]['values'] = $request["$in_name"];
+                                foreach ($request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                }
+                                $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
+                                if ($catAttr->details_status) {
+                                    $attrArr["$in_name"]['details_status'] = 1;
+                                } else {
+                                    $attrArr["$in_name"]['details_status'] = 0;
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (!empty($request->subcategory_id)) {
-                $subAttrs = Attribute::where('attributable_id', $request->subcategory_id)->where('attributable_type', 'App\Models\Subcategory')->get();
-                if (!empty($subAttrs)) {
-                    foreach ($subAttrs as $key => $subAttr) {
-                        $in_name = $subAttr->input_name;
-                        if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
-                            }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
-                            if ($subAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
-                            } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-            if (!empty($request->childcategory_id)) {
-                $childAttrs = Attribute::where('attributable_id', $request->childcategory_id)->where('attributable_type', 'App\Models\Childcategory')->get();
-                if (!empty($childAttrs)) {
-                    foreach ($childAttrs as $key => $childAttr) {
-                        $in_name = $childAttr->input_name;
-                        if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
-                            }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
-                            if ($childAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
-                            } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
+                if (! empty($request->subcategory_id)) {
+                    $subAttrs = Attribute::where('attributable_id', $request->subcategory_id)->where('attributable_type', 'App\Models\Subcategory')->get();
+                    if (! empty($subAttrs)) {
+                        foreach ($subAttrs as $key => $subAttr) {
+                            $in_name = $subAttr->input_name;
+                            if ($request->has("$in_name")) {
+                                $attrArr["$in_name"]['values'] = $request["$in_name"];
+                                foreach ($request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                }
+                                $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
+                                if ($subAttr->details_status) {
+                                    $attrArr["$in_name"]['details_status'] = 1;
+                                } else {
+                                    $attrArr["$in_name"]['details_status'] = 0;
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (empty($attrArr)) {
-                $input['attributes'] = null;
-            } else {
-                $jsonAttr = json_encode($attrArr);
-                $input['attributes'] = $jsonAttr;
-            }
-            $input['product_location'] = $request->product_location;
-            $input['product_city'] = $request->product_city;
-            $input['delivery_fee'] = $request->delivery_fee;
-            $input['delivery_unit'] = $request->delivery_unit;
-            if(isset($input['license'])){
-                if(is_array($input['license'])){
-                     $input['license']=implode(", ", $input['license']);
-                }else{
-                    $input['license']=$input['license'];
+                if (! empty($request->childcategory_id)) {
+                    $childAttrs = Attribute::where('attributable_id', $request->childcategory_id)->where('attributable_type', 'App\Models\Childcategory')->get();
+                    if (! empty($childAttrs)) {
+                        foreach ($childAttrs as $key => $childAttr) {
+                            $in_name = $childAttr->input_name;
+                            if ($request->has("$in_name")) {
+                                $attrArr["$in_name"]['values'] = $request["$in_name"];
+                                foreach ($request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                }
+                                $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
+                                if ($childAttr->details_status) {
+                                    $attrArr["$in_name"]['details_status'] = 1;
+                                } else {
+                                    $attrArr["$in_name"]['details_status'] = 0;
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-            if(isset($input['license_qty'])){
-                if(is_array($input['license_qty'])){
-                    $input['license_qty']=implode(", ", $input['license_qty']);
-                }else{
-                    $input['license_qty']=$input['license_qty'];
+                if (empty($attrArr)) {
+                    $input['attributes'] = null;
+                } else {
+                    $jsonAttr = json_encode($attrArr);
+                    $input['attributes'] = $jsonAttr;
                 }
-            }
-            $data->fill($input)->save();
-            $prod = Product::find($data->id);
-            if ($prod->type != 'Physical') {
-                $prod->slug = Str::slug($data->name, '-') . '-' . strtolower(Str::random(3) . $data->id . Str::random(3));
-            } else {
-                $prod->slug = Str::slug($data->name, '-') . '-' . strtolower($data->sku);
-            }
-            if (isset($aiPhotoUrls) && $aiPhotoUrls['provider'] === 'cloudinary') {
-                $prod->thumbnail = $aiPhotoUrls['thumbnail'];
-            } else {
-                $img = Image::make(public_path() . '/assets/images/products/' . $prod->photo)->resize(285, 285);
-                $thumbnail = time() . Str::random(8) . '.jpg';
-                $img->save(public_path() . '/assets/images/thumbnails/' . $thumbnail);
-                $prod->thumbnail = $thumbnail;
-            }
-            $prod->update();
+                $input['product_location'] = $request->product_location;
+                $input['product_city'] = $request->product_city;
+                $input['delivery_fee'] = $request->delivery_fee;
+                $input['delivery_unit'] = $request->delivery_unit;
+                if (isset($input['license'])) {
+                    if (is_array($input['license'])) {
+                        $input['license'] = implode(', ', $input['license']);
+                    } else {
+                        $input['license'] = $input['license'];
+                    }
+                }
+                if (isset($input['license_qty'])) {
+                    if (is_array($input['license_qty'])) {
+                        $input['license_qty'] = implode(', ', $input['license_qty']);
+                    } else {
+                        $input['license_qty'] = $input['license_qty'];
+                    }
+                }
+                $data->fill($input)->save();
+                $prod = Product::find($data->id);
+                if ($prod->type != 'Physical') {
+                    $prod->slug = Str::slug($data->name, '-').'-'.strtolower(Str::random(3).$data->id.Str::random(3));
+                } else {
+                    $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
+                }
+                if (isset($aiPhotoUrls) && $aiPhotoUrls['provider'] === 'cloudinary') {
+                    $prod->thumbnail = $aiPhotoUrls['thumbnail'];
+                } else {
+                    $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
+                    $thumbnail = time().Str::random(8).'.jpg';
+                    $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
+                    $prod->thumbnail = $thumbnail;
+                }
+                $prod->update();
 
-            // 3D Model Generation
-            if (config('ai.features.photo_enhancer')) {
-                $threeDService = new ThreeDGeneratorService();
-                $threeDModelPath = $threeDService->generateForProduct($prod, public_path('assets/images/products/' . $prod->photo));
-                if ($threeDModelPath) {
-                    $prod->update(['3d_model' => $threeDModelPath]);
+                // 3D Model Generation
+                if (config('ai.features.photo_enhancer')) {
+                    $threeDService = new ThreeDGeneratorService();
+                    $threeDModelPath = $threeDService->generateForProduct($prod, public_path('assets/images/products/'.$prod->photo));
+                    if ($threeDModelPath) {
+                        $prod->update(['3d_model' => $threeDModelPath]);
+                    }
                 }
-            }
 
-            $lastid = $data->id;
-            if ($files = $request->file('gallery')) {
-                foreach ($files as $key => $file) {
-                    $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-                    if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                        return response()->json(array('errors' => ['Image format not supported']));
-                    }
-                    if (in_array($key, $request->galval)) {
-                        $gallery = new Gallery;
-                        $name = \PriceHelper::ImageCreateName($file);
-                        $img = Image::make($file->getRealPath())->resize(800, 800);
-                        $thumbnail = time() . Str::random(8) . '.jpg';
-                        $img->save(public_path() . '/assets/images/galleries/' . $name);
-                        $gallery['photo'] = $name;
-                        $gallery['product_id'] = $lastid;
-                        $gallery->save();
+                $lastid = $data->id;
+                if ($files = $request->file('gallery')) {
+                    foreach ($files as $key => $file) {
+                        $extensions = ['jpeg', 'jpg', 'png', 'svg'];
+                        if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                            return response()->json(['errors' => ['Image format not supported']]);
+                        }
+                        if (in_array($key, $request->galval)) {
+                            $gallery = new Gallery;
+                            $name = \PriceHelper::ImageCreateName($file);
+                            $img = Image::make($file->getRealPath())->resize(800, 800);
+                            $thumbnail = time().Str::random(8).'.jpg';
+                            $img->save(public_path().'/assets/images/galleries/'.$name);
+                            $gallery['photo'] = $name;
+                            $gallery['product_id'] = $lastid;
+                            $gallery->save();
+                        }
                     }
                 }
+                $msg = __('New Product Added Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
+
+                return response()->json($msg);
+            } else {
+                return response()->json(['errors' => [0 => __('You Can\'t Add More Product.')]]);
             }
-            $msg = __('New Product Added Successfully.') . '<a href="' . route('vendor-prod-index') . '">' . __('View Product Lists.') . '</a>';
-            return response()->json($msg);
-        } 
-        
-        else {
-            return response()->json(array('errors' => [0 => __('You Can\'t Add More Product.')]));
-        }
         } catch (\Throwable $e) {
-            \Log::error('Vendor Product Store Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            \Log::error('Vendor Product Store Error: '.$e->getMessage()."\n".$e->getTraceAsString());
+
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -675,25 +687,25 @@ class ProductController extends VendorBaseController
         $cats = Category::all();
         $data = Product::findOrFail($id);
         $sign = $this->curr;
-        
+
         $cities = City::where('status', 1)
-    ->whereHas('state', function ($q) {
-        $q->where('status', 1)
-          ->whereHas('country', function ($qq) {
-              $qq->where('status', 1);
-          });
-    })
-    ->orderBy('city_name')
-    ->pluck('city_name', 'id');
-        
+            ->whereHas('state', function ($q) {
+                $q->where('status', 1)
+                    ->whereHas('country', function ($qq) {
+                        $qq->where('status', 1);
+                    });
+            })
+            ->orderBy('city_name')
+            ->pluck('city_name', 'id');
+
         if ($data->type == 'Digital') {
-            return view('vendor.product.edit.digital', compact('cats', 'data', 'sign','cities'));
+            return view('vendor.product.edit.digital', compact('cats', 'data', 'sign', 'cities'));
         } elseif ($data->type == 'License') {
-            return view('vendor.product.edit.license', compact('cats', 'data', 'sign','cities'));
+            return view('vendor.product.edit.license', compact('cats', 'data', 'sign', 'cities'));
         } elseif ($data->type == 'Listing') {
-            return view('vendor.product.edit.listing', compact('cats', 'data', 'sign','cities'));
+            return view('vendor.product.edit.listing', compact('cats', 'data', 'sign', 'cities'));
         } else {
-            return view('vendor.product.edit.physical', compact('cats', 'data', 'sign','cities'));
+            return view('vendor.product.edit.physical', compact('cats', 'data', 'sign', 'cities'));
         }
     }
 
@@ -721,7 +733,7 @@ class ProductController extends VendorBaseController
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         $data = Product::findOrFail($id);
         $sign = $this->curr;
@@ -730,28 +742,28 @@ class ProductController extends VendorBaseController
             $input['link'] = null;
         } else {
             if ($data->file != null) {
-                if (file_exists(public_path() . '/assets/files/' . $data->file)) {
-                    unlink(public_path() . '/assets/files/' . $data->file);
+                if (file_exists(public_path().'/assets/files/'.$data->file)) {
+                    unlink(public_path().'/assets/files/'.$data->file);
                 }
             }
             $input['file'] = null;
         }
-        if ($data->type == "Physical") {
-            $rules = ['sku' => 'min:8|unique:products,sku,' . $id];
+        if ($data->type == 'Physical') {
+            $rules = ['sku' => 'min:8|unique:products,sku,'.$id];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
-            if ($request->product_condition_check == "") {
+            if ($request->product_condition_check == '') {
                 $input['product_condition'] = 0;
             }
-            if ($request->preordered_check == "") {
+            if ($request->preordered_check == '') {
                 $input['preordered'] = 0;
             }
-            if ($request->minimum_qty_check == "") {
+            if ($request->minimum_qty_check == '') {
                 $input['minimum_qty'] = null;
             }
-            if ($request->shipping_time_check == "") {
+            if ($request->shipping_time_check == '') {
                 $input['ship'] = null;
             }
             if (empty($request->stock_check)) {
@@ -773,7 +785,7 @@ class ProductController extends VendorBaseController
                     $input['size'] = implode(',', $request->size);
                     $input['size_qty'] = implode(',', $request->size_qty);
                     $size_prices = $request->size_price;
-                    $s_price = array();
+                    $s_price = [];
                     foreach ($size_prices as $key => $sPrice) {
                         $s_price[$key] = $sPrice / $sign->value;
                     }
@@ -805,14 +817,14 @@ class ProductController extends VendorBaseController
             if (empty($request->color_check)) {
                 $input['color'] = null;
             } else {
-                if (!empty($request->color)) {
+                if (! empty($request->color)) {
                     $input['color'] = implode(',', $request->color);
                 }
                 if (empty($request->color)) {
                     $input['color'] = null;
                 }
             }
-            if ($request->measure_check == "") {
+            if ($request->measure_check == '') {
                 $input['measure'] = null;
             }
         }
@@ -820,12 +832,12 @@ class ProductController extends VendorBaseController
             $input['meta_tag'] = null;
             $input['meta_description'] = null;
         } else {
-            if (!empty($request->meta_tag)) {
+            if (! empty($request->meta_tag)) {
                 $input['meta_tag'] = implode(',', $request->meta_tag);
             }
         }
-        if ($data->type == "License") {
-            if (!in_array(null, $request->license) && !in_array(null, $request->license_qty)) {
+        if ($data->type == 'License') {
+            if (! in_array(null, $request->license) && ! in_array(null, $request->license_qty)) {
                 $input['license'] = implode(',,', $request->license);
                 $input['license_qty'] = implode(',', $request->license_qty);
             } else {
@@ -840,7 +852,7 @@ class ProductController extends VendorBaseController
                 }
             }
         }
-        if (!in_array(null, $request->features) && !in_array(null, $request->colors)) {
+        if (! in_array(null, $request->features) && ! in_array(null, $request->colors)) {
             $input['features'] = implode(',', str_replace(',', ' ', $request->features));
             $input['colors'] = implode(',', str_replace(',', ' ', $request->colors));
         } else {
@@ -854,7 +866,7 @@ class ProductController extends VendorBaseController
                 $input['colors'] = implode(',', $colors);
             }
         }
-        if (!empty($request->tags)) {
+        if (! empty($request->tags)) {
             $input['tags'] = implode(',', $request->tags);
         }
         if (empty($request->tags)) {
@@ -863,61 +875,61 @@ class ProductController extends VendorBaseController
         $input['price'] = $input['price'] / $sign->value;
         $input['previous_price'] = $input['previous_price'] / $sign->value;
         $attrArr = [];
-        if (!empty($request->category_id)) {
+        if (! empty($request->category_id)) {
             $catAttrs = Attribute::where('attributable_id', $request->category_id)->where('attributable_type', 'App\Models\Category')->get();
-            if (!empty($catAttrs)) {
+            if (! empty($catAttrs)) {
                 foreach ($catAttrs as $key => $catAttr) {
                     $in_name = $catAttr->input_name;
                     if ($request->has("$in_name")) {
-                        $attrArr["$in_name"]["values"] = $request["$in_name"];
-                        foreach ($request["$in_name" . "_price"] as $aprice) {
-                            $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                        $attrArr["$in_name"]['values'] = $request["$in_name"];
+                        foreach ($request["$in_name".'_price'] as $aprice) {
+                            $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                         }
-                        $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                        $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                         if ($catAttr->details_status) {
-                            $attrArr["$in_name"]["details_status"] = 1;
+                            $attrArr["$in_name"]['details_status'] = 1;
                         } else {
-                            $attrArr["$in_name"]["details_status"] = 0;
+                            $attrArr["$in_name"]['details_status'] = 0;
                         }
                     }
                 }
             }
         }
-        if (!empty($request->subcategory_id)) {
+        if (! empty($request->subcategory_id)) {
             $subAttrs = Attribute::where('attributable_id', $request->subcategory_id)->where('attributable_type', 'App\Models\Subcategory')->get();
-            if (!empty($subAttrs)) {
+            if (! empty($subAttrs)) {
                 foreach ($subAttrs as $key => $subAttr) {
                     $in_name = $subAttr->input_name;
                     if ($request->has("$in_name")) {
-                        $attrArr["$in_name"]["values"] = $request["$in_name"];
-                        foreach ($request["$in_name" . "_price"] as $aprice) {
-                            $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                        $attrArr["$in_name"]['values'] = $request["$in_name"];
+                        foreach ($request["$in_name".'_price'] as $aprice) {
+                            $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                         }
-                        $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                        $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                         if ($subAttr->details_status) {
-                            $attrArr["$in_name"]["details_status"] = 1;
+                            $attrArr["$in_name"]['details_status'] = 1;
                         } else {
-                            $attrArr["$in_name"]["details_status"] = 0;
+                            $attrArr["$in_name"]['details_status'] = 0;
                         }
                     }
                 }
             }
         }
-        if (!empty($request->childcategory_id)) {
+        if (! empty($request->childcategory_id)) {
             $childAttrs = Attribute::where('attributable_id', $request->childcategory_id)->where('attributable_type', 'App\Models\Childcategory')->get();
-            if (!empty($childAttrs)) {
+            if (! empty($childAttrs)) {
                 foreach ($childAttrs as $key => $childAttr) {
                     $in_name = $childAttr->input_name;
                     if ($request->has("$in_name")) {
-                        $attrArr["$in_name"]["values"] = $request["$in_name"];
-                        foreach ($request["$in_name" . "_price"] as $aprice) {
-                            $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                        $attrArr["$in_name"]['values'] = $request["$in_name"];
+                        foreach ($request["$in_name".'_price'] as $aprice) {
+                            $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                         }
-                        $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                        $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                         if ($childAttr->details_status) {
-                            $attrArr["$in_name"]["details_status"] = 1;
+                            $attrArr["$in_name"]['details_status'] = 1;
                         } else {
-                            $attrArr["$in_name"]["details_status"] = 0;
+                            $attrArr["$in_name"]['details_status'] = 0;
                         }
                     }
                 }
@@ -929,13 +941,14 @@ class ProductController extends VendorBaseController
             $jsonAttr = json_encode($attrArr);
             $input['attributes'] = $jsonAttr;
         }
-        $data->slug = Str::slug($data->name, '-') . '-' . strtolower($data->sku);
+        $data->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
         $input['product_location'] = $request->product_location;
         $input['product_city'] = $request->product_city;
         $input['delivery_fee'] = $request->delivery_fee;
         $input['delivery_unit'] = $request->delivery_unit;
         $data->update($input);
-        $msg = __('Product Updated Successfully.') . '<a href="' . route('vendor-prod-index') . '">' . __('View Product Lists.') . '</a>';
+        $msg = __('Product Updated Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
+
         return response()->json($msg);
     }
 
@@ -947,8 +960,8 @@ class ProductController extends VendorBaseController
         $package = $user->subscribes()->latest('id')->first();
         $prods = $user->products()->latest('id')->get()->count();
         if (Generalsetting::find(1)->verify_product == 1) {
-            if (!$user->checkStatus()) {
-                return response()->json(array('errors' => [0 => __('You must complete your verfication first.')]));
+            if (! $user->checkStatus()) {
+                return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
             }
         }
         if ($prods < $package->allowed_products || $package->allowed_products == 0) {
@@ -961,7 +974,7 @@ class ProductController extends VendorBaseController
             $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
             //--- Validation Section Ends
 
@@ -972,8 +985,8 @@ class ProductController extends VendorBaseController
             // Check File
             if ($file = $request->file('file')) {
                 $extensions = ['zip'];
-                if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                    return response()->json(array('errors' => ['Image format not supported']));
+                if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                    return response()->json(['errors' => ['Image format not supported']]);
                 }
                 $name = \PriceHelper::ImageCreateName($file);
                 $file->move(public_path('assets/files'), $name);
@@ -982,11 +995,11 @@ class ProductController extends VendorBaseController
 
             $image = $request->photo;
             if ($request->is_photo == '1') {
-                list($type, $image) = explode(';', $image);
-                list(, $image) = explode(',', $image);
+                [$type, $image] = explode(';', $image);
+                [, $image] = explode(',', $image);
                 $image = base64_decode($image);
-                $image_name = time() . Str::random(8) . '.png';
-                $path = 'assets/images/products/' . $image_name;
+                $image_name = time().Str::random(8).'.png';
+                $path = 'assets/images/products/'.$image_name;
                 file_put_contents(public_path($path), $image);
             } else {
                 $image_name = $request->photo;
@@ -995,7 +1008,7 @@ class ProductController extends VendorBaseController
             $input['photo'] = $image_name;
 
             // Check Physical
-            if ($request->type == "Physical") {
+            if ($request->type == 'Physical') {
 
                 //--- Validation Section
                 $rules = ['sku' => 'min:8|unique:products'];
@@ -1003,27 +1016,27 @@ class ProductController extends VendorBaseController
                 $validator = Validator::make($request->all(), $rules);
 
                 if ($validator->fails()) {
-                    return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                    return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                 }
                 //--- Validation Section Ends
 
                 // Check Condition
-                if ($request->product_condition_check == "") {
+                if ($request->product_condition_check == '') {
                     $input['product_condition'] = 0;
                 }
 
                 // Check Preorderd
-                if ($request->preordered_check == "") {
+                if ($request->preordered_check == '') {
                     $input['preordered'] = 0;
                 }
 
                 // Check Minimum Qty
-                if ($request->minimum_qty_check == "") {
+                if ($request->minimum_qty_check == '') {
                     $input['minimum_qty'] = null;
                 }
 
                 // Check Shipping Time
-                if ($request->shipping_time_check == "") {
+                if ($request->shipping_time_check == '') {
                     $input['ship'] = null;
                 }
 
@@ -1041,7 +1054,7 @@ class ProductController extends VendorBaseController
                         $input['size'] = implode(',', $request->size);
                         $input['size_qty'] = implode(',', $request->size_qty);
                         $size_prices = $request->size_price;
-                        $s_price = array();
+                        $s_price = [];
                         foreach ($size_prices as $key => $sPrice) {
                             $s_price[$key] = $sPrice / $sign->value;
                         }
@@ -1072,7 +1085,7 @@ class ProductController extends VendorBaseController
                 }
 
                 // Check Measurement
-                if ($request->mesasure_check == "") {
+                if ($request->mesasure_check == '') {
                     $input['measure'] = null;
                 }
             }
@@ -1082,14 +1095,14 @@ class ProductController extends VendorBaseController
                 $input['meta_tag'] = null;
                 $input['meta_description'] = null;
             } else {
-                if (!empty($request->meta_tag)) {
+                if (! empty($request->meta_tag)) {
                     $input['meta_tag'] = implode(',', $request->meta_tag);
                 }
             }
 
             // Check License
 
-            if ($request->type == "License") {
+            if ($request->type == 'License') {
 
                 if (in_array(null, $request->license) || in_array(null, $request->license_qty)) {
                     $input['license'] = null;
@@ -1110,7 +1123,7 @@ class ProductController extends VendorBaseController
             }
 
             //tags
-            if (!empty($request->tags)) {
+            if (! empty($request->tags)) {
                 $input['tags'] = implode(',', $request->tags);
             }
 
@@ -1121,62 +1134,62 @@ class ProductController extends VendorBaseController
 
             // store filtering attributes for physical product
             $attrArr = [];
-            if (!empty($request->category_id)) {
+            if (! empty($request->category_id)) {
                 $catAttrs = Attribute::where('attributable_id', $request->category_id)->where('attributable_type', 'App\Models\Category')->get();
-                if (!empty($catAttrs)) {
+                if (! empty($catAttrs)) {
                     foreach ($catAttrs as $key => $catAttr) {
                         $in_name = $catAttr->input_name;
                         if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                            $attrArr["$in_name"]['values'] = $request["$in_name"];
+                            foreach ($request["$in_name".'_price'] as $aprice) {
+                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                             }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                            $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($catAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
+                                $attrArr["$in_name"]['details_status'] = 1;
                             } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
+                                $attrArr["$in_name"]['details_status'] = 0;
                             }
                         }
                     }
                 }
             }
 
-            if (!empty($request->subcategory_id)) {
+            if (! empty($request->subcategory_id)) {
                 $subAttrs = Attribute::where('attributable_id', $request->subcategory_id)->where('attributable_type', 'App\Models\Subcategory')->get();
-                if (!empty($subAttrs)) {
+                if (! empty($subAttrs)) {
                     foreach ($subAttrs as $key => $subAttr) {
                         $in_name = $subAttr->input_name;
                         if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                            $attrArr["$in_name"]['values'] = $request["$in_name"];
+                            foreach ($request["$in_name".'_price'] as $aprice) {
+                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                             }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                            $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($subAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
+                                $attrArr["$in_name"]['details_status'] = 1;
                             } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
+                                $attrArr["$in_name"]['details_status'] = 0;
                             }
                         }
                     }
                 }
             }
-            if (!empty($request->childcategory_id)) {
+            if (! empty($request->childcategory_id)) {
                 $childAttrs = Attribute::where('attributable_id', $request->childcategory_id)->where('attributable_type', 'App\Models\Childcategory')->get();
-                if (!empty($childAttrs)) {
+                if (! empty($childAttrs)) {
                     foreach ($childAttrs as $key => $childAttr) {
                         $in_name = $childAttr->input_name;
                         if ($request->has("$in_name")) {
-                            $attrArr["$in_name"]["values"] = $request["$in_name"];
-                            foreach ($request["$in_name" . "_price"] as $aprice) {
-                                $ttt["$in_name" . "_price"][] = $aprice / $sign->value;
+                            $attrArr["$in_name"]['values'] = $request["$in_name"];
+                            foreach ($request["$in_name".'_price'] as $aprice) {
+                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
                             }
-                            $attrArr["$in_name"]["prices"] = $ttt["$in_name" . "_price"];
+                            $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($childAttr->details_status) {
-                                $attrArr["$in_name"]["details_status"] = 1;
+                                $attrArr["$in_name"]['details_status'] = 1;
                             } else {
-                                $attrArr["$in_name"]["details_status"] = 0;
+                                $attrArr["$in_name"]['details_status'] = 0;
                             }
                         }
                     }
@@ -1197,22 +1210,22 @@ class ProductController extends VendorBaseController
 
             $prod = Product::find($data->id);
             if ($prod->type != 'Physical') {
-                $prod->slug = Str::slug($data->name, '-') . '-' . strtolower(Str::random(3) . $data->id . Str::random(3));
+                $prod->slug = Str::slug($data->name, '-').'-'.strtolower(Str::random(3).$data->id.Str::random(3));
             } else {
-                $prod->slug = Str::slug($data->name, '-') . '-' . strtolower($data->sku);
+                $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
             }
             $photo = $prod->photo;
             if ($request->is_photo == '0') {
                 // Set Photo
-                $newimg = Image::make(public_path() . '/assets/images/products/' . $prod->photo)->resize(800, 800);
-                $photo = time() . Str::random(8) . '.jpg';
-                $newimg->save(public_path() . '/assets/images/products/' . $photo);
+                $newimg = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(800, 800);
+                $photo = time().Str::random(8).'.jpg';
+                $newimg->save(public_path().'/assets/images/products/'.$photo);
             }
 
             // Set Thumbnail
-            $img = Image::make(public_path() . '/assets/images/products/' . $prod->photo)->resize(285, 285);
-            $thumbnail = time() . Str::random(8) . '.jpg';
-            $img->save(public_path() . '/assets/images/thumbnails/' . $thumbnail);
+            $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
+            $thumbnail = time().Str::random(8).'.jpg';
+            $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
             $prod->thumbnail = $thumbnail;
             $prod->photo = $photo;
             $prod->update();
@@ -1222,15 +1235,15 @@ class ProductController extends VendorBaseController
             if ($files = $request->file('gallery')) {
                 foreach ($files as $key => $file) {
                     $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-                    if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                        return response()->json(array('errors' => ['Image format not supported']));
+                    if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                        return response()->json(['errors' => ['Image format not supported']]);
                     }
                     if (in_array($key, $request->galval)) {
                         $gallery = new Gallery;
                         $name = \PriceHelper::ImageCreateName($file);
                         $img = Image::make($file->getRealPath())->resize(800, 800);
-                        $thumbnail = time() . Str::random(8) . '.jpg';
-                        $img->save(public_path() . '/assets/images/galleries/' . $name);
+                        $thumbnail = time().Str::random(8).'.jpg';
+                        $img->save(public_path().'/assets/images/galleries/'.$name);
                         $gallery['photo'] = $name;
                         $gallery['product_id'] = $lastid;
                         $gallery->save();
@@ -1240,12 +1253,13 @@ class ProductController extends VendorBaseController
             //logic Section Ends
 
             //--- Redirect Section
-            $msg = __('New Product Added Successfully.') . '<a href="' . route('vendor-prod-index') . '">' . __('View Product Lists.') . '</a>';
+            $msg = __('New Product Added Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
+
             return response()->json($msg);
             //--- Redirect Section Ends
         } else {
             //--- Redirect Section
-            return response()->json(array('errors' => [0 => __('You Can\'t Add More Product.')]));
+            return response()->json(['errors' => [0 => __('You Can\'t Add More Product.')]]);
 
             //--- Redirect Section Ends
         }
@@ -1258,8 +1272,8 @@ class ProductController extends VendorBaseController
         $data = Product::findOrFail($id);
         if ($data->galleries->count() > 0) {
             foreach ($data->galleries as $gal) {
-                if (file_exists(public_path() . '/assets/images/galleries/' . $gal->photo)) {
-                    unlink(public_path() . '/assets/images/galleries/' . $gal->photo);
+                if (file_exists(public_path().'/assets/images/galleries/'.$gal->photo)) {
+                    unlink(public_path().'/assets/images/galleries/'.$gal->photo);
                 }
                 $gal->delete();
             }
@@ -1291,23 +1305,24 @@ class ProductController extends VendorBaseController
             }
         }
 
-        if (!filter_var($data->photo, FILTER_VALIDATE_URL)) {
-            if (file_exists(public_path() . '/assets/images/products/' . $data->photo)) {
-                unlink(public_path() . '/assets/images/products/' . $data->photo);
+        if (! filter_var($data->photo, FILTER_VALIDATE_URL)) {
+            if (file_exists(public_path().'/assets/images/products/'.$data->photo)) {
+                unlink(public_path().'/assets/images/products/'.$data->photo);
             }
         }
 
-        if (file_exists(public_path() . '/assets/images/thumbnails/' . $data->thumbnail) && $data->thumbnail != "") {
-            unlink(public_path() . '/assets/images/thumbnails/' . $data->thumbnail);
+        if (file_exists(public_path().'/assets/images/thumbnails/'.$data->thumbnail) && $data->thumbnail != '') {
+            unlink(public_path().'/assets/images/thumbnails/'.$data->thumbnail);
         }
         if ($data->file != null) {
-            if (file_exists(public_path() . '/assets/files/' . $data->file)) {
-                unlink(public_path() . '/assets/files/' . $data->file);
+            if (file_exists(public_path().'/assets/files/'.$data->file)) {
+                unlink(public_path().'/assets/files/'.$data->file);
             }
         }
         $data->delete();
         //--- Redirect Section
         $msg = __('Product Deleted Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
 
@@ -1331,6 +1346,7 @@ class ProductController extends VendorBaseController
             $options = AttributeOption::where('attribute_id', $attribute->id)->get();
             $attrOptions[] = ['attribute' => $attribute, 'options' => $options];
         }
+
         return response()->json($attrOptions);
     }
 }

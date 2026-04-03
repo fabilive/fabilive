@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\PaymentGateway;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 
 // routes/api.php
 Route::get('/service-areas', 'Api\GeneralController@serviceAreas');
@@ -43,31 +40,30 @@ Route::prefix('rider')->group(function () {
 
         Route::post('logout', 'Api\Auth\Rider\RiderAuthController@logout');
 
-        Route::post('update-profile','Api\Rider\RiderProfileController@updateProfile');
-        Route::get('my-profile','Api\Rider\RiderProfileController@myProfile');
+        Route::post('update-profile', 'Api\Rider\RiderProfileController@updateProfile');
+        Route::get('my-profile', 'Api\Rider\RiderProfileController@myProfile');
 
-        Route::put('update-password','Api\Rider\RiderProfileController@updatePassword');
+        Route::put('update-password', 'Api\Rider\RiderProfileController@updatePassword');
         // Route::put('service-area', 'Api\Rider\RiderController@updateServiceArea');
 
         // ============ Start: Withdraw =========================\\
-        Route::get('withdraw-requests','Api\Rider\WithdrawController@index');
-        Route::get('withdraw-request/{id}','Api\Rider\WithdrawController@show');
-        Route::post('withdraw-request','Api\Rider\WithdrawController@store');
+        Route::get('withdraw-requests', 'Api\Rider\WithdrawController@index');
+        Route::get('withdraw-request/{id}', 'Api\Rider\WithdrawController@show');
+        Route::post('withdraw-request', 'Api\Rider\WithdrawController@store');
         // ============ End: Withdraw =========================\\
 
         // ============ Start: Orders =========================\\
-        Route::get('orders','Api\Rider\OrderController@orders');
-        Route::get('orders/{id}','Api\Rider\OrderController@showOrder');
-        Route::post('orders-accept/{id}','Api\Rider\OrderController@orderAccept');
-        Route::post('orders-deliver/{id}','Api\Rider\OrderController@orderComplete');
-        Route::post('orders-reject/{id}','Api\Rider\OrderController@orderReject');
+        Route::get('orders', 'Api\Rider\OrderController@orders');
+        Route::get('orders/{id}', 'Api\Rider\OrderController@showOrder');
+        Route::post('orders-accept/{id}', 'Api\Rider\OrderController@orderAccept');
+        Route::post('orders-deliver/{id}', 'Api\Rider\OrderController@orderComplete');
+        Route::post('orders-reject/{id}', 'Api\Rider\OrderController@orderReject');
 
         // ============ End: Withdraw =========================\\
 
     });
 
 });
-
 
 Route::group(['prefix' => 'user'], function () {
     Route::post('registration', 'Api\Auth\AuthController@register');
@@ -80,7 +76,6 @@ Route::group(['prefix' => 'user'], function () {
     Route::get('details', 'Api\Auth\AuthController@details');
 
     Route::group(['middleware' => 'auth:api'], function () {
-
 
         // --------------------- USER DASHBOARD ---------------------
 
@@ -266,7 +261,7 @@ Route::post('/campay/webhook', [App\Http\Controllers\Api\Payment\CampayWebhookCo
 Route::prefix('delivery')->group(function () {
     // Seller Endpoints
     Route::post('seller/ready/{order}', [App\Http\Controllers\Api\DeliveryJobController::class, 'sellerReady'])->middleware('auth:api');
-    
+
     // Rider Endpoints
     Route::group(['middleware' => 'auth:rider-api'], function () {
         Route::get('rider/available', [App\Http\Controllers\Api\DeliveryJobController::class, 'availableJobs']);
@@ -329,4 +324,3 @@ Route::fallback(function () {
 //     }
 
 // });
-

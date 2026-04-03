@@ -2,10 +2,10 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
 use Filament\Actions\Action;
-use Illuminate\Support\Facades\Artisan;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\Artisan;
 
 class ClearCache extends Page
 {

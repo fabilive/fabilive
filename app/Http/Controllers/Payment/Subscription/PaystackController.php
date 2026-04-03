@@ -2,26 +2,22 @@
 
 namespace App\Http\Controllers\Payment\Subscription;
 
-use App\{
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\Generalsetting,
-    Models\UserSubscription
-};
-
+use App\Classes\GeniusMailer;
+use App\Models\Generalsetting;
+use App\Models\Subscription;
+use App\Models\UserSubscription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PaystackController extends SubscriptionBaseController
 {
-
     public function store(Request $request)
     {
 
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
+            'shop_name' => 'unique:users',
         ], [
-            'shop_name.unique' => __('This shop name has already been taken.')
+            'shop_name.unique' => __('This shop name has already been taken.'),
         ]);
         $user = $this->user;
         $package = $user->subscribes()->where('status', 1)->orderBy('id', 'desc')->first();
@@ -30,19 +26,19 @@ class PaystackController extends SubscriptionBaseController
         $today = Carbon::now()->format('Y-m-d');
         $input = $request->all();
         $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
-        if (!empty($package)) {
+        if (! empty($package)) {
             if ($package->subscription_id == $request->subs_id) {
                 $newday = strtotime($today);
                 $lastday = strtotime($user->date);
                 $secs = $lastday - $newday;
                 $days = $secs / 86400;
                 $total = $days + $subs->days;
-                $user->date = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                $user->date = date('Y-m-d', strtotime($today.' + '.$total.' days'));
             } else {
-                $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
             }
         } else {
-            $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+            $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
         }
         $user->mail_sent = 1;
         $user->update($input);
@@ -65,20 +61,20 @@ class PaystackController extends SubscriptionBaseController
         if ($settings->is_smtp == 1) {
             $data = [
                 'to' => $user->email,
-                'type' => "vendor_accept",
+                'type' => 'vendor_accept',
                 'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($data);
         } else {
-            $headers = "From: " . $settings->from_name . "<" . $settings->from_email . ">";
+            $headers = 'From: '.$settings->from_name.'<'.$settings->from_email.'>';
             mail($user->email, 'Your Vendor Account Activated', isset($user) && $user->is_vendor == 2 ? 'Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.' : 'Your Vendor Application Submitted Successfully. Please wait for admin approval.', $headers);
         }
 
-        return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
+        return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && ! isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
     }
 }

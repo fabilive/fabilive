@@ -3,23 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Currency;
+use Datatables;
 use Illuminate\Http\Request;
 use Validator;
-use Datatables;
 
 class CurrencyController extends AdminBaseController
 {
-
     //*** JSON Request
     public function datatables()
     {
         $datas = Currency::latest('id')->get();
+
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->addColumn('action', function (Currency $data) {
-                $delete = $data->id == 1 ? '' : '<a href="javascript:;" data-href="' . route('admin-currency-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
-                $default = $data->is_default == 1 ? '<a><i class="fa fa-check"></i> ' . __('Default') . '</a>' : '<a class="status" data-href="' . route('admin-currency-status', ['id1' => $data->id, 'id2' => 1]) . '">' . __('Set Default') . '</a>';
-                return '<div class="action-list"><a data-href="' . route('admin-currency-edit', $data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>' . __('Edit') . '</a>' . $delete . $default . '</div>';
+                $delete = $data->id == 1 ? '' : '<a href="javascript:;" data-href="'.route('admin-currency-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
+                $default = $data->is_default == 1 ? '<a><i class="fa fa-check"></i> '.__('Default').'</a>' : '<a class="status" data-href="'.route('admin-currency-status', ['id1' => $data->id, 'id2' => 1]).'">'.__('Set Default').'</a>';
+
+                return '<div class="action-list"><a data-href="'.route('admin-currency-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a>'.$delete.$default.'</div>';
             })
             ->rawColumns(['action'])
             ->toJson(); //--- Returning Json Data To Client Side
@@ -34,6 +35,7 @@ class CurrencyController extends AdminBaseController
     {
         return view('admin.currency.create');
     }
+
     //*** POST Request
     public function store(Request $request)
     {
@@ -42,7 +44,7 @@ class CurrencyController extends AdminBaseController
         $customs = ['name.unique' => __('This name has already been taken.'), 'sign.unique' => __('This sign has already been taken.')];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -52,16 +54,18 @@ class CurrencyController extends AdminBaseController
         $data->fill($input)->save();
         //--- Logic Section Ends
 
-        //--- Redirect Section        
+        //--- Redirect Section
         $msg = __('New Data Added Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends    
+        //--- Redirect Section Ends
     }
 
     //*** GET Request
     public function edit($id)
     {
         $data = Currency::findOrFail($id);
+
         return view('admin.currency.edit', compact('data'));
     }
 
@@ -69,12 +73,12 @@ class CurrencyController extends AdminBaseController
     public function update(Request $request, $id)
     {
         //--- Validation Section
-        $rules = ['name' => 'unique:currencies,name,' . $id, 'sign' => 'unique:currencies,sign,' . $id];
+        $rules = ['name' => 'unique:currencies,name,'.$id, 'sign' => 'unique:currencies,sign,'.$id];
         $customs = ['name.unique' => __('This name has already been taken.'), 'sign.unique' => __('This sign has already been taken.')];
         $validator = Validator::make($request->all(), $rules, $customs);
 
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -85,10 +89,11 @@ class CurrencyController extends AdminBaseController
         //--- Logic Section Ends
         cache()->forget('default_currency');
 
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends            
+        //--- Redirect Section Ends
     }
 
     public function status($id1, $id2)
@@ -97,10 +102,11 @@ class CurrencyController extends AdminBaseController
         $data->is_default = $id2;
         $data->update();
         $data = Currency::where('id', '!=', $id1)->update(['is_default' => 0]);
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends  
+        //--- Redirect Section Ends
     }
 
     //*** GET Request Delete
@@ -114,9 +120,10 @@ class CurrencyController extends AdminBaseController
             Currency::where('id', '=', 1)->update(['is_default' => 1]);
         }
         $data->delete();
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends     
+        //--- Redirect Section Ends
     }
 }

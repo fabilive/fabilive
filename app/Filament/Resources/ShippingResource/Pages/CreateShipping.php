@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ShippingResource\Pages;
 
 use App\Filament\Resources\ShippingResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateShipping extends CreateRecord

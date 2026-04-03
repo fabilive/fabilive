@@ -9,7 +9,7 @@ class NotificationPreference extends Model
     protected $fillable = [
         'user_id', 'notification_type',
         'email_enabled', 'push_enabled', 'in_app_enabled',
-        'quiet_hours_start', 'quiet_hours_end'
+        'quiet_hours_start', 'quiet_hours_end',
     ];
 
     protected $casts = [
@@ -28,7 +28,7 @@ class NotificationPreference extends Model
      */
     public function isInQuietHours(): bool
     {
-        if (!$this->quiet_hours_start || !$this->quiet_hours_end) {
+        if (! $this->quiet_hours_start || ! $this->quiet_hours_end) {
             return false;
         }
 

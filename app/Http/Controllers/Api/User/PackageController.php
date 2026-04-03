@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Generalsetting;
 use App\Models\Subscription;
 use App\Models\UserSubscription;
-use Auth;use Carbon\Carbon;
+use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Validator;
@@ -66,9 +67,10 @@ class PackageController extends Controller
             $package = $user->subscribes()->where('status', 1)->orderBy('id', 'desc')->first();
             $id = $request->id;
             $data = Subscription::find($id);
-            if (!$data) {
+            if (! $data) {
                 return response()->json(['status' => true, 'data' => [], 'error' => ['message' => 'Invalid ID.']]);
             }
+
             return response()->json(['status' => true, 'data' => ['sub' => $data, 'package' => $package], 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
@@ -98,8 +100,8 @@ class PackageController extends Controller
 
             //--- Validation Section Ends
 
-            if (!Auth::guard('api')->check()) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => 'Unauthenticated.']]);
+            if (! Auth::guard('api')->check()) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Unauthenticated.']]);
             }
 
             $user = Auth::guard('api')->user();
@@ -109,19 +111,19 @@ class PackageController extends Controller
             $today = Carbon::now()->format('Y-m-d');
             $input = $request->all();
 
-            if (!empty($package)) {
+            if (! empty($package)) {
                 if ($package->subscription_id == $request->subscription_id) {
                     $newday = strtotime($today);
                     $lastday = strtotime($user->date);
                     $secs = $lastday - $newday;
                     $days = $secs / 86400;
                     $total = $days + $subs->days;
-                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                    $user->date = date('Y-m-d', strtotime($today.' + '.$total.' days'));
                 } else {
-                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                    $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                 }
             } else {
-                $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
             }
 
             if ($user->is_vendor == 0) {
@@ -172,17 +174,17 @@ class PackageController extends Controller
             if ($settings->is_smtp == 1) {
                 $data = [
                     'to' => $user->email,
-                    'type' => "vendor_accept",
+                    'type' => 'vendor_accept',
                     'cname' => $user->name,
-                    'oamount' => "",
-                    'aname' => "",
-                    'aemail' => "",
-                    'onumber' => "",
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'onumber' => '',
                 ];
                 $mailer = new GeniusMailer();
                 $mailer->sendAutoMail($data);
             } else {
-                $headers = "From: " . $settings->from_name . "<" . $settings->from_email . ">";
+                $headers = 'From: '.$settings->from_name.'<'.$settings->from_email.'>';
                 mail($user->email, 'Your Vendor Account Activated', isset($user) && $user->is_vendor == 2 ? 'Your Vendor Account Activated Successfully. Please Login to your account and build your own shop.' : 'Your Vendor Application Submitted Successfully. Please wait for admin approval.', $headers);
             }
 

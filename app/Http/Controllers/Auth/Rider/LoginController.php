@@ -1,41 +1,51 @@
 <?php
+
 namespace App\Http\Controllers\Auth\Rider;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Auth;
+use Illuminate\Http\Request;
 use Validator;
+
 class LoginController extends Controller
 {
-  public function __construct()
-  {
-    $this->middleware('guest', ['except' => ['logout', 'userLogout']]);
-  }
-  public function login(Request $request)
-  {
-    $rules = [
-      'email'   => 'required|email',
-      'password' => 'required'
-    ];
-    $validator = Validator::make($request->all(), $rules);
-    if ($validator->fails()) {
-      return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+    public function __construct()
+    {
+        $this->middleware('guest', ['except' => ['logout', 'userLogout']]);
     }
-    if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
-      if (Auth::guard('rider')->user()->ban == 1) {
-        Auth::guard('rider')->logout();
-        return response()->json(array('errors' => [0 => __('Your Account Has Been Banned.')]));
-      }
+
+    public function login(Request $request)
+    {
+        $rules = [
+            'email' => 'required|email',
+            'password' => 'required',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+        }
+        if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
+            if (Auth::guard('rider')->user()->ban == 1) {
+                Auth::guard('rider')->logout();
+
+                return response()->json(['errors' => [0 => __('Your Account Has Been Banned.')]]);
+            }
             if (Auth::guard('rider')->user()->status != 1) {
                 Auth::guard('rider')->logout();
+
                 return response()->json(['errors' => [0 => __('Your account is awaiting admin approval.')]]);
             }
-      return response()->json(redirect()->intended(route('rider-dashboard'))->getTargetUrl());
+
+            return response()->json(redirect()->intended(route('rider-dashboard'))->getTargetUrl());
+        }
+
+        return response()->json(['errors' => [0 => __('Credentials Doesn\'t Match !')]]);
     }
-    return response()->json(array('errors' => [0 => __('Credentials Doesn\'t Match !')]));
-  }
-  public function logout()
-  {
-    Auth::guard('rider')->logout();
-    return redirect('/');
-  }
+
+    public function logout()
+    {
+        Auth::guard('rider')->logout();
+
+        return redirect('/');
+    }
 }

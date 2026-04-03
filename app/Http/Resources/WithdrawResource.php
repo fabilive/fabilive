@@ -6,7 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class WithdrawResource extends JsonResource
 {
-
     public function toArray($request)
     {
         return [
@@ -21,7 +20,7 @@ class WithdrawResource extends JsonResource
             'swift' => $this->swift,
             'reference' => $this->reference,
             'status' => ucfirst($this->status),
-            'request_date'=>$this->created_at
-          ];
+            'request_date' => $this->created_at,
+        ];
     }
 }

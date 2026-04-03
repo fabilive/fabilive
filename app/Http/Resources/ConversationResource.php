@@ -23,6 +23,6 @@ class ConversationResource extends JsonResource
             'messages' => ConversationMessageResource::collection($this->messages),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-          ];
+        ];
     }
 }

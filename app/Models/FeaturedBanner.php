@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FeaturedBanner extends Model
 {
-    protected $fillable = ['link','photo'];
+    protected $fillable = ['link', 'photo'];
 
     public $timestamps = false;
 }

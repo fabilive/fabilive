@@ -4,9 +4,9 @@ namespace App\Events;
 
 use App\Models\ChatMessages;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Queue\SerializesModels;
 
 class UserMessageSent implements ShouldBroadcastNow
 {
@@ -28,13 +28,12 @@ class UserMessageSent implements ShouldBroadcastNow
     public function broadcastOn()
     {
         // Use a private channel for the rider/admin
-        return new Channel('admin-chat.' . $this->message->receiver_id);
+        return new Channel('admin-chat.'.$this->message->receiver_id);
     }
 
     /**
      * Broadcast event name for frontend subscription
      */
-
     public function broadcastAs()
     {
         return 'UserMessageSent';
@@ -46,12 +45,12 @@ class UserMessageSent implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
-            'id'          => $this->message->id,
-            'chat_id'     => $this->message->chat_id,
-            'sender_id'   => $this->message->sender_id,
+            'id' => $this->message->id,
+            'chat_id' => $this->message->chat_id,
+            'sender_id' => $this->message->sender_id,
             'receiver_id' => $this->message->receiver_id,
-            'message'     => $this->message->message,
-            'created_at'  => $this->message->created_at->toDateTimeString(),
+            'message' => $this->message->message,
+            'created_at' => $this->message->created_at->toDateTimeString(),
         ];
     }
 }

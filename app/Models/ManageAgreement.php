@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ManageAgreement extends Model
 {
     use HasFactory;
-    protected $table ='agreements';
-    protected $guarded = [];
 
+    protected $table = 'agreements';
+
+    protected $guarded = [];
 }

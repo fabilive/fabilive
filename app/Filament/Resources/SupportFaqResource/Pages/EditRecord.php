@@ -1,1 +1,17 @@
-<?php namespace App\Filament\Resources\SupportFaqResource\Pages; use App\Filament\Resources\SupportFaqResource; use Filament\Actions; use Filament\Resources\Pages\EditRecord as BaseEditRecord; class EditRecord extends BaseEditRecord { protected static string $resource = SupportFaqResource::class; protected function getHeaderActions(): array { return [ Actions\DeleteAction::make(), ]; } }
+<?php
+
+namespace App\Filament\Resources\SupportFaqResource\Pages;
+
+use App\Filament\Resources\SupportFaqResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord as BaseEditRecord;
+
+class EditRecord extends BaseEditRecord
+{
+    protected static string $resource = SupportFaqResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [Actions\DeleteAction::make()];
+    }
+}

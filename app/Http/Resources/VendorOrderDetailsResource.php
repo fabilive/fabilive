@@ -15,6 +15,7 @@ class VendorOrderDetailsResource extends JsonResource
     public function toArray($request)
     {
         $user = auth()->user();
+
         return [
             'id' => $this->id,
             'number' => $this->order_number,
@@ -34,28 +35,29 @@ class VendorOrderDetailsResource extends JsonResource
             'customer_city' => $this->customer_city,
             'customer_country' => $this->customer_country,
             'shipping' => $this->shipping,
-            'total_qty' => $this->vendororders()->where('user_id','=',$user->id)->sum('qty'),
-            'pay_amount' => $this->currency_sign . "" . round($this->vendororders()->where('user_id','=',$user->id)->sum('price') * $this->currency_value , 2),
-            'shipping_cost' => $this->when($this->vendor_shipping_id == $user->id, function() {
+            'total_qty' => $this->vendororders()->where('user_id', '=', $user->id)->sum('qty'),
+            'pay_amount' => $this->currency_sign.''.round($this->vendororders()->where('user_id', '=', $user->id)->sum('price') * $this->currency_value, 2),
+            'shipping_cost' => $this->when($this->vendor_shipping_id == $user->id, function () {
                 return $this->shipping_cost;
             }),
-            'packing_cost' => $this->when($this->vendor_packing_id == $user->id, function() {
+            'packing_cost' => $this->when($this->vendor_packing_id == $user->id, function () {
                 return $this->packing_cost;
             }),
             'packing_cost' => $this->packing_cost,
-            'ordered_products' => $this->when(!empty($this->cart), function() use ($user) {
-            $user = auth()->user();
-              $cart = unserialize(bzdecompress(utf8_decode($this->cart)));
-              $prods = $cart->items;
-              foreach($prods as $key => $data){
-                  if($data['item']['user_id'] != $user->id){
-                      unset($prods[$key]);
-                  }
-              }
-              return $prods;
+            'ordered_products' => $this->when(! empty($this->cart), function () use ($user) {
+                $user = auth()->user();
+                $cart = unserialize(bzdecompress(utf8_decode($this->cart)));
+                $prods = $cart->items;
+                foreach ($prods as $key => $data) {
+                    if ($data['item']['user_id'] != $user->id) {
+                        unset($prods[$key]);
+                    }
+                }
+
+                return $prods;
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-          ];
+        ];
     }
 }

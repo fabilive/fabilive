@@ -5,8 +5,6 @@ namespace App\Events;
 use App\Models\DeliveryJob;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -32,7 +30,7 @@ class NewDeliveryJobAvailable implements ShouldBroadcast
     {
         // Broadcast to a channel specific to the service area
         return [
-            new Channel('delivery-jobs.' . $this->job->service_area_id)
+            new Channel('delivery-jobs.'.$this->job->service_area_id),
         ];
     }
 

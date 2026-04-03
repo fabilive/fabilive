@@ -14,12 +14,12 @@ class ReviewResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'image' => url('/') . '/assets/images/reviews/'.$this->photo,
-        'title' => $this->title,
-        'subtitle' => $this->subtitle,
-        'details' => $this->details
-      ];
+        return [
+            'id' => $this->id,
+            'image' => url('/').'/assets/images/reviews/'.$this->photo,
+            'title' => $this->title,
+            'subtitle' => $this->subtitle,
+            'details' => $this->details,
+        ];
     }
 }

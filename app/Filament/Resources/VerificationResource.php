@@ -2,24 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use App\Classes\GeniusMailer;
 use App\Filament\Resources\VerificationResource\Pages;
-use App\Filament\Resources\VerificationResource\RelationManagers;
-use App\Models\Verification;
-use App\Models\User;
+use App\Models\Generalsetting;
 use App\Models\Subscription;
 use App\Models\UserSubscription;
-use App\Models\Generalsetting;
-use App\Classes\GeniusMailer;
+use App\Models\Verification;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\HtmlString;
 
 class VerificationResource extends Resource
@@ -67,9 +63,9 @@ class VerificationResource extends Resource
                         Forms\Components\Placeholder::make('attachments_display')
                             ->label('Attachments')
                             ->content(fn (Verification $record): HtmlString => new HtmlString(
-                                '<img src="' . asset('assets/images/' . $record->attachments) . '" style="max-height: 500px; width: auto;" />'
+                                '<img src="'.asset('assets/images/'.$record->attachments).'" style="max-height: 500px; width: auto;" />'
                             ))
-                            ->visible(fn (Verification $record) => !empty($record->attachments))
+                            ->visible(fn (Verification $record) => ! empty($record->attachments))
                             ->columnSpanFull(),
                     ])->columns(2),
             ]);
@@ -83,12 +79,12 @@ class VerificationResource extends Resource
                     ->label('Sellers name')
                     ->sortable()
                     ->searchable(),
-                    
+
                 Tables\Columns\ImageColumn::make('attachments')
                     ->label('Document')
                     ->disk('public')
                     ->circular()
-                    ->getStateUsing(fn (Verification $record): string => asset('assets/images/' . $record->attachments)),
+                    ->getStateUsing(fn (Verification $record): string => asset('assets/images/'.$record->attachments)),
 
                 Tables\Columns\SelectColumn::make('status')
                     ->options([
@@ -119,6 +115,7 @@ class VerificationResource extends Resource
                         ->action(function (Verification $record) {
                             Auth::guard('web')->logout();
                             Auth::guard('web')->login($record->user);
+
                             return redirect()->route('vendor.dashboard');
                         }),
 
@@ -137,23 +134,23 @@ class VerificationResource extends Resource
                             $subs = Subscription::findOrFail($data['subs_id']);
                             $settings = Generalsetting::findOrFail(1);
                             $today = Carbon::now()->format('Y-m-d');
-                            
+
                             $package = $user->subscribes()->where('status', 1)->orderBy('id', 'desc')->first();
-                            
+
                             $user->is_vendor = 2;
-                            if (!empty($package)) {
+                            if (! empty($package)) {
                                 if ($package->subscription_id == $data['subs_id']) {
                                     $newday = strtotime($today);
                                     $lastday = strtotime($user->date);
                                     $secs = $lastday - $newday;
                                     $days = $secs / 86400;
                                     $total = $days + $subs->days;
-                                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                                    $user->date = date('Y-m-d', strtotime($today.' + '.$total.' days'));
                                 } else {
-                                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                                    $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                                 }
                             } else {
-                                $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                                $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                             }
                             $user->mail_sent = 1;
                             $user->update();
@@ -167,7 +164,7 @@ class VerificationResource extends Resource
                             $sub->currency_sign = $curr->sign;
                             $sub->currency_code = $curr->name;
                             $sub->currency_value = $curr->value;
-                            
+
                             $sub->price = $subs->price * $curr->value;
                             $sub->days = $subs->days;
                             $sub->allowed_products = $subs->allowed_products;
@@ -178,12 +175,12 @@ class VerificationResource extends Resource
                             if ($settings->is_smtp == 1) {
                                 $mailData = [
                                     'to' => $user->email,
-                                    'type' => "vendor_accept",
+                                    'type' => 'vendor_accept',
                                     'cname' => $user->name,
-                                    'oamount' => "",
-                                    'aname' => "",
-                                    'aemail' => "",
-                                    'onumber' => "",
+                                    'oamount' => '',
+                                    'aname' => '',
+                                    'aemail' => '',
+                                    'onumber' => '',
                                 ];
                                 $mailer = new GeniusMailer();
                                 $mailer->sendAutoMail($mailData);
@@ -207,21 +204,21 @@ class VerificationResource extends Resource
                         ->action(function (Verification $record, array $data) {
                             $user = $record->user;
                             $settings = Generalsetting::find(1);
-                            
+
                             $user->verifies()->create([
                                 'admin_warning' => 1,
-                                'warning_reason' => $data['details']
+                                'warning_reason' => $data['details'],
                             ]);
 
                             if ($settings->is_smtp == 1) {
                                 $mailData = [
                                     'to' => $user->email,
-                                    'type' => "vendor_verification",
+                                    'type' => 'vendor_verification',
                                     'cname' => $user->name,
-                                    'oamount' => "",
-                                    'aname' => "",
-                                    'aemail' => "",
-                                    'onumber' => "",
+                                    'oamount' => '',
+                                    'aname' => '',
+                                    'aemail' => '',
+                                    'onumber' => '',
                                 ];
                                 $mailer = new GeniusMailer();
                                 $mailer->sendAutoMail($mailData);

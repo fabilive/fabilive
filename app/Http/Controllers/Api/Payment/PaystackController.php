@@ -3,22 +3,18 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
-use App\Models\Generalsetting;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use App\Models\Shipping;
-use App\Models\Package;
 
 class PaystackController extends Controller
 {
-
     public function store(Request $request)
     {
 
-        if (!$request->has('order_number')) {
+        if (! $request->has('order_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
-        if (!$request->ref_id) {
+        if (! $request->ref_id) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
@@ -28,8 +24,9 @@ class PaystackController extends Controller
         $order['txnid'] = $request->ref_id;
         $order->payment_status = 'Completed';
         $order->pay_amount = round($item_amount / $order->currency_value, 2);
-        $order->method = "Paystack";
+        $order->method = 'Paystack';
         $order->update();
+
         return redirect(route('front.payment.success', 1));
     }
 }

@@ -2,28 +2,25 @@
 
 namespace App\Http\Controllers\Payment\Deposit;
 
-use App\{
-    Models\Deposit,
-    Models\Transaction,
-    Classes\GeniusMailer
-};
-
+use App\Classes\GeniusMailer;
+use App\Models\Deposit;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PaystackController extends DepositBaseController
 {
-
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
 
         $amount = $request->amount / $this->curr->value;
-        
+
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
             $user = \App\Models\User::lockForUpdate()->find($this->user->id);
             $curr = $this->curr;
-      
+
             $deposit = new Deposit;
             $deposit->user_id = $user->id;
             $deposit->currency = $curr->sign;
@@ -34,19 +31,19 @@ class PaystackController extends DepositBaseController
             $deposit->txnid = $request->ref_id;
             $deposit->status = 1;
             $deposit->save();
-      
+
             $user->balance = $user->balance + $amount;
             $user->save();
-      
+
             // store in transaction table
             if ($deposit->status == 1) {
                 $transaction = new Transaction;
-                $transaction->txn_number = Str::random(3).substr(time(), 6,8).Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $deposit->user_id;
                 $transaction->amount = $deposit->amount;
                 $transaction->currency_sign = $deposit->currency;
                 $transaction->currency_code = $deposit->currency_code;
-                $transaction->currency_value= $deposit->currency_value;
+                $transaction->currency_value = $deposit->currency_value;
                 $transaction->method = $deposit->method;
                 $transaction->txnid = $deposit->txnid;
                 $transaction->details = 'Payment Deposit';
@@ -55,26 +52,26 @@ class PaystackController extends DepositBaseController
             }
 
             \Illuminate\Support\Facades\DB::commit();
-      
+
             $data = [
                 'to' => $user->email,
-                'type' => "wallet_deposit",
+                'type' => 'wallet_deposit',
                 'cname' => $user->name,
                 'damount' => $deposit->amount,
                 'wbalance' => $user->balance,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($data);
 
-            return redirect()->route('user-dashboard')->with('success',__('Balance has been added to your account successfully.'));
+            return redirect()->route('user-dashboard')->with('success', __('Balance has been added to your account successfully.'));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
+
             return redirect()->route('user-dashboard')->with('unsuccess', $e->getMessage());
         }
-    }    
-
+    }
 }

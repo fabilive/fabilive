@@ -2,29 +2,27 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
-
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
-use Session;
-use OrderHelper;
 use Illuminate\Support\Str;
 use Omnipay\Omnipay;
+use OrderHelper;
+use Session;
 
 class PaypalController extends CheckoutBaseControlller
 {
     public $_api_context;
+
     public $gateway;
+
     public function __construct()
     {
         parent::__construct();
@@ -44,8 +42,6 @@ class PaypalController extends CheckoutBaseControlller
         $total = $request->total / $this->curr->value;
         $total = $total * $this->curr->value;
 
-
-
         OrderHelper::set_currency($this->curr->value); // For Converting Price
 
         $input['currency_sign'] = $this->curr->sign;
@@ -53,12 +49,12 @@ class PaypalController extends CheckoutBaseControlller
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
@@ -67,14 +63,13 @@ class PaypalController extends CheckoutBaseControlller
         $cancel_url = route('front.payment.cancle');
         $notify_url = route('front.paypal.notify');
 
-
         try {
-            $response = $this->gateway->purchase(array(
+            $response = $this->gateway->purchase([
                 'amount' => round($total, 2),
                 'currency' => $this->curr->name,
                 'returnUrl' => $notify_url,
                 'cancelUrl' => $cancel_url,
-            ))->send();
+            ])->send();
 
             if ($response->isRedirect()) {
 
@@ -84,6 +79,7 @@ class PaypalController extends CheckoutBaseControlller
                     /** add payment ID to session **/
                     Session::put('input_data', $input);
                     Session::put('order_payment_id', $response->getId());
+
                     return redirect($response->redirect());
                 }
             } else {
@@ -108,10 +104,10 @@ class PaypalController extends CheckoutBaseControlller
                 'message' => __('Unknown error occurred'),
             ];
         }
-        $transaction = $this->gateway->completePurchase(array(
+        $transaction = $this->gateway->completePurchase([
             'payer_id' => $responseData['PayerID'],
             'transactionReference' => $responseData['paymentId'],
-        ));
+        ]);
         $response = $transaction->send();
 
         if ($response->isSuccessful()) {
@@ -128,7 +124,6 @@ class PaypalController extends CheckoutBaseControlller
             $new_cart = json_encode($new_cart);
             $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
-
 
             $orderCalculate = PriceHelper::getOrderTotal($input, $cart);
             // dd($orderCalculate,'multi');
@@ -157,7 +152,6 @@ class PaypalController extends CheckoutBaseControlller
                 $input['vendor_ids'] = $vendor_ids;
             } else {
 
-
                 // multi shipping
 
                 $orderTotal = $orderCalculate['total_amount'];
@@ -184,15 +178,14 @@ class PaypalController extends CheckoutBaseControlller
                 unset($input['packeging']);
             }
 
-
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
-            $input['order_number'] = Str::random(4) . time();
+            $input['order_number'] = Str::random(4).time();
             $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
-            $input['payment_status'] = "Completed";
+            $input['payment_status'] = 'Completed';
             if ($input['tax_type'] == 'state_tax') {
                 $input['tax_location'] = State::findOrFail($input['tax'])->state;
             } else {
@@ -226,7 +219,7 @@ class PaypalController extends CheckoutBaseControlller
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
 
@@ -255,23 +248,23 @@ class PaypalController extends CheckoutBaseControlller
                         $smallest[$i->order_amount] = abs($i->order_amount - $num);
                     }
 
-                    if(isset($smallest)){
+                    if (isset($smallest)) {
                         asort($smallest);
-                  $final_reword = Reward::where('order_amount', key($smallest))->first();
-                  Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-                  }
+                        $final_reword = Reward::where('order_amount', key($smallest))->first();
+                        Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                    }
                 }
             }
 
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
             $mailer = new GeniusMailer();
@@ -280,14 +273,15 @@ class PaypalController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
 
             return redirect($success_url);
         }
+
         return redirect($cancel_url);
     }
 }

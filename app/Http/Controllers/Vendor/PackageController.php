@@ -3,32 +3,33 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Models\Package;
-use Illuminate\Http\Request;
-
-
-use Validator;
 use Datatables;
+use Illuminate\Http\Request;
+use Validator;
 
 class PackageController extends VendorBaseController
 {
     //*** JSON Request
     public function datatables()
     {
-         $datas = Package::where('user_id',$this->user->id)->get();
-         //--- Integrating This Collection Into Datatables
-         return Datatables::of($datas)
-                            ->editColumn('price', function(Package $data) {
-                                $price = round($data->price * $this->curr->value , 2);
-                                return \PriceHelper::showAdminCurrencyPrice($price);
-                            })
-                            ->addColumn('action', function(Package $data) {
-                                return '<div class="action-list"><a data-href="' . route('vendor-package-edit',$data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="' . route('vendor-package-delete',$data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
-                            }) 
-                            ->rawColumns(['action'])
-                            ->toJson(); //--- Returning Json Data To Client Side
+        $datas = Package::where('user_id', $this->user->id)->get();
+
+        //--- Integrating This Collection Into Datatables
+        return Datatables::of($datas)
+            ->editColumn('price', function (Package $data) {
+                $price = round($data->price * $this->curr->value, 2);
+
+                return \PriceHelper::showAdminCurrencyPrice($price);
+            })
+            ->addColumn('action', function (Package $data) {
+                return '<div class="action-list"><a data-href="'.route('vendor-package-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('vendor-package-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+            })
+            ->rawColumns(['action'])
+            ->toJson(); //--- Returning Json Data To Client Side
     }
 
-    public function index(){
+    public function index()
+    {
         return view('vendor.package.index');
     }
 
@@ -36,7 +37,8 @@ class PackageController extends VendorBaseController
     public function create()
     {
         $sign = $this->curr;
-        return view('vendor.package.create',compact('sign'));
+
+        return view('vendor.package.create', compact('sign'));
     }
 
     //*** POST Request
@@ -47,7 +49,7 @@ class PackageController extends VendorBaseController
         $customs = ['title.unique' => __('This title has already been taken.')];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -60,10 +62,11 @@ class PackageController extends VendorBaseController
         $data->fill($input)->save();
         //--- Logic Section Ends
 
-        //--- Redirect Section        
+        //--- Redirect Section
         $msg = __('New Data Added Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends    
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 
     //*** GET Request
@@ -71,7 +74,8 @@ class PackageController extends VendorBaseController
     {
         $sign = $this->curr;
         $data = Package::findOrFail($id);
-        return view('vendor.package.edit',compact('data','sign'));
+
+        return view('vendor.package.edit', compact('data', 'sign'));
     }
 
     //*** POST Request
@@ -81,10 +85,10 @@ class PackageController extends VendorBaseController
         $rules = ['title' => 'unique:packages,title,'.$id];
         $customs = ['title.unique' => __('This title has already been taken.')];
         $validator = Validator::make($request->all(), $rules, $customs);
-        
+
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
-        }        
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+        }
         //--- Validation Section Ends
 
         //--- Logic Section
@@ -95,10 +99,11 @@ class PackageController extends VendorBaseController
         $data->update($input);
         //--- Logic Section Ends
 
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends            
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 
     //*** GET Request Delete
@@ -106,9 +111,10 @@ class PackageController extends VendorBaseController
     {
         $data = Package::findOrFail($id);
         $data->delete();
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends     
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 }

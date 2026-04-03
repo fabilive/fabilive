@@ -1,36 +1,43 @@
 <?php
+
 namespace App\Models;
-use App\Models\Currency;
+
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
+
 class Product extends Model
 {
     protected $fillable = ['user_id', 'category_id', 'product_type',
-    'product_location','product_city','affiliate_link', 'sku', 'subcategory_id','country_id',
-     'childcategory_id', 'attributes', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'details',
-      'price', 'previous_price', 'stock', 'policy', 'status', 'views', 'tags', 'featured', 'best', 'top', 'hot',
-      'latest', 'big', 'trending', 'sale', 'features', 'colors', 'product_condition', 'ship', 'meta_tag',
-       'meta_description', 'youtube', 'type', 'file', 'license', 'license_qty', 'link', 'platform', 'region',
+        'product_location', 'product_city', 'affiliate_link', 'sku', 'subcategory_id', 'country_id',
+        'childcategory_id', 'attributes', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'details',
+        'price', 'previous_price', 'stock', 'policy', 'status', 'views', 'tags', 'featured', 'best', 'top', 'hot',
+        'latest', 'big', 'trending', 'sale', 'features', 'colors', 'product_condition', 'ship', 'meta_tag',
+        'meta_description', 'youtube', 'type', 'file', 'license', 'license_qty', 'link', 'platform', 'region',
         'licence_type', 'measure', 'discount_date', 'is_discount', 'whole_sell_qty', 'whole_sell_discount',
-         'catalog_id', 'slug', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count',
-          'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
-           'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
-            'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check','delivery_fee','delivery_unit','product_servicearea',
-             'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+        'catalog_id', 'slug', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count',
+        'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
+        'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
+        'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check', 'delivery_fee', 'delivery_unit', 'product_servicearea',
+        'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+
     public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end'];
+
     public function user()
     {
         return $this->belongsTo('App\Models\User')->withDefault();
     }
+
     public function serviceArea()
-{
-    return $this->belongsTo(\App\Models\ServiceArea::class, 'product_location');
-}
-public function cities()
-{
-    return $this->belongsTo(\App\Models\City::class, 'product_city');
-}
+    {
+        return $this->belongsTo(\App\Models\ServiceArea::class, 'product_location');
+    }
+
+    public function cities()
+    {
+        return $this->belongsTo(\App\Models\City::class, 'product_city');
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');
@@ -49,10 +56,12 @@ public function cities()
 
         try {
             $now = \Carbon\Carbon::now();
-            
+
             // Helper function to handle dd/mm/yyyy or other formats
-            $parseDate = function($dateStr) {
-                if (empty($dateStr)) return null;
+            $parseDate = function ($dateStr) {
+                if (empty($dateStr)) {
+                    return null;
+                }
                 if (str_contains($dateStr, '/')) {
                     try {
                         return \Carbon\Carbon::createFromFormat('d/m/Y', $dateStr);
@@ -60,6 +69,7 @@ public function cities()
                         return \Carbon\Carbon::parse($dateStr);
                     }
                 }
+
                 return \Carbon\Carbon::parse($dateStr);
             };
 
@@ -82,11 +92,12 @@ public function cities()
 
     public function getPriceAttribute($value)
     {
-        // If discount is not active and we have a previous price (Regular Price), 
+        // If discount is not active and we have a previous price (Regular Price),
         // use it as the main price.
-        if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
+        if (! $this->isDiscountActive() && ! empty($this->previous_price) && $this->previous_price > 0) {
             return $this->previous_price;
         }
+
         return $value;
     }
 
@@ -103,7 +114,7 @@ public function cities()
             return $value;
         }
 
-        return asset('assets/images/products/' . $value);
+        return asset('assets/images/products/'.$value);
     }
 
     /**
@@ -119,7 +130,7 @@ public function cities()
             return $value;
         }
 
-        return asset('assets/images/thumbnails/' . $value);
+        return asset('assets/images/thumbnails/'.$value);
     }
 
     public function category()
@@ -175,13 +186,15 @@ public function cities()
     public function IsSizeColor($value)
     {
         $sizes = array_unique($this->size);
+
         return in_array($value, $sizes);
     }
 
     public function checkVendor()
     {
-        return $this->user_id != 0 ? '<small class="ml-2"> ' . __("VENDOR") . ': <a href="' . route('admin-vendor-show', $this->user_id) . '" target="_blank">' . $this->user->shop_name . '</a></small>' : '';
+        return $this->user_id != 0 ? '<small class="ml-2"> '.__('VENDOR').': <a href="'.route('admin-vendor-show', $this->user_id).'" target="_blank">'.$this->user->shop_name.'</a></small>' : '';
     }
+
     public function vendorPrice()
     {
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
@@ -204,23 +217,23 @@ public function cities()
         if ($this->user_id != 0) {
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
         }
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
 
         // Attribute Section
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
+        $attributes = $this->attributes['attributes'];
+        if (! empty($attributes)) {
             $attrArr = json_decode($attributes, true);
         }
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
@@ -253,9 +266,9 @@ public function cities()
         $price = $price * $curr->value;
         $price = \PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
@@ -272,9 +285,9 @@ public function cities()
             $price = $price + $gs->fixed_commission + ($price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
@@ -283,9 +296,9 @@ public function cities()
         $attributes = $this->attributes;
         $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
                         break;
@@ -308,9 +321,9 @@ public function cities()
         $price = \PriceHelper::showPrice($price);
 
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
@@ -325,23 +338,23 @@ public function cities()
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
 
         // Attribute Section
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
+        $attributes = $this->attributes['attributes'];
+        if (! empty($attributes)) {
             $attrArr = json_decode($attributes, true);
         }
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
@@ -359,32 +372,32 @@ public function cities()
         $price = \PriceHelper::showPrice($price);
 
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
     public function showPreviousPrice()
     {
         // Only show previous price if a discount is active AND previous_price exists
-        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
+        if (! $this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
             return '';
         }
 
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
         });
-        
+
         $price = $this->previous_price;
-        
+
         if ($this->user_id != 0) {
             $price = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
@@ -393,9 +406,9 @@ public function cities()
         $attributes = $this->attributes;
         $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
                         break;
@@ -418,9 +431,9 @@ public function cities()
         $price = \PriceHelper::showPrice($price);
 
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
@@ -441,9 +454,9 @@ public function cities()
         $price = $price * $curr->value;
         $price = \PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
@@ -456,24 +469,26 @@ public function cities()
         $price = $price * $curr->value;
         $price = \PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
-            return $curr->sign . $price;
+            return $curr->sign.$price;
         } else {
-            return $price . $curr->sign;
+            return $price.$curr->sign;
         }
     }
 
     public function showName()
     {
-        $name = mb_strlen($this->name, 'UTF-8') > 50 ? mb_substr($this->name, 0, 50, 'UTF-8') . '...' : $this->name;
+        $name = mb_strlen($this->name, 'UTF-8') > 50 ? mb_substr($this->name, 0, 50, 'UTF-8').'...' : $this->name;
+
         return $name;
     }
 
     public function emptyStock()
     {
         $stck = (string) $this->stock;
-        if ($stck == "0") {
+        if ($stck == '0') {
             return true;
         }
+
         return false;
     }
 
@@ -483,13 +498,14 @@ public function cities()
         $tagz = '';
         $name = Product::where('status', '=', 1)->pluck('tags')->toArray();
         foreach ($name as $nm) {
-            if (!empty($nm)) {
+            if (! empty($nm)) {
                 foreach ($nm as $n) {
-                    $tagz .= $n . ',';
+                    $tagz .= $n.',';
                 }
             }
         }
         $tags = array_unique(explode(',', $tagz));
+
         return $tags;
     }
 
@@ -503,6 +519,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -511,6 +528,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -519,6 +537,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -527,6 +546,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -535,6 +555,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -543,6 +564,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -551,6 +573,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -559,6 +582,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -567,6 +591,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',,', $value);
     }
 
@@ -575,6 +600,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -583,6 +609,7 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
@@ -591,12 +618,13 @@ public function cities()
         if ($value == null) {
             return '';
         }
+
         return explode(',', $value);
     }
 
     public function offPercentage()
     {
-        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
+        if (! $this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
             return 0;
         }
 
@@ -611,9 +639,9 @@ public function cities()
             $preprice = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
                 $preprice += $size_prices[0];
             }
@@ -623,9 +651,9 @@ public function cities()
         $attributes = $this->attributes;
         $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
                         $preprice += $attrVal['prices'][$optionKey];
@@ -647,12 +675,13 @@ public function cities()
 
         $price = $price * $curr->value;
         $preprice = $preprice * $curr->value;
-        
+
         if ($preprice > 0 && $preprice > $price) {
             $Percentage = (($preprice - $price) * 100) / $preprice;
+
             return round($Percentage);
         }
-        
+
         return 0;
     }
 
@@ -671,16 +700,9 @@ public function cities()
             }
             $data->price = $data->vendorSizePrice();
         }
+
         return $collection;
     }
-
-
-
-
-
-
-
-
 
     // MOBILE API SECTION
 
@@ -695,23 +717,23 @@ public function cities()
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
 
         // Attribute Section
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
+        $attributes = $this->attributes['attributes'];
+        if (! empty($attributes)) {
             $attrArr = json_decode($attributes, true);
         }
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
@@ -736,6 +758,7 @@ public function cities()
 
         $price = $price * $curr->value;
         $price = \PriceHelper::apishowPrice($price);
+
         return $price;
     }
 
@@ -750,17 +773,16 @@ public function cities()
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
         }
 
-
         // Attribute Section
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
+        $attributes = $this->attributes['attributes'];
+        if (! empty($attributes)) {
             $attrArr = json_decode($attributes, true);
         }
 
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
@@ -789,38 +811,36 @@ public function cities()
         return $price;
     }
 
-
-
     public function ApishowPreviousPrice()
     {
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
             return DB::table('generalsettings')->first();
         });
         $price = $this->previous_price;
-        if (!$price) {
+        if (! $price) {
             return '';
         }
         if ($this->user_id != 0) {
             $price = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
         }
 
-        if (!empty($this->size)) {
+        if (! empty($this->size)) {
             $size_prices = $this->size_price;
-            if(is_array($size_prices) && isset($size_prices[0])) {
+            if (is_array($size_prices) && isset($size_prices[0])) {
                 $price += $size_prices[0];
             }
         }
 
         // Attribute Section
 
-        $attributes = $this->attributes["attributes"];
-        if (!empty($attributes)) {
+        $attributes = $this->attributes['attributes'];
+        if (! empty($attributes)) {
             $attrArr = json_decode($attributes, true);
         }
         // dd($attrArr);
-        if (!empty($attrArr)) {
+        if (! empty($attrArr)) {
             foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
                         $price += $attrVal['prices'][$optionKey];
@@ -849,4 +869,3 @@ public function cities()
         return $price;
     }
 }
-

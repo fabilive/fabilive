@@ -6,18 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryJob;
 use App\Models\DeliveryJobStop;
 use App\Models\Order;
-use App\Models\VendorOrder;
-use App\Services\DeliveryJobService;
-use App\Services\DeliveryDispatchService;
 use App\Services\DeliveryAcceptanceService;
+use App\Services\DeliveryDispatchService;
+use App\Services\DeliveryJobService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Exception;
 
 class DeliveryJobController extends Controller
 {
     protected $jobService;
+
     protected $dispatchService;
+
     protected $acceptanceService;
 
     public function __construct(
@@ -36,16 +37,16 @@ class DeliveryJobController extends Controller
     public function sellerReady(Request $request, Order $order)
     {
         $sellerId = Auth::id(); // Assuming seller is authenticated
-        
+
         // 1. Find the delivery job and the specific stop for this seller
         $job = DeliveryJob::where('order_id', $order->id)->first();
-        if (!$job) {
+        if (! $job) {
             // If job doesn't exist yet, create it
             $job = $this->jobService->createJobFromOrder($order);
         }
 
         $stop = $job->stops()->where('type', 'pickup')->where('seller_id', $sellerId)->first();
-        if (!$stop) {
+        if (! $stop) {
             return response()->json(['message' => 'Stop not found for this seller.'], 404);
         }
 
@@ -56,11 +57,11 @@ class DeliveryJobController extends Controller
         // 2. Mark stop as ready
         $stop->update([
             'status' => 'ready',
-            'ready_at' => now()
+            'ready_at' => now(),
         ]);
 
         $this->jobService->logEvent($job, 'seller', $sellerId, 'seller_marked_ready');
-        
+
         // Sync main order status for buyer awareness
         $order->update(['status' => 'ready to pick up']);
 
@@ -97,6 +98,7 @@ class DeliveryJobController extends Controller
     {
         try {
             $updatedJob = $this->acceptanceService->acceptJob($job->id, Auth::id());
+
             return response()->json(['message' => 'Job accepted.', 'job' => $updatedJob]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -113,16 +115,16 @@ class DeliveryJobController extends Controller
         }
 
         $status = $request->input('status'); // arrived, picked_up
-        if (!in_array($status, ['arrived', 'picked_up'])) {
+        if (! in_array($status, ['arrived', 'picked_up'])) {
             return response()->json(['message' => 'Invalid status.'], 400);
         }
 
         $stop->update([
             'status' => $status,
-            $status . '_at' => now()
+            $status.'_at' => now(),
         ]);
 
-        $this->jobService->logEvent($job, 'rider', Auth::id(), 'stop_' . $status, ['stop_id' => $stop->id]);
+        $this->jobService->logEvent($job, 'rider', Auth::id(), 'stop_'.$status, ['stop_id' => $stop->id]);
 
         // If all pickups are done, transition job to picked_up
         $pendingPickups = $job->stops()->where('type', 'pickup')->where('status', '!=', 'picked_up')->count();
@@ -146,21 +148,22 @@ class DeliveryJobController extends Controller
         }
 
         $request->validate([
-            'proof_photo' => 'required|image|max:2048'
+            'proof_photo' => 'required|image|max:2048',
         ]);
 
         $path = null;
         if ($request->hasFile('proof_photo')) {
             $file = $request->file('proof_photo');
-            $filename = 'proof_' . $job->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'proof_'.$job->id.'_'.time().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('delivery_proofs', $filename, 'public');
         }
 
         try {
             $this->jobService->completeDeliveryJob($job, $path);
+
             return response()->json(['message' => 'Delivered successfully. Awaiting admin verification for payout.']);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error completing job: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Error completing job: '.$e->getMessage()], 500);
         }
     }
 
@@ -192,7 +195,7 @@ class DeliveryJobController extends Controller
     public function tracking(Order $order)
     {
         $job = DeliveryJob::where('order_id', $order->id)->with(['stops', 'rider', 'events'])->first();
-        if (!$job) {
+        if (! $job) {
             return response()->json(['status' => 'Preparing your items']);
         }
 

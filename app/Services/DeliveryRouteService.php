@@ -6,10 +6,8 @@ class DeliveryRouteService
 {
     /**
      * Sort stops by distance to buyer DESC (farthest first).
-     * 
-     * @param array $stops Array of stop data (must include lat/lng if available)
-     * @param float|null $buyerLat 
-     * @param float|null $buyerLng
+     *
+     * @param  array  $stops Array of stop data (must include lat/lng if available)
      * @return array Sorted stops
      */
     public function optimizePickupSequence(array $stops, ?float $buyerLat, ?float $buyerLng): array
@@ -20,8 +18,8 @@ class DeliveryRouteService
         }
 
         foreach ($stops as &$stop) {
-            if (!empty($stop['lat']) && !empty($stop['lng'])) {
-                $stop['distance_to_buyer'] = $this->haversine($buyerLat, $buyerLng, (float)$stop['lat'], (float)$stop['lng']);
+            if (! empty($stop['lat']) && ! empty($stop['lng'])) {
+                $stop['distance_to_buyer'] = $this->haversine($buyerLat, $buyerLng, (float) $stop['lat'], (float) $stop['lng']);
             } else {
                 $stop['distance_to_buyer'] = 0; // Or some default
             }

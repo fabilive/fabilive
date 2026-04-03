@@ -1,26 +1,26 @@
 <?php
+
 namespace App\Http\Controllers\Api\Payment;
+
 use App\Http\Controllers\Front\FrontBaseController;
 use App\Models\Currency;
 use App\Models\Deposit;
 use App\Models\Order;
 use App\Models\PaymentGateway;
+use App\Services\CampayService;
 use DB;
 use Illuminate\Http\Request;
-use App\Services\CampayService;
 use Session;
-use Str;
-
 
 class CheckoutController extends FrontBaseController
 {
     protected $campayService;
 
-public function __construct(CampayService $campayService)
-{
-    $this->campayService = $campayService;
-}
-    
+    public function __construct(CampayService $campayService)
+    {
+        $this->campayService = $campayService;
+    }
+
     public function loadpayment(Request $request, $slug1, $slug2)
     {
         if ($request->has('order_number')) {
@@ -33,9 +33,11 @@ public function __construct(CampayService $campayService)
             if ($pay_id != 0) {
                 $gateway = PaymentGateway::findOrFail($pay_id);
             }
+
             return view('payment.load.payment', compact('payment', 'pay_id', 'gateway', 'curr'));
         }
     }
+
     public function depositloadpayment(Request $request, $slug1, $slug2)
     {
 
@@ -49,9 +51,11 @@ public function __construct(CampayService $campayService)
             if ($pay_id != 0) {
                 $gateway = PaymentGateway::findOrFail($pay_id);
             }
+
             return view('payment.load.payment', compact('payment', 'pay_id', 'gateway', 'curr'));
         }
     }
+
     public function checkout(Request $request)
     {
         if ($request->has('order_number')) {
@@ -73,43 +77,42 @@ public function __construct(CampayService $campayService)
             }
         }
     }
-    
-    
-//     public function checkout(Request $request)
-// {
-//     if ($request->has('order_number')) {
-//         $order_number = $request->order_number;
-//         $order = Order::where('order_number', $order_number)->firstOrFail();
 
-//         // Only process pending orders
-//         if ($order->payment_status !== 'Pending') {
-//             return redirect()->back()->with('unsuccess', 'Order is already paid.');
-//         }
+    //     public function checkout(Request $request)
+    // {
+    //     if ($request->has('order_number')) {
+    //         $order_number = $request->order_number;
+    //         $order = Order::where('order_number', $order_number)->firstOrFail();
 
-//         // Campay only
-//         $campay = PaymentGateway::where('name', 'Campay')->first();
-//         if (!$campay || !$campay->showCheckoutLink()) {
-//             return redirect()->back()->with('unsuccess', 'Campay is not available.');
-//         }
+    //         // Only process pending orders
+    //         if ($order->payment_status !== 'Pending') {
+    //             return redirect()->back()->with('unsuccess', 'Order is already paid.');
+    //         }
 
-//         // Generate Campay link via service
-//         $response = $this->campayService->generatePaymentLink(
-//             $order->pay_amount * $order->currency_value,    // Amount in correct currency
-//             $order->currency_code,                          // e.g., "XAF"
-//             'Order Payment - #' . $order->order_number,
-//             route('front.campay.notify')                    // Redirect/notify callback
-//         );
+    //         // Campay only
+    //         $campay = PaymentGateway::where('name', 'Campay')->first();
+    //         if (!$campay || !$campay->showCheckoutLink()) {
+    //             return redirect()->back()->with('unsuccess', 'Campay is not available.');
+    //         }
 
-//         // Check and redirect
-//         if (isset($response['link'])) {
-//             Session::put('order_data', $order); // if needed
-//             return redirect()->away($response['link']);
-//         }
+    //         // Generate Campay link via service
+    //         $response = $this->campayService->generatePaymentLink(
+    //             $order->pay_amount * $order->currency_value,    // Amount in correct currency
+    //             $order->currency_code,                          // e.g., "XAF"
+    //             'Order Payment - #' . $order->order_number,
+    //             route('front.campay.notify')                    // Redirect/notify callback
+    //         );
 
-//         return redirect()->back()->with('unsuccess', 'Failed to generate Campay payment link.');
-//     }
+    //         // Check and redirect
+    //         if (isset($response['link'])) {
+    //             Session::put('order_data', $order); // if needed
+    //             return redirect()->away($response['link']);
+    //         }
 
-//     return redirect()->back()->with('unsuccess', 'Order number missing.');
-// }
-    
+    //         return redirect()->back()->with('unsuccess', 'Failed to generate Campay payment link.');
+    //     }
+
+    //     return redirect()->back()->with('unsuccess', 'Order number missing.');
+    // }
+
 }

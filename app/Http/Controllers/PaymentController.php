@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\HitPayService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-
 
 class PaymentController extends Controller
 {
@@ -16,19 +15,21 @@ class PaymentController extends Controller
         if (isset($payment['url'])) {
             return redirect($payment['url']); // Redirect user to HitPay checkout
         }
+
         return back()->with('error', 'Unable to create payment.');
     }
+
     public function handleCallback(Request $request, HitPayService $hitPayService)
-{
-    $paymentId = $request->get('id');
+    {
+        $paymentId = $request->get('id');
 
-    // Use HitPay API to fetch and verify payment status
-    $response = Http::withHeaders([
-        'X-BUSINESS-API-KEY' => config('services.hitpay.api_key'),
-    ])->get(config('services.hitpay.base_url') . "/v1/payment-requests/{$paymentId}");
+        // Use HitPay API to fetch and verify payment status
+        $response = Http::withHeaders([
+            'X-BUSINESS-API-KEY' => config('services.hitpay.api_key'),
+        ])->get(config('services.hitpay.base_url')."/v1/payment-requests/{$paymentId}");
 
-    $paymentDetails = $response->json();
+        $paymentDetails = $response->json();
 
-    return view('payment.callback', ['data' => $paymentDetails]);
-}
+        return view('payment.callback', ['data' => $paymentDetails]);
+    }
 }

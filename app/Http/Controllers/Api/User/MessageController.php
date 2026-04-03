@@ -31,12 +31,12 @@ class MessageController extends Controller
 
             $rules =
                 [
-                'user_id' => 'required',
-                'email' => 'required',
-                'subject' => 'required',
-                'message' => 'required',
+                    'user_id' => 'required',
+                    'email' => 'required',
+                    'subject' => 'required',
+                    'message' => 'required',
 
-            ];
+                ];
 
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -44,12 +44,12 @@ class MessageController extends Controller
             }
 
             $user = User::find($request->user_id);
-            if (!$user) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "User not found."]]);
+            if (! $user) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'User not found.']]);
             }
             $vendor = User::where('email', '=', $request->email)->first();
-            if (!$vendor) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Email not found."]]);
+            if (! $vendor) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Email not found.']]);
             }
 
             $gs = Generalsetting::find(1);
@@ -57,7 +57,7 @@ class MessageController extends Controller
             $to = $vendor->email;
             $name = $user->name;
             $from = $user->email;
-            $msg = "Name: " . $name . "\nEmail: " . $from . "\nMessage: " . $request->message;
+            $msg = 'Name: '.$name."\nEmail: ".$from."\nMessage: ".$request->message;
             if ($gs->is_smtp) {
                 $data = [
                     'to' => $to,
@@ -68,7 +68,7 @@ class MessageController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMail($data);
             } else {
-                $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+                $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
                 mail($to, $subject, $msg, $headers);
             }
 
@@ -94,7 +94,7 @@ class MessageController extends Controller
 
             }
 
-            return response()->json(['status' => true, 'data' => ["message" => "Message Sent Successfully!"], 'error' => []]);
+            return response()->json(['status' => true, 'data' => ['message' => 'Message Sent Successfully!'], 'error' => []]);
 
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
@@ -110,28 +110,28 @@ class MessageController extends Controller
 
             $rules =
                 [
-                'conversation_id' => 'required',
-                'sent_user' => [
-                    function ($attribute, $value, $fail) use ($request, $user) {
-                        if ($request->sent_user == $user->id) {
-                            if (empty($request->sent_user)) {
-                                $fail('sent_user id is required.');
+                    'conversation_id' => 'required',
+                    'sent_user' => [
+                        function ($attribute, $value, $fail) use ($request, $user) {
+                            if ($request->sent_user == $user->id) {
+                                if (empty($request->sent_user)) {
+                                    $fail('sent_user id is required.');
+                                }
                             }
-                        }
-                    },
-                ],
-                'recieved_user' => [
-                    function ($attribute, $value, $fail) use ($request, $user) {
-                        if ($request->recieved_user == $user->id) {
-                            if (empty($request->recieved_user)) {
-                                $fail('recieved_user id is required.');
+                        },
+                    ],
+                    'recieved_user' => [
+                        function ($attribute, $value, $fail) use ($request, $user) {
+                            if ($request->recieved_user == $user->id) {
+                                if (empty($request->recieved_user)) {
+                                    $fail('recieved_user id is required.');
+                                }
                             }
-                        }
-                    },
-                ],
-                'message' => 'required',
+                        },
+                    ],
+                    'message' => 'required',
 
-            ];
+                ];
 
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -142,6 +142,7 @@ class MessageController extends Controller
             $input = $request->all();
 
             $mgs = $msg->fill($input)->save();
+
             //--- Redirect Section
             return response()->json(['status' => true, 'data' => new ConversationMessageResource($msg), 'error' => []]);
             //--- Redirect Section Ends
@@ -157,8 +158,8 @@ class MessageController extends Controller
         try {
 
             $conv = Conversation::find($id);
-            if (!$conv) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Conversation Not found."]]);
+            if (! $conv) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Conversation Not found.']]);
             }
 
             if ($conv->messages->count() > 0) {
@@ -168,6 +169,7 @@ class MessageController extends Controller
             }
 
             $conv->delete();
+
             return response()->json(['status' => true, 'data' => ['message' => 'Message Deleted Successfully!'], 'error' => []]);
 
         } catch (\Exception $e) {

@@ -16,7 +16,7 @@ class PayoutRequest extends Model
         'method',
         'destination',
         'status',
-        'admin_action_at'
+        'admin_action_at',
     ];
 
     public function user()

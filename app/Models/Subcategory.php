@@ -6,17 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subcategory extends Model
 {
-    protected $fillable = ['category_id','name','slug'];
+    protected $fillable = ['category_id', 'name', 'slug'];
+
     public $timestamps = false;
 
     public function childs()
     {
-    	return $this->hasMany('App\Models\Childcategory')->where('status','=',1);
+        return $this->hasMany('App\Models\Childcategory')->where('status', '=', 1);
     }
 
     public function category()
     {
-    	return $this->belongsTo('App\Models\Category')->withDefault();
+        return $this->belongsTo('App\Models\Category')->withDefault();
     }
 
     public function products()
@@ -29,8 +30,8 @@ class Subcategory extends Model
         $this->attributes['slug'] = str_replace(' ', '-', $value);
     }
 
-    public function attributes() {
+    public function attributes()
+    {
         return $this->morphMany('App\Models\Attribute', 'attributable');
     }
-
 }

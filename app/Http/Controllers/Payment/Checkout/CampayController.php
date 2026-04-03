@@ -2,23 +2,18 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\GeniusMailer,
-    Classes\Campay
-};
+use App\Classes\Campay;
 use App\Helpers\OrderHelper;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
-use App\Models\Reward;
+use App\Models\Order;
 use App\Models\State;
 use App\Models\WalletLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use App\Models\Generalsetting;
 
 class CampayController extends CheckoutBaseControlller
 {
@@ -28,12 +23,12 @@ class CampayController extends CheckoutBaseControlller
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
@@ -45,17 +40,17 @@ class CampayController extends CheckoutBaseControlller
         $orderTotal = $orderCalculate['total_amount'] + ($input['total_delivery_fee'] ?? 0);
 
         $order = new Order;
-        $order_number = Str::random(4) . time();
-        
-        $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+        $order_number = Str::random(4).time();
+
+        $input['user_id'] = Auth::check() ? Auth::user()->id : null;
         $input['cart'] = json_encode($cart);
         $input['pay_amount'] = $orderTotal / $this->curr->value;
         $input['order_number'] = $order_number;
-        $input['method'] = "Campay";
-        $input['payment_status'] = "Pending";
-        $input['escrow_status'] = "held";
+        $input['method'] = 'Campay';
+        $input['payment_status'] = 'Pending';
+        $input['escrow_status'] = 'held';
 
-        if (!empty($input['tax'])) {
+        if (! empty($input['tax'])) {
             if ($input['tax_type'] == 'state_tax') {
                 $taxState = State::find($input['tax']);
                 $input['tax_location'] = $taxState ? $taxState->state : null;
@@ -72,22 +67,23 @@ class CampayController extends CheckoutBaseControlller
         $order->fill($input)->save();
         try {
             $order->tracks()->create(['title' => 'Pending', 'text' => 'Order placed. Waiting for payment.']);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         // Initialize Campay Collection
         $campay = new Campay();
         try {
             $phoneNumber = $request->phone; // Assuming phone is provided in checkout
-            $response = $campay->collect($order->pay_amount, $phoneNumber, 'Payment for Order #' . $order_number, $order_number);
-            
+            $response = $campay->collect($order->pay_amount, $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
+
             if (isset($response['reference'])) {
                 $order->txnid = $response['reference'];
                 $order->update();
-                
+
                 // Redirect to a waiting page or status check page
                 return redirect()->route('front.campay.check', $order->order_number);
             } else {
-                return redirect()->back()->with('unsuccess', 'Campay initialization failed: ' . json_encode($response));
+                return redirect()->back()->with('unsuccess', 'Campay initialization failed: '.json_encode($response));
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('unsuccess', $e->getMessage());
@@ -107,6 +103,7 @@ class CampayController extends CheckoutBaseControlller
             if ($order->payment_status != 'Completed') {
                 $this->finalizeOrder($order);
             }
+
             return redirect()->route('front.payment.return')->with('success', 'Payment successful!');
         }
 
@@ -126,7 +123,7 @@ class CampayController extends CheckoutBaseControlller
             'order_id' => $order->id,
             'reference' => $order->txnid,
             'status' => 'completed',
-            'details' => 'Payment held in escrow via Campay'
+            'details' => 'Payment held in escrow via Campay',
         ]);
 
         // Stock and vendor logic
@@ -139,8 +136,9 @@ class CampayController extends CheckoutBaseControlller
         try {
             $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
             $order->notifications()->create();
-        } catch (\Exception $e) {}
-        
+        } catch (\Exception $e) {
+        }
+
         // mailer logic here (similar to WalletPaymentController)
     }
 }

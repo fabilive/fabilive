@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name','slug','photo','image','is_featured'];
+    protected $fillable = ['name', 'slug', 'photo', 'image', 'is_featured'];
+
     public $timestamps = false;
 
     public function subs()
     {
-    	return $this->hasMany('App\Models\Subcategory')->where('status','=',1);
+        return $this->hasMany('App\Models\Subcategory')->where('status', '=', 1);
     }
-    
 
     public function products()
     {
@@ -25,7 +25,8 @@ class Category extends Model
         $this->attributes['slug'] = str_replace(' ', '-', $value);
     }
 
-    public function attributes() {
+    public function attributes()
+    {
         return $this->morphMany('App\Models\Attribute', 'attributable');
     }
 }

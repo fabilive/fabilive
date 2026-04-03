@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryJob;
-use App\Services\EscrowReleaseService;
-use App\Services\DeliveryJobService;
 use App\Services\DeliveryChatLifecycleService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\DeliveryJobService;
+use App\Services\EscrowReleaseService;
 use Exception;
+use Illuminate\Http\Request;
 
 class DeliveryVerificationController extends Controller
 {
     protected $escrowService;
+
     protected $jobService;
+
     protected $chatLifecycleService;
 
     public function __construct(

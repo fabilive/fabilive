@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Resources\UserResource;
 use App\Models\FavoriteSeller;
 use App\Models\Product;
-use App\Models\User;use Auth;
+use App\Models\User;
+use Auth;
 use Hash;
 use Illuminate\Http\Request;
 use Validator;
@@ -24,6 +24,7 @@ class ProfileController extends Controller
             $data['completed_orders'] = (string) Auth::user()->orders()->where('status', 'completed')->count();
             $data['pending_orders'] = (string) Auth::user()->orders()->where('status', 'pending')->count();
             $data['recent_orders'] = (string) Auth::user()->orders()->latest()->take(5)->get();
+
             return response()->json(['status' => true, 'data' => $data, 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => $e->getMessage()]);
@@ -37,17 +38,17 @@ class ProfileController extends Controller
 
             $rules =
                 [
-                'name' => 'required',
-                'email' => 'required|email|unique:users,email,' . auth()->user()->id,
-                'phone' => 'required',
-                // 'fax' => 'required',
-                'city' => 'required',
-                'country' => 'required',
-                // 'zip' => 'required',
-                'address' => 'required',
-                'photo' => 'mimes:jpeg,jpg,png,svg',
+                    'name' => 'required',
+                    'email' => 'required|email|unique:users,email,'.auth()->user()->id,
+                    'phone' => 'required',
+                    // 'fax' => 'required',
+                    'city' => 'required',
+                    'country' => 'required',
+                    // 'zip' => 'required',
+                    'address' => 'required',
+                    'photo' => 'mimes:jpeg,jpg,png,svg',
 
-            ];
+                ];
 
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -58,11 +59,11 @@ class ProfileController extends Controller
             $input = $request->all();
             $data = auth()->user();
             if ($file = $request->file('photo')) {
-                $name = time() . $file->getClientOriginalName();
+                $name = time().$file->getClientOriginalName();
                 $file->move('assets/images/users/', $name);
                 if ($data->photo != null) {
-                    if (file_exists(public_path() . '/assets/images/users/' . $data->photo)) {
-                        unlink(public_path() . '/assets/images/users/' . $data->photo);
+                    if (file_exists(public_path().'/assets/images/users/'.$data->photo)) {
+                        unlink(public_path().'/assets/images/users/'.$data->photo);
                     }
                 }
                 $input['photo'] = $name;
@@ -113,10 +114,10 @@ class ProfileController extends Controller
 
         $rules =
             [
-            'current_password' => 'required',
-            'new_password' => 'required',
-            'renew_password' => 'required',
-        ];
+                'current_password' => 'required',
+                'new_password' => 'required',
+                'renew_password' => 'required',
+            ];
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -135,6 +136,7 @@ class ProfileController extends Controller
                 return response()->json(['status' => true, 'data' => [], 'error' => ['message' => 'Current password Does not match.']]);
             }
             $user->update($input);
+
             return response()->json(['status' => true, 'data' => ['message' => 'Successfully changed your password.'], 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => $e->getMessage()]);
@@ -147,11 +149,12 @@ class ProfileController extends Controller
             $input = $request->all();
             $user = Auth::guard('api')->user();
             $ck = FavoriteSeller::where('user_id', $user->id)->where('vendor_id', $input['vendor_id'])->exists();
-            if (!$ck) {
+            if (! $ck) {
                 $fav = new FavoriteSeller();
                 $fav->user_id = $user->id;
                 $fav->vendor_id = $input['vendor_id'];
                 $fav->save();
+
                 return response()->json(['status' => true, 'data' => ['message' => 'Successfully Added To Favorite Seller.'], 'error' => []]);
             } else {
                 return response()->json(['status' => true, 'data' => [], 'error' => ['message' => 'Added To Favorite Already.']]);
@@ -168,7 +171,7 @@ class ProfileController extends Controller
         try {
             $user = Auth::guard('api')->user();
             $favorites = FavoriteSeller::where('user_id', '=', $user->id)->get();
-            $vendors = array();
+            $vendors = [];
             foreach ($favorites as $key => $favorite) {
                 $seller = User::find($favorite->vendor_id);
                 if ($seller) {
@@ -180,6 +183,7 @@ class ProfileController extends Controller
                     $vendors[$key]['shop_link'] = route('front.vendor', str_replace(' ', '-', ($seller->shop_name)));
                 }
             }
+
             return response()->json(['status' => true, 'data' => $vendors, 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => $e->getMessage()]);
@@ -191,6 +195,7 @@ class ProfileController extends Controller
         try {
             $wish = FavoriteSeller::find($id);
             $wish->delete();
+
             return response()->json(['status' => true, 'data' => ['message' => 'Successfully Removed The Seller.'], 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => $e->getMessage()]);

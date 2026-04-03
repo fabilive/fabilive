@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Api\User\Payment;
 
-use App\Models\Generalsetting;
-use Illuminate\Http\Request;
-use App\Models\Deposit;
-use App\Models\Currency;
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
+use App\Models\Deposit;
 use App\Models\PaymentGateway;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Omnipay\Omnipay;
@@ -15,7 +14,9 @@ use Omnipay\Omnipay;
 class PaymentController extends Controller
 {
     public $_api_context;
+
     public $gateway;
+
     public function __construct()
     {
         $data = PaymentGateway::whereKeyword('paypal')->first();
@@ -30,7 +31,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
 
-        if (!$request->has('deposit_number')) {
+        if (! $request->has('deposit_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
@@ -40,22 +41,21 @@ class PaymentController extends Controller
         $curr = Currency::where('name', '=', $deposit->currency_code)->first();
 
         $support = ['USD', 'EUR'];
-        if (!in_array($curr->name, $support)) {
+        if (! in_array($curr->name, $support)) {
             return redirect()->back()->with('unsuccess', 'Please Select USD Or EUR Currency For Paypal.');
         }
 
         $item_amount = $deposit->amount * $deposit->currency_value;
 
-
         $notify_url = action('Api\User\Payment\PaymentController@notify');
         $cancel_url = route('user.success', 0);
         try {
-            $response = $this->gateway->purchase(array(
+            $response = $this->gateway->purchase([
                 'amount' => $item_amount,
                 'currency' => $curr->name,
                 'returnUrl' => $notify_url,
                 'cancelUrl' => $cancel_url,
-            ))->send();
+            ])->send();
 
             if ($response->isRedirect()) {
                 Session::put('deposit_number', $deposit_number);
@@ -70,9 +70,6 @@ class PaymentController extends Controller
         }
     }
 
-
-
-
     public function notify(Request $request)
     {
 
@@ -85,10 +82,10 @@ class PaymentController extends Controller
             ];
         }
 
-        $transaction = $this->gateway->completePurchase(array(
+        $transaction = $this->gateway->completePurchase([
             'payer_id' => $responseData['PayerID'],
             'transactionReference' => $responseData['paymentId'],
-        ));
+        ]);
 
         $response = $transaction->send();
 
@@ -99,7 +96,7 @@ class PaymentController extends Controller
             $user->balance = $user->balance + ($order->amount);
             $user->save();
 
-            $order->method = "Paypal";
+            $order->method = 'Paypal';
             $order->txnid = $response->getData()['transactions'][0]['related_resources'][0]['sale']['id'];
             $order->status = 1;
             $order->update();
@@ -107,7 +104,7 @@ class PaymentController extends Controller
             // store in transaction table
             if ($order->status == 1) {
                 $transaction = new \App\Models\Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $order->user_id;
                 $transaction->amount = $order->amount;
                 $transaction->user_id = $order->user_id;

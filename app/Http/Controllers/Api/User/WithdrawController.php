@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Resources\WithdrawDetailsResource;
-
 use App\Http\Resources\WithdrawResource;
 use App\Models\Currency;
 use App\Models\Generalsetting;
 use App\Models\Transaction;
-use App\Models\User;use App\Models\Withdraw;
+use App\Models\User;
+use App\Models\Withdraw;
 use Auth;
-
 use Illuminate\Http\Request;
 use Validator;
+
 class WithdrawController extends Controller
 {
     public function index()
@@ -22,6 +21,7 @@ class WithdrawController extends Controller
         try {
             $user = auth()->user();
             $withdraws = Withdraw::where('user_id', '=', $user->id)->where('type', '=', 'user')->orderBy('id', 'desc')->get();
+
             return response()->json(['status' => true, 'data' => WithdrawResource::collection($withdraws), 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
@@ -178,77 +178,68 @@ class WithdrawController extends Controller
 
                         return response()->json(['status' => true, 'data' => new WithdrawDetailsResource($newwithdraw), 'error' => []]);
                     } else {
-                        return response()->json(['status' => false, 'data' => [], 'error' => ["message" => 'Insufficient Balance.']]);
+                        return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Insufficient Balance.']]);
 
                     }
                 } else {
-                    return response()->json(['status' => false, 'data' => [], 'error' => ["message" => 'Insufficient Balance.']]);
+                    return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Insufficient Balance.']]);
 
                 }
             }
-            return response()->json(['status' => false, 'data' => [], 'error' => ["message" => 'Please enter a valid amount.']]);
+
+            return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Please enter a valid amount.']]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
         }
 
-
     }
-    
-    
+
     public function convertSubmit(Request $request)
     {
         try {
-        $curr = Currency::where('is_default','=',1)->first();
-        $user = Auth::user();
-        $gs = Generalsetting::find(1);
+            $curr = Currency::where('is_default', '=', 1)->first();
+            $user = Auth::user();
+            $gs = Generalsetting::find(1);
 
-        $rules =
-        [
-            'reward_point' => 'required|integer|max:'.$user->reward.'|min:'.$gs->reward_point
-        ];
+            $rules =
+            [
+                'reward_point' => 'required|integer|max:'.$user->reward.'|min:'.$gs->reward_point,
+            ];
 
-        $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $validator->getMessageBag()->toArray()['reward_point']]]);
-          //return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
-        }
+            if ($validator->fails()) {
+                return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $validator->getMessageBag()->toArray()['reward_point']]]);
+                //return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            }
 
-        $dolar = ($request->reward_point / $gs->reward_point)  * $gs->reward_dolar;
+            $dolar = ($request->reward_point / $gs->reward_point) * $gs->reward_dolar;
 
-        $user->reward = $user->reward - $request->reward_point;
-        $user->balance = $user->balance + $dolar;
-        $user->update();
-        $trans =  new Transaction();
-        $trans->user_id = $user->id;
-        $trans->reward_point = $request->reward_point;
-        $trans->reward_dolar = $dolar;
-        $trans->type = 'reward';
-        $trans->save();
+            $user->reward = $user->reward - $request->reward_point;
+            $user->balance = $user->balance + $dolar;
+            $user->update();
+            $trans = new Transaction();
+            $trans->user_id = $user->id;
+            $trans->reward_point = $request->reward_point;
+            $trans->reward_dolar = $dolar;
+            $trans->type = 'reward';
+            $trans->save();
 
-        $mgs = __('Your Wallet Balance Added ' . ' : $'. $dolar);
-        return response()->json(['status' => true, 'data' => $mgs, 'error' => []]);
-        }
-        catch (\Exception $e) {
+            $mgs = __('Your Wallet Balance Added '.' : $'.$dolar);
+
+            return response()->json(['status' => true, 'data' => $mgs, 'error' => []]);
+        } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
         }
 
-
     }
-    
-    
-    public function getReword(){
+
+    public function getReword()
+    {
         $user = Auth::user();
-        $datas = Transaction::where('type','reward')->where('user_id',$user->id)->orderby('id','desc')->get();
+        $datas = Transaction::where('type', 'reward')->where('user_id', $user->id)->orderby('id', 'desc')->get();
         $datas->toArray();
+
         return response()->json(['status' => true, 'data' => $datas, 'error' => []]);
     }
-    
-    
-    
-    
-    
-    
-    
-    
 }

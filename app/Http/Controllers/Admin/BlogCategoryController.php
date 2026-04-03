@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\BlogCategory;
+use Datatables;
 use Illuminate\Http\Request;
 use Validator;
-use Datatables;
 
 class BlogCategoryController extends AdminBaseController
 {
@@ -13,10 +13,11 @@ class BlogCategoryController extends AdminBaseController
     public function datatables()
     {
         $datas = BlogCategory::latest('id')->get();
+
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->addColumn('action', function (BlogCategory $data) {
-                return '<div class="action-list"><a data-href="' . route('admin-cblog-edit', $data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>' . __('Edit') . '</a><a href="javascript:;" data-href="' . route('admin-cblog-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+                return '<div class="action-list"><a data-href="'.route('admin-cblog-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('admin-cblog-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
             })
             ->toJson(); //--- Returning Json Data To Client Side
     }
@@ -37,15 +38,15 @@ class BlogCategoryController extends AdminBaseController
         //--- Validation Section
         $rules = [
             'name' => 'unique:blog_categories',
-            'slug' => 'unique:blog_categories'
+            'slug' => 'unique:blog_categories',
         ];
         $customs = [
             'name.unique' => __('This name has already been taken.'),
-            'slug.unique' => __('This slug has already been taken.')
+            'slug.unique' => __('This slug has already been taken.'),
         ];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -55,16 +56,18 @@ class BlogCategoryController extends AdminBaseController
         $data->fill($input)->save();
         //--- Logic Section Ends
 
-        //--- Redirect Section  
+        //--- Redirect Section
         $msg = __('New Data Added Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends  
+        //--- Redirect Section Ends
     }
 
     //*** GET Request
     public function edit($id)
     {
         $data = BlogCategory::findOrFail($id);
+
         return view('admin.blog.category.edit', compact('data'));
     }
 
@@ -73,16 +76,16 @@ class BlogCategoryController extends AdminBaseController
     {
         //--- Validation Section
         $rules = [
-            'name' => 'unique:blog_categories,name,' . $id,
-            'slug' => 'unique:blog_categories,slug,' . $id
+            'name' => 'unique:blog_categories,name,'.$id,
+            'slug' => 'unique:blog_categories,slug,'.$id,
         ];
         $customs = [
             'name.unique' => __('This name has already been taken.'),
-            'slug.unique' => __('This slug has already been taken.')
+            'slug.unique' => __('This slug has already been taken.'),
         ];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -92,10 +95,11 @@ class BlogCategoryController extends AdminBaseController
         $data->update($input);
         //--- Logic Section Ends
 
-        //--- Redirect Section          
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends  
+        //--- Redirect Section Ends
 
     }
 
@@ -104,16 +108,17 @@ class BlogCategoryController extends AdminBaseController
     {
         $data = BlogCategory::findOrFail($id);
 
-        //--- Check If there any blogs available, If Available Then Delete it 
+        //--- Check If there any blogs available, If Available Then Delete it
         if ($data->blogs->count() > 0) {
             foreach ($data->blogs as $element) {
                 $element->delete();
             }
         }
         $data->delete();
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
+
         return response()->json($msg);
-        //--- Redirect Section Ends   
+        //--- Redirect Section Ends
     }
 }

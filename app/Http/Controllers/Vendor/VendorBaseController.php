@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Vendor;
 
-use App\Http\Controllers\Controller;
-use DB;
 use App;
+use App\Http\Controllers\Controller;
 use Auth;
+use DB;
 use Session;
-
 
 class VendorBaseController extends Controller
 {
     protected $gs;
+
     protected $curr;
+
     protected $language_id;
+
     protected $user;
 
     public function __construct()
@@ -26,30 +28,26 @@ class VendorBaseController extends Controller
 
         $this->middleware(function ($request, $next) {
 
-        // Set Global Users
+            // Set Global Users
 
-        $this->user = Auth::user();
-
-            // Set Global Language
+            $this->user = Auth::user();
 
             // Set Global Language
 
-            if (Session::has('language')) 
-            {
+            // Set Global Language
+
+            if (Session::has('language')) {
                 $this->language = DB::table('languages')->find(Session::get('language'));
+            } else {
+                $this->language = DB::table('languages')->where('is_default', '=', 1)->first();
             }
-            else
-            {
-                $this->language = DB::table('languages')->where('is_default','=',1)->first();
-            }  
             view()->share('langg', $this->language);
             App::setlocale($this->language->name);
-    
+
             // Set Global Currency
 
-            $this->curr = DB::table('currencies')->where('is_default','=',1)->first();
-            
-    
+            $this->curr = DB::table('currencies')->where('is_default', '=', 1)->first();
+
             return $next($request);
         });
     }

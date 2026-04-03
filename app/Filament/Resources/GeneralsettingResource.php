@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GeneralsettingResource\Pages;
-use App\Filament\Resources\GeneralsettingResource\RelationManagers;
 use App\Models\Generalsetting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GeneralsettingResource extends Resource
 {

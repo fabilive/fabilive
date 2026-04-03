@@ -9,7 +9,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class CustomReferralResource extends Resource
 {
@@ -141,7 +140,7 @@ class CustomReferralResource extends Resource
                                 'amount' => $record->amount,
                                 'type' => 'referral_bonus',
                                 'status' => 'completed',
-                                'reference' => 'CREF-' . $record->id,
+                                'reference' => 'CREF-'.$record->id,
                                 'details' => "Custom referral bonus unlocked for referring user #{$record->referred_id}",
                             ]);
                         }
@@ -170,7 +169,7 @@ class CustomReferralResource extends Resource
                                             'amount' => $record->amount,
                                             'type' => 'referral_bonus',
                                             'status' => 'completed',
-                                            'reference' => 'CREF-' . $record->id,
+                                            'reference' => 'CREF-'.$record->id,
                                             'details' => "Custom referral bonus unlocked for referring user #{$record->referred_id}",
                                         ]);
                                     }

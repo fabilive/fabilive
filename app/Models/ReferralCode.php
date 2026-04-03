@@ -8,7 +8,7 @@ class ReferralCode extends Model
 {
     protected $fillable = [
         'user_id', 'rider_id', 'code', 'owner_role',
-        'usages_count', 'max_usages', 'active'
+        'usages_count', 'max_usages', 'active',
     ];
 
     protected $casts = [

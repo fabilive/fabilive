@@ -11,7 +11,7 @@ class Admin extends Authenticatable implements FilamentUser
     protected $guard = 'admin';
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'section', 'created_at', 'updated_at', 'remember_token','shop_name'
+        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'section', 'created_at', 'updated_at', 'remember_token', 'shop_name',
     ];
 
     protected $hidden = [
@@ -20,29 +20,32 @@ class Admin extends Authenticatable implements FilamentUser
 
     public function role()
     {
-    	return $this->belongsTo('App\Models\Role')->withDefault();
+        return $this->belongsTo('App\Models\Role')->withDefault();
     }
 
-    public function IsSuper(){
+    public function IsSuper()
+    {
         if ($this->id == 1 || $this->email == 'hello@fabilive.com') {
-           return true;
+            return true;
         }
+
         return false;
     }
 
-    public function sectionCheck($value){
+    public function sectionCheck($value)
+    {
         $sections = [];
-        if(!empty($this->section)){
-            $sections = explode(" , ", $this->section);
+        if (! empty($this->section)) {
+            $sections = explode(' , ', $this->section);
         } else {
-            if (isset($this->role->section) && !empty($this->role->section)) {
-                $sections = explode(" , ", $this->role->section);
+            if (isset($this->role->section) && ! empty($this->role->section)) {
+                $sections = explode(' , ', $this->role->section);
             }
         }
-        
-        if (in_array($value, $sections)){
+
+        if (in_array($value, $sections)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

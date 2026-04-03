@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Font extends Model
 {
-    protected $fillable = ['is_default','font_family','font_value'];
-    protected $table    = 'fonts';
+    protected $fillable = ['is_default', 'font_family', 'font_value'];
 
-    public $timestamps  = false;
+    protected $table = 'fonts';
+
+    public $timestamps = false;
 }

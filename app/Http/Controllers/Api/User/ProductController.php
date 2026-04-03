@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\RatingResource;
 use App\Http\Resources\ReplyResource;
-
 use App\Http\Resources\ReportResource;
 use App\Models\Comment;
 use App\Models\Order;
@@ -37,7 +36,7 @@ class ProductController extends Controller
             $orders = Order::where('user_id', '=', $request->user_id)->where('status', '=', 'completed')->get();
 
             foreach ($orders as $order) {
-                $cart = json_decode($order->cart,true);
+                $cart = json_decode($order->cart, true);
                 foreach ($cart['items'] as $product) {
                     if ($request->product_id == $product['item']['id']) {
                         $ck = 1;
@@ -57,6 +56,7 @@ class ProductController extends Controller
                 $Rating->fill($in);
                 $Rating['review_date'] = date('Y-m-d H:i:s');
                 $Rating->save();
+
                 return response()->json(['status' => true, 'data' => new RatingResource($Rating), 'error' => []]);
             } else {
                 return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Buy This Product First']]);

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api\Front;
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\ProductDetailsResource;
@@ -14,9 +16,10 @@ class ProductController extends Controller
     {
         try {
             $product = Product::find($id);
-            if (!$product) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Item not found."]]);
+            if (! $product) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Item not found.']]);
             }
+
             return response()->json(['status' => true, 'data' => new ProductDetailsResource($product), 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
@@ -28,8 +31,8 @@ class ProductController extends Controller
         try {
             $product = Product::find($id);
 
-            if (!$product) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Item not found."]]);
+            if (! $product) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Item not found.']]);
             }
             $ratings = $product->ratings;
 
@@ -43,10 +46,11 @@ class ProductController extends Controller
     {
         try {
             $product = Product::find($id);
-            if (!$product) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Item not found."]]);
+            if (! $product) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Item not found.']]);
             }
             $comments = $product->comments()->orderBy('id', 'DESC')->get();
+
             return response()->json(['status' => true, 'data' => CommentResource::collection($comments), 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
@@ -57,10 +61,11 @@ class ProductController extends Controller
     {
         try {
             $comment = Comment::find($id);
-            if (!$comment) {
-                return response()->json(['status' => false, 'data' => [], 'error' => ["message" => "Comment not found."]]);
+            if (! $comment) {
+                return response()->json(['status' => false, 'data' => [], 'error' => ['message' => 'Comment not found.']]);
             }
             $replies = $comment->replies()->orderBy('id', 'DESC')->get();
+
             return response()->json(['status' => true, 'data' => ReplyResource::collection($replies), 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);

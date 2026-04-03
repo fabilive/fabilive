@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\DeliveryJob;
 use App\Models\DeliveryChatThread;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +17,7 @@ class DeliveryChatLifecycleService
         DeliveryChatThread::where('delivery_job_id', $jobId)
             ->whereNull('hidden_at')
             ->update([
-                'hidden_at' => now()
+                'hidden_at' => now(),
             ]);
     }
 

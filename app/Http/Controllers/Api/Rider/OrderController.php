@@ -2,17 +2,8 @@
 
 namespace App\Http\Controllers\Api\Rider;
 
-use App\Models\ServiceArea;
-use App\Models\City;
-use App\Models\Currency;
 use App\Models\DeliveryRider;
-use App\Models\FavoriteSeller;
-use App\Models\Order;
-use App\Models\PaymentGateway;
-use App\Models\RiderServiceArea;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Validator;
 
 class OrderController
 {
@@ -36,12 +27,12 @@ class OrderController
             ->paginate($perPage);
 
         return response()->json([
-            'data' => $orders->getCollection()->map(fn($order) => $this->transformOrder($order)),
+            'data' => $orders->getCollection()->map(fn ($order) => $this->transformOrder($order)),
             'meta' => [
                 'current_page' => $orders->currentPage(),
-                'per_page'     => $orders->perPage(),
-                'total'        => $orders->total(),
-                'last_page'    => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+                'last_page' => $orders->lastPage(),
             ],
         ]);
     }
@@ -52,7 +43,7 @@ class OrderController
             ->where('rider_id', $this->rider->id)
             ->where('id', $id)
             ->first();
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Record not found '], 404);
         }
 
@@ -63,12 +54,12 @@ class OrderController
     {
         $order = DeliveryRider::where('rider_id', $this->rider->id)->where('id', $id)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Record not found'], 404);
         }
 
         if ($order->status != 'pending') {
-            return response()->json(['message' => 'The Order should be in Pending state. Current status is: ' . $order->status], 400);
+            return response()->json(['message' => 'The Order should be in Pending state. Current status is: '.$order->status], 400);
         }
 
         $order->status = 'accepted';
@@ -81,12 +72,12 @@ class OrderController
     {
         $order = DeliveryRider::where('rider_id', $this->rider->id)->where('id', $id)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Record not found'], 404);
         }
 
         if ($order->status != 'pending') {
-            return response()->json(['message' => 'The Order should be in Pending state. Current status is: ' . $order->status], 400);
+            return response()->json(['message' => 'The Order should be in Pending state. Current status is: '.$order->status], 400);
         }
 
         $order->status = 'rejected';
@@ -99,11 +90,11 @@ class OrderController
     {
         $order = DeliveryRider::where('rider_id', $this->rider->id)->where('id', $id)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Record not found'], 404);
         }
         if ($order->status != 'accepted') {
-            return response()->json(['message' => 'The Order should be in Accepted state. Current status is: ' . $order->status], 400);
+            return response()->json(['message' => 'The Order should be in Accepted state. Current status is: '.$order->status], 400);
         }
         $order->status = 'delivered';
         $order->save();
@@ -123,17 +114,17 @@ class OrderController
     private function transformOrder($order)
     {
         $order_detail = [
-            'id'             => $order['order']['id'],
-            'method'         => $order['order']['method'],
-            'totalQty'       => $order['order']['totalQty'],
-            'pay_amount'     => $order['order']['pay_amount'],
+            'id' => $order['order']['id'],
+            'method' => $order['order']['method'],
+            'totalQty' => $order['order']['totalQty'],
+            'pay_amount' => $order['order']['pay_amount'],
             'payment_status' => $order['order']['payment_status'],
-            'order_number'   => $order['order']['order_number'],
-            'status'         => $order['order']['status'],
-            'created_at'     => $order['order']['created_at'],
-            'shipping_cost'  => $order['order']['shipping_cost'],
-            'currency_sign'  => $order['order']['currency_sign'],
-            'currency_name'  => $order['order']['currency_name'],
+            'order_number' => $order['order']['order_number'],
+            'status' => $order['order']['status'],
+            'created_at' => $order['order']['created_at'],
+            'shipping_cost' => $order['order']['shipping_cost'],
+            'currency_sign' => $order['order']['currency_sign'],
+            'currency_name' => $order['order']['currency_name'],
             'currency_value' => $order['order']['currency_value'],
         ];
 
@@ -141,45 +132,44 @@ class OrderController
         $order_items = array_values(array_map(function ($item) {
             return [
                 'quantity' => $item['qty'],
-                'price'    => $item['price'],
-                'item'     => [
+                'price' => $item['price'],
+                'item' => [
                     'title' => $item['item']['name'],
                     'photo' => $item['item']['photo'],
-                    'link'  => $item['item']['link']
-                ]
+                    'link' => $item['item']['link'],
+                ],
             ];
         }, $order_items['items']));
 
         $customer = [
-            'customer_name'    => $order['order']['customer_name'],
-            'customer_email'   => $order['order']['customer_email'],
-            'customer_phone'   => $order['order']['customer_phone'],
+            'customer_name' => $order['order']['customer_name'],
+            'customer_email' => $order['order']['customer_email'],
+            'customer_phone' => $order['order']['customer_phone'],
             'customer_address' => $order['order']['customer_address'],
-            'customer_city'    => $order['order']['customer_city'],
+            'customer_city' => $order['order']['customer_city'],
             'customer_country' => $order['order']['customer_country'],
-            'customer_state'   => $order['order']['customer_state'],
+            'customer_state' => $order['order']['customer_state'],
         ];
 
         return [
-            'id'           => $order['id'],
-            'status'       => $order['status'],
+            'id' => $order['id'],
+            'status' => $order['status'],
             'phone_number' => $order['phone_number'],
-            'order'        => $order_detail,
-            'order_items'  => $order_items,
-            'customer'     => $customer,
-            'pickup'       => $order['pickup'] ? [
-                'id'       => $order['pickup']['id'],
+            'order' => $order_detail,
+            'order_items' => $order_items,
+            'customer' => $customer,
+            'pickup' => $order['pickup'] ? [
+                'id' => $order['pickup']['id'],
                 'location' => $order['pickup']['location'],
             ] : null,
-            'vendor'       => $order['vendor'] ? [
-                'id'           => $order['vendor']['id'],
-                'name'         => $order['vendor']['name'],
-                'shop_name'    => $order['vendor']['shop_name'],
-                'shop_phone'   => $order['vendor']['phone'],
-                'shop_email'   => $order['vendor']['email'],
+            'vendor' => $order['vendor'] ? [
+                'id' => $order['vendor']['id'],
+                'name' => $order['vendor']['name'],
+                'shop_name' => $order['vendor']['shop_name'],
+                'shop_phone' => $order['vendor']['phone'],
+                'shop_email' => $order['vendor']['email'],
                 'shop_address' => $order['vendor']['shop_address'],
             ] : null,
         ];
     }
-
 }

@@ -2,16 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\Generalsetting;
 use App\Models\ReferralCode;
 use App\Models\ReferralUsage;
-use App\Models\User;
 use App\Models\Rider;
-use App\Models\Generalsetting;
+use App\Models\User;
 use App\Models\WalletLedger;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ReferralService
 {
@@ -21,11 +20,11 @@ class ReferralService
     public function generateCode($owner, string $role = 'buyer'): ReferralCode
     {
         $prefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $owner->name ?? 'FAB'), 0, 4));
-        $code = $prefix . strtoupper(Str::random(6));
+        $code = $prefix.strtoupper(Str::random(6));
 
         // Ensure uniqueness
         while (ReferralCode::where('code', $code)->exists()) {
-            $code = $prefix . strtoupper(Str::random(6));
+            $code = $prefix.strtoupper(Str::random(6));
         }
 
         if ($role === 'vendor') {
@@ -56,17 +55,17 @@ class ReferralService
     {
         $gs = Generalsetting::first();
 
-        if (!$gs || !($gs->referral_system_active ?? true)) {
+        if (! $gs || ! ($gs->referral_system_active ?? true)) {
             throw new Exception('Referral system is currently disabled.');
         }
 
         $referralCode = ReferralCode::where('code', $code)->first();
 
-        if (!$referralCode) {
+        if (! $referralCode) {
             throw new Exception('Invalid referral code.');
         }
 
-        if (!$referralCode->isActive()) {
+        if (! $referralCode->isActive()) {
             throw new Exception('This referral code is no longer active.');
         }
 
@@ -127,7 +126,7 @@ class ReferralService
                         'amount' => $referrerBonus,
                         'type' => 'referral_bonus',
                         'status' => 'completed',
-                        'reference' => 'REF-' . $referralCode->code,
+                        'reference' => 'REF-'.$referralCode->code,
                         'details' => "Referral bonus for inviting user via code {$referralCode->code}",
                     ]);
                 }
@@ -143,7 +142,7 @@ class ReferralService
                     'amount' => $referredBonus,
                     'type' => 'referral_bonus',
                     'status' => 'completed',
-                    'reference' => 'RREF-' . $referralCode->code,
+                    'reference' => 'RREF-'.$referralCode->code,
                     'details' => "Welcome bonus from referral code {$referralCode->code}",
                 ]);
             }
@@ -168,7 +167,7 @@ class ReferralService
             $referralCode = ReferralCode::where('user_id', $owner->id)->first();
         }
 
-        if (!$referralCode) {
+        if (! $referralCode) {
             return [
                 'code' => null,
                 'total_referrals' => 0,
@@ -195,6 +194,7 @@ class ReferralService
     private function hashValue(string $value): ?string
     {
         $cleaned = trim(strtolower($value));
+
         return $cleaned ? hash('sha256', $cleaned) : null;
     }
 }

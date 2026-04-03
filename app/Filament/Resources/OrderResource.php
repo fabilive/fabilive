@@ -9,7 +9,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -30,7 +29,7 @@ class OrderResource extends Resource
                         Forms\Components\Placeholder::make('created_at')
                             ->content(fn (Order $record) => $record->created_at?->toDateTimeString()),
                         Forms\Components\Placeholder::make('pay_amount')
-                            ->content(fn (Order $record) => $record->currency_sign . number_format($record->pay_amount, 2)),
+                            ->content(fn (Order $record) => $record->currency_sign.number_format($record->pay_amount, 2)),
                         Forms\Components\Placeholder::make('status')
                             ->content(fn (Order $record) => strtoupper($record->status)),
                     ])->columns(4),
@@ -56,16 +55,19 @@ class OrderResource extends Resource
                         Forms\Components\Placeholder::make('cart_items')
                             ->content(function (Order $record) {
                                 $cart = json_decode($record->cart, true);
-                                if (!$cart || !isset($cart['items'])) return 'Empty Cart';
-                                
-                                $output = "";
+                                if (! $cart || ! isset($cart['items'])) {
+                                    return 'Empty Cart';
+                                }
+
+                                $output = '';
                                 foreach ($cart['items'] as $item) {
                                     $name = $item['item']['name'] ?? 'Unknown Item';
                                     $qty = $item['qty'] ?? 1;
                                     $price = $item['price'] ?? 0;
-                                    $output .= "- {$name} (x{$qty}) - " . number_format($price, 2) . "\n";
+                                    $output .= "- {$name} (x{$qty}) - ".number_format($price, 2)."\n";
                                 }
-                                return new \Illuminate\Support\HtmlString("<pre>" . e($output) . "</pre>");
+
+                                return new \Illuminate\Support\HtmlString('<pre>'.e($output).'</pre>');
                             }),
                     ]),
             ]);
@@ -84,7 +86,7 @@ class OrderResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('pay_amount')
                     ->label('Total')
-                    ->formatStateUsing(fn ($state, Order $record) => $record->currency_sign . number_format($state, 2))
+                    ->formatStateUsing(fn ($state, Order $record) => $record->currency_sign.number_format($state, 2))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

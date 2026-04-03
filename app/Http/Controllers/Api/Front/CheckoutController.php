@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api\Front;
+
 use App\Classes\GeniusMailer;
 use App\Helpers\OrderHelper;
 use App\Helpers\PriceHelper;
@@ -16,16 +18,16 @@ use App\Models\Package;
 use App\Models\Pagesetting;
 use App\Models\Product;
 use App\Models\Reward;
-use App\Models\Shipping;
 use App\Models\ServiceArea;
+use App\Models\Shipping;
 use App\Models\State;
-use App\Models\PaymentGateway;
 use App\Models\User;
 use App\Models\VendorOrder;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Session;
+
 class CheckoutController extends Controller
 {
     public function checkout(Request $request)
@@ -46,7 +48,7 @@ class CheckoutController extends Controller
             $cart = new Cart($new_cart);
             $gs = Generalsetting::find(1);
             $currency_code = $input['currency_code'];
-            if (!empty($currency_code)) {
+            if (! empty($currency_code)) {
                 $curr = Currency::where('name', '=', $currency_code)->first();
                 if (empty($curr)) {
                     $curr = Currency::where('is_default', '=', 1)->first();
@@ -64,7 +66,7 @@ class CheckoutController extends Controller
             $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
             foreach ($cart->items as $key => $prod) {
-                if (!empty($prod['item']['license']) && !empty($prod['item']['license_qty'])) {
+                if (! empty($prod['item']['license']) && ! empty($prod['item']['license_qty'])) {
                     foreach ($prod['item']['license_qty'] as $ttl => $dtl) {
                         if ($dtl != 0) {
                             $dtl--;
@@ -135,7 +137,7 @@ class CheckoutController extends Controller
             $input['currency_sign'] = $curr->sign;
             $input['currency_value'] = $curr->value;
             $input['pay_amount'] = $orderTotal / $curr->value;
-            $input['order_number'] = Str::random(4) . time();
+            $input['order_number'] = Str::random(4).time();
             $input['wallet_price'] = $request->wallet_price / $curr->value;
             if (@$input['tax_type'] == 'state_tax') {
                 if (@$input['tax_type'] == 'state_tax') {
@@ -201,12 +203,12 @@ class CheckoutController extends Controller
             }
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
             $mailer = new GeniusMailer();
@@ -214,23 +216,24 @@ class CheckoutController extends Controller
             $ps = Pagesetting::find(1);
             $data = [
                 'to' => $ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
             unset($order['cart']);
-            return response()->json(['status' => true, 'data' => route('payment.checkout') . '?order_number=' . $order->order_number, 'error' => []]);
+
+            return response()->json(['status' => true, 'data' => route('payment.checkout').'?order_number='.$order->order_number, 'error' => []]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
         }
     }
-    
-// if (@$input['tax_type'] == 'state_tax') {
-                //     $input['tax_location'] = State::findOrFail($input['tax'])->state;
-                // } else {
-                //     $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
-                // }
+
+    // if (@$input['tax_type'] == 'state_tax') {
+    //     $input['tax_location'] = State::findOrFail($input['tax'])->state;
+    // } else {
+    //     $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
+    // }
 
     //*** POST Request
     public function update(Request $request, $id)
@@ -238,12 +241,13 @@ class CheckoutController extends Controller
         try {
             $data = Order::find($id);
             $input = $request->all();
-            if ($data->status == "completed") {
-                $input['status'] = "completed";
+            if ($data->status == 'completed') {
+                $input['status'] = 'completed';
                 $data->update($input);
+
                 return response()->json(['status' => true, 'data' => $data, 'error' => []]);
             } else {
-                if ($input['status'] == "completed") {
+                if ($input['status'] == 'completed') {
                     foreach ($data->vendororders as $vorder) {
                         $uprice = User::find($vorder->user_id);
                         $uprice->current_balance = $uprice->current_balance + $vorder->price;
@@ -258,20 +262,20 @@ class CheckoutController extends Controller
                     if ($gs->is_smtp == 1) {
                         $maildata = [
                             'to' => $data->customer_email,
-                            'subject' => 'Your order ' . $data->order_number . ' is Confirmed!',
-                            'body' => "Hello " . $data->customer_name . "," . "\n Thank you for shopping with us. We are looking forward to your next visit.",
+                            'subject' => 'Your order '.$data->order_number.' is Confirmed!',
+                            'body' => 'Hello '.$data->customer_name.','."\n Thank you for shopping with us. We are looking forward to your next visit.",
                         ];
                         $mailer = new GeniusMailer();
                         $mailer->sendCustomMail($maildata);
                     } else {
                         $to = $data->customer_email;
-                        $subject = 'Your order ' . $data->order_number . ' is Confirmed!';
-                        $msg = "Hello " . $data->customer_name . "," . "\n Thank you for shopping with us. We are looking forward to your next visit.";
-                        $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+                        $subject = 'Your order '.$data->order_number.' is Confirmed!';
+                        $msg = 'Hello '.$data->customer_name.','."\n Thank you for shopping with us. We are looking forward to your next visit.";
+                        $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
                         mail($to, $subject, $msg, $headers);
                     }
                 }
-                if ($input['status'] == "declined") {
+                if ($input['status'] == 'declined') {
 
                     if ($data->user_id != 0) {
                         if ($data->wallet_price != 0) {
@@ -293,7 +297,7 @@ class CheckoutController extends Controller
                     }
                     foreach ($cart->items as $prod) {
                         $x = (string) $prod['size_qty'];
-                        if (!empty($x)) {
+                        if (! empty($x)) {
                             $product = Product::find($prod['item']['id']);
                             $x = (int) $x;
                             $temp = $product->size_qty;
@@ -307,16 +311,16 @@ class CheckoutController extends Controller
                     if ($gs->is_smtp == 1) {
                         $maildata = [
                             'to' => $data->customer_email,
-                            'subject' => 'Your order ' . $data->order_number . ' is Declined!',
-                            'body' => "Hello " . $data->customer_name . "," . "\n We are sorry for the inconvenience caused. We are looking forward to your next visit.",
+                            'subject' => 'Your order '.$data->order_number.' is Declined!',
+                            'body' => 'Hello '.$data->customer_name.','."\n We are sorry for the inconvenience caused. We are looking forward to your next visit.",
                         ];
                         $mailer = new GeniusMailer();
                         $mailer->sendCustomMail($maildata);
                     } else {
                         $to = $data->customer_email;
-                        $subject = 'Your order ' . $data->order_number . ' is Declined!';
-                        $msg = "Hello " . $data->customer_name . "," . "\n We are sorry for the inconvenience caused. We are looking forward to your next visit.";
-                        $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+                        $subject = 'Your order '.$data->order_number.' is Declined!';
+                        $msg = 'Hello '.$data->customer_name.','."\n We are sorry for the inconvenience caused. We are looking forward to your next visit.";
+                        $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
                         mail($to, $subject, $msg, $headers);
                     }
                 }
@@ -338,13 +342,13 @@ class CheckoutController extends Controller
                     }
                 }
                 VendorOrder::where('order_id', '=', $id)->update(['status' => $input['status']]);
+
                 return response()->json(['status' => true, 'data' => $data, 'error' => []]);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => true, 'data' => [], 'error' => ['message' => $e->getMessage()]]);
         }
     }
- 
 
     //*** POST Request
     public function delete($id)
@@ -374,6 +378,7 @@ class CheckoutController extends Controller
             if ($request->has('order_number')) {
                 $order_number = $request->order_number;
                 $order = Order::where('order_number', $order_number)->firstOrFail();
+
                 return response()->json(['status' => true, 'data' => new OrderDetailsResource($order), 'error' => []]);
             }
         } catch (\Exception $e) {
@@ -394,21 +399,21 @@ class CheckoutController extends Controller
             $size_price = (float) $p_size_price;
             $size_key = $p_size_key;
             $keys = $p_keys;
-            $keys = explode(",", $keys);
+            $keys = explode(',', $keys);
             $values = $p_values;
-            $values = explode(",", $values);
+            $values = explode(',', $values);
             $prices = $p_prices;
 
-            if (!empty($prices)) {
-                $prices = explode(",", $prices);
+            if (! empty($prices)) {
+                $prices = explode(',', $prices);
             }
 
-            $keys = $keys == "" ? '' : implode(',', $keys);
+            $keys = $keys == '' ? '' : implode(',', $keys);
 
-            $values = $values == "" ? '' : implode(',', $values);
-            if (!empty($currency_code)) {
+            $values = $values == '' ? '' : implode(',', $values);
+            if (! empty($currency_code)) {
                 $curr = Currency::where('name', '=', $currency_code)->first();
-                if (!empty($curr)) {
+                if (! empty($curr)) {
                     $curr = Currency::where('is_default', '=', 1)->first();
                 }
             } else {
@@ -424,15 +429,15 @@ class CheckoutController extends Controller
                 $prod->price = round($prc, 2);
             }
 
-            if (!empty($prices)) {
-                if (!empty($prices[0])) {
+            if (! empty($prices)) {
+                if (! empty($prices[0])) {
                     foreach ($prices as $data) {
                         $prod->price += ($data / $curr->value);
                     }
                 }
             }
 
-            if (!empty($prod->license_qty)) {
+            if (! empty($prod->license_qty)) {
                 $lcheck = 1;
                 foreach ($prod->license_qty as $ttl => $dtl) {
                     if ($dtl < 1) {
@@ -447,25 +452,23 @@ class CheckoutController extends Controller
                 }
             }
             if (empty($size)) {
-                if (!empty($prod->size)) {
+                if (! empty($prod->size)) {
                     $size = trim($prod->size[0]);
                 }
                 $size = str_replace(' ', '-', $size);
             }
 
             if (empty($color)) {
-                if (!empty($prod->color)) {
+                if (! empty($prod->color)) {
                     $color = $prod->color[0];
                 }
             }
-
 
             $color = str_replace('#', '', $color);
 
             $cart->addnum($prod, $prod->id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user);
 
             $cart->totalPrice = 0;
-
 
             foreach ($cart->items as $data) {
                 $cart->totalPrice += $data['price'];
@@ -503,9 +506,9 @@ class CheckoutController extends Controller
     {
         $shipping = Shipping::whereUserId(0)->get();
         $packaging = Package::whereUserId(0)->get();
+
         return response()->json(['status' => true, 'data' => ['shipping' => $shipping, 'packaging' => $packaging], 'error' => []]);
     }
-
 
     public function VendorWisegetShippingPackaging(Request $request)
     {
@@ -513,33 +516,37 @@ class CheckoutController extends Controller
         foreach ($explode as $key => $value) {
             // $shipping[$value] = Shipping::where('user_id', $value)->get();
             // $packaging[$value] = Package::where('user_id', $value)->get();
-            
+
             $shipping[$value] = Shipping::where('user_id', $value)
-                    ->orWhere('user_id', 0)
-                    ->get();
+                ->orWhere('user_id', 0)
+                ->get();
 
             $packaging[$value] = Package::where('user_id', $value)
-                    ->orWhere('user_id', 0)
-                    ->get();
+                ->orWhere('user_id', 0)
+                ->get();
 
         }
+
         return response()->json(['status' => true, 'data' => ['shipping' => $shipping, 'packaging' => $packaging], 'error' => []]);
     }
-    
+
     public function countries()
     {
-    $countries = Country::with('states.cities')
-        ->where('status', 1)
-        ->get();
-    return response()->json([
-        'status' => true,
-        'data' => $countries,
-        'error' => []
-    ]);
+        $countries = Country::with('states.cities')
+            ->where('status', 1)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $countries,
+            'error' => [],
+        ]);
     }
-    
-    public function servicearea(){
+
+    public function servicearea()
+    {
         $service_areas = ServiceArea::all();
+
         return response()->json(['status' => true, 'data' => $service_areas, 'error' => []]);
     }
 }

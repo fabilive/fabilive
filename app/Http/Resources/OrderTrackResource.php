@@ -14,13 +14,13 @@ class OrderTrackResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'order_id' => $this->user_id,
-        'title' => $this->title,
-        'text' => $this->text,
-        'created_at' => $this->created_at,
-        'updated_at' => $this->updated_at,
-      ];
+        return [
+            'id' => $this->id,
+            'order_id' => $this->user_id,
+            'title' => $this->title,
+            'text' => $this->text,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

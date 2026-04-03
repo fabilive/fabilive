@@ -9,6 +9,5 @@ class ArrivalSection extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title','header', 'photo','up_sale','url'];
-
+    protected $fillable = ['title', 'header', 'photo', 'up_sale', 'url'];
 }

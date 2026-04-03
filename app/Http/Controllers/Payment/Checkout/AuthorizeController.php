@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Models\PaymentGateway,
-    Classes\GeniusMailer
-};
+use App\Classes\GeniusMailer;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
-use Session;
 use OrderHelper;
-use Illuminate\Support\Str;
+use Session;
 
 class AuthorizeController extends CheckoutBaseControlller
 {
@@ -32,17 +30,17 @@ class AuthorizeController extends CheckoutBaseControlller
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $item_name = $this->gs->title . " Order";
-        $item_number = Str::random(4) . time();
+        $item_name = $this->gs->title.' Order';
+        $item_number = Str::random(4).time();
         $item_amount = $total;
         $success_url = route('front.payment.return');
 
@@ -63,14 +61,14 @@ class AuthorizeController extends CheckoutBaseControlller
             $merchantAuthentication->setTransactionKey($paydata['txn_key']);
 
             // Set the transaction's refId
-            $refId = 'ref' . time();
+            $refId = 'ref'.time();
 
             // Create the payment data for a credit card
             $creditCard = new AnetAPI\CreditCardType();
             $creditCard->setCardNumber(str_replace(' ', '', $request->cardNumber));
             $year = $request->year;
             $month = $request->month;
-            $creditCard->setExpirationDate($year . '-' . $month);
+            $creditCard->setExpirationDate($year.'-'.$month);
             $creditCard->setCardCode($request->cardCode);
 
             // Add the payment data to a paymentType object
@@ -84,7 +82,7 @@ class AuthorizeController extends CheckoutBaseControlller
 
             // Create a TransactionRequestType object and add the previous objects to it
             $transactionRequestType = new AnetAPI\TransactionRequestType();
-            $transactionRequestType->setTransactionType("authCaptureTransaction");
+            $transactionRequestType->setTransactionType('authCaptureTransaction');
             $transactionRequestType->setAmount($item_amount);
             $transactionRequestType->setOrder($orderr);
             $transactionRequestType->setPayment($paymentOne);
@@ -105,7 +103,7 @@ class AuthorizeController extends CheckoutBaseControlller
             if ($response != null) {
 
                 // Check to see if the API request was successfully received and acted upon
-                if ($response->getMessages()->getResultCode() == "Ok") {
+                if ($response->getMessages()->getResultCode() == 'Ok') {
                     // Since the API request was successful, look for a transaction response
                     // and parse it to display the results of authorizing the card
                     $tresponse = $response->getTransactionResponse();
@@ -150,7 +148,6 @@ class AuthorizeController extends CheckoutBaseControlller
                             $input['vendor_ids'] = $vendor_ids;
                         } else {
 
-
                             // multi shipping
 
                             $orderTotal = $orderCalculate['total_amount'];
@@ -179,12 +176,12 @@ class AuthorizeController extends CheckoutBaseControlller
 
                         $order = new Order;
                         $input['cart'] = $new_cart;
-                        $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+                        $input['user_id'] = Auth::check() ? Auth::user()->id : null;
                         $input['affilate_users'] = $affilate_users;
                         $input['pay_amount'] = $orderTotal;
                         $input['order_number'] = $item_number;
                         $input['wallet_price'] = $request->wallet_price / $this->curr->value;
-                        $input['payment_status'] = "Completed";
+                        $input['payment_status'] = 'Completed';
                         if ($input['tax_type'] == 'state_tax') {
                             $input['tax_location'] = State::findOrFail($input['tax'])->state;
                         } else {
@@ -218,7 +215,7 @@ class AuthorizeController extends CheckoutBaseControlller
                         $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
                         $order->notifications()->create();
 
-                        if ($input['coupon_id'] != "") {
+                        if ($input['coupon_id'] != '') {
                             OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
                         }
 
@@ -230,11 +227,11 @@ class AuthorizeController extends CheckoutBaseControlller
                                     $smallest[$i->order_amount] = abs($i->order_amount - $num);
                                 }
 
-                                if(isset($smallest)){
+                                if (isset($smallest)) {
                                     asort($smallest);
-                              $final_reword = Reward::where('order_amount', key($smallest))->first();
-                              Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-                              }
+                                    $final_reword = Reward::where('order_amount', key($smallest))->first();
+                                    Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                                }
                             }
                         }
 
@@ -258,12 +255,12 @@ class AuthorizeController extends CheckoutBaseControlller
                         //Sending Email To Buyer
                         $data = [
                             'to' => $order->customer_email,
-                            'type' => "new_order",
+                            'type' => 'new_order',
                             'cname' => $order->customer_name,
-                            'oamount' => "",
-                            'aname' => "",
-                            'aemail' => "",
-                            'wtitle' => "",
+                            'oamount' => '',
+                            'aname' => '',
+                            'aemail' => '',
+                            'wtitle' => '',
                             'onumber' => $order->order_number,
                         ];
 
@@ -273,8 +270,8 @@ class AuthorizeController extends CheckoutBaseControlller
                         //Sending Email To Admin
                         $data = [
                             'to' => $this->ps->contact_email,
-                            'subject' => "New Order Recieved!!",
-                            'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                            'subject' => 'New Order Recieved!!',
+                            'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
                         ];
                         $mailer = new GeniusMailer();
                         $mailer->sendCustomMail($data);
@@ -291,6 +288,7 @@ class AuthorizeController extends CheckoutBaseControlller
                 return back()->with('unsuccess', __('Payment Failed.'));
             }
         }
+
         return back()->with('unsuccess', __('Invalid Payment Details.'));
     }
 }

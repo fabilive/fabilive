@@ -3,91 +3,99 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Generalsetting;
-use Illuminate\{
-    Http\Request,
-    Support\Facades\Mail
-};
-
 use Config;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 
 class GeneralSettingController extends AdminBaseController
 {
     protected $rules =
     [
-        'logo'              => 'mimes:jpeg,jpg,png,svg',
-        'favicon'           => 'mimes:jpeg,jpg,png,svg',
-        'loader'            => 'mimes:gif',
-        'admin_loader'      => 'mimes:gif',
-        'affilate_banner'   => 'mimes:jpeg,jpg,png,svg',
-        'error_banner_404'  => 'mimes:jpeg,jpg,png,svg',
-        'error_banner_500'  => 'mimes:jpeg,jpg,png,svg',
-        'popup_background'  => 'mimes:jpeg,jpg,png,svg',
-        'invoice_logo'      => 'mimes:jpeg,jpg,png,svg',
-        'user_image'        => 'mimes:jpeg,jpg,png,svg',
-        'footer_logo'       => 'mimes:jpeg,jpg,png,svg',
+        'logo' => 'mimes:jpeg,jpg,png,svg',
+        'favicon' => 'mimes:jpeg,jpg,png,svg',
+        'loader' => 'mimes:gif',
+        'admin_loader' => 'mimes:gif',
+        'affilate_banner' => 'mimes:jpeg,jpg,png,svg',
+        'error_banner_404' => 'mimes:jpeg,jpg,png,svg',
+        'error_banner_500' => 'mimes:jpeg,jpg,png,svg',
+        'popup_background' => 'mimes:jpeg,jpg,png,svg',
+        'invoice_logo' => 'mimes:jpeg,jpg,png,svg',
+        'user_image' => 'mimes:jpeg,jpg,png,svg',
+        'footer_logo' => 'mimes:jpeg,jpg,png,svg',
     ];
 
-    private function setEnv($key, $value,$prev)
+    private function setEnv($key, $value, $prev)
     {
         file_put_contents(app()->environmentFilePath(), str_replace(
-            $key . '=' . $prev,
-            $key . '=' . $value,
+            $key.'='.$prev,
+            $key.'='.$value,
             file_get_contents(app()->environmentFilePath())
         ));
     }
 
-    public function paymentsinfo(){
+    public function paymentsinfo()
+    {
         return view('admin.generalsetting.paymentsinfo');
     }
 
-    public function logo(){
+    public function logo()
+    {
         return view('admin.generalsetting.logo');
     }
 
-    public function favicon(){
+    public function favicon()
+    {
         return view('admin.generalsetting.favicon');
     }
 
-    public function loader(){
+    public function loader()
+    {
         return view('admin.generalsetting.loader');
     }
 
-    public function websitecontent(){
+    public function websitecontent()
+    {
         return view('admin.generalsetting.websitecontent');
     }
-    public function popup(){
+
+    public function popup()
+    {
         return view('admin.generalsetting.popup');
     }
-    public function breadcrumb(){
+
+    public function breadcrumb()
+    {
         return view('admin.generalsetting.breadcrumb');
     }
 
-    public function footer(){
+    public function footer()
+    {
         return view('admin.generalsetting.footer');
     }
 
-    public function affilate(){
+    public function affilate()
+    {
         return view('admin.generalsetting.affilate');
     }
 
-    public function error_banner(){
+    public function error_banner()
+    {
         return view('admin.generalsetting.error_banner');
     }
 
-
-
-    public function maintain(){
+    public function maintain()
+    {
         return view('admin.generalsetting.maintain');
     }
 
-
-
-    public function vendor_color(){
+    public function vendor_color()
+    {
         return view('admin.generalsetting.vendor_color');
     }
 
-    public function user_image(){
+    public function user_image()
+    {
         return view('admin.generalsetting.user_image');
     }
 
@@ -96,7 +104,7 @@ class GeneralSettingController extends AdminBaseController
     {
         $validator = Validator::make($request->all(), $this->rules);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
 
         try {
@@ -192,7 +200,7 @@ class GeneralSettingController extends AdminBaseController
 
             // Product page checkboxes
             if ($request->exists('product_page')) {
-                $updateData['product_page'] = !empty($request->product_page)
+                $updateData['product_page'] = ! empty($request->product_page)
                     ? implode(',', $request->product_page)
                     : null;
             }
@@ -209,11 +217,13 @@ class GeneralSettingController extends AdminBaseController
             $data->update($updateData);
 
             $msg = __('Data Updated Successfully.');
+
             return response()->json($msg);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('GeneralSetting update failed: ' . $e->getMessage());
-            return response()->json(['errors' => ['general' => ['Upload failed: ' . $e->getMessage()]]], 500);
+            \Illuminate\Support\Facades\Log::error('GeneralSetting update failed: '.$e->getMessage());
+
+            return response()->json(['errors' => ['general' => ['Upload failed: '.$e->getMessage()]]], 500);
         }
     }
 
@@ -223,49 +233,48 @@ class GeneralSettingController extends AdminBaseController
         $validator = Validator::make($request->all(), $this->rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
         //--- Logic Section
         else {
-        $input = $request->all();
-        $data = Generalsetting::findOrFail(1);
-        $prev = $data->molly_key;
+            $input = $request->all();
+            $data = Generalsetting::findOrFail(1);
+            $prev = $data->molly_key;
 
-        if ($request->vendor_ship_info == ""){
-            $input['vendor_ship_info'] = 0;
-        }
+            if ($request->vendor_ship_info == '') {
+                $input['vendor_ship_info'] = 0;
+            }
 
-        if ($request->instamojo_sandbox == ""){
-            $input['instamojo_sandbox'] = 0;
-        }
+            if ($request->instamojo_sandbox == '') {
+                $input['instamojo_sandbox'] = 0;
+            }
 
-        if ($request->paypal_mode == ""){
-            $input['paypal_mode'] = 'live';
-        }
-        else {
-            $input['paypal_mode'] = 'sandbox';
-        }
+            if ($request->paypal_mode == '') {
+                $input['paypal_mode'] = 'live';
+            } else {
+                $input['paypal_mode'] = 'sandbox';
+            }
 
-        if ($request->paytm_mode == ""){
-            $input['paytm_mode'] = 'live';
-        }
-        else {
-            $input['paytm_mode'] = 'sandbox';
-        }
-        $data->update($input);
+            if ($request->paytm_mode == '') {
+                $input['paytm_mode'] = 'live';
+            } else {
+                $input['paytm_mode'] = 'sandbox';
+            }
+            $data->update($input);
 
-        cache()->forget('generalsettings');
+            cache()->forget('generalsettings');
 
-        // Set Molly ENV
+            // Set Molly ENV
 
-        //--- Logic Section Ends
+            //--- Logic Section Ends
 
-        //--- Redirect Section
-        $msg = __(__('Data Updated Successfully.'));
-        return response()->json($msg);
-        //--- Redirect Section Ends
+            //--- Redirect Section
+            $msg = __(__('Data Updated Successfully.'));
+
+            return response()->json($msg);
+            //--- Redirect Section Ends
         }
     }
 
@@ -307,11 +316,11 @@ class GeneralSettingController extends AdminBaseController
         //         return response()->json($e->getMessage());
         //     }
 
-
         $maildata->update($input);
 
         //--- Redirect Section
         $msg = 'Mail Data Updated Successfully.';
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -325,22 +334,23 @@ class GeneralSettingController extends AdminBaseController
     }
 
     // Status Change Method -> GET Request
-    public function status($field,$value)
+    public function status($field, $value)
     {
         $prev = '';
         $data = Generalsetting::findOrFail(1);
-        if($field == 'is_debug'){
-            $prev = $data->is_debug == 1 ? 'true':'false';
+        if ($field == 'is_debug') {
+            $prev = $data->is_debug == 1 ? 'true' : 'false';
         }
         $data[$field] = $value;
         $data->update();
-        if($field == 'is_debug'){
-            $now = $data->is_debug == 1 ? 'true':'false';
-            $this->setEnv('APP_DEBUG',$now,$prev);
+        if ($field == 'is_debug') {
+            $now = $data->is_debug == 1 ? 'true' : 'false';
+            $this->setEnv('APP_DEBUG', $now, $prev);
         }
         cache()->forget('generalsettings');
         //--- Redirect Section
         $msg = __('Status Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
 

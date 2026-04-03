@@ -3,8 +3,8 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Order;
-use App\Models\User;
 use App\Models\Rider;
+use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -25,7 +25,7 @@ class StatsOverview extends BaseWidget
                 ->description('Verified delivery partners')
                 ->descriptionIcon('heroicon-m-truck')
                 ->color('warning'),
-            Stat::make('Revenue (Est.)', 'XAF ' . number_format(Order::where('payment_status', 'Completed')->sum('pay_amount'), 0))
+            Stat::make('Revenue (Est.)', 'XAF '.number_format(Order::where('payment_status', 'Completed')->sum('pay_amount'), 0))
                 ->description('Total completed payments')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),

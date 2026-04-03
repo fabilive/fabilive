@@ -2,25 +2,24 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Session;
-use OrderHelper;
 use Illuminate\Support\Str;
+use OrderHelper;
+use Session;
 
 class FlutterwaveController extends CheckoutBaseControlller
 {
     public $public_key;
+
     private $secret_key;
 
     public function __construct()
@@ -41,23 +40,23 @@ class FlutterwaveController extends CheckoutBaseControlller
         $total = $request->total;
 
         $supported_currency = json_decode($data->currency_id, true);
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Flutterwave Payment.'));
         }
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $order['item_name'] = $this->gs->title . " Order";
-        $order['item_number'] = Str::random(4) . time();
+        $order['item_name'] = $this->gs->title.' Order';
+        $order['item_number'] = Str::random(4).time();
         $order['item_amount'] = $total;
         $cancel_url = route('front.payment.cancle');
         $notify_url = route('front.flutter.notify');
@@ -76,13 +75,12 @@ class FlutterwaveController extends CheckoutBaseControlller
         $txref = $order['item_number']; // ensure you generate unique references per transaction.
         $PBFPubKey = $this->public_key; // get your public key from the dashboard.
         $redirect_url = $notify_url;
-        $payment_plan = ""; // this is only required for recurring payments.
+        $payment_plan = ''; // this is only required for recurring payments.
 
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/hosted/pay",
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/hosted/pay',
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode([
                 'amount' => $amount,
                 'customer_email' => $customer_email,
@@ -90,47 +88,42 @@ class FlutterwaveController extends CheckoutBaseControlller
                 'txref' => $txref,
                 'PBFPubKey' => $PBFPubKey,
                 'redirect_url' => $redirect_url,
-                'payment_plan' => $payment_plan
+                'payment_plan' => $payment_plan,
             ]),
             CURLOPT_HTTPHEADER => [
-                "content-type: application/json",
-                "cache-control: no-cache"
+                'content-type: application/json',
+                'cache-control: no-cache',
             ],
-        ));
+        ]);
 
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
         if ($err) {
             // there was an error contacting the rave API
-            return redirect($cancel_url)->with('unsuccess', 'Curl returned error: ' . $err);
+            return redirect($cancel_url)->with('unsuccess', 'Curl returned error: '.$err);
         }
 
         $transaction = json_decode($response);
 
-        if (!$transaction->data && !$transaction->data->link) {
+        if (! $transaction->data && ! $transaction->data->link) {
             // there was an error from the API
-            return redirect($cancel_url)->with('unsuccess', 'API returned error: ' . $transaction->message);
+            return redirect($cancel_url)->with('unsuccess', 'API returned error: '.$transaction->message);
         }
 
         return redirect($transaction->data->link);
     }
-
 
     public function notify(Request $request)
     {
 
         $input_data = $request->all();
 
-
-
         $input = Session::get('input_data');
 
-
-        if ($request->cancelled == "true") {
+        if ($request->cancelled == 'true') {
             return redirect()->route('front.cart')->with('success', __('Payment Cancelled!'));
         }
-
 
         $order_data = Session::get('order_data');
         $success_url = route('front.payment.return');
@@ -149,19 +142,19 @@ class FlutterwaveController extends CheckoutBaseControlller
 
             $ref = $payment_id;
 
-            $query = array(
-                "SECKEY" => $this->secret_key,
-                "txref" => $ref
-            );
+            $query = [
+                'SECKEY' => $this->secret_key,
+                'txref' => $ref,
+            ];
 
             $data_string = json_encode($query);
 
             $ch = curl_init('https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/verify');
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
             $response = curl_exec($ch);
 
@@ -169,13 +162,13 @@ class FlutterwaveController extends CheckoutBaseControlller
 
             $resp = json_decode($response, true);
 
-            if ($resp['status'] = "success") {
-                if (!empty($resp['data'])) {
+            if ($resp['status'] = 'success') {
+                if (! empty($resp['data'])) {
 
                     $paymentStatus = $resp['data']['status'];
                     $chargeResponsecode = $resp['data']['chargecode'];
 
-                    if (($chargeResponsecode == "00" || $chargeResponsecode == "0") && ($paymentStatus == "successful")) {
+                    if (($chargeResponsecode == '00' || $chargeResponsecode == '0') && ($paymentStatus == 'successful')) {
 
                         $cart = Session::get('cart');
                         OrderHelper::license_check($cart); // For License Checking
@@ -214,7 +207,6 @@ class FlutterwaveController extends CheckoutBaseControlller
                             $input['vendor_ids'] = $vendor_ids;
                         } else {
 
-
                             // multi shipping
 
                             $orderTotal = $orderCalculate['total_amount'];
@@ -243,12 +235,12 @@ class FlutterwaveController extends CheckoutBaseControlller
 
                         $order = new Order;
                         $input['cart'] = $new_cart;
-                        $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+                        $input['user_id'] = Auth::check() ? Auth::user()->id : null;
                         $input['affilate_users'] = $affilate_users;
                         $input['pay_amount'] = $orderTotal;
                         $input['order_number'] = $order_data['item_number'];
                         $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
-                        $input['payment_status'] = "Completed";
+                        $input['payment_status'] = 'Completed';
                         $input['txnid'] = $resp['data']['txid'];
 
                         if ($input['tax_type'] == 'state_tax') {
@@ -283,7 +275,7 @@ class FlutterwaveController extends CheckoutBaseControlller
                         $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
                         $order->notifications()->create();
 
-                        if ($input['coupon_id'] != "") {
+                        if ($input['coupon_id'] != '') {
                             OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
                         }
 
@@ -295,11 +287,11 @@ class FlutterwaveController extends CheckoutBaseControlller
                                     $smallest[$i->order_amount] = abs($i->order_amount - $num);
                                 }
 
-                                if(isset($smallest)){
+                                if (isset($smallest)) {
                                     asort($smallest);
-                              $final_reword = Reward::where('order_amount', key($smallest))->first();
-                              Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-                              }
+                                    $final_reword = Reward::where('order_amount', key($smallest))->first();
+                                    Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                                }
                             }
                         }
 
@@ -323,12 +315,12 @@ class FlutterwaveController extends CheckoutBaseControlller
                         //Sending Email To Buyer
                         $data = [
                             'to' => $order->customer_email,
-                            'type' => "new_order",
+                            'type' => 'new_order',
                             'cname' => $order->customer_name,
-                            'oamount' => "",
-                            'aname' => "",
-                            'aemail' => "",
-                            'wtitle' => "",
+                            'oamount' => '',
+                            'aname' => '',
+                            'aemail' => '',
+                            'wtitle' => '',
                             'onumber' => $order->order_number,
                         ];
 
@@ -338,8 +330,8 @@ class FlutterwaveController extends CheckoutBaseControlller
                         //Sending Email To Admin
                         $data = [
                             'to' => $this->ps->contact_email,
-                            'subject' => "New Order Recieved!!",
-                            'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                            'subject' => 'New Order Recieved!!',
+                            'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
                         ];
                         $mailer = new GeniusMailer();
                         $mailer->sendCustomMail($data);
@@ -348,8 +340,10 @@ class FlutterwaveController extends CheckoutBaseControlller
                     }
                 }
             }
+
             return redirect($cancel_url);
         }
+
         return redirect($cancel_url);
     }
 }

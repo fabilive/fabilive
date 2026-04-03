@@ -3,7 +3,6 @@
 namespace App\Services\AI;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class AntiScamService
 {
@@ -97,6 +96,7 @@ class AntiScamService
                 'details' => "Price is $price for category: $category",
                 'risk_score' => 50,
             ];
+
             return $signals;
         }
 

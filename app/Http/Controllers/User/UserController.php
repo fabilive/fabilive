@@ -1,15 +1,17 @@
 <?php
+
 namespace App\Http\Controllers\User;
-use Validator;
-use App\Models\User;
-use App\Models\Order;
+
 use App\Events\MessageSent;
-use App\Models\LiveMessage;
-use Illuminate\Http\Request;
 use App\Models\FavoriteSeller;
+use App\Models\LiveMessage;
+use App\Models\Order;
 use App\Models\PaymentGateway;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Validator;
 
 class UserController extends UserBaseController
 {
@@ -18,12 +20,12 @@ class UserController extends UserBaseController
         $user = Auth::user(); // More standard
         // dd($user);
         $sign = \App\Models\Currency::where('is_default', 1)->first();
-        if (!$sign) {
+        if (! $sign) {
             $sign = (object) ['sign' => 'FCFA', 'value' => 1, 'name' => 'CFA'];
         }
+
         return view('user.dashboard', compact('user', 'sign'));
     }
-
 
     // public function index()
     // {
@@ -34,6 +36,7 @@ class UserController extends UserBaseController
     public function profile()
     {
         $user = $this->user;
+
         return view('user.profile', compact('user'));
     }
 
@@ -44,35 +47,36 @@ class UserController extends UserBaseController
         $rules =
             [
                 'photo' => 'mimes:jpeg,jpg,png,svg',
-                'email' => 'unique:users,email,' . $this->user->id,
-                'referral_name' => 'nullable|string|unique:users,referral_name,' . $this->user->id,
+                'email' => 'unique:users,email,'.$this->user->id,
+                'referral_name' => 'nullable|string|unique:users,referral_name,'.$this->user->id,
             ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
         $input = $request->all();
         $data = $this->user;
         if ($file = $request->file('photo')) {
             $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-            if (!in_array($file->getClientOriginalExtension(), $extensions)) {
-                return response()->json(array('errors' => ['Image format not supported']));
+            if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                return response()->json(['errors' => ['Image format not supported']]);
             }
 
             $name = \PriceHelper::ImageCreateName($file);
             $file->move('assets/images/users/', $name);
             if ($data->photo != null) {
-                if (file_exists(public_path() . '/assets/images/users/' . $data->photo)) {
-                    unlink(public_path() . '/assets/images/users/' . $data->photo);
+                if (file_exists(public_path().'/assets/images/users/'.$data->photo)) {
+                    unlink(public_path().'/assets/images/users/'.$data->photo);
                 }
             }
             $input['photo'] = $name;
         }
         $data->update($input);
         $msg = __('Successfully updated your profile');
+
         return response()->json($msg);
     }
 
@@ -89,14 +93,15 @@ class UserController extends UserBaseController
                 if ($request->newpass == $request->renewpass) {
                     $input['password'] = Hash::make($request->newpass);
                 } else {
-                    return response()->json(array('errors' => [0 => __('Confirm password does not match.')]));
+                    return response()->json(['errors' => [0 => __('Confirm password does not match.')]]);
                 }
             } else {
-                return response()->json(array('errors' => [0 => __('Current password Does not match.')]));
+                return response()->json(['errors' => [0 => __('Current password Does not match.')]]);
             }
         }
         $user->update($input);
         $msg = __('Successfully changed your password');
+
         return response()->json($msg);
     }
 
@@ -108,6 +113,7 @@ class UserController extends UserBaseController
         if ($data['pay_id'] != 0) {
             $data['gateway'] = PaymentGateway::findOrFail($data['pay_id']);
         }
+
         return view('load.payment-user', $data);
     }
 
@@ -119,6 +125,7 @@ class UserController extends UserBaseController
         $fav->save();
         $data['icon'] = '<i class="icofont-check"></i>';
         $data['text'] = __('Favorite');
+
         return response()->json($data);
     }
 
@@ -131,12 +138,14 @@ class UserController extends UserBaseController
     {
         $wish = FavoriteSeller::findOrFail($id);
         $wish->delete();
+
         return redirect()->route('user-favorites')->with('success', __('Successfully Removed The Seller.'));
     }
 
     public function affilate_code()
     {
         $user = $this->user;
+
         return view('user.affilate.affilate-program', compact('user'));
     }
 
@@ -144,7 +153,7 @@ class UserController extends UserBaseController
     {
         $user = $this->user;
         $affilates = Order::where('status', '=', 'completed')->where('affilate_users', '!=', null)->get();
-        $final_affilate_users = array();
+        $final_affilate_users = [];
         $i = 0;
         foreach ($affilates as $order) {
             $affilate_users = json_decode($order->affilate_users, true);
@@ -158,6 +167,7 @@ class UserController extends UserBaseController
                 }
             }
         }
+
         return view('user.affilate.affilate-history', compact('user', 'final_affilate_users'));
     }
 
@@ -169,6 +179,7 @@ class UserController extends UserBaseController
         })->orWhere(function ($query) use ($user) {
             $query->where('sender_id', $user->id)->where('receiver_id', auth()->id());
         })->orderBy('created_at', 'asc')->get();
+
         return view('chat', compact('user', 'messages'));
     }
 
@@ -180,6 +191,7 @@ class UserController extends UserBaseController
             'content' => $request->message,
         ]);
         broadcast(new MessageSent($message))->toOthers();
+
         return response()->json(['message' => $message]);
     }
 
@@ -187,9 +199,9 @@ class UserController extends UserBaseController
     {
         $user = $this->user;
         $request->validate([
-            'affilate_code' => 'required|string|max:255|unique:users,affilate_code,' . $user->id
+            'affilate_code' => 'required|string|max:255|unique:users,affilate_code,'.$user->id,
         ], [
-            'affilate_code.unique' => __('This Referral Code is already taken. Please choose another one.')
+            'affilate_code.unique' => __('This Referral Code is already taken. Please choose another one.'),
         ]);
 
         $user->affilate_code = str_replace(' ', '-', trim($request->affilate_code));

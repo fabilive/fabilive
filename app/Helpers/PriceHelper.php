@@ -7,8 +7,8 @@ use App\Models\Currency;
 use App\Models\Package;
 use App\Models\Shipping;
 use App\Models\State;
-use Session;
 use DB;
+use Session;
 
 class PriceHelper
 {
@@ -36,7 +36,6 @@ class PriceHelper
         }
     }
 
-
     public static function showCurrencyPrice($price)
     {
         $gs = cache()->remember('generalsettings', now()->addDay(), function () {
@@ -59,12 +58,11 @@ class PriceHelper
         }
 
         if ($gs->currency_format == 0) {
-            return $curr->sign . $new_price;
+            return $curr->sign.$new_price;
         } else {
-            return $new_price . $curr->sign;
+            return $new_price.$curr->sign;
         }
     }
-
 
     public static function showAdminCurrencyPrice($price)
     {
@@ -80,14 +78,12 @@ class PriceHelper
 
         $curr = Currency::where('is_default', '=', 1)->first();
 
-
         if ($gs->currency_format == 0) {
-            return $curr->sign . $new_price;
+            return $curr->sign.$new_price;
         } else {
-            return $new_price . $curr->sign;
+            return $new_price.$curr->sign;
         }
     }
-
 
     public static function showOrderCurrencyPrice($price, $currency)
     {
@@ -102,19 +98,18 @@ class PriceHelper
         }
 
         if ($gs->currency_format == 0) {
-            return $currency . $new_price;
+            return $currency.$new_price;
         } else {
-            return $new_price . $currency;
+            return $new_price.$currency;
         }
     }
 
-
     public static function ImageCreateName($image)
     {
-        $name = time() . preg_replace('/[^A-Za-z0-9\-]/', '', $image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
+        $name = time().preg_replace('/[^A-Za-z0-9\-]/', '', $image->getClientOriginalName()).'.'.$image->getClientOriginalExtension();
+
         return $name;
     }
-
 
     public static function getOrderTotal($input, $cart)
     {
@@ -122,7 +117,7 @@ class PriceHelper
         try {
             $vendor_ids = [];
             foreach ($cart->items as $item) {
-                if (!in_array($item['item']['user_id'], $vendor_ids)) {
+                if (! in_array($item['item']['user_id'], $vendor_ids)) {
                     $vendor_ids[] = $item['item']['user_id'];
                 }
             }
@@ -164,10 +159,9 @@ class PriceHelper
                     'vendor_shipping_ids' => @json_encode($vendor_shipping_ids),
                     'vendor_packing_ids' => @json_encode($vendor_packing_ids),
                     'vendor_ids' => @json_encode($vendor_ids),
-                    'success' => true
+                    'success' => true,
                 ];
             } else {
-
 
                 if (gettype($input['shipping']) == 'string') {
                     $shippingData = json_decode($input['shipping'], true);
@@ -182,12 +176,11 @@ class PriceHelper
                     foreach ($shippingData as $key => $shipping_id) {
                         $shipping = Shipping::findOrFail($shipping_id);
                         $shipping_cost += $shipping->price;
-                        if (!in_array($shipping->user_id, $vendor_ids)) {
+                        if (! in_array($shipping->user_id, $vendor_ids)) {
                             $vendor_ids[] = $shipping->user_id;
                         }
                     }
                 }
-
 
                 if (gettype($input['packeging']) == 'string') {
                     $packegingData = json_decode($input['packeging'], true);
@@ -199,13 +192,11 @@ class PriceHelper
                     foreach ($packegingData as $key => $packaging_id) {
                         $packeing = Package::findOrFail($packaging_id);
                         $packaging_cost += $packeing->price;
-                        if (!in_array($packeing->user_id, $vendor_ids)) {
+                        if (! in_array($packeing->user_id, $vendor_ids)) {
                             $vendor_ids[] = $packeing->user_id;
                         }
                     }
                 }
-
-
 
                 $totalAmount = $totalAmount + $shipping_cost + $packaging_cost;
 
@@ -220,17 +211,16 @@ class PriceHelper
                     'vendor_ids' => @json_encode($vendor_ids),
                     'shipping_cost' => $shipping_cost,
                     'packing_cost' => $packaging_cost,
-                    'success' => true
+                    'success' => true,
                 ];
             }
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }
-
 
     public static function getOrderTotalAmount($input, $cart)
     {
@@ -248,7 +238,7 @@ class PriceHelper
         try {
             $vendor_ids = [];
             foreach ($cart->items as $item) {
-                if (!in_array($item['item']['user_id'], $vendor_ids)) {
+                if (! in_array($item['item']['user_id'], $vendor_ids)) {
                     $vendor_ids[] = $item['item']['user_id'];
                 }
             }
@@ -275,10 +265,10 @@ class PriceHelper
                     $vendor_packing_ids[$vendor_id] = $input['packaging_id'];
                 }
 
-
                 $shipping = Shipping::findOrFail($input['shipping_id']);
                 $packeing = Package::findOrFail($input['packaging_id']);
                 $totalAmount = $totalAmount + $shipping->price + $packeing->price;
+
                 return round($totalAmount / $curr->value, 2);
             } else {
 
@@ -289,7 +279,7 @@ class PriceHelper
                     foreach ($input['shipping'] as $key => $shipping_id) {
                         $shipping = Shipping::findOrFail($shipping_id);
                         $shipping_cost += $shipping->price;
-                        if (!in_array($shipping->user_id, $vendor_ids)) {
+                        if (! in_array($shipping->user_id, $vendor_ids)) {
                             $vendor_ids[] = $shipping->user_id;
                         }
                     }
@@ -298,7 +288,7 @@ class PriceHelper
                     foreach ($input['packeging'] as $key => $packaging_id) {
                         $packeing = Package::findOrFail($packaging_id);
                         $packaging_cost += $packeing->price;
-                        if (!in_array($packeing->user_id, $vendor_ids)) {
+                        if (! in_array($packeing->user_id, $vendor_ids)) {
                             $vendor_ids[] = $packeing->user_id;
                         }
                     }
@@ -311,7 +301,7 @@ class PriceHelper
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }

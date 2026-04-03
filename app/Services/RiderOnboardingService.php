@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Rider;
-use App\Models\Generalsetting;
 use App\Classes\GeniusMailer;
+use App\Models\Generalsetting;
+use App\Models\Rider;
 use Illuminate\Support\Facades\Log;
 
 class RiderOnboardingService
@@ -38,8 +38,8 @@ class RiderOnboardingService
     {
         $missing = $this->hasRequiredDocuments($rider);
 
-        if (!empty($missing)) {
-            throw new \Exception('Missing required documents: ' . implode(', ', $missing));
+        if (! empty($missing)) {
+            throw new \Exception('Missing required documents: '.implode(', ', $missing));
         }
 
         $rider->onboarding_status = 'pending_approval';
@@ -99,13 +99,13 @@ class RiderOnboardingService
                     <p>Your delivery agent account on <strong>{$siteName}</strong> has been approved.</p>
                     <p>You can now accept delivery jobs in your service area.</p>
                     <p>Best regards,<br>The {$siteName} Team</p>
-                "
+                ",
             ];
 
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } catch (\Exception $e) {
-            Log::error("Failed to send rider approval email: " . $e->getMessage());
+            Log::error('Failed to send rider approval email: '.$e->getMessage());
         }
     }
 
@@ -124,13 +124,13 @@ class RiderOnboardingService
                     <blockquote>{$reason}</blockquote>
                     <p>You may resubmit after addressing the above.</p>
                     <p>Best regards,<br>The {$siteName} Team</p>
-                "
+                ",
             ];
 
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } catch (\Exception $e) {
-            Log::error("Failed to send rider rejection email: " . $e->getMessage());
+            Log::error('Failed to send rider rejection email: '.$e->getMessage());
         }
     }
 }

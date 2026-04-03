@@ -3,13 +3,12 @@
 namespace App\Services\AI;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ThreeDGeneratorService extends AIService
 {
     protected $provider;
+
     protected $apiKey;
 
     public function __construct()
@@ -22,8 +21,6 @@ class ThreeDGeneratorService extends AIService
     /**
      * Generate a 3D model from a product image.
      *
-     * @param Product $product
-     * @param string $imagePath
      * @return string|null Path to the generated .glb file
      */
     public function generateForProduct(Product $product, string $imagePath)
@@ -41,6 +38,7 @@ class ThreeDGeneratorService extends AIService
 
         } catch (\Exception $e) {
             $this->auditLog('3d_generation_failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -53,21 +51,22 @@ class ThreeDGeneratorService extends AIService
         // In a real scenario, this would call an AI API.
         // For demonstration, we'll copy a placeholder robot model if it exists,
         // or just return the path to the expected model.
-        
+
         $modelDir = public_path('assets/models/products');
-        if (!file_exists($modelDir)) {
+        if (! file_exists($modelDir)) {
             mkdir($modelDir, 0755, true);
         }
 
-        $filename = 'product_' . $product->id . '_' . Str::random(5) . '.glb';
-        $destPath = 'assets/models/products/' . $filename;
-        
+        $filename = 'product_'.$product->id.'_'.Str::random(5).'.glb';
+        $destPath = 'assets/models/products/'.$filename;
+
         // Use the robot model we already have as a placeholder for now
         $sourcePath = public_path('assets/models/RobotExpressive.glb');
-        
+
         if (file_exists($sourcePath)) {
             copy($sourcePath, public_path($destPath));
             $this->auditLog('3d_generation_success', ['path' => $destPath, 'type' => 'mock']);
+
             return $destPath;
         }
 

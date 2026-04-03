@@ -2,26 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory;
 
-    protected $fillable = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country','country_id', 'address', 'phone','selfie_image',
-     'lat', 'lng',
-     'fax', 'email', 'password', 'affilate_code','reff', 'verification_link', 'shop_name', 'owner_name',
-     'shop_number', 'shop_address', 'reg_number', 'shop_message','business_registration_certificate','taxpayer_card_copy',
-     'id_card_copy','passport_copy','driver_license_copy','residence_permit', 'is_vendor', 'shop_details',
-     'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified','current_balance', 'email_token', 'reward',
-      'national_id_front_image', 'national_id_back_image','submerchant_agreement', 'license_image', 'is_verified',
-      'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
+    protected $fillable = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country', 'country_id', 'address', 'phone', 'selfie_image',
+        'lat', 'lng',
+        'fax', 'email', 'password', 'affilate_code', 'reff', 'verification_link', 'shop_name', 'owner_name',
+        'shop_number', 'shop_address', 'reg_number', 'shop_message', 'business_registration_certificate', 'taxpayer_card_copy',
+        'id_card_copy', 'passport_copy', 'driver_license_copy', 'residence_permit', 'is_vendor', 'shop_details',
+        'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified', 'current_balance', 'email_token', 'reward',
+        'national_id_front_image', 'national_id_back_image', 'submerchant_agreement', 'license_image', 'is_verified',
+        'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
 
     protected $hidden = [
-        'password', 'remember_token'
+        'password', 'remember_token',
     ];
 
     public function orders()
@@ -64,6 +64,7 @@ class User extends Authenticatable implements JWTSubject
         if ($this->is_vendor == 2) {
             return true;
         }
+
         return false;
     }
 
@@ -182,15 +183,21 @@ class User extends Authenticatable implements JWTSubject
 
     public function checkWarning()
     {
-        if (count($this->verifies) == 0) return false;
+        if (count($this->verifies) == 0) {
+            return false;
+        }
         $warning = $this->verifies()->where('admin_warning', '=', '1')->latest('id')->first();
-        if (!$warning) return false;
+        if (! $warning) {
+            return false;
+        }
+
         return empty($warning->status) ? true : false;
     }
 
     public function displayWarning()
     {
         $warning = $this->verifies()->where('admin_warning', '=', '1')->latest('id')->first();
+
         return $warning ? $warning->warning_reason : '';
     }
 

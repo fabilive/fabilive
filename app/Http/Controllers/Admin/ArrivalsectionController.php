@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ArrivalSection;
-use Illuminate\Http\Request;
 use Datatables;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ArrivalsectionController extends Controller
@@ -13,35 +13,42 @@ class ArrivalsectionController extends Controller
     public function datatables()
     {
         $datas = ArrivalSection::latest('id')->get();
+
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->editColumn('photo', function (ArrivalSection $data) {
-                $photo = $data->photo ? url('assets/images/arrival/' . $data->photo) : url('assets/images/noimage.png');
-                return '<img src="' . $photo . '" alt="Image">';
+                $photo = $data->photo ? url('assets/images/arrival/'.$data->photo) : url('assets/images/noimage.png');
+
+                return '<img src="'.$photo.'" alt="Image">';
             })
             ->editColumn('title', function (ArrivalSection $data) {
-                $title = mb_strlen(strip_tags($data->title), 'UTF-8') > 250 ? mb_substr(strip_tags($data->title), 0, 250, 'UTF-8') . '...' : strip_tags($data->title);
-                return  $title;
+                $title = mb_strlen(strip_tags($data->title), 'UTF-8') > 250 ? mb_substr(strip_tags($data->title), 0, 250, 'UTF-8').'...' : strip_tags($data->title);
+
+                return $title;
             })
             ->editColumn('up_sale', function (ArrivalSection $data) {
-                $up_sale = mb_strlen(strip_tags($data->up_sale), 'UTF-8') > 250 ? mb_substr(strip_tags($data->up_sale), 0, 250, 'UTF-8') . '...' : strip_tags($data->up_sale);
-                return  $up_sale;
+                $up_sale = mb_strlen(strip_tags($data->up_sale), 'UTF-8') > 250 ? mb_substr(strip_tags($data->up_sale), 0, 250, 'UTF-8').'...' : strip_tags($data->up_sale);
+
+                return $up_sale;
             })
             ->editColumn('header', function (ArrivalSection $data) {
-                $header = mb_strlen(strip_tags($data->header), 'UTF-8') > 250 ? mb_substr(strip_tags($data->header), 0, 250, 'UTF-8') . '...' : strip_tags($data->header);
-                return  $header;
+                $header = mb_strlen(strip_tags($data->header), 'UTF-8') > 250 ? mb_substr(strip_tags($data->header), 0, 250, 'UTF-8').'...' : strip_tags($data->header);
+
+                return $header;
             })
-          
+
             ->addColumn('action', function (ArrivalSection $data) {
-                return '<div class="action-list"><a href="' . route('admin-arrival-edit', $data->id) . '"> <i class="fas fa-edit"></i>' . __('Edit') . '</a><a href="javascript:;" data-href="' . route('admin-arrival-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+                return '<div class="action-list"><a href="'.route('admin-arrival-edit', $data->id).'"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('admin-arrival-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
             })
             ->rawColumns(['photo', 'action', 'up_sale'])
             ->toJson();
     }
+
     public function index()
     {
         return view('admin.arrival.index');
     }
+
     public function create()
     {
         return view('admin.arrival.create');
@@ -52,13 +59,13 @@ class ArrivalsectionController extends Controller
         //--- Validation Section
 
         $rules = [
-            'photo'      => 'required|mimes:jpeg,jpg,png,svg',
+            'photo' => 'required|mimes:jpeg,jpg,png,svg',
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Logic Section
         $data = new ArrivalSection();
@@ -73,19 +80,22 @@ class ArrivalsectionController extends Controller
 
         //--- Redirect Section
         $msg = __('New Data Added Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
+
     public function edit($id)
     {
         $data = ArrivalSection::findOrFail($id);
+
         return view('admin.arrival.edit', compact('data'));
     }
 
     public function status($id1, $id2)
     {
         ArrivalSection::findOrFail($id1)->update([
-            'status' => $id2
+            'status' => $id2,
         ]);
     }
 
@@ -93,13 +103,13 @@ class ArrivalsectionController extends Controller
     {
         //--- Validation Section
         $rules = [
-            'photo'      => 'mimes:jpeg,jpg,png,svg',
+            'photo' => 'mimes:jpeg,jpg,png,svg',
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
@@ -110,8 +120,8 @@ class ArrivalsectionController extends Controller
             $name = \PriceHelper::ImageCreateName($file);
             $file->move('assets/images/arrival', $name);
             if ($data->photo != null) {
-                if (file_exists(public_path() . '/assets/images/arrival/' . $data->photo)) {
-                    unlink(public_path() . '/assets/images/arrival/' . $data->photo);
+                if (file_exists(public_path().'/assets/images/arrival/'.$data->photo)) {
+                    unlink(public_path().'/assets/images/arrival/'.$data->photo);
                 }
             }
             $input['photo'] = $name;
@@ -121,6 +131,7 @@ class ArrivalsectionController extends Controller
 
         //--- Redirect Section
         $msg = __('Data Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -133,16 +144,18 @@ class ArrivalsectionController extends Controller
             $data->delete();
             //--- Redirect Section
             $msg = __('Data Deleted Successfully.');
+
             return response()->json($msg);
             //--- Redirect Section Ends
         }
         //If Photo Exist
-        if (file_exists(public_path() . '/assets/images/arrival/' . $data->photo)) {
-            unlink(public_path() . '/assets/images/arrival/' . $data->photo);
+        if (file_exists(public_path().'/assets/images/arrival/'.$data->photo)) {
+            unlink(public_path().'/assets/images/arrival/'.$data->photo);
         }
         $data->delete();
         //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }

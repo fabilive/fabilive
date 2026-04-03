@@ -2,28 +2,19 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use Session;
-use App\Models\Cart;
-use App\Models\State;
 use App\Classes\GeniusMailer;
+use App\Models\Cart;
+use App\Models\Generalsetting;
+use App\Models\Order;
+use App\Models\Reward;
+use App\Models\State;
+use App\Services\HitPayService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\PaymentGateway;
-use App\Models\Reward;
-use App\Models\Order;
-use App\Models\Generalsetting;
-use App\Http\Controllers\Controller;
 use OrderHelper;
-use Config;
+use Session;
 use Str;
-
-use App\{
-    Models\Deposit,
-    Models\Transaction,
-};
-use Exception;
-use App\Services\HitPayService;
-use Illuminate\Support\Facades\Http;
 
 class HitpayController extends CheckoutBaseControlller
 {
@@ -40,11 +31,11 @@ class HitpayController extends CheckoutBaseControlller
         $input = $request->all();
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input);
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
@@ -62,14 +53,15 @@ class HitpayController extends CheckoutBaseControlller
                 route('front.hitpay.notify'),
                 [
                     'failure_redirect_url' => route('front.payment.cancle'),
-                    'external_reference' => 'ORDER_'.time()
+                    'external_reference' => 'ORDER_'.time(),
                 ]
             );
             if (isset($response['url'])) {
                 Session::put('input_data', $request->all());
+
                 return redirect($response['url']);
             } else {
-                return back()->with('unsuccess', 'Hitpay Error: ' . json_encode($response));
+                return back()->with('unsuccess', 'Hitpay Error: '.json_encode($response));
             }
         } catch (Exception $e) {
             return back()->with('unsuccess', $e->getMessage());
@@ -92,7 +84,6 @@ class HitpayController extends CheckoutBaseControlller
             $new_cart = json_encode($new_cart);
             $temp_affilate_users = \OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
-
 
             $orderCalculate = \PriceHelper::getOrderTotal($input, $cart);
 
@@ -147,10 +138,10 @@ class HitpayController extends CheckoutBaseControlller
 
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
-            $input['order_number'] = Str::random(4) . time();
+            $input['order_number'] = Str::random(4).time();
             $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
             $input['payment_status'] = 'Completed';
             $input['txnid'] = $request->reference;
@@ -191,7 +182,7 @@ class HitpayController extends CheckoutBaseControlller
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
 
@@ -231,12 +222,12 @@ class HitpayController extends CheckoutBaseControlller
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
 
@@ -246,11 +237,12 @@ class HitpayController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
+
             return redirect(route('front.payment.return'));
         } else {
             return redirect(route('front.payment.cancle'));

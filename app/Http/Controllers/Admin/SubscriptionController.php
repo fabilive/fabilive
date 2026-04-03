@@ -3,38 +3,40 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Subscription;
-
-use Illuminate\Http\Request;
 use Datatables;
+use Illuminate\Http\Request;
 
 class SubscriptionController extends AdminBaseController
 {
     //*** JSON Request
     public function datatables()
     {
-         $datas = Subscription::latest('id')->get();
-         //--- Integrating This Collection Into Datatables
-         return Datatables::of($datas)
-                            ->editColumn('price', function(Subscription $data) {
-                                $price = $data->price * $this->curr->value;
-                                return \PriceHelper::showAdminCurrencyPrice($price);
-                            })
-                            ->editColumn('allowed_products', function(Subscription $data) {
-                                $allowed_products = $data->allowed_products == 0 ? "Unlimited": $data->allowed_products;
-                                return $allowed_products;
-                            })
-                            ->addColumn('action', function(Subscription $data) {
-                                return '<div class="action-list"><a data-href="' . route('admin-subscription-edit',$data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="' . route('admin-subscription-delete',$data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
-                            }) 
-                            ->rawColumns(['action'])
-                            ->toJson(); //--- Returning Json Data To Client Side
+        $datas = Subscription::latest('id')->get();
+
+        //--- Integrating This Collection Into Datatables
+        return Datatables::of($datas)
+            ->editColumn('price', function (Subscription $data) {
+                $price = $data->price * $this->curr->value;
+
+                return \PriceHelper::showAdminCurrencyPrice($price);
+            })
+            ->editColumn('allowed_products', function (Subscription $data) {
+                $allowed_products = $data->allowed_products == 0 ? 'Unlimited' : $data->allowed_products;
+
+                return $allowed_products;
+            })
+            ->addColumn('action', function (Subscription $data) {
+                return '<div class="action-list"><a data-href="'.route('admin-subscription-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('admin-subscription-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+            })
+            ->rawColumns(['action'])
+            ->toJson(); //--- Returning Json Data To Client Side
     }
 
     //*** GET Request
     public function index()
     {
-        return view('admin.subscription.index',[
-            'sign' => $this->curr
+        return view('admin.subscription.index', [
+            'sign' => $this->curr,
         ]);
     }
 
@@ -51,18 +53,18 @@ class SubscriptionController extends AdminBaseController
         $data = new Subscription();
         $input = $request->all();
 
-        if($input['limit'] == 0)
-         {
+        if ($input['limit'] == 0) {
             $input['allowed_products'] = 0;
-         }
+        }
         $input['price'] = ($input['price'] / $this->curr->value);
         $data->fill($input)->save();
         //--- Logic Section Ends
 
-        //--- Redirect Section        
+        //--- Redirect Section
         $msg = __('New Data Added Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends    
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 
     //*** GET Request
@@ -70,7 +72,8 @@ class SubscriptionController extends AdminBaseController
     {
         $sign = $this->curr;
         $data = Subscription::findOrFail($id);
-        return view('admin.subscription.edit',compact('data','sign'));
+
+        return view('admin.subscription.edit', compact('data', 'sign'));
     }
 
     //*** POST Request
@@ -79,18 +82,18 @@ class SubscriptionController extends AdminBaseController
         //--- Logic Section
         $data = Subscription::findOrFail($id);
         $input = $request->all();
-        if($input['limit'] == 0)
-         {
+        if ($input['limit'] == 0) {
             $input['allowed_products'] = 0;
-         }
-         $input['price'] = ($input['price'] / $this->curr->value);
+        }
+        $input['price'] = ($input['price'] / $this->curr->value);
         $data->update($input);
         //--- Logic Section Ends
 
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends            
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 
     //*** GET Request Delete
@@ -98,9 +101,10 @@ class SubscriptionController extends AdminBaseController
     {
         $data = Subscription::findOrFail($id);
         $data->delete();
-        //--- Redirect Section     
+        //--- Redirect Section
         $msg = __('Data Deleted Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends     
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
     }
 }

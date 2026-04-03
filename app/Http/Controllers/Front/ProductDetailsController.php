@@ -2,42 +2,35 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\{
-    Models\User,
-    Models\Order,
-    Models\Reply,
-    Models\Rating,
-    Models\Report,
-    Models\Product,
-    Models\Comment,
-    Models\Currency,
-    Models\ProductClick,
-    Models\LiveMessage
-};
-use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Models\Comment;
+use App\Models\LiveMessage;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductClick;
+use App\Models\Rating;
+use App\Models\Reply;
+use App\Models\Report;
+use App\Models\User;
 use Auth;
-use Session;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Validator;
 
 class ProductDetailsController extends FrontBaseController
 {
-
-
-
     // -------------------------------- PRODUCT DETAILS SECTION ----------------------------------------
-    
+
     public function product(Request $request, $slug)
     {
         $affilate_user = 0;
         $gs = $this->gs;
         if ($gs->product_affilate == 1) {
             if ($request->has('ref')) {
-                if (!empty($request->ref)) {
+                if (! empty($request->ref)) {
                     $ref = $request->ref;
                     $user = User::where('affilate_code', $ref)->first();
                     if ($user) {
-                        $affilate_users = array();
+                        $affilate_users = [];
                         $ck = false;
                         if (Auth::check()) {
                             // Checking whether the affiliate holder is using his own affilate
@@ -65,18 +58,18 @@ class ProductDetailsController extends FrontBaseController
         $productt->views += 1;
         $productt->update();
         $curr = $this->curr;
-        $product_click =  new ProductClick;
+        $product_click = new ProductClick;
         $product_click->product_id = $productt->id;
         $product_click->date = Carbon::now()->format('Y-m-d');
         $product_click->save();
-        $user=$productt->user;
+        $user = $productt->user;
         $messages = LiveMessage::where(function ($query) use ($user) {
             $query->where('sender_id', auth()->id())->where('receiver_id', $user->id);
         })->orWhere(function ($query) use ($user) {
             $query->where('sender_id', $user->id)->where('receiver_id', auth()->id());
         })->orderBy('created_at', 'asc')->get();
         //dd(env('DB_DATABASE'));
-       
+
         return view('frontend.product', compact('productt', 'curr', 'affilate_user', 'vendor_products', 'messages', 'user'));
     }
 
@@ -90,12 +83,13 @@ class ProductDetailsController extends FrontBaseController
         ];
         $validator = Validator::make($request->all(), $rules, $customs);
         if ($validator->fails()) {
-            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         $data = new Report;
         $input = $request->all();
         $data->fill($input)->save();
         $msg = __('Report Sent Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
 
@@ -105,17 +99,17 @@ class ProductDetailsController extends FrontBaseController
     {
         $product = Product::findOrFail($id);
         $curr = $this->curr;
+
         return view('load.quick', compact('product', 'curr'));
     }
 
     public function affProductRedirect($slug)
     {
         $product = Product::where('slug', '=', $slug)->first();
+
         return redirect($product->affiliate_link);
     }
     // -------------------------------- PRODUCT DETAILS SECTION ENDS----------------------------------------
-
-
 
     // -------------------------------- PRODUCT COMMENT SECTION ----------------------------------------
 
@@ -124,7 +118,7 @@ class ProductDetailsController extends FrontBaseController
         $comment = new Comment;
         $input = $request->all();
         $comment->fill($input)->save();
-        $data[0] = $comment->user->photo ? url('assets/images/users/' . $comment->user->photo) : url('assets/images/' . $this->gs->user_image);
+        $data[0] = $comment->user->photo ? url('assets/images/users/'.$comment->user->photo) : url('assets/images/'.$this->gs->user_image);
         $data[1] = $comment->user->name;
         $data[2] = $comment->created_at->diffForHumans();
         $data[3] = $comment->text;
@@ -132,45 +126,46 @@ class ProductDetailsController extends FrontBaseController
         $data[6] = route('product.comment.edit', $comment->id);
         $data[7] = route('product.reply', $comment->id);
         $data[8] = $comment->user->id;
-        $newdata  =  '<li>';
+        $newdata = '<li>';
         $newdata .= '<div class="single-comment comment-section">';
         $newdata .= '<div class="left-area">';
-        $newdata .= '<img src="' . $data[0] . '" alt="">';
-        $newdata .= '<h5 class="name">' . $data[1] . '</h5>';
-        $newdata .= '<p class="date">' . $data[2] . '</p>';
+        $newdata .= '<img src="'.$data[0].'" alt="">';
+        $newdata .= '<h5 class="name">'.$data[1].'</h5>';
+        $newdata .= '<p class="date">'.$data[2].'</p>';
         $newdata .= '</div>';
         $newdata .= '<div class="right-area">';
         $newdata .= '<div class="comment-body">';
-        $newdata .= '<p>' . $data[3] . '</p>';
+        $newdata .= '<p>'.$data[3].'</p>';
         $newdata .= '</div>';
         $newdata .= '<div class="comment-footer">';
         $newdata .= '<div class="links">';
-        $newdata .= '<a href="javascript:;" class="comment-link reply mr-2"><i class="fas fa-reply "></i>' . __('Reply') . '</a>';
-        $newdata .= '<a href="javascript:;" class="comment-link edit mr-2"><i class="fas fa-edit "></i>' . __('Edit') . '</a>';
-        $newdata .= '<a href="javascript:;" data-href="' . $data[5] . '" class="comment-link comment-delete mr-2">';
-        $newdata .= '<i class="fas fa-trash"></i>' . __('Delete') . '</a>';
+        $newdata .= '<a href="javascript:;" class="comment-link reply mr-2"><i class="fas fa-reply "></i>'.__('Reply').'</a>';
+        $newdata .= '<a href="javascript:;" class="comment-link edit mr-2"><i class="fas fa-edit "></i>'.__('Edit').'</a>';
+        $newdata .= '<a href="javascript:;" data-href="'.$data[5].'" class="comment-link comment-delete mr-2">';
+        $newdata .= '<i class="fas fa-trash"></i>'.__('Delete').'</a>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '<div class="replay-area edit-area d-none">';
-        $newdata .= '<form class="update" action="' . $data[6] . '" method="POST">';
+        $newdata .= '<form class="update" action="'.$data[6].'" method="POST">';
         $newdata .= csrf_field();
-        $newdata .= '<textarea placeholder="' . __('Edit Your Comment') . '" name="text" required=""></textarea>';
-        $newdata .= '<button type="submit">' . __('Submit') . '</button>';
-        $newdata .= '<a href="javascript:;" class="remove">' . __('Cancel') . '</a>';
+        $newdata .= '<textarea placeholder="'.__('Edit Your Comment').'" name="text" required=""></textarea>';
+        $newdata .= '<button type="submit">'.__('Submit').'</button>';
+        $newdata .= '<a href="javascript:;" class="remove">'.__('Cancel').'</a>';
         $newdata .= '</form>';
         $newdata .= '</div>';
         $newdata .= '<div class="replay-area reply-reply-area d-none">';
-        $newdata .= '<form class="reply-form" action="' . $data[7] . '" method="POST">';
-        $newdata .= '<input type="hidden" name="user_id" value="' . $data[8] . '">';
+        $newdata .= '<form class="reply-form" action="'.$data[7].'" method="POST">';
+        $newdata .= '<input type="hidden" name="user_id" value="'.$data[8].'">';
         $newdata .= csrf_field();
-        $newdata .= '<textarea placeholder="' . __('Write Your Reply') . '" name="text" required=""></textarea>';
-        $newdata .= '<button type="submit">' . __('Submit') . '</button>';
-        $newdata .= '<a href="javascript:;" class="remove">' . __('Cancel') . '</a>';
+        $newdata .= '<textarea placeholder="'.__('Write Your Reply').'" name="text" required=""></textarea>';
+        $newdata .= '<button type="submit">'.__('Submit').'</button>';
+        $newdata .= '<a href="javascript:;" class="remove">'.__('Cancel').'</a>';
         $newdata .= '</form>';
         $newdata .= '</div>';
         $newdata .= '</li>';
+
         return response()->json($newdata);
     }
 
@@ -179,6 +174,7 @@ class ProductDetailsController extends FrontBaseController
         $comment = Comment::findOrFail($id);
         $comment->text = $request->text;
         $comment->update();
+
         return response()->json($comment->text);
     }
 
@@ -203,40 +199,41 @@ class ProductDetailsController extends FrontBaseController
         $input = $request->all();
         $input['comment_id'] = $id;
         $reply->fill($input)->save();
-        $data[0] = $reply->user->photo ? url('assets/images/users/' . $reply->user->photo) : url('assets/images/' . $this->gs->user_image);
+        $data[0] = $reply->user->photo ? url('assets/images/users/'.$reply->user->photo) : url('assets/images/'.$this->gs->user_image);
         $data[1] = $reply->user->name;
         $data[2] = $reply->created_at->diffForHumans();
         $data[3] = $reply->text;
         $data[4] = route('product.reply.delete', $reply->id);
         $data[5] = route('product.reply.edit', $reply->id);
-        $newdata  = '<div class="single-comment replay-review">';
+        $newdata = '<div class="single-comment replay-review">';
         $newdata .= '<div class="left-area">';
-        $newdata .= '<img src="' . $data[0] . '" alt="">';
-        $newdata .= '<h5 class="name">' . $data[1] . '</h5>';
-        $newdata .= '<p class="date">' . $data[2] . '</p>';
+        $newdata .= '<img src="'.$data[0].'" alt="">';
+        $newdata .= '<h5 class="name">'.$data[1].'</h5>';
+        $newdata .= '<p class="date">'.$data[2].'</p>';
         $newdata .= '</div>';
         $newdata .= '<div class="right-area">';
         $newdata .= '<div class="comment-body">';
-        $newdata .= '<p>' . $data[3] . '</p>';
+        $newdata .= '<p>'.$data[3].'</p>';
         $newdata .= '</div>';
         $newdata .= '<div class="comment-footer">';
         $newdata .= '<div class="links">';
-        $newdata .= '<a href="javascript:;" class="comment-link reply mr-2"><i class="fas fa-reply "></i>' . __('Reply') . '</a>';
-        $newdata .= '<a href="javascript:;" class="comment-link edit mr-2"><i class="fas fa-edit "></i>' . __('Edit') . '</a>';
-        $newdata .= '<a href="javascript:;" data-href="' . $data[4] . '" class="comment-link reply-delete mr-2">';
-        $newdata .= '<i class="fas fa-trash"></i>' . __('Delete') . '</a>';
+        $newdata .= '<a href="javascript:;" class="comment-link reply mr-2"><i class="fas fa-reply "></i>'.__('Reply').'</a>';
+        $newdata .= '<a href="javascript:;" class="comment-link edit mr-2"><i class="fas fa-edit "></i>'.__('Edit').'</a>';
+        $newdata .= '<a href="javascript:;" data-href="'.$data[4].'" class="comment-link reply-delete mr-2">';
+        $newdata .= '<i class="fas fa-trash"></i>'.__('Delete').'</a>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '</div>';
         $newdata .= '<div class="replay-area edit-area d-none">';
-        $newdata .= '<form class="update" action="' . $data[5] . '" method="POST">';
+        $newdata .= '<form class="update" action="'.$data[5].'" method="POST">';
         $newdata .= csrf_field();
-        $newdata .= '<textarea placeholder="' . __('Edit Your Reply') . '" name="text" required=""></textarea>';
-        $newdata .= '<button type="submit">' . __('Submit') . '</button>';
-        $newdata .= '<a href="javascript:;" class="remove">' . __('Cancel') . '</a>';
+        $newdata .= '<textarea placeholder="'.__('Edit Your Reply').'" name="text" required=""></textarea>';
+        $newdata .= '<button type="submit">'.__('Submit').'</button>';
+        $newdata .= '<a href="javascript:;" class="remove">'.__('Cancel').'</a>';
         $newdata .= '</form>';
         $newdata .= '</div>';
+
         return response()->json($newdata);
     }
 
@@ -245,6 +242,7 @@ class ProductDetailsController extends FrontBaseController
         $reply = Reply::findOrFail($id);
         $reply->text = $request->text;
         $reply->update();
+
         return response()->json($reply->text);
     }
 
@@ -255,7 +253,6 @@ class ProductDetailsController extends FrontBaseController
     }
 
     // -------------------------------- PRODUCT REPLY SECTION ENDS----------------------------------------
-
 
     // ------------------ Rating SECTION --------------------
 
@@ -281,6 +278,7 @@ class ProductDetailsController extends FrontBaseController
                 $input['review_date'] = date('Y-m-d H:i:s');
                 $prev_reviewer->update($input);
                 $data = __('Your Rating Submitted Successfully.');
+
                 return response()->json($data);
             }
             $Rating = new Rating;
@@ -288,38 +286,38 @@ class ProductDetailsController extends FrontBaseController
             $Rating['review_date'] = date('Y-m-d H:i:s');
             $Rating->save();
             $data = __('Your Rating Submitted Successfully.');
+
             return response()->json($data);
         } else {
-            return response()->json(array('errors' => [0 => __('Buy This Product First')]));
+            return response()->json(['errors' => [0 => __('Buy This Product First')]]);
         }
     }
 
     public function reviews($id)
     {
         $productt = Product::find($id);
+
         return view('load.reviews', compact('productt', 'id'));
     }
 
     public function sideReviews($id)
     {
         $productt = Product::find($id);
+
         return view('load.side-load', compact('productt'));
     }
 
     // ------------------ Rating SECTION ENDS --------------------
-
 
     public function showCrossProduct($id)
     {
         $product = Product::findOrFail($id);
         $cross_ids = explode(',', $product->cross_products);
 
-
         $cross_products = Product::whereIn('id', $cross_ids)->withCount('ratings')
             ->withAvg('ratings', 'rating')->get();
-        return view('includes.cross_product', compact('cross_products'));
-        
-    }
-    
 
+        return view('includes.cross_product', compact('cross_products'));
+
+    }
 }

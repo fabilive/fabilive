@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\DeliveryJob;
 use App\Models\Order;
 use App\Models\WalletLedger;
-use App\Models\DeliveryJob;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CommissionReportingService
 {
@@ -29,7 +29,7 @@ class CommissionReportingService
             'total_delivery_fees' => DeliveryJob::whereIn('status', ['delivered_verified'])
                 ->whereBetween('created_at', [
                     Carbon::parse($startDate ?? '1970-01-01')->startOfDay(),
-                    Carbon::parse($endDate ?? now())->endOfDay()
+                    Carbon::parse($endDate ?? now())->endOfDay(),
                 ])
                 ->sum(DB::raw('base_fee + stopover_fee')),
             'transaction_count' => $query->count(),
@@ -45,13 +45,13 @@ class CommissionReportingService
             ->where('admin_verified', true)
             ->whereBetween('updated_at', [
                 Carbon::parse($startDate ?? '1970-01-01')->startOfDay(),
-                Carbon::parse($endDate ?? now())->endOfDay()
+                Carbon::parse($endDate ?? now())->endOfDay(),
             ])
             ->get()
             ->map(function ($order) {
                 $adminLedger = $order->walletLedgers->where('type', 'commission')->first();
                 $riderLedger = $order->walletLedgers->where('type', 'delivery_fee')->first();
-                
+
                 return [
                     'order_number' => $order->order_number,
                     'gross_amount' => $order->pay_amount,

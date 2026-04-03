@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Compare extends Model
 {
     public $items = null;
+
     public function __construct($oldCompare)
     {
         if ($oldCompare) {
@@ -14,17 +15,20 @@ class Compare extends Model
         }
     }
 
-    public function add($item, $id) {
+    public function add($item, $id)
+    {
         $storedItem = ['ck' => 0, 'item' => $item];
         if ($this->items) {
             if (array_key_exists($id, $this->items)) {
                 $storedItem = $this->items[$id];
-            	$storedItem['ck'] = 1;
+                $storedItem['ck'] = 1;
             }
         }
         $this->items[$id] = $storedItem;
     }
-    public function removeItem($id) {
+
+    public function removeItem($id)
+    {
         unset($this->items[$id]);
     }
 }

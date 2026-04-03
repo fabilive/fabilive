@@ -9,7 +9,7 @@ class ReferralUsage extends Model
     protected $fillable = [
         'referral_code_id', 'referred_user_id', 'referred_rider_id',
         'referred_role', 'referrer_bonus', 'referred_bonus',
-        'status', 'phone_hash', 'email_hash'
+        'status', 'phone_hash', 'email_hash',
     ];
 
     public function referralCode()

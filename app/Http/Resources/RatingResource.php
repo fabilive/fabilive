@@ -14,14 +14,14 @@ class RatingResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'user_image' => empty($this->user->photo) ? url('/') . '/assets/images/noimage.png' : '/assets/images/users/' . $this->user->photo,
-        'user_id' => $this->user_id,
-        'name' => $this->user->name,
-        'review' => $this->review,
-        'rating' => $this->rating,
-        'review_date' => $this->review_date,
-      ];
+        return [
+            'id' => $this->id,
+            'user_image' => empty($this->user->photo) ? url('/').'/assets/images/noimage.png' : '/assets/images/users/'.$this->user->photo,
+            'user_id' => $this->user_id,
+            'name' => $this->user->name,
+            'review' => $this->review,
+            'rating' => $this->rating,
+            'review_date' => $this->review_date,
+        ];
     }
 }

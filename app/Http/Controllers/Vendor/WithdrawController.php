@@ -1,22 +1,28 @@
 <?php
+
 namespace App\Http\Controllers\Vendor;
+
 use App\Models\Withdraw;
-use App\Models\VendorOrder;
 use Illuminate\Http\Request;
+
 class WithdrawController extends VendorBaseController
 {
     public function index()
     {
         $withdraws = Withdraw::where('user_id', '=', $this->user->id)->where('type', '=', 'vendor')->latest('id')->get();
         $sign = $this->curr;
+
         return view('vendor.withdraw.index', compact('withdraws', 'sign'));
     }
+
     public function create()
     {
         $sign = $this->curr;
-        $actualBalance = $this->user->current_balance; 
-        return view('vendor.withdraw.create', compact('sign','actualBalance'));
+        $actualBalance = $this->user->current_balance;
+
+        return view('vendor.withdraw.create', compact('sign', 'actualBalance'));
     }
+
     public function store(Request $request)
     {
         try {
@@ -31,17 +37,18 @@ class WithdrawController extends VendorBaseController
                 if ($from->current_balance >= $amount) {
                     $fee = (($withdrawcharge->withdraw_charge / 100) * $amount) + $charge;
                     $finalamount = $amount - $fee;
-                    
+
                     if ($finalamount < 0) {
                         \Illuminate\Support\Facades\DB::rollBack();
-                        return response()->json(array('errors' => [0 => __('Withdraw amount is too low.')]));
+
+                        return response()->json(['errors' => [0 => __('Withdraw amount is too low.')]]);
                     }
-                    
-                    $finalamount = number_format((float)$finalamount, 2, '.', '');
-                    
+
+                    $finalamount = number_format((float) $finalamount, 2, '.', '');
+
                     $from->current_balance = $from->current_balance - $amount;
                     $from->update();
-                    
+
                     $newwithdraw = new Withdraw();
                     if ($request->methods == 'Campay') {
                         if ($request->network) {
@@ -72,9 +79,9 @@ class WithdrawController extends VendorBaseController
                         'user_id' => $from->id,
                         'amount' => $amount,
                         'type' => 'withdrawal_pending',
-                        'reference' => 'WWD-' . $newwithdraw->id,
+                        'reference' => 'WWD-'.$newwithdraw->id,
                         'status' => 'pending',
-                        'details' => 'Vendor withdrawal request submitted.'
+                        'details' => 'Vendor withdrawal request submitted.',
                     ]);
 
                     \Illuminate\Support\Facades\DB::table('payout_requests')->insert([
@@ -84,19 +91,21 @@ class WithdrawController extends VendorBaseController
                         'method' => $request->methods,
                         'status' => 'pending',
                         'created_at' => now(),
-                        'updated_at' => now()
+                        'updated_at' => now(),
                     ]);
 
                     \Illuminate\Support\Facades\DB::commit();
 
                     return response()->json(__('Withdraw Request Sent Successfully.'));
                 } else {
-                    return response()->json(array('errors' => [0 => __('Insufficient Balance.')]));
+                    return response()->json(['errors' => [0 => __('Insufficient Balance.')]]);
                 }
             }
-            return response()->json(array('errors' => [0 => __('Please enter a valid amount.')]));
+
+            return response()->json(['errors' => [0 => __('Please enter a valid amount.')]]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
+
             return response()->json(['errors' => [0 => $e->getMessage()]], 500);
         }
     }

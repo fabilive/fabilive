@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
-use Mollie\Laravel\Facades\Mollie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Session;
-use OrderHelper;
 use Illuminate\Support\Str;
+use Mollie\Laravel\Facades\Mollie;
+use OrderHelper;
+use Session;
 
 class MollieController extends CheckoutBaseControlller
 {
@@ -30,30 +28,30 @@ class MollieController extends CheckoutBaseControlller
 
         $available_currency = OrderHelper::mollie_currencies();
 
-        if (!in_array($this->curr->name, $available_currency)) {
+        if (! in_array($this->curr->name, $available_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Molly Payment.'));
         }
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $order['item_name'] = $this->gs->title . " Order";
-        $order['item_number'] = Str::random(4) . time();
+        $order['item_name'] = $this->gs->title.' Order';
+        $order['item_number'] = Str::random(4).time();
         $order['item_amount'] = $total;
         $notify_url = route('front.molly.notify');
 
         $payment = Mollie::api()->payments()->create([
             'amount' => [
                 'currency' => $this->curr->name,
-                'value' => '' . sprintf('%0.2f', $order['item_amount']) . '', // You must send the correct number of decimals, thus we enforce the use of strings
+                'value' => ''.sprintf('%0.2f', $order['item_amount']).'', // You must send the correct number of decimals, thus we enforce the use of strings
             ],
             'description' => $order['item_name'],
             'redirectUrl' => $notify_url,
@@ -76,7 +74,6 @@ class MollieController extends CheckoutBaseControlller
         $cancel_url = route('front.payment.cancle');
         $input_data = $request->all();
         /** Get the payment ID before session clear **/
-
         $payment = Mollie::api()->payments()->get(Session::get('order_payment_id'));
         if ($payment->status == 'paid') {
 
@@ -95,12 +92,12 @@ class MollieController extends CheckoutBaseControlller
 
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $order_data['item_amount'] / $this->curr->value;
             $input['order_number'] = $order_data['item_number'];
             $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
-            $input['payment_status'] = "Completed";
+            $input['payment_status'] = 'Completed';
             $input['txnid'] = $payment->id;
 
             if ($input['tax_type'] == 'state_tax') {
@@ -109,7 +106,6 @@ class MollieController extends CheckoutBaseControlller
                 $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
             }
             $input['tax'] = Session::get('current_tax');
-
 
             if ($input['dp'] == 1) {
                 $input['status'] = 'completed';
@@ -136,10 +132,9 @@ class MollieController extends CheckoutBaseControlller
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
-
 
             if (Auth::check()) {
                 if ($this->gs->is_reward == 1) {
@@ -177,12 +172,12 @@ class MollieController extends CheckoutBaseControlller
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
 
@@ -192,14 +187,15 @@ class MollieController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
 
             return redirect($success_url);
         }
+
         return redirect($cancel_url);
     }
 }

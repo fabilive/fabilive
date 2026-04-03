@@ -3,9 +3,8 @@
 namespace App\Services;
 
 use App\Models\DeliveryJob;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class DeliveryAcceptanceService
 {
@@ -29,7 +28,7 @@ class DeliveryAcceptanceService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$job) {
+            if (! $job) {
                 throw new Exception('Job is no longer available or already taken.');
             }
 
@@ -37,7 +36,7 @@ class DeliveryAcceptanceService
             $job->update([
                 'assigned_rider_id' => $riderId,
                 'status' => 'assigned',
-                'accepted_at' => now()
+                'accepted_at' => now(),
             ]);
 
             // Sync main order status
@@ -52,8 +51,8 @@ class DeliveryAcceptanceService
             // 5. Notify the Buyer
             app(\App\Services\SmartNotificationService::class)->send($job->buyer_id, 'delivery_rider_assigned', [
                 'title' => __('Rider Assigned'),
-                'text' => __('Rider ') . $job->rider->name . __(' has accepted your order #') . $job->order->order_number,
-                'type' => 'order'
+                'text' => __('Rider ').$job->rider->name.__(' has accepted your order #').$job->order->order_number,
+                'type' => 'order',
             ]);
 
             // 6. Notify the Seller(s)
@@ -61,8 +60,8 @@ class DeliveryAcceptanceService
             foreach ($sellerIds as $sellerId) {
                 app(\App\Services\SmartNotificationService::class)->send($sellerId, 'rider_assigned_for_pickup', [
                     'title' => __('Rider for Pickup'),
-                    'text' => __('Rider ') . $job->rider->name . __(' is coming to pick up order #') . $job->order->order_number,
-                    'type' => 'order'
+                    'text' => __('Rider ').$job->rider->name.__(' is coming to pick up order #').$job->order->order_number,
+                    'type' => 'order',
                 ]);
             }
 

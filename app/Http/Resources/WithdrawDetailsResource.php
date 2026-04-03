@@ -26,7 +26,7 @@ class WithdrawDetailsResource extends JsonResource
             'swift' => $this->swift,
             'reference' => $this->reference,
             'status' => ucfirst($this->status),
-            'request_date'=>$this->created_at
-          ];
+            'request_date' => $this->created_at,
+        ];
     }
 }

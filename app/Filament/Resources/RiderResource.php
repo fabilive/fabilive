@@ -5,14 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RiderResource\Pages;
 use App\Models\Rider;
 use App\Traits\AuditsAdminActions;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
-use Carbon\Carbon;
+use Filament\Tables\Table;
 
 class RiderResource extends Resource
 {
@@ -118,9 +118,12 @@ class RiderResource extends Resource
                         $record->approved_at = Carbon::now();
                         $record->save();
 
-                        (new class { use AuditsAdminActions; })->auditAdminAction('Verify Rider Onboarding', $record, [
+                        (new class
+                        {
+                            use AuditsAdminActions;
+                        })->auditAdminAction('Verify Rider Onboarding', $record, [
                             'name' => $record->name,
-                            'phone' => $record->phone
+                            'phone' => $record->phone,
                         ]);
 
                         Notification::make()
@@ -146,8 +149,11 @@ class RiderResource extends Resource
                         $record->is_verified = 0;
                         $record->save();
 
-                        (new class { use AuditsAdminActions; })->auditAdminAction('Reject Rider Onboarding', $record, [
-                            'reason' => $data['reason']
+                        (new class
+                        {
+                            use AuditsAdminActions;
+                        })->auditAdminAction('Reject Rider Onboarding', $record, [
+                            'reason' => $data['reason'],
                         ]);
 
                         Notification::make()

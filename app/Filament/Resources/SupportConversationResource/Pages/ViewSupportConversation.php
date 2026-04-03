@@ -3,11 +3,10 @@
 namespace App\Filament\Resources\SupportConversationResource\Pages;
 
 use App\Filament\Resources\SupportConversationResource;
-use App\Models\SupportMessage;
 use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Components;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 
 class ViewSupportConversation extends ViewRecord
@@ -32,13 +31,13 @@ class ViewSupportConversation extends ViewRecord
                         'conversation_id' => $record->id,
                         'actor_type' => 'agent',
                         'actor_id' => Auth::id(),
-                        'event' => 'ended'
+                        'event' => 'ended',
                     ]);
 
                     \App\Models\SupportMessage::create([
                         'conversation_id' => $record->id,
                         'sender_type' => 'system',
-                        'body_text' => 'This conversation has been ended by the agent.'
+                        'body_text' => 'This conversation has been ended by the agent.',
                     ]);
 
                     \Filament\Notifications\Notification::make()
@@ -48,6 +47,7 @@ class ViewSupportConversation extends ViewRecord
                 }),
         ];
     }
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -58,7 +58,7 @@ class ViewSupportConversation extends ViewRecord
                         Components\TextEntry::make('status')->badge(),
                         Components\TextEntry::make('context')->label('App Side'),
                     ])->columns(3),
-                
+
                 Components\Section::make('Join Conversation')
                     ->description('Type below to reply. Sending a message will automatically assign you to this chat.')
                     ->schema([

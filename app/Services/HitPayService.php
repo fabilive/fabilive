@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use App\Models\PaymentGateway;
+use Illuminate\Support\Facades\Http;
+
 class HitPayService
 {
     private $apiKey;
+
     private $salt;
+
     private $url;
+
     private $callback;
 
     public function __construct()
@@ -22,7 +26,7 @@ class HitPayService
             $this->apiKey = '';
             $this->secret = '';
         }
-        
+
         // $this->baseUrl = 'https://api.hit-pay.com'; // for-live
         $this->baseUrl = 'https://api.sandbox.hit-pay.com';
         try {
@@ -53,12 +57,12 @@ class HitPayService
 
         return $response->json();
     }
-    
+
     public function generatePaymentLink($amount, $currency = 'SGD', $description = 'Deposit', $redirectUrl = null)
     {
         $fullUrl = "{$this->baseUrl}/v1/payment-requests";
 
-       $response = Http::withHeaders([
+        $response = Http::withHeaders([
             'X-BUSINESS-API-KEY' => $this->apiKey,
             'Content-Type' => 'application/json',
         ])->post($fullUrl, [
@@ -82,6 +86,7 @@ class HitPayService
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
             return null;
         }
 

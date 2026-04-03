@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class DeliveryJob extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'order_id',
         'buyer_id',
@@ -26,7 +27,7 @@ class DeliveryJob extends Model
         'picked_up_at',
         'delivered_at',
         'cancelled_at',
-        'returned_at'
+        'returned_at',
     ];
 
     protected $casts = [

@@ -7,20 +7,20 @@ use Illuminate\Http\Request;
 
 class SocialSettingController extends AdminBaseController
 {
-
     // Spcial Settings All post requests will be done in this method
     public function socialupdate(Request $request)
     {
         //--- Logic Section
-        $input = $request->all(); 
-        $data = Socialsetting::findOrFail(1);   
+        $input = $request->all();
+        $data = Socialsetting::findOrFail(1);
         $data->update($input);
         //--- Logic Section Ends
-        
-        //--- Redirect Section        
+
+        //--- Redirect Section
         $msg = __('Data Updated Successfully.');
-        return response()->json($msg);      
-        //--- Redirect Section Ends               
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
 
     }
 
@@ -32,49 +32,53 @@ class SocialSettingController extends AdminBaseController
         //--- Validation Section Ends
 
         //--- Logic Section
-        $input = $request->all(); 
-        $data = Socialsetting::findOrFail(1);   
-        if ($request->f_status == ""){
+        $input = $request->all();
+        $data = Socialsetting::findOrFail(1);
+        if ($request->f_status == '') {
             $input['f_status'] = 0;
         }
-        if ($request->t_status == ""){
+        if ($request->t_status == '') {
             $input['t_status'] = 0;
         }
-        if ($request->g_status == ""){
+        if ($request->g_status == '') {
             $input['g_status'] = 0;
         }
-        if ($request->l_status == ""){
+        if ($request->l_status == '') {
             $input['l_status'] = 0;
         }
-        if ($request->d_status == ""){
+        if ($request->d_status == '') {
             $input['d_status'] = 0;
         }
         $data->update($input);
         //--- Logic Section Ends
-        
-        //--- Redirect Section        
+
+        //--- Redirect Section
         $msg = 'Data Updated Successfully.';
-        return response()->json($msg);      
-        //--- Redirect Section Ends               
+
+        return response()->json($msg);
+        //--- Redirect Section Ends
 
     }
 
     public function index()
     {
-    	$data = Socialsetting::findOrFail(1);
-        return view('admin.socialsetting.index',compact('data'));
+        $data = Socialsetting::findOrFail(1);
+
+        return view('admin.socialsetting.index', compact('data'));
     }
 
     public function facebook()
     {
-    	$data = Socialsetting::findOrFail(1);
-        return view('admin.socialsetting.facebook',compact('data'));
+        $data = Socialsetting::findOrFail(1);
+
+        return view('admin.socialsetting.facebook', compact('data'));
     }
 
     public function google()
     {
-    	$data = Socialsetting::findOrFail(1);
-        return view('admin.socialsetting.google',compact('data'));
+        $data = Socialsetting::findOrFail(1);
+
+        return view('admin.socialsetting.google', compact('data'));
     }
 
     public function facebookup($status)
@@ -85,6 +89,7 @@ class SocialSettingController extends AdminBaseController
 
         //--- Redirect Section
         $msg = __('Status Updated Successfully.');
+
         return response()->json($msg);
         //--- Redirect Section Ends
 
@@ -98,8 +103,8 @@ class SocialSettingController extends AdminBaseController
 
         //--- Redirect Section
         $msg = __('Status Updated Successfully.');
-        return response()->json($msg);
-        //--- Redirect Section Ends        
-    }
 
+        return response()->json($msg);
+        //--- Redirect Section Ends
+    }
 }

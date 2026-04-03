@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AI\MultilingualAssistantService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class AssistantController extends Controller
 {
@@ -46,20 +46,21 @@ class AssistantController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => $response['error'],
-                    'fallback' => $response['fallback'] ?? false
+                    'fallback' => $response['fallback'] ?? false,
                 ], 429); // or 400
             }
 
             return response()->json([
                 'success' => true,
-                'data' => $response
+                'data' => $response,
             ]);
         } catch (\Exception $e) {
-            Log::error("Assistant Controller Exception: " . $e->getMessage());
+            Log::error('Assistant Controller Exception: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong while connecting to the Fabilive Assistant.',
-                'fallback' => true
+                'fallback' => true,
             ], 500);
         }
     }

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\NotificationPreference;
 use App\Models\Notification;
+use App\Models\NotificationPreference;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -34,13 +34,13 @@ class SmartNotificationService
             ->first();
 
         // If no preference set, default to sending
-        if (!$pref) {
+        if (! $pref) {
             return true;
         }
 
         // Check channel enabled
-        $channelField = $channel . '_enabled';
-        if (isset($pref->{$channelField}) && !$pref->{$channelField}) {
+        $channelField = $channel.'_enabled';
+        if (isset($pref->{$channelField}) && ! $pref->{$channelField}) {
             return false;
         }
 
@@ -57,7 +57,7 @@ class SmartNotificationService
      */
     public function send(int $userId, string $type, array $data = [], string $channel = 'in_app'): bool
     {
-        if (!$this->shouldSend($userId, $type, $channel)) {
+        if (! $this->shouldSend($userId, $type, $channel)) {
             return false;
         }
 

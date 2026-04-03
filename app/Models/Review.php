@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    protected $fillable = ['photo','title','subtitle','details'];
+    protected $fillable = ['photo', 'title', 'subtitle', 'details'];
+
     public $timestamps = false;
 }

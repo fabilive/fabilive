@@ -2,7 +2,6 @@
 
 namespace App\Services\AI;
 
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -17,14 +16,15 @@ class PhotoEnhancerService extends AIService
     public function optimizeAndStore(string $filePath, string $originalName, string $folder = 'products'): array
     {
         // Fallback or if feature disabled
-        if (!$this->isFeatureEnabled('photo_enhancer') || config('ai.photo.provider') !== 'cloudinary') {
+        if (! $this->isFeatureEnabled('photo_enhancer') || config('ai.photo.provider') !== 'cloudinary') {
             return $this->storeLocalFallback($filePath, $originalName, $folder);
         }
 
         try {
             return $this->uploadToCloudinary($filePath, $originalName, $folder);
         } catch (\Exception $e) {
-            Log::error("Cloudinary enhance failed, falling back to local: " . $e->getMessage());
+            Log::error('Cloudinary enhance failed, falling back to local: '.$e->getMessage());
+
             return $this->storeLocalFallback($filePath, $originalName, $folder);
         }
     }
@@ -36,12 +36,12 @@ class PhotoEnhancerService extends AIService
     {
         $config = config('ai.photo.cloudinary');
         if (empty($config['cloud_name']) || empty($config['api_key']) || empty($config['api_secret'])) {
-            throw new \Exception("Cloudinary credentials not configured.");
+            throw new \Exception('Cloudinary credentials not configured.');
         }
 
         $cloudName = $config['cloud_name'];
         $timestamp = time();
-        $publicId = $folder . '/' . Str::random(16);
+        $publicId = $folder.'/'.Str::random(16);
 
         // Parameters to sign
         $params = [
@@ -52,7 +52,7 @@ class PhotoEnhancerService extends AIService
         ];
 
         // Generate signature: SHA-1 of ordered params + secret (alphabetical order)
-        $signatureString = 'background_removal=pixelz&folder=' . $folder . '&public_id=' . $publicId . '&timestamp=' . $timestamp . $config['api_secret'];
+        $signatureString = 'background_removal=pixelz&folder='.$folder.'&public_id='.$publicId.'&timestamp='.$timestamp.$config['api_secret'];
         $signature = sha1($signatureString);
 
         $response = Http::attach(
@@ -63,18 +63,18 @@ class PhotoEnhancerService extends AIService
             'signature' => $signature,
             'folder' => $folder,
             'public_id' => $publicId,
-            'background_removal' => 'pixelz'
+            'background_removal' => 'pixelz',
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Cloudinary API Error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Cloudinary API Error: '.$response->body());
         }
 
         $data = $response->json();
         $basePublicId = $data['public_id'];
 
         // Cloudinary URL structure
-        
+
         // 1. Original - VIESUS color correction on the fly (Pixelz is processing the background asynchronously)
         $originalUrl = "https://res.cloudinary.com/{$cloudName}/image/upload/f_auto,q_auto,e_viesus_correct,b_white/{$basePublicId}.webp";
 
@@ -94,7 +94,7 @@ class PhotoEnhancerService extends AIService
             'original' => $originalUrl,
             'medium' => $mediumUrl,
             'thumbnail' => $thumbnailUrl,
-            'provider' => 'cloudinary'
+            'provider' => 'cloudinary',
         ];
     }
 
@@ -109,9 +109,9 @@ class PhotoEnhancerService extends AIService
 
         return [
             'original' => $filename,
-            'medium' => $filename, 
+            'medium' => $filename,
             'thumbnail' => $filename,
-            'provider' => 'local'
+            'provider' => 'local',
         ];
     }
 }

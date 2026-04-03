@@ -14,19 +14,19 @@ class SslController extends Controller
     public function store(Request $request)
     {
         $data = PaymentGateway::whereKeyword('sslcommerz')->first();
-        if (!$request->has('deposit_number')) {
+        if (! $request->has('deposit_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
         $deposit_number = $request->deposit_number;
         $order = Deposit::where('deposit_number', $deposit_number)->first();
         $curr = Currency::where('name', '=', $order->currency_code)->first();
-        if ($curr->name != "BDT") {
+        if ($curr->name != 'BDT') {
             return redirect()->back()->with('unsuccess', 'Please Select BDT Currency For Sslcommerz .');
         }
 
         $item_amount = $order->amount * $order->currency_value;
-        $txnid = "SSLCZ_TXN_" . uniqid();
+        $txnid = 'SSLCZ_TXN_'.uniqid();
         $order->amount = round($item_amount / $order->currency_value, 2);
         $order['method'] = $request->method;
         $order['txnid'] = $txnid;
@@ -34,7 +34,7 @@ class SslController extends Controller
         $order->update();
         $paydata = $data->convertAutoData();
 
-        $post_data = array();
+        $post_data = [];
         $post_data['store_id'] = $paydata['store_id'];
         $post_data['store_passwd'] = $paydata['store_password'];
         $post_data['total_amount'] = $item_amount;
@@ -43,9 +43,9 @@ class SslController extends Controller
         $post_data['success_url'] = action('Api\User\Payment\SslController@notify');
         $post_data['fail_url'] = route('user.deposit.send', $order->deposit_number);
         $post_data['cancel_url'] = route('user.deposit.send', $order->deposit_number);
-        # $post_data['multi_card_name'] = "mastercard,visacard,amexcard";  # DISABLE TO DISPLAY ALL AVAILABLE
+        // $post_data['multi_card_name'] = "mastercard,visacard,amexcard";  # DISABLE TO DISPLAY ALL AVAILABLE
 
-        # CUSTOMER INFORMATION
+        // CUSTOMER INFORMATION
         // $post_data['cus_name'] = $order['customer_name'];
         // $post_data['cus_email'] = $order['customer_email'];
         // $post_data['cus_add1'] = $order['customer_address'];
@@ -56,11 +56,11 @@ class SslController extends Controller
         // $post_data['cus_phone'] = '';
         // $post_data['cus_fax'] = '';
 
-        # REQUEST SEND TO SSLCOMMERZ
+        // REQUEST SEND TO SSLCOMMERZ
         if ($paydata['sandbox_check'] == 1) {
-            $direct_api_url = "https://sandbox.sslcommerz.com/gwprocess/v3/api.php";
+            $direct_api_url = 'https://sandbox.sslcommerz.com/gwprocess/v3/api.php';
         } else {
-            $direct_api_url = "https://securepay.sslcommerz.com/gwprocess/v3/api.php";
+            $direct_api_url = 'https://securepay.sslcommerz.com/gwprocess/v3/api.php';
         }
         $handle = curl_init();
         curl_setopt($handle, CURLOPT_URL, $direct_api_url);
@@ -69,33 +69,34 @@ class SslController extends Controller
         curl_setopt($handle, CURLOPT_POST, 1);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false); # KEEP IT FALSE IF YOU RUN FROM LOCAL PC
+        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false); // KEEP IT FALSE IF YOU RUN FROM LOCAL PC
 
         $content = curl_exec($handle);
 
         $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
-        if ($code == 200 && !(curl_errno($handle))) {
+        if ($code == 200 && ! (curl_errno($handle))) {
             curl_close($handle);
             $sslcommerzResponse = $content;
         } else {
             curl_close($handle);
-            return redirect()->back()->with('unsuccess', "FAILED TO CONNECT WITH SSLCOMMERZ API");
+
+            return redirect()->back()->with('unsuccess', 'FAILED TO CONNECT WITH SSLCOMMERZ API');
             exit;
         }
 
-        # PARSE THE JSON RESPONSE
+        // PARSE THE JSON RESPONSE
         $sslcz = json_decode($sslcommerzResponse, true);
 
-        if (isset($sslcz['GatewayPageURL']) && $sslcz['GatewayPageURL'] != "") {
+        if (isset($sslcz['GatewayPageURL']) && $sslcz['GatewayPageURL'] != '') {
 
-            # THERE ARE MANY WAYS TO REDIRECT - Javascript, Meta Tag or Php Header Redirect or Other
-            # echo "<script>window.location.href = '". $sslcz['GatewayPageURL'] ."';</script>";
-            echo "<meta http-equiv='refresh' content='0;url=" . $sslcz['GatewayPageURL'] . "'>";
-            # header("Location: ". $sslcz['GatewayPageURL']);
+            // THERE ARE MANY WAYS TO REDIRECT - Javascript, Meta Tag or Php Header Redirect or Other
+            // echo "<script>window.location.href = '". $sslcz['GatewayPageURL'] ."';</script>";
+            echo "<meta http-equiv='refresh' content='0;url=".$sslcz['GatewayPageURL']."'>";
+            // header("Location: ". $sslcz['GatewayPageURL']);
             exit;
         } else {
-            return redirect()->back()->with('unsuccess', "JSON Data parsing error!");
+            return redirect()->back()->with('unsuccess', 'JSON Data parsing error!');
 
         }
 
@@ -116,7 +117,7 @@ class SslController extends Controller
 
             if ($order->status == 1) {
                 $transaction = new \App\Models\Transaction;
-                $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                 $transaction->user_id = $order->user_id;
                 $transaction->amount = $order->amount;
                 $transaction->user_id = $order->user_id;

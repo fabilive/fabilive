@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\SupportConversation;
-use App\Filament\Resources\SupportConversationResource\RelationManagers;
 use App\Filament\Resources\SupportConversationResource\Pages;
+use App\Filament\Resources\SupportConversationResource\RelationManagers;
+use App\Models\SupportConversation;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,8 +14,11 @@ use Filament\Tables\Table;
 class SupportConversationResource extends Resource
 {
     protected static ?string $model = SupportConversation::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+
     protected static ?string $navigationGroup = 'Support System';
+
     protected static ?string $navigationLabel = 'Chat Logs';
 
     public static function form(Form $form): Form
@@ -52,8 +55,8 @@ class SupportConversationResource extends Resource
                 Tables\Columns\TextColumn::make('assignedAgent.name')->label('Agent'),
                 Tables\Columns\TextColumn::make('started_at')->dateTime()->sortable(),
             ])
-            ->actions([ 
-                Tables\Actions\ViewAction::make(), 
+            ->actions([
+                Tables\Actions\ViewAction::make(),
             ]);
     }
 

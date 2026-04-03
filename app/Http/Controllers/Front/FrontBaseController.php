@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\{
-    Http\Controllers\Controller,
-    Models\Counter
-};
+use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\Language;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use InvalidArgumentException;
+
 //use Markury\MarkuryPost;
 
 class FrontBaseController extends Controller
 {
     protected $gs;
+
     protected $ps;
+
     protected $curr;
+
     protected $language;
 
     public function __construct()
@@ -41,12 +41,11 @@ class FrontBaseController extends Controller
             } else {
                 $this->language = Language::where('is_default', '=', 1)->first();
             }
-            if (!Session::has('language')) {
+            if (! Session::has('language')) {
                 $this->language = Language::where('is_default', '=', 1)->first();
             }
 
             App::setLocale($this->language->name);
-
 
             if (Session::has('currency')) {
                 $this->curr = Currency::find(Session::get('currency'));

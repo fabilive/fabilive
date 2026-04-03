@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\AffliateBonusResource\Pages;
 
 use App\Filament\Resources\AffliateBonusResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAffliateBonus extends CreateRecord

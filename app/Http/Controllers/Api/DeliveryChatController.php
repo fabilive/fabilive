@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MessageSents;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryChatThread;
 use App\Models\Message;
-use App\Events\MessageSents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +35,7 @@ class DeliveryChatController extends Controller
 
         return response()->json([
             'status' => true,
-            'messages' => $messages
+            'messages' => $messages,
         ]);
     }
 
@@ -46,7 +46,7 @@ class DeliveryChatController extends Controller
     {
         $request->validate([
             'delivery_chat_thread_id' => 'required|exists:delivery_chat_threads,id',
-            'message' => 'required|string|max:2000'
+            'message' => 'required|string|max:2000',
         ]);
 
         $thread = DeliveryChatThread::findOrFail($request->delivery_chat_thread_id);
@@ -82,7 +82,7 @@ class DeliveryChatController extends Controller
 
         return response()->json([
             'status' => true,
-            'message_data' => $message
+            'message_data' => $message,
         ]);
     }
 }

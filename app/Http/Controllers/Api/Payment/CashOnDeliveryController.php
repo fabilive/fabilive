@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Api\Payment;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class CashOnDeliveryController extends Controller
 {
-
     public function store(Request $request)
     {
         if ($request->has('order_number')) {
@@ -22,10 +20,10 @@ class CashOnDeliveryController extends Controller
             $order->txnid = Str::random(12);
             $order->payment_status = 'Pending';
             $order->save();
+
             return redirect(route('front.payment.success', 1));
         } else {
             return redirect()->back()->with('unsuccess', 'Something Went Wrong.');
         }
     }
-
 }

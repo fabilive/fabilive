@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\SupportFaqCategory;
-use App\Models\SupportFaq;
-use App\Models\SupportConversation;
-use App\Models\SupportMessage;
-use App\Models\SupportConversationEvent;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SupportController extends Controller
@@ -19,23 +15,23 @@ class SupportController extends Controller
     public function getFaqs(Request $request)
     {
         $request->validate([
-            'context' => 'required|in:buyer,vendor'
+            'context' => 'required|in:buyer,vendor',
         ]);
 
         $context = $request->context;
-        
-        $categories = SupportFaqCategory::where(function($query) use ($context) {
-                $query->where('context', $context)->orWhere('context', 'both');
-            })
+
+        $categories = SupportFaqCategory::where(function ($query) use ($context) {
+            $query->where('context', $context)->orWhere('context', 'both');
+        })
             ->where('is_active', true)
-            ->with(['faqs' => function($query) use ($context) {
-                $query->where(function($q) use ($context) {
+            ->with(['faqs' => function ($query) use ($context) {
+                $query->where(function ($q) use ($context) {
                     $q->where('context', $context)->orWhere('context', 'both');
                 })->where('is_active', true)->orderBy('sort_order');
             }])
             ->orderBy('sort_order')
             ->get();
-            
+
         return response()->json(['categories' => $categories]);
     }
 
@@ -48,11 +44,11 @@ class SupportController extends Controller
             'context' => 'required|in:buyer,vendor',
             'message' => 'nullable|string',
             'attachment' => 'nullable|file|max:5120', // 5MB max
-            'conversation_id' => 'nullable|integer'
+            'conversation_id' => 'nullable|integer',
         ]);
 
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
@@ -66,7 +62,7 @@ class SupportController extends Controller
             $conversation = \App\Models\SupportConversation::create([
                 'requester_user_id' => $user->id,
                 'context' => $request->context,
-                'status' => 'bot_active'
+                'status' => 'bot_active',
             ]);
         }
 
@@ -76,17 +72,17 @@ class SupportController extends Controller
             'sender_type' => 'user',
             'sender_id' => $user->id,
             'type' => 'text',
-            'body_text' => $request->message
+            'body_text' => $request->message,
         ];
 
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
             $path = $file->store('support_attachments', 'public');
             $msgData['type'] = 'file';
-            $msgData['attachment_url'] = '/storage/' . $path;
+            $msgData['attachment_url'] = '/storage/'.$path;
             $msgData['attachment_mime'] = $file->getMimeType();
             $msgData['attachment_size'] = $file->getSize();
-            
+
             if (str_starts_with($msgData['attachment_mime'], 'image/')) {
                 $msgData['type'] = 'image';
             }
@@ -95,12 +91,12 @@ class SupportController extends Controller
         \App\Models\SupportMessage::create($msgData);
 
         // Process through bot (only if there's text AND it's bot_active)
-        $botResponseText = "";
+        $botResponseText = '';
         if ($request->message && $conversation->status === 'bot_active') {
             $reply = $botService->processMessage($request->message, $request->context);
             if ($reply) {
                 $botResponseText = $reply['response_text'];
-                
+
                 // If bot indicates escalation is needed
                 if (isset($reply['escalate']) && $reply['escalate'] === true) {
                     $conversation->status = 'bot_active'; // Keep bot active so user can click escalate button
@@ -108,8 +104,8 @@ class SupportController extends Controller
                 }
             }
         }
-        
-        if (!$botResponseText && $conversation->status === 'bot_active') {
+
+        if (! $botResponseText && $conversation->status === 'bot_active') {
             // Count consecutive misses to trigger escalation
             // We can check the last 2 messages from bot if they were fallback
             $recentBotMessages = \App\Models\SupportMessage::where('conversation_id', $conversation->id)
@@ -117,9 +113,9 @@ class SupportController extends Controller
                 ->latest()
                 ->take(2)
                 ->get();
-                
-            $repeatedMiss = $recentBotMessages->count() === 2 && $recentBotMessages->every(fn($msg) => str_contains($msg->body_text, 'Please clarify') || str_contains($msg->body_text, 'Live Support'));
-            
+
+            $repeatedMiss = $recentBotMessages->count() === 2 && $recentBotMessages->every(fn ($msg) => str_contains($msg->body_text, 'Please clarify') || str_contains($msg->body_text, 'Live Support'));
+
             if ($repeatedMiss) {
                 $botResponseText = "You want talk with a live agent? Make you click 'Request Live Support' button below.";
             } else {
@@ -134,14 +130,14 @@ class SupportController extends Controller
                 'sender_type' => 'bot',
                 'sender_id' => null,
                 'type' => 'text',
-                'body_text' => $botResponseText
+                'body_text' => $botResponseText,
             ]);
         }
 
         return response()->json([
-            'status' => 'success', 
+            'status' => 'success',
             'conversation_id' => $conversation->id,
-            'bot_message' => $botMsg ?? null
+            'bot_message' => $botMsg ?? null,
         ]);
     }
 
@@ -151,20 +147,21 @@ class SupportController extends Controller
     public function requestLiveSupport(Request $request)
     {
         $request->validate([
-            'conversation_id' => 'required|exists:support_conversations,id'
+            'conversation_id' => 'required|exists:support_conversations,id',
         ]);
 
-        \Illuminate\Support\Facades\Log::info("DEBUG: requestLiveSupport reached with ID: " . $request->conversation_id);
+        \Illuminate\Support\Facades\Log::info('DEBUG: requestLiveSupport reached with ID: '.$request->conversation_id);
 
         $user = Auth::guard('web')->user();
-        if (!$user) {
-            \Illuminate\Support\Facades\Log::warning("DEBUG: requestLiveSupport unauthenticated");
+        if (! $user) {
+            \Illuminate\Support\Facades\Log::warning('DEBUG: requestLiveSupport unauthenticated');
+
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
         if ($conversation->requester_user_id !== $user->id) {
-            \Illuminate\Support\Facades\Log::error("DEBUG: requestLiveSupport ownership mismatch");
+            \Illuminate\Support\Facades\Log::error('DEBUG: requestLiveSupport ownership mismatch');
             abort(403);
         }
 
@@ -173,7 +170,7 @@ class SupportController extends Controller
         }
         try {
             $convId = $request->conversation_id;
-            
+
             // 1. Instant Status Switch (Direct & Fast)
             \Illuminate\Support\Facades\DB::table('support_conversations')
                 ->where('id', $convId)
@@ -204,15 +201,16 @@ class SupportController extends Controller
                 'status' => 'success',
                 'conversation' => [
                     'id' => $convId,
-                    'status' => 'waiting_agent'
-                ]
+                    'status' => 'waiting_agent',
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("ULTRA STABLE ESCALATION FAILED: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('ULTRA STABLE ESCALATION FAILED: '.$e->getMessage());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Escalation error. Our team is investigating.'
+                'message' => 'Escalation error. Our team is investigating.',
             ], 500);
         }
     }
@@ -230,11 +228,11 @@ class SupportController extends Controller
 
         $user = Auth::guard('web')->user();
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-        
+
         if ($conversation->requester_user_id !== $user->id) {
             abort(403);
         }
-        
+
         if ($conversation->status === 'ended') {
             return response()->json(['status' => 'error', 'message' => 'Conversation ended']);
         }
@@ -244,17 +242,17 @@ class SupportController extends Controller
             'sender_type' => 'user',
             'sender_id' => $user->id,
             'type' => 'text',
-            'body_text' => $request->message
+            'body_text' => $request->message,
         ];
 
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
             $path = $file->store('support_attachments', 'public'); // Usually using public disk or s3
             $msgData['type'] = 'file';
-            $msgData['attachment_url'] = '/storage/' . $path;
+            $msgData['attachment_url'] = '/storage/'.$path;
             $msgData['attachment_mime'] = $file->getMimeType();
             $msgData['attachment_size'] = $file->getSize();
-            
+
             if (str_starts_with($msgData['attachment_mime'], 'image/')) {
                 $msgData['type'] = 'image';
             }
@@ -274,18 +272,18 @@ class SupportController extends Controller
     public function endConversation(Request $request)
     {
         $request->validate([
-            'conversation_id' => 'required|exists:support_conversations,id'
+            'conversation_id' => 'required|exists:support_conversations,id',
         ]);
 
         $user = Auth::guard('web')->user();
         $admin = Auth::guard('admin')->user();
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-        
+
         if ($user && $conversation->requester_user_id !== $user->id) {
             abort(403);
         }
 
-        if (!$user && !$admin) {
+        if (! $user && ! $admin) {
             abort(401);
         }
 
@@ -293,17 +291,17 @@ class SupportController extends Controller
         $conversation->ended_at = now();
         $conversation->ended_by = $admin ? 'agent' : 'user';
         $conversation->save();
-        
+
         \App\Models\SupportConversationEvent::create([
             'conversation_id' => $conversation->id,
             'actor_type' => $admin ? 'agent' : 'user',
             'actor_id' => $admin ? $admin->id : $user->id,
-            'event' => 'ended'
+            'event' => 'ended',
         ]);
 
         return response()->json(['status' => 'success']);
     }
-    
+
     /**
      * Rate a conversation.
      */
@@ -312,20 +310,20 @@ class SupportController extends Controller
         $request->validate([
             'conversation_id' => 'required|exists:support_conversations,id',
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string'
+            'comment' => 'nullable|string',
         ]);
 
         $user = Auth::guard('web')->user();
         $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-        
+
         if ($conversation->requester_user_id !== $user->id) {
             abort(403);
         }
-        
+
         if ($conversation->status !== 'ended') {
             return response()->json(['status' => 'error', 'message' => 'You can only rate an ended conversation.']);
         }
-        
+
         if (\App\Models\SupportRating::where('conversation_id', $conversation->id)->exists()) {
             return response()->json(['status' => 'error', 'message' => 'You have already rated this conversation.']);
         }
@@ -335,27 +333,27 @@ class SupportController extends Controller
             'agent_admin_id' => $conversation->assigned_agent_admin_id ?? 1, // Fallback if rated unassigned
             'rater_user_id' => $user->id,
             'rating' => $request->rating,
-            'comment' => $request->comment
+            'comment' => $request->comment,
         ]);
-        
+
         $conversation->status = 'rated';
         $conversation->save();
 
         return response()->json(['status' => 'success']);
     }
-    
+
     /**
      * Get chat history.
      */
     public function getChatHistory(Request $request)
     {
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
         $conversationId = $request->query('conversation_id');
-        
+
         if ($conversationId) {
             $conversation = \App\Models\SupportConversation::with('messages', 'assignedAgent')->findOrFail($conversationId);
             if ($conversation->requester_user_id !== $user->id) {
@@ -368,16 +366,16 @@ class SupportController extends Controller
                 ->with('messages', 'assignedAgent')
                 ->orderBy('created_at', 'desc')
                 ->first();
-                
-            if (!$conversation) {
+
+            if (! $conversation) {
                 return response()->json(['status' => 'no_content']);
             }
         }
 
         return response()->json([
-            'status' => 'success', 
+            'status' => 'success',
             'conversation' => $conversation,
-            'messages' => $conversation->messages
+            'messages' => $conversation->messages,
         ]);
     }
 
@@ -387,12 +385,12 @@ class SupportController extends Controller
     public function getUserConversations(Request $request)
     {
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
         $conversations = \App\Models\SupportConversation::where('requester_user_id', $user->id)
-            ->with(['messages' => function($q) {
+            ->with(['messages' => function ($q) {
                 $q->latest()->limit(1);
             }, 'assignedAgent'])
             ->orderBy('updated_at', 'desc')
@@ -401,7 +399,7 @@ class SupportController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'conversations' => $conversations
+            'conversations' => $conversations,
         ]);
     }
 }

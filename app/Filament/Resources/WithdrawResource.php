@@ -3,17 +3,17 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WithdrawResource\Pages;
-use App\Models\Withdraw;
 use App\Models\User;
 use App\Models\WalletLedger;
+use App\Models\Withdraw;
 use App\Traits\AuditsAdminActions;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 
 class WithdrawResource extends Resource
@@ -105,14 +105,19 @@ class WithdrawResource extends Resource
                     ->action(function (Withdraw $record) {
                         DB::transaction(function () use ($record) {
                             $withdraw = Withdraw::lockForUpdate()->find($record->id);
-                            if ($withdraw->status !== 'pending') return;
+                            if ($withdraw->status !== 'pending') {
+                                return;
+                            }
 
                             $withdraw->status = 'completed';
                             $withdraw->save();
 
-                            (new class { use AuditsAdminActions; })->auditAdminAction('Approve Withdrawal', $withdraw, [
+                            (new class
+                            {
+                                use AuditsAdminActions;
+                            })->auditAdminAction('Approve Withdrawal', $withdraw, [
                                 'amount' => $withdraw->amount,
-                                'method' => $withdraw->method
+                                'method' => $withdraw->method,
                             ]);
                         });
 
@@ -131,10 +136,14 @@ class WithdrawResource extends Resource
                         try {
                             DB::transaction(function () use ($record) {
                                 $withdraw = Withdraw::lockForUpdate()->find($record->id);
-                                if ($withdraw->status !== 'pending') return;
+                                if ($withdraw->status !== 'pending') {
+                                    return;
+                                }
 
                                 $user = User::lockForUpdate()->find($withdraw->user_id);
-                                if (!$user) throw new \Exception("User not found for ID: {$withdraw->user_id}");
+                                if (! $user) {
+                                    throw new \Exception("User not found for ID: {$withdraw->user_id}");
+                                }
 
                                 // Logic from legacy controller reversal
                                 $refundAmount = $withdraw->amount + $withdraw->fee;
@@ -149,14 +158,17 @@ class WithdrawResource extends Resource
                                     'user_id' => $user->id,
                                     'amount' => $refundAmount,
                                     'type' => 'withdrawal_reversal',
-                                    'reference' => 'WDR-' . $withdraw->id,
+                                    'reference' => 'WDR-'.$withdraw->id,
                                     'status' => 'completed',
-                                    'details' => 'Withdrawal request rejected by admin. Funds returned to wallet.'
+                                    'details' => 'Withdrawal request rejected by admin. Funds returned to wallet.',
                                 ]);
 
-                                (new class { use AuditsAdminActions; })->auditAdminAction('Reject Withdrawal', $withdraw, [
+                                (new class
+                                {
+                                    use AuditsAdminActions;
+                                })->auditAdminAction('Reject Withdrawal', $withdraw, [
                                     'refunded_amount' => $refundAmount,
-                                    'reason' => 'Admin manual rejection'
+                                    'reason' => 'Admin manual rejection',
                                 ]);
                             });
 

@@ -9,12 +9,11 @@ use App\Services\DeliveryJobService;
 use App\Traits\AuditsAdminActions;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Table;
 
 class DeliveryJobResource extends Resource
 {
@@ -53,7 +52,7 @@ class DeliveryJobResource extends Resource
                             ])
                             ->required(),
                     ])->columns(2),
-                
+
                 Forms\Components\Section::make('Financials')
                     ->schema([
                         Forms\Components\TextInput::make('delivery_fee_total')
@@ -147,10 +146,13 @@ class DeliveryJobResource extends Resource
                             app(DeliveryJobService::class)->verifyAndSettle($record);
 
                             // Audit - Using static call to avoid trait instantiation issues in anon function if any
-                            (new class { use AuditsAdminActions; })->auditAdminAction('Verify Delivery', $record, [
+                            (new class
+                            {
+                                use AuditsAdminActions;
+                            })->auditAdminAction('Verify Delivery', $record, [
                                 'order_number' => $record->order->order_number,
                                 'rider_id' => $record->assigned_rider_id,
-                                'amount' => $record->delivery_fee_total
+                                'amount' => $record->delivery_fee_total,
                             ]);
 
                             Notification::make()

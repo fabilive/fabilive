@@ -2,24 +2,22 @@
 
 namespace App\Http\Controllers\User;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Generalsetting;
-use App\Models\User;
 use App\Classes\GeniusMailer;
 use App\Http\Controllers\Front\FrontBaseController;
+use App\Models\Generalsetting;
 use App\Models\ManageAgreement;
 use App\Models\Notification;
+use App\Models\User;
 use Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Validator;
 
 class RegisterController extends FrontBaseController
 {
-
     public function showRegisterForm()
     {
-      return view('frontend.register');
+        return view('frontend.register');
     }
 
     public function showRegisterFormWithReferral($referral_name)
@@ -29,13 +27,16 @@ class RegisterController extends FrontBaseController
             Session::put('custom_referral', $referrer->id);
             Session::put('custom_referral_code', $referrer->affilate_code);
         }
+
         return view('frontend.register');
     }
+
     public function showVendorRegisterForm()
     {
         // Fetch all agreements (or filter by type if needed)
         $agreements = ManageAgreement::all(); // or ->where('type', 'rider_agreement')->get();
-    // dd($agreements);
+
+        // dd($agreements);
         // Pass agreements to the view
         return view('frontend.vendor-register', compact('agreements'));
     }
@@ -44,113 +45,106 @@ class RegisterController extends FrontBaseController
     {
         $gs = Generalsetting::findOrFail(1);
         $rules = [
-		        'email'   => 'required|email|unique:users',
-		        'password' => 'required|confirmed'
-                ];
+            'email' => 'required|email|unique:users',
+            'password' => 'required|confirmed',
+        ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
-	        $user = new User;
-	        $input = $request->all();
-	        $input['password'] = bcrypt($request['password']);
-	        $token = md5(time().$request->name.$request->email);
-	        $input['verification_link'] = $token;
-	        $input['affilate_code'] = md5($request->name.$request->email);
+        $user = new User;
+        $input = $request->all();
+        $input['password'] = bcrypt($request['password']);
+        $token = md5(time().$request->name.$request->email);
+        $input['verification_link'] = $token;
+        $input['affilate_code'] = md5($request->name.$request->email);
 
-	          if(!empty($request->vendor))
-	          {
-					//--- Validation Section
-					$rules = [
-						'shop_name' => 'unique:users',
-						'shop_number'  => 'max:10'
-							];
-					$customs = [
-						'shop_name.unique' => 'This Shop Name has already been taken.',
-						'shop_number.max'  => 'Shop Number Must Be Less Then 10 Digit.'
-					];
+        if (! empty($request->vendor)) {
+            //--- Validation Section
+            $rules = [
+                'shop_name' => 'unique:users',
+                'shop_number' => 'max:10',
+            ];
+            $customs = [
+                'shop_name.unique' => 'This Shop Name has already been taken.',
+                'shop_number.max' => 'Shop Number Must Be Less Then 10 Digit.',
+            ];
 
-					$validator = Validator::make($request->all(), $rules, $customs);
-					if ($validator->fails()) {
-					return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
-					}
-					$input['is_vendor'] = 1;
+            $validator = Validator::make($request->all(), $rules, $customs);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+            $input['is_vendor'] = 1;
 
-			  }
+        }
 
-	        $user->fill($input)->save();
+        $user->fill($input)->save();
 
-            //--- Referral Logic
-            $referral_code = $request->referral_code;
-            $referrer = null;
+        //--- Referral Logic
+        $referral_code = $request->referral_code;
+        $referrer = null;
 
-            // Try finding referrer by affilate_code from form input
-            if(!empty($referral_code))
-            {
-                $referrer = User::where('affilate_code', $referral_code)->first();
+        // Try finding referrer by affilate_code from form input
+        if (! empty($referral_code)) {
+            $referrer = User::where('affilate_code', $referral_code)->first();
+        }
+
+        // Fallback: use session-stored referrer ID (from referral link)
+        if (! $referrer && Session::has('custom_referral')) {
+            $referrer = User::find(Session::get('custom_referral'));
+            Session::forget('custom_referral');
+            Session::forget('custom_referral_code');
+        }
+
+        if ($referrer) {
+            $user->reff = $referrer->id;
+            $user->update();
+
+            // Create Custom Referral Record
+            $referral = new \App\Models\CustomReferral();
+            $referral->referrer_id = $referrer->id;
+            $referral->referred_id = $user->id;
+            $referral->amount = 500; // Default amount from migration
+            $referral->status = 'locked';
+            $referral->save();
+        }
+        //--- Referral Logic Ends
+
+        if ($gs->is_verification_email == 1) {
+            $to = $request->email;
+            $subject = 'Verify your email address.';
+            $msg = 'Dear Customer,<br> We noticed that you need to verify your email address. <a href='.url('user/register/verify/'.$token).'>Simply click here to verify. </a>';
+            //Sending Email To Customer
+            if ($gs->is_smtp == 1) {
+                $data = [
+                    'to' => $to,
+                    'subject' => $subject,
+                    'body' => $msg,
+                ];
+
+                $mailer = new GeniusMailer();
+                $mailer->sendCustomMail($data);
+            } else {
+                $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
+                mail($to, $subject, $msg, $headers);
             }
 
-            // Fallback: use session-stored referrer ID (from referral link)
-            if(!$referrer && Session::has('custom_referral'))
-            {
-                $referrer = User::find(Session::get('custom_referral'));
-                Session::forget('custom_referral');
-                Session::forget('custom_referral_code');
-            }
-
-            if($referrer)
-            {
-                $user->reff = $referrer->id;
-                $user->update();
-
-                // Create Custom Referral Record
-                $referral = new \App\Models\CustomReferral();
-                $referral->referrer_id = $referrer->id;
-                $referral->referred_id = $user->id;
-                $referral->amount = 500; // Default amount from migration
-                $referral->status = 'locked';
-                $referral->save();
-            }
-            //--- Referral Logic Ends
-
-	        if($gs->is_verification_email == 1)
-	        {
-	        $to = $request->email;
-	        $subject = 'Verify your email address.';
-	        $msg = "Dear Customer,<br> We noticed that you need to verify your email address. <a href=".url('user/register/verify/'.$token).">Simply click here to verify. </a>";
-	        //Sending Email To Customer
-	        if($gs->is_smtp == 1)
-	        {
-	        $data = [
-	            'to' => $to,
-	            'subject' => $subject,
-	            'body' => $msg,
-	        ];
-
-	        $mailer = new GeniusMailer();
-	        $mailer->sendCustomMail($data);
-	        }
-	        else
-	        {
-	        $headers = "From: ".$gs->from_name."<".$gs->from_email.">";
-	        mail($to,$subject,$msg,$headers);
-	        }
-          	return response()->json('We need to verify your email address. We have sent an email to '.$to.' to verify your email address. Please click link in that email to continue.');
-	        }
-	        else {
+            return response()->json('We need to verify your email address. We have sent an email to '.$to.' to verify your email address. Please click link in that email to continue.');
+        } else {
 
             $user->email_verified = 'Yes';
             $user->update();
-	        $notification = new Notification;
-	        $notification->user_id = $user->id;
-	        $notification->save();
+            $notification = new Notification;
+            $notification->user_id = $user->id;
+            $notification->save();
             Auth::guard('web')->login($user);
-          	return response()->json(1);
-	        }
+
+            return response()->json(1);
+        }
 
     }
 
@@ -158,22 +152,20 @@ class RegisterController extends FrontBaseController
     {
         $gs = Generalsetting::findOrFail(1);
 
-        if($gs->is_verification_email == 1)
-	        {
-        $user = User::where('verification_link','=',$token)->first();
-        if(isset($user))
-        {
-            $user->email_verified = 'Yes';
-            $user->update();
-	        $notification = new Notification;
-	        $notification->user_id = $user->id;
-	        $notification->save();
-            Auth::guard('web')->login($user);
-            return redirect()->route('user-dashboard')->with('success','Email Verified Successfully');
+        if ($gs->is_verification_email == 1) {
+            $user = User::where('verification_link', '=', $token)->first();
+            if (isset($user)) {
+                $user->email_verified = 'Yes';
+                $user->update();
+                $notification = new Notification;
+                $notification->user_id = $user->id;
+                $notification->save();
+                Auth::guard('web')->login($user);
+
+                return redirect()->route('user-dashboard')->with('success', 'Email Verified Successfully');
+            }
+        } else {
+            return redirect()->back();
         }
-    		}
-    		else {
-    		return redirect()->back();
-    		}
     }
 }

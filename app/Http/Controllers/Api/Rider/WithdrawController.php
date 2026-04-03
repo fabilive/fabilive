@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Api\Rider;
 
-use App\{
-    Models\Rider,
-    Models\Withdraw,
-    Models\Currency
-};
-use Illuminate\Http\Request;
-use DB;
 use App\Http\Resources\CustomWithdrawResource;
+use App\Models\Rider;
+use App\Models\Withdraw;
+use DB;
+use Illuminate\Http\Request;
 
 class WithdrawController
 {
     protected $gs;
+
     protected $rider;
 
     public function __construct()
@@ -25,15 +23,17 @@ class WithdrawController
     public function index()
     {
         $withdraws = Withdraw::where('user_id', $this->rider->id)->orderByDesc('id')->get();
+
         return response()->json(['data' => CustomWithdrawResource::collection($withdraws)]);
     }
 
     public function show($id)
     {
         $withdraw = Withdraw::where('id', $id)->where('user_id', $this->rider->id)->first();
-        if (!$withdraw) {
+        if (! $withdraw) {
             return response()->json(['message' => 'No record found'], 404);
         }
+
         return response()->json(['data' => new CustomWithdrawResource($withdraw)]);
     }
 
@@ -55,6 +55,7 @@ class WithdrawController
                     $finalamount = $amount - $fee;
                     if ($finalamount < 0) {
                         DB::rollBack();
+
                         return response()->json(['errors' => [__('You can not withdraw this amount.')]]);
                     }
 
@@ -87,20 +88,23 @@ class WithdrawController
                     DB::commit();
 
                     return response()->json([
-                        'status'  => true,
+                        'status' => true,
                         'message' => __('Withdraw Request Sent Successfully.'),
                     ]);
                 } else {
                     DB::rollBack();
+
                     return response()->json(['status' => true, 'message' => 'Insufficient Balance']);
                 }
             }
 
             DB::rollBack();
+
             return response()->json(['status' => false, 'message' => 'Please enter a valid amount. ']);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'status' => false,
                 'errors' => [$e->getMessage()],

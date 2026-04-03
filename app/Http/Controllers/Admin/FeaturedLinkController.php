@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Datatables;
-use App\Models\FeaturedLink;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Models\FeaturedLink;
+use Datatables;
+use Illuminate\Http\Request;
 use Validator;
 
 class FeaturedLinkController extends Controller
@@ -19,18 +18,20 @@ class FeaturedLinkController extends Controller
     //*** JSON Request
     public function datatables()
     {
-         $datas = FeaturedLink::orderBy('id','desc')->get();
-         //--- Integrating This Collection Into Datatables
-         return Datatables::of($datas)
-                            ->editColumn('photo', function(FeaturedLink $data) {
-                                $photo = $data->photo ? url('assets/images/featuredlink/'.$data->photo):url('assets/images/noimage.png');
-                                return '<img src="' . $photo . '" alt="Image">';
-                            })
-                            ->addColumn('action', function(FeaturedLink $data) {
-                                return '<div class="action-list"><a data-href="' . route('admin-featuredlink-edit',$data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>Edit</a><a href="javascript:;" data-href="' . route('admin-featuredlink-delete',$data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
-                            })
-                            ->rawColumns(['photo', 'action'])
-                            ->toJson(); //--- Returning Json Data To Client Side
+        $datas = FeaturedLink::orderBy('id', 'desc')->get();
+
+        //--- Integrating This Collection Into Datatables
+        return Datatables::of($datas)
+            ->editColumn('photo', function (FeaturedLink $data) {
+                $photo = $data->photo ? url('assets/images/featuredlink/'.$data->photo) : url('assets/images/noimage.png');
+
+                return '<img src="'.$photo.'" alt="Image">';
+            })
+            ->addColumn('action', function (FeaturedLink $data) {
+                return '<div class="action-list"><a data-href="'.route('admin-featuredlink-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>Edit</a><a href="javascript:;" data-href="'.route('admin-featuredlink-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+            })
+            ->rawColumns(['photo', 'action'])
+            ->toJson(); //--- Returning Json Data To Client Side
     }
 
     //*** GET Request
@@ -50,23 +51,22 @@ class FeaturedLinkController extends Controller
     {
         //--- Validation Section
         $rules = [
-               'photo'      => 'required|mimes:jpeg,jpg,png,svg',
-                ];
+            'photo' => 'required|mimes:jpeg,jpg,png,svg',
+        ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
         //--- Logic Section
         $data = new FeaturedLink();
         $input = $request->all();
-        if ($file = $request->file('photo'))
-         {
+        if ($file = $request->file('photo')) {
             $name = \PriceHelper::ImageCreateName($file);
-            $file->move('assets/images/featuredlink',$name);
+            $file->move('assets/images/featuredlink', $name);
             $input['photo'] = $name;
         }
         $data->fill($input)->save();
@@ -74,6 +74,7 @@ class FeaturedLinkController extends Controller
 
         //--- Redirect Section
         $msg = 'New Data Added Successfully.';
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -82,7 +83,8 @@ class FeaturedLinkController extends Controller
     public function edit($id)
     {
         $data = FeaturedLink::findOrFail($id);
-        return view('admin.featuredlink.edit',compact('data'));
+
+        return view('admin.featuredlink.edit', compact('data'));
     }
 
     //*** POST Request
@@ -90,36 +92,35 @@ class FeaturedLinkController extends Controller
     {
         //--- Validation Section
         $rules = [
-               'photo'      => 'mimes:jpeg,jpg,png,svg',
-                ];
+            'photo' => 'mimes:jpeg,jpg,png,svg',
+        ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
         //--- Logic Section
         $data = FeaturedLink::findOrFail($id);
         $input = $request->all();
-            if ($file = $request->file('photo'))
-            {
-                $name = \PriceHelper::ImageCreateName($file);
-                $file->move('assets/images/featuredlink',$name);
-                if($data->photo != null)
-                {
-                    if (file_exists(public_path().'/assets/images/featuredlink/'.$data->photo)) {
-                        unlink(public_path().'/assets/images/featuredlink/'.$data->photo);
-                    }
+        if ($file = $request->file('photo')) {
+            $name = \PriceHelper::ImageCreateName($file);
+            $file->move('assets/images/featuredlink', $name);
+            if ($data->photo != null) {
+                if (file_exists(public_path().'/assets/images/featuredlink/'.$data->photo)) {
+                    unlink(public_path().'/assets/images/featuredlink/'.$data->photo);
                 }
-            $input['photo'] = $name;
             }
+            $input['photo'] = $name;
+        }
         $data->update($input);
         //--- Logic Section Ends
 
         //--- Redirect Section
         $msg = 'Data Updated Successfully.';
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }
@@ -129,10 +130,11 @@ class FeaturedLinkController extends Controller
     {
         $data = FeaturedLink::findOrFail($id);
         //If Photo Doesn't Exist
-        if($data->photo == null){
+        if ($data->photo == null) {
             $data->delete();
             //--- Redirect Section
             $msg = 'Data Deleted Successfully.';
+
             return response()->json($msg);
             //--- Redirect Section Ends
         }
@@ -143,6 +145,7 @@ class FeaturedLinkController extends Controller
         $data->delete();
         //--- Redirect Section
         $msg = 'Data Deleted Successfully.';
+
         return response()->json($msg);
         //--- Redirect Section Ends
     }

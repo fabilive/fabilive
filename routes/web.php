@@ -1,14 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\PaymentController;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 // =================================== Admin Section Routes ===================================\\
 
@@ -20,42 +18,42 @@ Route::get('/fix-campay-db', function () {
         $campay = DB::table('payment_gateways')->where('keyword', 'campay')->first();
 
         $information = json_encode([
-            'username'        => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
-            'password'        => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
+            'username' => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
+            'password' => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
             'permanent_token' => 'fd3c20a1ff48e47cf92407c0bde3e27a53063d13',
-            'webhook_key'     => 'SCBmhdWURtCWFui7IKPN6B63Jxaxr6VPsV2voNZs2Vc1axnFFehMpWLE6omBRuVea9UiY42mBb0keoytD597nw',
-            'text'            => 'Pay via Campay',
+            'webhook_key' => 'SCBmhdWURtCWFui7IKPN6B63Jxaxr6VPsV2voNZs2Vc1axnFFehMpWLE6omBRuVea9UiY42mBb0keoytD597nw',
+            'text' => 'Pay via Campay',
         ]);
 
         if ($campay) {
             DB::table('payment_gateways')->where('keyword', 'campay')->update([
-                'type'        => 'automatic',
-                'name'        => 'Campay',
-                'title'       => 'Campay',
-                'subtitle'    => 'Pay via mobile money (MTN/Orange)',
+                'type' => 'automatic',
+                'name' => 'Campay',
+                'title' => 'Campay',
+                'subtitle' => 'Pay via mobile money (MTN/Orange)',
                 'information' => $information,
                 'currency_id' => '["*"]',
-                'checkout'    => 1,
+                'checkout' => 1,
             ]);
             $action = 'updated';
         } else {
             DB::table('payment_gateways')->insert([
-                'title'       => 'Campay',
-                'subtitle'    => 'Pay via mobile money (MTN/Orange)',
-                'name'        => 'Campay',
-                'keyword'     => 'campay',
-                'type'        => 'automatic',
+                'title' => 'Campay',
+                'subtitle' => 'Pay via mobile money (MTN/Orange)',
+                'name' => 'Campay',
+                'keyword' => 'campay',
+                'type' => 'automatic',
                 'information' => $information,
                 'currency_id' => '["*"]',
-                'checkout'    => 1,
+                'checkout' => 1,
             ]);
             $action = 'created';
         }
 
         return response()->json([
-            'status'  => 'success',
-            'action'  => $action,
-            'message' => 'Campay row ' . $action . ' with type=automatic and all API credentials. Go to Admin > Payment Gateways > Edit Campay to verify.',
+            'status' => 'success',
+            'action' => $action,
+            'message' => 'Campay row '.$action.' with type=automatic and all API credentials. Go to Admin > Payment Gateways > Edit Campay to verify.',
         ], 200, [], JSON_PRETTY_PRINT);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
@@ -63,11 +61,12 @@ Route::get('/fix-campay-db', function () {
 });
 Route::get('/add-custom-referral-bonus-column', function () {
     try {
-        if (!Schema::hasColumn('generalsettings', 'custom_referral_bonus')) {
+        if (! Schema::hasColumn('generalsettings', 'custom_referral_bonus')) {
             Schema::table('generalsettings', function ($table) {
                 $table->unsignedInteger('custom_referral_bonus')->default(500)->after('referral_bonus');
             });
             DB::table('generalsettings')->where('id', 1)->update(['custom_referral_bonus' => 500]);
+
             return response()->json(['status' => 'success', 'message' => 'custom_referral_bonus column added and set to 500 CFA.']);
         } else {
             return response()->json(['status' => 'already_exists', 'message' => 'Column already exists. No changes made.']);
@@ -79,7 +78,7 @@ Route::get('/add-custom-referral-bonus-column', function () {
 
 Route::get('/fix-subscriptions', function () {
     try {
-        if (!\Illuminate\Support\Facades\Schema::hasTable('subscriptions')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('subscriptions')) {
             \Illuminate\Support\Facades\Schema::create('subscriptions', function ($table) {
                 $table->id();
                 $table->string('title')->nullable();
@@ -92,7 +91,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('user_subscriptions')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('user_subscriptions')) {
             \Illuminate\Support\Facades\Schema::create('user_subscriptions', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -115,7 +114,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('agreements')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('agreements')) {
             \Illuminate\Support\Facades\Schema::create('agreements', function ($table) {
                 $table->id();
                 $table->string('title')->nullable();
@@ -125,7 +124,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('languages')) {
             \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
@@ -138,11 +137,11 @@ Route::get('/fix-subscriptions', function () {
                 'id' => 1,
                 'name' => 'English',
                 'language' => 'English',
-                'is_default' => 1
+                'is_default' => 1,
             ]);
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('currencies')) {
             \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
@@ -155,11 +154,11 @@ Route::get('/fix-subscriptions', function () {
                 'name' => 'CFA',
                 'sign' => 'CFA',
                 'value' => 1,
-                'is_default' => 1
+                'is_default' => 1,
             ]);
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('verifications')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('verifications')) {
             \Illuminate\Support\Facades\Schema::create('verifications', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -173,7 +172,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('vendor_orders')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('vendor_orders')) {
             \Illuminate\Support\Facades\Schema::create('vendor_orders', function ($table) {
                 $table->id();
                 $table->integer('order_id')->nullable();
@@ -187,7 +186,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('orders')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('orders')) {
             \Illuminate\Support\Facades\Schema::create('orders', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -201,7 +200,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
             \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
                 $table->id();
                 $table->integer('sender_id')->nullable();
@@ -212,7 +211,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
             \Illuminate\Support\Facades\Schema::create('user_notifications', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -222,7 +221,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
             \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
                 $table->id();
                 $table->integer('order_id')->nullable();
@@ -246,7 +245,7 @@ Route::get('/fix-subscriptions', function () {
         if ($gs_check) {
             $gs_cols = ['physical', 'digital', 'license', 'listing', 'vendor_ship_info', 'affilite', 'is_admin_loader', 'wholesell'];
             foreach ($gs_cols as $col) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
                     \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col) {
                         $table->integer($col)->default(1);
                     });
@@ -260,30 +259,30 @@ Route::get('/fix-subscriptions', function () {
                 'vendor_ship_info' => 1,
                 'affilite' => 1,
                 'is_admin_loader' => 0,
-                'wholesell' => 1
+                'wholesell' => 1,
             ]);
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('countries')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('countries')) {
             \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
                 $table->id();
                 $table->string('country_name')->nullable();
                 $table->integer('status')->default(1);
             });
         } else {
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('countries', 'country_name')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('countries', 'country_name')) {
                 \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
                     $table->string('country_name')->nullable();
                 });
             }
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('countries', 'status')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('countries', 'status')) {
                 \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
                     $table->integer('status')->default(1);
                 });
             }
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('states')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('states')) {
             \Illuminate\Support\Facades\Schema::create('states', function ($table) {
                 $table->id();
                 $table->string('state_name')->nullable();
@@ -291,24 +290,24 @@ Route::get('/fix-subscriptions', function () {
                 $table->integer('status')->default(1);
             });
         } else {
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'state_name')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'state_name')) {
                 \Illuminate\Support\Facades\Schema::table('states', function ($table) {
                     $table->string('state_name')->nullable();
                 });
             }
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
                 \Illuminate\Support\Facades\Schema::table('states', function ($table) {
                     $table->integer('country_id')->nullable();
                 });
             }
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'status')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'status')) {
                 \Illuminate\Support\Facades\Schema::table('states', function ($table) {
                     $table->integer('status')->default(1);
                 });
             }
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('cities')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('cities')) {
             \Illuminate\Support\Facades\Schema::create('cities', function ($table) {
                 $table->id();
                 $table->string('city_name')->nullable();
@@ -316,24 +315,24 @@ Route::get('/fix-subscriptions', function () {
                 $table->integer('status')->default(1);
             });
         } else {
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'city_name')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'city_name')) {
                 \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
                     $table->string('city_name')->nullable();
                 });
             }
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'state_id')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'state_id')) {
                 \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
                     $table->integer('state_id')->nullable();
                 });
             }
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'status')) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'status')) {
                 \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
                     $table->integer('status')->default(1);
                 });
             }
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('categories')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('categories')) {
             \Illuminate\Support\Facades\Schema::create('categories', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
@@ -353,7 +352,8 @@ Route::get('/fix-subscriptions', function () {
                     $table->dropForeign(['subcategory_id']);
                     $table->dropForeign(['childcategory_id']);
                 });
-            } catch (\Exception $e) { /* Ignore if keys don't exist */ }
+            } catch (\Exception $e) { /* Ignore if keys don't exist */
+            }
 
             \Illuminate\Support\Facades\Schema::table('products', function ($table) {
                 // Correctly fix the ID columns
@@ -376,7 +376,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
             \Illuminate\Support\Facades\Schema::create('subcategories', function ($table) {
                 $table->id();
                 $table->integer('category_id')->nullable();
@@ -386,7 +386,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
             \Illuminate\Support\Facades\Schema::create('childcategories', function ($table) {
                 $table->id();
                 $table->integer('subcategory_id')->nullable();
@@ -398,7 +398,7 @@ Route::get('/fix-subscriptions', function () {
 
         if (\Illuminate\Support\Facades\Schema::hasTable('subcategories')) {
             \Illuminate\Support\Facades\Schema::table('subcategories', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('subcategories', 'category_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('subcategories', 'category_id')) {
                     $table->integer('category_id')->nullable();
                 }
             });
@@ -406,7 +406,7 @@ Route::get('/fix-subscriptions', function () {
 
         if (\Illuminate\Support\Facades\Schema::hasTable('childcategories')) {
             \Illuminate\Support\Facades\Schema::table('childcategories', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('childcategories', 'subcategory_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('childcategories', 'subcategory_id')) {
                     $table->integer('subcategory_id')->nullable();
                 }
             });
@@ -415,7 +415,7 @@ Route::get('/fix-subscriptions', function () {
         // NEW STABILITY REPAIRS FOR CHECKOUT & PRODUCT DETAILS
         if (\Illuminate\Support\Facades\Schema::hasTable('orders')) {
             \Illuminate\Support\Facades\Schema::table('orders', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('orders', 'currency_name')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('orders', 'currency_name')) {
                     $table->string('currency_name')->nullable();
                 }
             });
@@ -424,19 +424,19 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('products')) {
             \Illuminate\Support\Facades\Schema::table('products', function ($table) {
                 $columns = ['user_id', 'category_id', 'product_type',
-                'product_location','product_city','affiliate_link', 'sku', 'subcategory_id','country_id',
-                 'childcategory_id', 'attributes', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'details',
-                  'price', 'previous_price', 'stock', 'policy', 'status', 'views', 'tags', 'featured', 'best', 'top', 'hot',
-                  'latest', 'big', 'trending', 'sale', 'features', 'colors', 'product_condition', 'ship', 'meta_tag',
-                   'meta_description', 'youtube', 'type', 'file', 'license', 'license_qty', 'link', 'platform', 'region',
+                    'product_location', 'product_city', 'affiliate_link', 'sku', 'subcategory_id', 'country_id',
+                    'childcategory_id', 'attributes', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'details',
+                    'price', 'previous_price', 'stock', 'policy', 'status', 'views', 'tags', 'featured', 'best', 'top', 'hot',
+                    'latest', 'big', 'trending', 'sale', 'features', 'colors', 'product_condition', 'ship', 'meta_tag',
+                    'meta_description', 'youtube', 'type', 'file', 'license', 'license_qty', 'link', 'platform', 'region',
                     'licence_type', 'measure', 'discount_date', 'is_discount', 'whole_sell_qty', 'whole_sell_discount',
-                     'catalog_id', 'slug', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count',
-                      'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
-                       'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
-                        'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check','delivery_fee','delivery_unit','product_servicearea',
-                         'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
+                    'catalog_id', 'slug', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count',
+                    'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
+                    'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
+                    'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check', 'delivery_fee', 'delivery_unit', 'product_servicearea',
+                    'cross_products', '3d_model', 'discount_date_start', 'discount_date_end'];
                 foreach ($columns as $column) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('products', $column)) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('products', $column)) {
                         if (in_array($column, ['views', 'stock', 'status', 'featured', 'best', 'top', 'hot', 'latest', 'big', 'trending', 'sale', 'is_discount'])) {
                             $table->integer($column)->default(0);
                         } elseif (in_array($column, ['delivery_fee'])) {
@@ -451,16 +451,16 @@ Route::get('/fix-subscriptions', function () {
 
         if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
             \Illuminate\Support\Facades\Schema::table('users', function ($table) {
-                $columns = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country','country_id', 'address', 'phone','selfie_image',
-                 'lat', 'lng',
-                 'fax', 'email', 'password', 'affilate_code','reff', 'verification_link', 'shop_name', 'owner_name',
-                 'shop_number', 'shop_address', 'reg_number', 'shop_message','business_registration_certificate','taxpayer_card_copy',
-                 'id_card_copy','passport_copy','driver_license_copy','residence_permit', 'is_vendor', 'shop_details',
-                 'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified','current_balance', 'email_token', 'reward',
-                  'national_id_front_image', 'national_id_back_image','submerchant_agreement', 'license_image', 'is_verified',
-                  'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
+                $columns = ['referral_name', 'name', 'photo', 'zip', 'city_id', 'state_id', 'country', 'country_id', 'address', 'phone', 'selfie_image',
+                    'lat', 'lng',
+                    'fax', 'email', 'password', 'affilate_code', 'reff', 'verification_link', 'shop_name', 'owner_name',
+                    'shop_number', 'shop_address', 'reg_number', 'shop_message', 'business_registration_certificate', 'taxpayer_card_copy',
+                    'id_card_copy', 'passport_copy', 'driver_license_copy', 'residence_permit', 'is_vendor', 'shop_details',
+                    'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified', 'current_balance', 'email_token', 'reward',
+                    'national_id_front_image', 'national_id_back_image', 'submerchant_agreement', 'license_image', 'is_verified',
+                    'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
                 foreach ($columns as $column) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('users', $column)) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('users', $column)) {
                         $table->text($column)->nullable();
                     }
                 }
@@ -472,7 +472,7 @@ Route::get('/fix-subscriptions', function () {
             \Illuminate\Support\Facades\Schema::table('riders', function ($table) {
                 $columns = ['rider_status', 'onboarding_status', 'rejection_reason', 'approved_at', 'status'];
                 foreach ($columns as $column) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('riders', $column)) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('riders', $column)) {
                         if ($column == 'approved_at') {
                             $table->timestamp($column)->nullable();
                         } elseif ($column == 'status') {
@@ -486,7 +486,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // REPAIR SERVICE AREAS TABLE
-        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
             \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
@@ -505,17 +505,21 @@ Route::get('/fix-subscriptions', function () {
             \Illuminate\Support\Facades\Schema::table('service_areas', function ($table) {
                 $cols = ['name', 'location', 'latitude', 'longitude', 'base_fee', 'stopover_fee', 'status'];
                 foreach ($cols as $c) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', $c)) {
-                        if (in_array($c, ['base_fee', 'stopover_fee'])) $table->double($c)->default(0);
-                        elseif ($c == 'status') $table->integer($c)->default(1);
-                        else $table->string($c)->nullable();
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('service_areas', $c)) {
+                        if (in_array($c, ['base_fee', 'stopover_fee'])) {
+                            $table->double($c)->default(0);
+                        } elseif ($c == 'status') {
+                            $table->integer($c)->default(1);
+                        } else {
+                            $table->string($c)->nullable();
+                        }
                     }
                 }
             });
         }
 
         // REPAIR RIDER SERVICE AREAS TABLE
-        if (!\Illuminate\Support\Facades\Schema::hasTable('rider_service_areas')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('rider_service_areas')) {
             \Illuminate\Support\Facades\Schema::create('rider_service_areas', function ($table) {
                 $table->id();
                 $table->unsignedBigInteger('rider_id')->index();
@@ -524,13 +528,13 @@ Route::get('/fix-subscriptions', function () {
             });
         } else {
             \Illuminate\Support\Facades\Schema::table('rider_service_areas', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'rider_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'rider_id')) {
                     $table->unsignedBigInteger('rider_id')->index();
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'service_area_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'service_area_id')) {
                     $table->unsignedBigInteger('service_area_id')->index();
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'price')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('rider_service_areas', 'price')) {
                     $table->double('price')->nullable();
                 }
             });
@@ -539,7 +543,7 @@ Route::get('/fix-subscriptions', function () {
         // Fix for missing generalsettings columns (EXHAUSTIVE ALIGNMENT)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
-            if (!$gs_check) {
+            if (! $gs_check) {
                 \Illuminate\Support\Facades\DB::table('generalsettings')->insert([
                     'id' => 1,
                     'title' => 'Fabilive',
@@ -554,9 +558,9 @@ Route::get('/fix-subscriptions', function () {
                 ]);
             }
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
-                $columns = ['logo', 'favicon', 'title','copyright','colors','loader','admin_loader','talkto','disqus','currency_format','withdraw_fee','withdraw_charge','shipping_cost','mail_driver','mail_host','mail_port','mail_encryption','mail_user','mail_pass','from_email','from_name','is_affilate','affilate_charge','affilate_banner','fixed_commission','percentage_commission','multiple_shipping','vendor_ship_info','is_verification_email','wholesell','is_capcha','error_banner_404','error_banner_500','popup_title','popup_text','popup_background','invoice_logo','user_image','vendor_color','is_secure','paypal_business','footer_logo','paytm_merchant','maintain_text','flash_count','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','page_count','seller_product_count','wishlist_count','vendor_page_count','min_price','max_price','product_page','post_count','wishlist_page','decimal_separator','thousand_separator','version','is_reward','reward_point','reward_dolar','physical','digital','license','affilite','header_color','capcha_secret_key','capcha_site_key','referral_amount','referral_bonus','breadcrumb_banner','partner_title','partner_text','deal_title','deal_details','deal_time','deal_background','delivery_base_fee','delivery_stopover_fee','rider_percentage_commission','custom_referral_bonus','same_servicearea_delivery_fee'];
+                $columns = ['logo', 'favicon', 'title', 'copyright', 'colors', 'loader', 'admin_loader', 'talkto', 'disqus', 'currency_format', 'withdraw_fee', 'withdraw_charge', 'shipping_cost', 'mail_driver', 'mail_host', 'mail_port', 'mail_encryption', 'mail_user', 'mail_pass', 'from_email', 'from_name', 'is_affilate', 'affilate_charge', 'affilate_banner', 'fixed_commission', 'percentage_commission', 'multiple_shipping', 'vendor_ship_info', 'is_verification_email', 'wholesell', 'is_capcha', 'error_banner_404', 'error_banner_500', 'popup_title', 'popup_text', 'popup_background', 'invoice_logo', 'user_image', 'vendor_color', 'is_secure', 'paypal_business', 'footer_logo', 'paytm_merchant', 'maintain_text', 'flash_count', 'hot_count', 'new_count', 'sale_count', 'best_seller_count', 'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count', 'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price', 'product_page', 'post_count', 'wishlist_page', 'decimal_separator', 'thousand_separator', 'version', 'is_reward', 'reward_point', 'reward_dolar', 'physical', 'digital', 'license', 'affilite', 'header_color', 'capcha_secret_key', 'capcha_site_key', 'referral_amount', 'referral_bonus', 'breadcrumb_banner', 'partner_title', 'partner_text', 'deal_title', 'deal_details', 'deal_time', 'deal_background', 'delivery_base_fee', 'delivery_stopover_fee', 'rider_percentage_commission', 'custom_referral_bonus', 'same_servicearea_delivery_fee'];
                 foreach ($columns as $column) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
                         $table->text($column)->nullable();
                     }
                 }
@@ -570,10 +574,10 @@ Route::get('/fix-subscriptions', function () {
             ]);
 
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_shipping')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_shipping')) {
                     $table->integer('is_shipping')->default(1);
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_comment')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'is_comment')) {
                     $table->integer('is_comment')->default(1);
                 }
             });
@@ -582,7 +586,7 @@ Route::get('/fix-subscriptions', function () {
         // SEED MISSING ADMIN ID 1 (CRITICAL FOR "SOLD BY")
         if (\Illuminate\Support\Facades\Schema::hasTable('admins')) {
             $admin_check = \Illuminate\Support\Facades\DB::table('admins')->where('id', 1)->first();
-            if (!$admin_check) {
+            if (! $admin_check) {
                 \Illuminate\Support\Facades\DB::table('admins')->insert([
                     'id' => 1,
                     'name' => 'Fabilive Admin',
@@ -594,7 +598,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing galleries table
-        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('galleries')) {
             \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
                 $table->increments('id');
                 $table->integer('product_id');
@@ -603,7 +607,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing product_clicks table
-        if (!\Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
             \Illuminate\Support\Facades\Schema::create('product_clicks', function ($table) {
                 $table->increments('id');
                 $table->integer('product_id');
@@ -612,7 +616,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing live_messages table
-        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
             \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
                 $table->increments('id');
                 $table->integer('sender_id')->nullable();
@@ -623,7 +627,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing reports table
-        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('reports')) {
             \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id');
@@ -635,7 +639,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing countries table
-        if (!\Illuminate\Support\Facades\Schema::hasTable('countries')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('countries')) {
             \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
                 $table->increments('id');
                 $table->string('name');
@@ -643,12 +647,12 @@ Route::get('/fix-subscriptions', function () {
             });
             \Illuminate\Support\Facades\DB::table('countries')->insert([
                 ['name' => 'Cameroon', 'status' => 1],
-                ['name' => 'Nigeria', 'status' => 1]
+                ['name' => 'Nigeria', 'status' => 1],
             ]);
         }
 
         // Fix for missing currencies table (CRITICAL FOR PRICING)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('currencies')) {
             \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
                 $table->increments('id');
                 $table->string('name');
@@ -659,7 +663,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         $curr_check = \Illuminate\Support\Facades\DB::table('currencies')->where('is_default', 1)->first();
-        if (!$curr_check) {
+        if (! $curr_check) {
             \Illuminate\Support\Facades\DB::table('currencies')->insert([
                 'name' => 'CFA',
                 'sign' => 'FCFA',
@@ -674,20 +678,20 @@ Route::get('/fix-subscriptions', function () {
         // Fix for missing cities/states columns
         if (\Illuminate\Support\Facades\Schema::hasTable('states')) {
             \Illuminate\Support\Facades\Schema::table('states', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
                     $table->integer('country_id')->unsigned()->nullable();
                 }
             });
         }
         if (\Illuminate\Support\Facades\Schema::hasTable('cities')) {
             \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('cities', 'state_id')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'state_id')) {
                     $table->integer('state_id')->unsigned()->nullable();
                 }
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
             \Illuminate\Support\Facades\Schema::create('ratings', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -699,16 +703,16 @@ Route::get('/fix-subscriptions', function () {
             });
         } else {
             \Illuminate\Support\Facades\Schema::table('ratings', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('ratings', 'status')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('ratings', 'status')) {
                     $table->integer('status')->default(1);
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('ratings', 'review')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('ratings', 'review')) {
                     $table->text('review')->nullable();
                 }
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('product_clicks')) {
             \Illuminate\Support\Facades\Schema::create('product_clicks', function ($table) {
                 $table->id();
                 $table->integer('product_id')->nullable();
@@ -716,7 +720,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('reports')) {
             \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -726,7 +730,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('comments')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('comments')) {
             \Illuminate\Support\Facades\Schema::create('comments', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -736,7 +740,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('wishlists')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('wishlists')) {
             \Illuminate\Support\Facades\Schema::create('wishlists', function ($table) {
                 $table->id();
                 $table->integer('user_id')->nullable();
@@ -745,7 +749,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('delivery_fees')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('delivery_fees')) {
             \Illuminate\Support\Facades\Schema::create('delivery_fees', function ($table) {
                 $table->id();
                 $table->integer('category_id')->nullable();
@@ -756,7 +760,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('distance_fees')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('distance_fees')) {
             \Illuminate\Support\Facades\Schema::create('distance_fees', function ($table) {
                 $table->id();
                 $table->double('min_distance', 8, 2)->default(0);
@@ -766,7 +770,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('attributes')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('attributes')) {
             \Illuminate\Support\Facades\Schema::create('attributes', function ($table) {
                 $table->id();
                 $table->integer('attributable_id')->nullable();
@@ -779,7 +783,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('attribute_options')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('attribute_options')) {
             \Illuminate\Support\Facades\Schema::create('attribute_options', function ($table) {
                 $table->id();
                 $table->integer('attribute_id')->nullable();
@@ -788,7 +792,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('live_messages')) {
             \Illuminate\Support\Facades\Schema::create('live_messages', function ($table) {
                 $table->id();
                 $table->integer('sender_id')->nullable();
@@ -798,13 +802,13 @@ Route::get('/fix-subscriptions', function () {
             });
         } else {
             \Illuminate\Support\Facades\Schema::table('live_messages', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('live_messages', 'content')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('live_messages', 'content')) {
                     $table->text('content')->nullable();
                 }
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('galleries')) {
             \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
                 $table->id();
                 $table->integer('product_id')->nullable();
@@ -812,7 +816,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('replies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('replies')) {
             \Illuminate\Support\Facades\Schema::create('replies', function ($table) {
                 $table->id();
                 $table->integer('comment_id')->nullable();
@@ -822,7 +826,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('subreplies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('subreplies')) {
             \Illuminate\Support\Facades\Schema::create('subreplies', function ($table) {
                 $table->id();
                 $table->integer('reply_id')->nullable();
@@ -832,7 +836,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('order_logs')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('order_logs')) {
             \Illuminate\Support\Facades\Schema::create('order_logs', function ($table) {
                 $table->id();
                 $table->integer('order_id')->nullable();
@@ -841,14 +845,14 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('pickups')) {
             \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
                 $table->id();
                 $table->string('location')->nullable();
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('shippings')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('shippings')) {
             \Illuminate\Support\Facades\Schema::create('shippings', function ($table) {
                 $table->id();
                 $table->integer('user_id')->default(0);
@@ -859,7 +863,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('packages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('packages')) {
             \Illuminate\Support\Facades\Schema::create('packages', function ($table) {
                 $table->id();
                 $table->integer('user_id')->default(0);
@@ -869,7 +873,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
             \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
                 $table->id();
                 $table->string('name')->nullable();
@@ -883,16 +887,16 @@ Route::get('/fix-subscriptions', function () {
             });
         } else {
             \Illuminate\Support\Facades\Schema::table('service_areas', function ($table) {
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'base_fee')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'base_fee')) {
                     $table->double('base_fee', 8, 2)->default(0);
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'stopover_fee')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'stopover_fee')) {
                     $table->double('stopover_fee', 8, 2)->default(0);
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'status')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'status')) {
                     $table->integer('status')->default(1);
                 }
-                if (!\Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'location')) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('service_areas', 'location')) {
                     $table->string('location')->nullable();
                 }
             });
@@ -913,7 +917,7 @@ Route::get('/fix-subscriptions', function () {
         $cats = [
             ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
             ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],
-            ['name' => 'Services', 'slug' => 'services', 'status' => 1]
+            ['name' => 'Services', 'slug' => 'services', 'status' => 1],
         ];
         foreach ($cats as $cat) {
             if (\Illuminate\Support\Facades\DB::table('categories')->where('slug', $cat['slug'])->count() == 0) {
@@ -929,12 +933,12 @@ Route::get('/fix-subscriptions', function () {
             'fashion' => [
                 ['name' => "Men's Clothing", 'slug' => 'mens-clothing', 'status' => 1],
                 ['name' => "Women's Clothing", 'slug' => 'womens-clothing', 'status' => 1],
-                ['name' => "Shoes", 'slug' => 'shoes', 'status' => 1],
-                ['name' => "Watches", 'slug' => 'watches', 'status' => 1]
+                ['name' => 'Shoes', 'slug' => 'shoes', 'status' => 1],
+                ['name' => 'Watches', 'slug' => 'watches', 'status' => 1],
             ],
             'services' => [
-                ['name' => "Digital Services", 'slug' => 'digital-services', 'status' => 1],
-            ]
+                ['name' => 'Digital Services', 'slug' => 'digital-services', 'status' => 1],
+            ],
         ];
         foreach ($subcats as $cat_slug => $subs) {
             $category = \Illuminate\Support\Facades\DB::table('categories')->where('slug', $cat_slug)->first();
@@ -955,12 +959,12 @@ Route::get('/fix-subscriptions', function () {
                 'price' => 0,
                 'days' => 365,
                 'allowed_products' => 0,
-                'details' => 'Full vendor access package.'
+                'details' => 'Full vendor access package.',
             ]);
         }
 
         // Fix for missing languages table (CRITICAL FOR LOCALE)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('languages')) {
             \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
                 $table->increments('id');
                 $table->string('name');
@@ -980,10 +984,10 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // Fix for missing pagesettings table (CRITICAL FOR HEADER/FOOTER)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('pagesettings')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('pagesettings')) {
             \Illuminate\Support\Facades\Schema::create('pagesettings', function ($table) {
                 $table->increments('id');
-                $columns = ['contact_email','street','phone','fax','email','site','best_seller_banner','best_seller_banner_link','big_save_banner','big_save_banner_link','best_seller_banner1','best_seller_banner_link1','big_save_banner1','big_save_banner_link1','partners','bottom_small','rightbanner1','rightbanner2','rightbannerlink1','rightbannerlink2','home','blog','faq','contact','category','arrival_section','our_services','popular_products','third_left_banner','slider','flash_deal','deal_of_the_day','best_sellers','partner','top_big_trending','top_brand','big_save_banner_subtitle','big_save_banner_title','big_save_banner_text','top_banner','large_banner','best_selling','bottom_banner','newsletter'];
+                $columns = ['contact_email', 'street', 'phone', 'fax', 'email', 'site', 'best_seller_banner', 'best_seller_banner_link', 'big_save_banner', 'big_save_banner_link', 'best_seller_banner1', 'best_seller_banner_link1', 'big_save_banner1', 'big_save_banner_link1', 'partners', 'bottom_small', 'rightbanner1', 'rightbanner2', 'rightbannerlink1', 'rightbannerlink2', 'home', 'blog', 'faq', 'contact', 'category', 'arrival_section', 'our_services', 'popular_products', 'third_left_banner', 'slider', 'flash_deal', 'deal_of_the_day', 'best_sellers', 'partner', 'top_big_trending', 'top_brand', 'big_save_banner_subtitle', 'big_save_banner_title', 'big_save_banner_text', 'top_banner', 'large_banner', 'best_selling', 'bottom_banner', 'newsletter'];
                 foreach ($columns as $column) {
                     $table->text($column)->nullable();
                 }
@@ -996,12 +1000,12 @@ Route::get('/fix-subscriptions', function () {
         // ENSURE GENERALSETTINGS HAS ALL REQUIRED COLUMNS (DISPLAY COUNTS & TOGGLES)
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) {
-                $columns = ['show_stock','show_cart', 'show_wishlist', 'is_report','is_contact_seller','admin_loader','fixed_commission','percentage_commission','withdraw_fee','withdraw_charge','currency_format','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','post_count','is_capcha','is_maintain'];
+                $columns = ['show_stock', 'show_cart', 'show_wishlist', 'is_report', 'is_contact_seller', 'admin_loader', 'fixed_commission', 'percentage_commission', 'withdraw_fee', 'withdraw_charge', 'currency_format', 'hot_count', 'new_count', 'sale_count', 'best_seller_count', 'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'post_count', 'is_capcha', 'is_maintain'];
                 foreach ($columns as $column) {
-                    if (!\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $column)) {
                         if (str_contains($column, 'count')) {
                             $table->integer($column)->default(10);
-                        } elseif (in_array($column, ['fixed_commission','percentage_commission','withdraw_fee','withdraw_charge'])) {
+                        } elseif (in_array($column, ['fixed_commission', 'percentage_commission', 'withdraw_fee', 'withdraw_charge'])) {
                             $table->double($column)->default(0);
                         } else {
                             $table->integer($column)->default(1);
@@ -1015,14 +1019,14 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // RESTORE BLOG CONTENT TABLES
-        if (!\Illuminate\Support\Facades\Schema::hasTable('blog_categories')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('blog_categories')) {
             \Illuminate\Support\Facades\Schema::create('blog_categories', function ($table) {
                 $table->increments('id');
                 $table->string('name');
                 $table->string('slug');
             });
         }
-        if (!\Illuminate\Support\Facades\Schema::hasTable('blogs')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('blogs')) {
             \Illuminate\Support\Facades\Schema::create('blogs', function ($table) {
                 $table->increments('id');
                 $table->integer('category_id');
@@ -1041,7 +1045,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // RESTORE CORE PILLARS (CURRENCIES, RATINGS, GALLERIES, ATTRIBUTES)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('currencies')) {
             \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
                 $table->increments('id');
                 $table->string('name');
@@ -1055,11 +1059,11 @@ Route::get('/fix-subscriptions', function () {
                 'name' => 'CFA',
                 'sign' => 'CFA',
                 'value' => 1,
-                'is_default' => 1
+                'is_default' => 1,
             ]);
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
             \Illuminate\Support\Facades\Schema::create('ratings', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id')->nullable();
@@ -1070,7 +1074,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('galleries')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('galleries')) {
             \Illuminate\Support\Facades\Schema::create('galleries', function ($table) {
                 $table->increments('id');
                 $table->integer('product_id');
@@ -1078,7 +1082,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('attributes')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('attributes')) {
             \Illuminate\Support\Facades\Schema::create('attributes', function ($table) {
                 $table->increments('id');
                 $table->integer('attributable_id');
@@ -1091,7 +1095,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // RESTORE COMMUNITY FEATURES (FAVORITES, COMMENTS, REPLIES, REPORTS)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('favorite_sellers')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('favorite_sellers')) {
             \Illuminate\Support\Facades\Schema::create('favorite_sellers', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id');
@@ -1099,7 +1103,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('comments')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('comments')) {
             \Illuminate\Support\Facades\Schema::create('comments', function ($table) {
                 $table->increments('id');
                 $table->integer('product_id');
@@ -1109,7 +1113,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('replies')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('replies')) {
             \Illuminate\Support\Facades\Schema::create('replies', function ($table) {
                 $table->increments('id');
                 $table->integer('comment_id');
@@ -1119,7 +1123,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('reports')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('reports')) {
             \Illuminate\Support\Facades\Schema::create('reports', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id');
@@ -1131,7 +1135,7 @@ Route::get('/fix-subscriptions', function () {
         }
 
         // RESTORE CHECKOUT MODULES (GATEWAYS, SHIPPINGS, PACKAGES)
-        if (!\Illuminate\Support\Facades\Schema::hasTable('payment_gateways')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('payment_gateways')) {
             \Illuminate\Support\Facades\Schema::create('payment_gateways', function ($table) {
                 $table->increments('id');
                 $table->string('title')->nullable();
@@ -1144,14 +1148,14 @@ Route::get('/fix-subscriptions', function () {
                 $table->string('currency_id')->nullable();
             });
         }
-        
+
         \Illuminate\Support\Facades\DB::table('payment_gateways')->truncate();
         \Illuminate\Support\Facades\DB::table('payment_gateways')->insert([
             ['title' => 'Campay', 'name' => 'Campay', 'type' => 'manual', 'keyword' => 'campay', 'details' => 'Pay with Campay (Mobile Money).', 'currency_id' => '*'],
-            ['title' => 'Cash On Delivery', 'name' => 'Cash On Delivery', 'type' => 'manual', 'keyword' => 'cod', 'details' => 'Pay when you receive the product.', 'currency_id' => '*']
+            ['title' => 'Cash On Delivery', 'name' => 'Cash On Delivery', 'type' => 'manual', 'keyword' => 'cod', 'details' => 'Pay when you receive the product.', 'currency_id' => '*'],
         ]);
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('shippings')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('shippings')) {
             \Illuminate\Support\Facades\Schema::create('shippings', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id')->default(0);
@@ -1162,7 +1166,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('packages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('packages')) {
             \Illuminate\Support\Facades\Schema::create('packages', function ($table) {
                 $table->increments('id');
                 $table->integer('user_id')->default(0);
@@ -1179,18 +1183,19 @@ Route::get('/fix-subscriptions', function () {
             $defaultCurr = \App\Models\Currency::where('is_default', 1)->first();
             $currencyVal = $defaultCurr ? $defaultCurr->value : 1;
             $shippingPrice = 1000 / $currencyVal;
-            
+
             \Illuminate\Support\Facades\DB::table('shippings')->insert([
-                ['user_id' => 0, 'title' => 'Fast Delivery', 'subtitle' => 'within 24 hours', 'price' => $shippingPrice]
+                ['user_id' => 0, 'title' => 'Fast Delivery', 'subtitle' => 'within 24 hours', 'price' => $shippingPrice],
             ]);
-            
+
             \Illuminate\Support\Facades\DB::table('packages')->truncate();
             \Illuminate\Support\Facades\DB::table('packages')->insert([
-                ['user_id' => 0, 'title' => 'Standard Packaging', 'subtitle' => 'Safe box securely packed.', 'price' => 0]
+                ['user_id' => 0, 'title' => 'Standard Packaging', 'subtitle' => 'Safe box securely packed.', 'price' => 0],
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('pickups')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('pickups')) {
             \Illuminate\Support\Facades\Schema::create('pickups', function ($table) {
                 $table->increments('id');
                 $table->string('location');
@@ -1198,7 +1203,7 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('service_areas')) {
             \Illuminate\Support\Facades\Schema::create('service_areas', function ($table) {
                 $table->increments('id');
                 $table->string('name');
@@ -1222,21 +1227,24 @@ Route::get('/fix-subscriptions', function () {
             $cache = base_path('bootstrap/cache');
             @chmod($storage, 0775);
             @chmod($cache, 0775);
-        } catch (\Exception $permEx) {}
+        } catch (\Exception $permEx) {
+        }
 
         // DEEP SYSTEM DIAGNOSTICS
         try {
             $logPath = storage_path('logs/laravel.log');
-            $logContent = "Log file not found at " . $logPath;
+            $logContent = 'Log file not found at '.$logPath;
             if (file_exists($logPath)) {
                 $file = @file($logPath);
                 if ($file) {
-                    $logContent = implode("", array_slice($file, -150));
+                    $logContent = implode('', array_slice($file, -150));
                 } else {
-                    $logContent = "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.";
+                    $logContent = 'Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.';
                 }
             }
-        } catch (\Exception $e) { $logContent = "Log reading failed: " . $e->getMessage(); }
+        } catch (\Exception $e) {
+            $logContent = 'Log reading failed: '.$e->getMessage();
+        }
         // Phase 16: Image Restoration & Branding
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
@@ -1258,7 +1266,7 @@ Route::get('/fix-subscriptions', function () {
             'services' => 'services',
             'galleries' => 'galleries',
             'arrival_sections' => 'arrival',
-            'brands' => 'brands'
+            'brands' => 'brands',
         ];
 
         foreach ($repair_map as $table => $folder) {
@@ -1268,35 +1276,47 @@ Route::get('/fix-subscriptions', function () {
                     foreach ($columns as $column) {
                         $val = $item->$column;
                         $folderPath = ($column == 'thumbnail') ? 'thumbnails' : $folder;
-                        $path = public_path("assets/images/{$folderPath}/" . $val);
-                        
+                        $path = public_path("assets/images/{$folderPath}/".$val);
+
                         // Default repair logic + UPGRADE from noimage to PREMIUM
-                        if (empty($val) || !file_exists($path) || $val == 'noimage.png') {
+                        if (empty($val) || ! file_exists($path) || $val == 'noimage.png') {
                             $newImg = 'noimage.png';
 
                             // --- PREMIUM SAMPLE OVERRIDE ---
                             if ($table == 'products') {
-                                if (str_contains(strtolower($item->name), 'premium laptop')) $newImg = 'premium_laptop.png';
-                                elseif (str_contains(strtolower($item->name), 'high performance laptop')) $newImg = 'high_perf_laptop.png';
-                                elseif (str_contains(strtolower($item->name), 'fashion tee')) $newImg = 'urban_tee.png';
-                                elseif (str_contains(strtolower($item->name), 'posture')) $newImg = 'posture_belt.png';
-                            }
-                            elseif ($table == 'blogs') {
-                                if (str_contains(strtolower($item->title), 'welcome')) $newImg = 'sample_blog.png';
-                            }
-                            elseif ($table == 'arrival_sections') {
+                                if (str_contains(strtolower($item->name), 'premium laptop')) {
+                                    $newImg = 'premium_laptop.png';
+                                } elseif (str_contains(strtolower($item->name), 'high performance laptop')) {
+                                    $newImg = 'high_perf_laptop.png';
+                                } elseif (str_contains(strtolower($item->name), 'fashion tee')) {
+                                    $newImg = 'urban_tee.png';
+                                } elseif (str_contains(strtolower($item->name), 'posture')) {
+                                    $newImg = 'posture_belt.png';
+                                }
+                            } elseif ($table == 'blogs') {
+                                if (str_contains(strtolower($item->title), 'welcome')) {
+                                    $newImg = 'sample_blog.png';
+                                }
+                            } elseif ($table == 'arrival_sections') {
                                 $arrival_imgs = ['arrival_electronics.png', 'arrival_fashion.png', 'arrival_lifestyle.png'];
                                 $newImg = $arrival_imgs[$item->id % 3];
-                            }
-                            elseif ($table == 'services') {
-                                if (str_contains(strtolower($item->title), 'delivery')) $newImg = 'delivery.png';
-                                elseif (str_contains(strtolower($item->title), 'support')) $newImg = 'support.png';
-                                elseif (str_contains(strtolower($item->title), 'payment')) $newImg = 'payment.png';
-                                elseif (str_contains(strtolower($item->title), 'guarantee') || str_contains(strtolower($item->title), 'money')) $newImg = 'guarantee.png';
-                            }
-                            elseif ($table == 'categories' && $column == 'image') {
-                                if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) $newImg = '3d_smartphone.png';
-                                if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) $newImg = '3d_laptop.png';
+                            } elseif ($table == 'services') {
+                                if (str_contains(strtolower($item->title), 'delivery')) {
+                                    $newImg = 'delivery.png';
+                                } elseif (str_contains(strtolower($item->title), 'support')) {
+                                    $newImg = 'support.png';
+                                } elseif (str_contains(strtolower($item->title), 'payment')) {
+                                    $newImg = 'payment.png';
+                                } elseif (str_contains(strtolower($item->title), 'guarantee') || str_contains(strtolower($item->title), 'money')) {
+                                    $newImg = 'guarantee.png';
+                                }
+                            } elseif ($table == 'categories' && $column == 'image') {
+                                if (str_contains(strtolower($item->name), 'phone') || str_contains(strtolower($item->name), 'mobile')) {
+                                    $newImg = '3d_smartphone.png';
+                                }
+                                if (str_contains(strtolower($item->name), 'laptop') || str_contains(strtolower($item->name), 'computer')) {
+                                    $newImg = '3d_laptop.png';
+                                }
                             }
 
                             \Illuminate\Support\Facades\DB::table($table)->where('id', $item->id)->update([$column => $newImg]);
@@ -1320,15 +1340,15 @@ Route::get('/fix-subscriptions', function () {
                         }
                     }
                 }
-                
+
                 // Deal background panoramic fix
                 if (\Illuminate\Support\Facades\Schema::hasColumn('generalsettings', 'deal_background')) {
-                    if (empty($gs->deal_background) || !file_exists(public_path('assets/images/' . $gs->deal_background)) || $gs->deal_background == 'noimage.png' || $gs->deal_background == 'high_perf_laptop.png') {
+                    if (empty($gs->deal_background) || ! file_exists(public_path('assets/images/'.$gs->deal_background)) || $gs->deal_background == 'noimage.png' || $gs->deal_background == 'high_perf_laptop.png') {
                         $updates['deal_background'] = 'electronics_hero.png';
                     }
                 }
 
-                if (!empty($updates)) {
+                if (! empty($updates)) {
                     \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update($updates);
                 }
             }
@@ -1338,7 +1358,7 @@ Route::get('/fix-subscriptions', function () {
         if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
             $integrityUpdates = [];
             $numericColumns = ['referral_amount', 'referral_bonus', 'custom_referral_bonus', 'rider_percentage_commission', 'same_servicearea_delivery_fee'];
-            
+
             $gs = \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->first();
             if ($gs) {
                 foreach ($numericColumns as $col) {
@@ -1348,8 +1368,8 @@ Route::get('/fix-subscriptions', function () {
                         }
                     }
                 }
-                
-                if (!empty($integrityUpdates)) {
+
+                if (! empty($integrityUpdates)) {
                     \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update($integrityUpdates);
                 }
             }
@@ -1368,23 +1388,23 @@ Route::get('/fix-subscriptions', function () {
         \Artisan::call('cache:clear');
 
         return response()->json([
-            "status" => "success",
-            "message" => "Phase 18 Final Master Restoration complete. Homepage fully polished.",
-            "diagnostics" => [
-                "php" => PHP_VERSION,
-                "storage_writable" => is_writable(storage_path()),
-                "cache_writable" => is_writable(base_path('bootstrap/cache')),
-                "logs_writable" => is_writable(storage_path('logs'))
+            'status' => 'success',
+            'message' => 'Phase 18 Final Master Restoration complete. Homepage fully polished.',
+            'diagnostics' => [
+                'php' => PHP_VERSION,
+                'storage_writable' => is_writable(storage_path()),
+                'cache_writable' => is_writable(base_path('bootstrap/cache')),
+                'logs_writable' => is_writable(storage_path('logs')),
             ],
-            "log_dump" => ($logContent === "Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.") ? "" : $logContent
+            'log_dump' => ($logContent === 'Log file exists but is NOT readable. PERMISSION FIX IN TERMINAL REQUIRED.') ? '' : $logContent,
         ]);
     } catch (\Exception $e) {
         return response()->json([
-            "status" => "error",
-            "message" => $e->getMessage(),
-            "line" => $e->getLine(),
-            "file" => $e->getFile(),
-            "trace" => $e->getTraceAsString()
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+            'trace' => $e->getTraceAsString(),
         ]);
     }
 });
@@ -1400,7 +1420,7 @@ Route::get('/run-setup', function () {
         if (Schema::hasTable('products')) {
             $products = DB::table('products')->whereNull('thumbnail')->orWhere('thumbnail', '')->get();
             foreach ($products as $p) {
-                if (isset($p->photo) && !empty($p->photo)) {
+                if (isset($p->photo) && ! empty($p->photo)) {
                     DB::table('products')->where('id', $p->id)->update(['thumbnail' => $p->photo]);
                     $product_backfill[] = "Product #{$p->id}: backfilled thumbnail from photo";
                 }
@@ -1428,7 +1448,8 @@ Route::get('/run-setup', function () {
         $gs = DB::table('generalsettings')->first();
         $products_desc = Schema::hasTable('products') ? DB::select('DESCRIBE products') : 'MISSING';
         $image_dirs = is_dir(public_path('assets/images')) ? array_filter(scandir(public_path('assets/images')), function ($d) {
-            return is_dir(public_path('assets/images/' . $d)); }) : 'ASSETS MISSING';
+            return is_dir(public_path('assets/images/'.$d));
+        }) : 'ASSETS MISSING';
 
         $cat_images = is_dir(public_path('assets/images/categories')) ? scandir(public_path('assets/images/categories')) : 'DIR MISSING';
 
@@ -1439,7 +1460,7 @@ Route::get('/run-setup', function () {
                 $files = scandir($dir);
                 foreach ($files as $file) {
                     if (str_ends_with($file, '.sql') || str_ends_with($file, '.sql.gz')) {
-                        $backups[] = $dir . '/' . $file;
+                        $backups[] = $dir.'/'.$file;
                     }
                 }
             }
@@ -1450,12 +1471,12 @@ Route::get('/run-setup', function () {
                 'id' => $c->id,
                 'name' => $c->name,
                 'hex' => bin2hex($c->name),
-                'count' => $c->products_count ?? 'N/A'
+                'count' => $c->products_count ?? 'N/A',
             ];
         });
 
         // V85: DATABASE REPAIR (product_clicks & mailer settings)
-        if (!Schema::hasTable('product_clicks')) {
+        if (! Schema::hasTable('product_clicks')) {
             Schema::create('product_clicks', function ($table) {
                 $table->increments('id');
                 $table->integer('product_id')->unsigned();
@@ -1474,9 +1495,9 @@ Route::get('/run-setup', function () {
                 if (empty($gs_check->from_name) || trim($gs_check->from_name) == '') {
                     $updates['from_name'] = 'Fabilive';
                 }
-                if (!empty($updates)) {
+                if (! empty($updates)) {
                     DB::table('generalsettings')->where('id', $gs_check->id)->update($updates);
-                    $product_backfill[] = "Mailer config repaired: " . json_encode($updates);
+                    $product_backfill[] = 'Mailer config repaired: '.json_encode($updates);
                 }
             }
         }
@@ -1489,17 +1510,19 @@ Route::get('/run-setup', function () {
                         'email_type' => 'customer_reg_common',
                         'email_subject' => 'Welcome to Fabilive',
                         'email_body' => '<p>Hello {customer_name},</p><p>Welcome to Fabilive! Your account has been created successfully.</p>',
-                        'status' => 1
+                        'status' => 1,
                     ],
                     [
                         'email_type' => 'common',
                         'email_subject' => 'Notification from Fabilive',
                         'email_body' => '<p>Hello {customer_name},</p><p>This is a notification regarding your recent activity on Fabilive.</p>',
-                        'status' => 1
-                    ]
+                        'status' => 1,
+                    ],
                 ]);
+
                 return 'backfilled';
             }
+
             return 'exists';
         })();
 
@@ -1507,13 +1530,14 @@ Route::get('/run-setup', function () {
         $env_updates_status = (function () {
             try {
                 $envPath = base_path('.env');
-                if (!file_exists($envPath))
+                if (! file_exists($envPath)) {
                     return ['status' => 'missing'];
+                }
                 $envContent = file_get_contents($envPath);
                 $replacements = [
                     'CACHE_DRIVER' => 'database',
                     'SESSION_DRIVER' => 'database',
-                    'APP_ENV' => 'production'
+                    'APP_ENV' => 'production',
                 ];
                 foreach ($replacements as $key => $value) {
                     if (preg_match("/^{$key}=/m", $envContent)) {
@@ -1523,32 +1547,38 @@ Route::get('/run-setup', function () {
                     }
                 }
                 file_put_contents($envPath, $envContent);
+
                 return ['status' => 'persisted'];
             } catch (\Exception $e) {
-                return ['status' => 'failed', 'error' => $e->getMessage()]; }
+                return ['status' => 'failed', 'error' => $e->getMessage()];
+            }
         })();
 
         // Phase 11: Counters Repair
         $counters_repair = (function () {
             try {
-                if (!Schema::hasTable('counters')) {
+                if (! Schema::hasTable('counters')) {
                     Schema::create('counters', function ($table) {
                         $table->increments('id');
                         $table->string('type')->nullable();
                         $table->integer('total_count')->default(0);
                         $table->timestamps();
                     });
+
                     return 'created';
                 }
-                if (!Schema::hasColumn('counters', 'type')) {
+                if (! Schema::hasColumn('counters', 'type')) {
                     Schema::table('counters', function ($table) {
                         $table->string('type')->nullable();
                     });
+
                     return 'column_added';
                 }
+
                 return 'exists';
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // V87.1: GeneralSettings Hardening
@@ -1557,7 +1587,7 @@ Route::get('/run-setup', function () {
                 if (Schema::hasTable('generalsettings')) {
                     $columns = ['rtl', 'is_capcha', 'is_verification_email', 'is_guest_checkout'];
                     foreach ($columns as $column) {
-                        if (!Schema::hasColumn('generalsettings', $column)) {
+                        if (! Schema::hasColumn('generalsettings', $column)) {
                             Schema::table('generalsettings', function ($table) use ($column) {
                                 $table->integer($column)->default(0);
                             });
@@ -1574,20 +1604,22 @@ Route::get('/run-setup', function () {
                         $needed = ['rtl' => 0, 'is_capcha' => 0, 'is_verification_email' => 0, 'is_guest_checkout' => 0];
                         $update = [];
                         foreach ($needed as $key => $val) {
-                            if (!property_exists($gs_row, $key)) {
+                            if (! property_exists($gs_row, $key)) {
                                 $update[$key] = $val;
                             }
                         }
-                        if (!empty($update)) {
+                        if (! empty($update)) {
                             DB::table('generalsettings')->where('id', $gs_row->id)->update($update);
                         }
                     }
 
                     return 'hardened_and_cleared';
                 }
+
                 return 'missing_table';
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // Phase 10: Admin Sync
@@ -1596,29 +1628,33 @@ Route::get('/run-setup', function () {
                 $email = 'hello@fabilive.com';
                 $password = 'Fabi@123';
                 $admin = DB::table('admins')->where('email', $email)->first();
-                if (!$admin) {
+                if (! $admin) {
                     DB::table('admins')->insert([
                         'name' => 'Admin',
                         'email' => $email,
-                        'password' => Hash::make($password)
+                        'password' => Hash::make($password),
                     ]);
+
                     return 'created';
                 } else {
                     DB::table('admins')->where('email', $email)->update([
-                        'password' => Hash::make($password)
+                        'password' => Hash::make($password),
                     ]);
+
                     return 'updated';
                 }
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // Phase 12: Redis Hardening Sync & Recovery
         $redis_sync = (function () {
             try {
                 $path = base_path('.env');
-                if (!file_exists($path))
+                if (! file_exists($path)) {
                     return 'missing_env';
+                }
 
                 $content = file_get_contents($path);
 
@@ -1626,14 +1662,15 @@ Route::get('/run-setup', function () {
                 if (request()->query('recover_redis')) {
                     $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=', $content);
                     file_put_contents($path, $content);
+
                     return 'recovered_null';
                 }
 
                 $new_pass = 'Fab!L1ve@Redis#Secure2026';
                 if (strpos($content, 'REDIS_PASSWORD=') !== false) {
-                    $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD=' . $new_pass, $content);
+                    $content = preg_replace('/REDIS_PASSWORD=.*/', 'REDIS_PASSWORD='.$new_pass, $content);
                 } else {
-                    $content .= "\nREDIS_PASSWORD=" . $new_pass;
+                    $content .= "\nREDIS_PASSWORD=".$new_pass;
                 }
                 file_put_contents($path, $content);
 
@@ -1643,32 +1680,38 @@ Route::get('/run-setup', function () {
                 foreach ($possible_paths as $p) {
                     if (file_exists($p)) {
                         $found_path = $p;
-                        break; }
+                        break;
+                    }
                 }
 
                 return [
                     'status' => 'persisted',
-                    'config_hint' => $found_path
+                    'config_hint' => $found_path,
                 ];
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // V90.2: Payment Gateways Repair
         $pg_repair = (function () {
             try {
                 if (Schema::hasTable('payment_gateways')) {
-                    if (!Schema::hasColumn('payment_gateways', 'subscription')) {
+                    if (! Schema::hasColumn('payment_gateways', 'subscription')) {
                         Schema::table('payment_gateways', function ($table) {
                             $table->integer('subscription')->default(0);
                         });
+
                         return 'column_added';
                     }
+
                     return 'exists';
                 }
+
                 return 'table_not_found';
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // V90.2: FINAL SCHEMA POLISH (Vendors & Payment Info)
@@ -1677,25 +1720,25 @@ Route::get('/run-setup', function () {
                 $status_log = [];
                 $gs_table = 'generalsettings';
                 $gs_columns = [
-                    'reg_vendor' => "TINYINT(1) DEFAULT 1",
-                    'guest_checkout' => "TINYINT(1) DEFAULT 1",
-                    'currency_format' => "TINYINT(1) DEFAULT 0",
+                    'reg_vendor' => 'TINYINT(1) DEFAULT 1',
+                    'guest_checkout' => 'TINYINT(1) DEFAULT 1',
+                    'currency_format' => 'TINYINT(1) DEFAULT 0',
                     'decimal_separator' => "VARCHAR(10) DEFAULT '.'",
                     'thousand_separator' => "VARCHAR(10) DEFAULT ','",
-                    'withdraw_fee' => "DOUBLE DEFAULT 0",
-                    'withdraw_charge' => "DOUBLE DEFAULT 0",
-                    'fixed_commission' => "DOUBLE DEFAULT 0",
-                    'percentage_commission' => "DOUBLE DEFAULT 0",
-                    'multiple_shipping' => "TINYINT(1) DEFAULT 0",
-                    'vendor_ship_info' => "TINYINT(1) DEFAULT 0",
-                    'is_reward' => "TINYINT(1) DEFAULT 0",
-                    'verify_product' => "TINYINT(1) DEFAULT 0",
-                    'is_affilate' => "TINYINT(1) DEFAULT 0",
-                    'affilate_charge' => "DOUBLE DEFAULT 0",
+                    'withdraw_fee' => 'DOUBLE DEFAULT 0',
+                    'withdraw_charge' => 'DOUBLE DEFAULT 0',
+                    'fixed_commission' => 'DOUBLE DEFAULT 0',
+                    'percentage_commission' => 'DOUBLE DEFAULT 0',
+                    'multiple_shipping' => 'TINYINT(1) DEFAULT 0',
+                    'vendor_ship_info' => 'TINYINT(1) DEFAULT 0',
+                    'is_reward' => 'TINYINT(1) DEFAULT 0',
+                    'verify_product' => 'TINYINT(1) DEFAULT 0',
+                    'is_affilate' => 'TINYINT(1) DEFAULT 0',
+                    'affilate_charge' => 'DOUBLE DEFAULT 0',
                 ];
 
                 foreach ($gs_columns as $column => $type) {
-                    if (!Schema::hasColumn($gs_table, $column)) {
+                    if (! Schema::hasColumn($gs_table, $column)) {
                         DB::statement("ALTER TABLE $gs_table ADD $column $type");
                         $status_log[] = "Added $column to $gs_table";
                     }
@@ -1703,14 +1746,14 @@ Route::get('/run-setup', function () {
 
                 $users_table = 'users';
                 $users_columns = [
-                    'is_vendor' => "TINYINT(1) DEFAULT 0",
-                    'shop_name' => "VARCHAR(255) DEFAULT NULL",
-                    'shop_number' => "VARCHAR(255) DEFAULT NULL",
-                    'admin_commission' => "DOUBLE DEFAULT 0",
+                    'is_vendor' => 'TINYINT(1) DEFAULT 0',
+                    'shop_name' => 'VARCHAR(255) DEFAULT NULL',
+                    'shop_number' => 'VARCHAR(255) DEFAULT NULL',
+                    'admin_commission' => 'DOUBLE DEFAULT 0',
                 ];
 
                 foreach ($users_columns as $column => $type) {
-                    if (!Schema::hasColumn($users_table, $column)) {
+                    if (! Schema::hasColumn($users_table, $column)) {
                         DB::statement("ALTER TABLE $users_table ADD $column $type");
                         $status_log[] = "Added $column to $users_table";
                     }
@@ -1721,13 +1764,13 @@ Route::get('/run-setup', function () {
                 $cur_table = 'currencies';
                 if (Schema::hasTable($cur_table)) {
                     $cur_cols = [
-                        'name' => "VARCHAR(255) DEFAULT NULL",
-                        'sign' => "VARCHAR(10) DEFAULT NULL",
-                        'value' => "DOUBLE DEFAULT 1",
-                        'is_default' => "TINYINT(1) DEFAULT 0",
+                        'name' => 'VARCHAR(255) DEFAULT NULL',
+                        'sign' => 'VARCHAR(10) DEFAULT NULL',
+                        'value' => 'DOUBLE DEFAULT 1',
+                        'is_default' => 'TINYINT(1) DEFAULT 0',
                     ];
                     foreach ($cur_cols as $col => $type) {
-                        if (!Schema::hasColumn($cur_table, $col)) {
+                        if (! Schema::hasColumn($cur_table, $col)) {
                             DB::statement("ALTER TABLE $cur_table ADD $col $type");
                             $status_log[] = "Added $col to $cur_table";
                         }
@@ -1738,21 +1781,21 @@ Route::get('/run-setup', function () {
                 $pg_table = 'payment_gateways';
                 if (Schema::hasTable($pg_table)) {
                     $pg_cols = [
-                        'title' => "VARCHAR(255) DEFAULT NULL",
-                        'subtitle' => "VARCHAR(255) DEFAULT NULL",
-                        'details' => "TEXT DEFAULT NULL",
-                        'name' => "VARCHAR(255) DEFAULT NULL",
+                        'title' => 'VARCHAR(255) DEFAULT NULL',
+                        'subtitle' => 'VARCHAR(255) DEFAULT NULL',
+                        'details' => 'TEXT DEFAULT NULL',
+                        'name' => 'VARCHAR(255) DEFAULT NULL',
                         'type' => "VARCHAR(255) DEFAULT 'manual'",
-                        'keyword' => "VARCHAR(255) DEFAULT NULL",
-                        'information' => "TEXT DEFAULT NULL",
-                        'currency_id' => "TEXT DEFAULT NULL",
-                        'checkout' => "TINYINT(1) DEFAULT 1",
-                        'deposit' => "TINYINT(1) DEFAULT 1",
-                        'subscription' => "TINYINT(1) DEFAULT 0",
-                        'status' => "TINYINT(1) DEFAULT 1",
+                        'keyword' => 'VARCHAR(255) DEFAULT NULL',
+                        'information' => 'TEXT DEFAULT NULL',
+                        'currency_id' => 'TEXT DEFAULT NULL',
+                        'checkout' => 'TINYINT(1) DEFAULT 1',
+                        'deposit' => 'TINYINT(1) DEFAULT 1',
+                        'subscription' => 'TINYINT(1) DEFAULT 0',
+                        'status' => 'TINYINT(1) DEFAULT 1',
                     ];
                     foreach ($pg_cols as $col => $type) {
-                        if (!Schema::hasColumn($pg_table, $col)) {
+                        if (! Schema::hasColumn($pg_table, $col)) {
                             DB::statement("ALTER TABLE $pg_table ADD $col $type");
                             $status_log[] = "Added $col to $pg_table";
                         }
@@ -1763,22 +1806,22 @@ Route::get('/run-setup', function () {
                     DB::statement("ALTER TABLE $pg_table MODIFY `title` VARCHAR(255) DEFAULT NULL");
                     DB::statement("ALTER TABLE $pg_table MODIFY `subtitle` VARCHAR(255) DEFAULT NULL");
                     DB::statement("ALTER TABLE $pg_table MODIFY `name` VARCHAR(255) DEFAULT NULL");
-                    $status_log[] = "Fixed payment_gateways column types";
+                    $status_log[] = 'Fixed payment_gateways column types';
                 }
 
                 // Verifications Table
                 $ver_table = 'verifications';
                 if (Schema::hasTable($ver_table)) {
                     $ver_cols = [
-                        'user_id' => "INT(11) DEFAULT 0",
-                        'text' => "TEXT DEFAULT NULL",
-                        'type' => "VARCHAR(255) DEFAULT NULL",
-                        'attachments' => "VARCHAR(255) DEFAULT NULL",
-                        'admin_warning' => "TINYINT(1) DEFAULT 0",
-                        'warning_reason' => "TEXT DEFAULT NULL",
+                        'user_id' => 'INT(11) DEFAULT 0',
+                        'text' => 'TEXT DEFAULT NULL',
+                        'type' => 'VARCHAR(255) DEFAULT NULL',
+                        'attachments' => 'VARCHAR(255) DEFAULT NULL',
+                        'admin_warning' => 'TINYINT(1) DEFAULT 0',
+                        'warning_reason' => 'TEXT DEFAULT NULL',
                     ];
                     foreach ($ver_cols as $col => $type) {
-                        if (!Schema::hasColumn($ver_table, $col)) {
+                        if (! Schema::hasColumn($ver_table, $col)) {
                             DB::statement("ALTER TABLE $ver_table ADD $col $type");
                             $status_log[] = "Added $col to $ver_table";
                         }
@@ -1795,7 +1838,7 @@ Route::get('/run-setup', function () {
 
                 // Pages Table
                 $page_table = 'pages';
-                if (!Schema::hasTable($page_table)) {
+                if (! Schema::hasTable($page_table)) {
                     Schema::create($page_table, function ($table) {
                         $table->increments('id');
                         $table->string('slug')->unique();
@@ -1811,17 +1854,17 @@ Route::get('/run-setup', function () {
                     $status_log[] = "Created table $page_table";
                 } else {
                     $page_cols = [
-                        'slug' => "VARCHAR(255)",
-                        'title' => "VARCHAR(255) DEFAULT NULL",
-                        'details' => "TEXT DEFAULT NULL",
-                        'meta_tag' => "TEXT DEFAULT NULL",
-                        'meta_description' => "TEXT DEFAULT NULL",
-                        'photo' => "VARCHAR(255) DEFAULT NULL",
-                        'header' => "TINYINT(1) DEFAULT 1",
-                        'footer' => "TINYINT(1) DEFAULT 1",
+                        'slug' => 'VARCHAR(255)',
+                        'title' => 'VARCHAR(255) DEFAULT NULL',
+                        'details' => 'TEXT DEFAULT NULL',
+                        'meta_tag' => 'TEXT DEFAULT NULL',
+                        'meta_description' => 'TEXT DEFAULT NULL',
+                        'photo' => 'VARCHAR(255) DEFAULT NULL',
+                        'header' => 'TINYINT(1) DEFAULT 1',
+                        'footer' => 'TINYINT(1) DEFAULT 1',
                     ];
                     foreach ($page_cols as $col => $type) {
-                        if (!Schema::hasColumn($page_table, $col)) {
+                        if (! Schema::hasColumn($page_table, $col)) {
                             DB::statement("ALTER TABLE $page_table ADD $col $type");
                             $status_log[] = "Added $col to $page_table";
                         }
@@ -1831,7 +1874,7 @@ Route::get('/run-setup', function () {
                 // Products Table
                 $prod_table = 'products';
                 if (Schema::hasTable($prod_table)) {
-                    if (!Schema::hasColumn($prod_table, 'is_catalog')) {
+                    if (! Schema::hasColumn($prod_table, 'is_catalog')) {
                         DB::statement("ALTER TABLE $prod_table ADD is_catalog TINYINT(1) DEFAULT 0");
                         $status_log[] = "Added is_catalog to $prod_table";
                     }
@@ -1839,10 +1882,11 @@ Route::get('/run-setup', function () {
 
                 return [
                     'status' => 'completed',
-                    'log' => $status_log
+                    'log' => $status_log,
                 ];
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         // V90.7: DEEP RECOVERY PHASE
@@ -1853,7 +1897,7 @@ Route::get('/run-setup', function () {
                 // 1. Force Captcha OFF in database
                 if (Schema::hasTable('generalsettings')) {
                     DB::table('generalsettings')->update(['is_capcha' => 0]);
-                    $log[] = "Forced is_capcha=0 in generalsettings";
+                    $log[] = 'Forced is_capcha=0 in generalsettings';
                 }
 
                 // 2. Fix CamPay gateway: set to automatic type with API field structure
@@ -1863,13 +1907,13 @@ Route::get('/run-setup', function () {
                         $info = json_encode([
                             'campay_username' => '',
                             'campay_password' => '',
-                            'sandbox_check' => 1
+                            'sandbox_check' => 1,
                         ]);
                         DB::table('payment_gateways')->where('id', $campay->id)->update([
                             'type' => 'automatic',
-                            'information' => $info
+                            'information' => $info,
                         ]);
-                        $log[] = "Updated CamPay to automatic type with API fields";
+                        $log[] = 'Updated CamPay to automatic type with API fields';
                     }
 
                     // Also fix HitPay if it exists
@@ -1878,13 +1922,13 @@ Route::get('/run-setup', function () {
                         $info = json_encode([
                             'hitpay_api_key' => '',
                             'hitpay_salt' => '',
-                            'sandbox_check' => 1
+                            'sandbox_check' => 1,
                         ]);
                         DB::table('payment_gateways')->where('id', $hitpay->id)->update([
                             'type' => 'automatic',
-                            'information' => $info
+                            'information' => $info,
                         ]);
-                        $log[] = "Updated HitPay to automatic type with API fields";
+                        $log[] = 'Updated HitPay to automatic type with API fields';
                     }
                 }
 
@@ -1898,7 +1942,7 @@ Route::get('/run-setup', function () {
                         ['slug' => 'shipping-info', 'title' => 'Shipping Information', 'details' => '<p>Delivery information and shipping rates for all locations.</p>', 'header' => 0, 'footer' => 1],
                     ];
                     foreach ($default_pages as $page) {
-                        if (!DB::table('pages')->where('slug', $page['slug'])->exists()) {
+                        if (! DB::table('pages')->where('slug', $page['slug'])->exists()) {
                             DB::table('pages')->insert(array_merge($page, [
                                 'meta_tag' => $page['title'],
                                 'meta_description' => strip_tags($page['details']),
@@ -1911,7 +1955,7 @@ Route::get('/run-setup', function () {
                 }
 
                 // 4. Ensure blog tables exist
-                if (!Schema::hasTable('blogs')) {
+                if (! Schema::hasTable('blogs')) {
                     Schema::create('blogs', function ($table) {
                         $table->increments('id');
                         $table->integer('category_id')->default(0);
@@ -1925,26 +1969,27 @@ Route::get('/run-setup', function () {
                         $table->integer('views')->default(0);
                         $table->timestamps();
                     });
-                    $log[] = "Created blogs table";
+                    $log[] = 'Created blogs table';
                 }
 
-                if (!Schema::hasTable('blog_categories')) {
+                if (! Schema::hasTable('blog_categories')) {
                     Schema::create('blog_categories', function ($table) {
                         $table->increments('id');
                         $table->string('name');
                         $table->string('slug');
                         $table->timestamps();
                     });
-                    $log[] = "Created blog_categories table";
+                    $log[] = 'Created blog_categories table';
                 }
 
                 // 5. Clear cache after all DB changes
                 Artisan::call('cache:clear');
-                $log[] = "Cache cleared";
+                $log[] = 'Cache cleared';
 
                 return ['status' => 'completed', 'log' => $log];
             } catch (\Exception $e) {
-                return 'error: ' . $e->getMessage(); }
+                return 'error: '.$e->getMessage();
+            }
         })();
 
         $results = [
@@ -1958,7 +2003,7 @@ Route::get('/run-setup', function () {
             'phase_8_pg' => $pg_repair,
             'phase_9_polish' => $schema_polish,
             'phase_10_deep_recovery' => $deep_recovery,
-            'status' => 'Fabilive Recovery V90.7: Deep Recovery Complete'
+            'status' => 'Fabilive Recovery V90.7: Deep Recovery Complete',
         ];
 
         return response()->json($results);
@@ -1966,7 +2011,7 @@ Route::get('/run-setup', function () {
         return response()->json([
             'success' => false,
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ], 500);
     }
 });
@@ -1974,41 +2019,45 @@ Route::get('/run-setup', function () {
 // V82 ADVANCED DIAGNOSTICS
 Route::get('/debug-logs', function () {
     $logPath = storage_path('logs/laravel.log');
-    if (!file_exists($logPath))
+    if (! file_exists($logPath)) {
         return response()->json(['error' => 'Log file not found']);
+    }
     $data = file($logPath);
     $lines = array_slice($data, -100);
-    return response('<html><head><title>Fabilive Debug Logs</title></head><body><pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;">' . implode("", $lines) . '</pre></body></html>');
+
+    return response('<html><head><title>Fabilive Debug Logs</title></head><body><pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;">'.implode('', $lines).'</pre></body></html>');
 });
 
 Route::get('/debug-smtp', function () {
     try {
         $gs = DB::table('generalsettings')->first();
-        if (!$gs)
-            throw new \Exception("generalsettings table is empty");
+        if (! $gs) {
+            throw new \Exception('generalsettings table is empty');
+        }
 
         $template = DB::table('email_templates')->first();
         $data = [
-            'to' => $gs->from_email ?: "noreply@fabilive.com",
-            'type' => $template ? $template->email_type : "common",
-            'cname' => "System Debug",
-            'oamount' => "0",
-            'aname' => "Admin",
-            'aemail' => $gs->from_email ?: "noreply@fabilive.com",
-            'onumber' => "DEBUG-" . time()
+            'to' => $gs->from_email ?: 'noreply@fabilive.com',
+            'type' => $template ? $template->email_type : 'common',
+            'cname' => 'System Debug',
+            'oamount' => '0',
+            'aname' => 'Admin',
+            'aemail' => $gs->from_email ?: 'noreply@fabilive.com',
+            'onumber' => 'DEBUG-'.time(),
         ];
         $mailer = new \App\Classes\GeniusMailer();
-        \Log::info("Debug SMTP attempt started...");
+        \Log::info('Debug SMTP attempt started...');
         $result = $mailer->sendAutoMail($data);
+
         return response()->json([
             'status' => $result ? 'success' : 'failed',
-            'message' => $result ? 'Test email sent to ' . ($gs->from_email ?: "noreply@fabilive.com (Fallback)") : 'Mailer returned false (template missing?)',
+            'message' => $result ? 'Test email sent to '.($gs->from_email ?: 'noreply@fabilive.com (Fallback)') : 'Mailer returned false (template missing?)',
             'from_address' => $gs->from_email ?: 'EMPTY (Fallback: support@fabilive.com used in Mailer)',
             'gs_data' => [
                 'from_email' => $gs->from_email,
                 'from_name' => $gs->from_name,
-                'smtp_host' => $gs->mail_host
-            ]
+                'smtp_host' => $gs->mail_host,
+            ],
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -2024,7 +2073,7 @@ Route::get('/debug-auth', function () {
         'config_sitekey' => config('nocaptcha.sitekey') ?: 'MISSING',
         'gs_is_capcha' => DB::table('generalsettings')->value('is_capcha'),
         'app_env' => config('app.env'),
-        'cache_driver' => config('cache.default')
+        'cache_driver' => config('cache.default'),
     ]);
 });
 
@@ -2035,10 +2084,10 @@ Route::get('/debug-config', function () {
             'driver' => config('mail.driver'),
             'host' => config('mail.host'),
             'port' => config('mail.port'),
-            'encryption' => config('mail.encryption')
+            'encryption' => config('mail.encryption'),
         ],
         'cache' => config('cache.default'),
-        'session' => config('session.driver')
+        'session' => config('session.driver'),
     ]);
 });
 
@@ -2049,6 +2098,7 @@ Route::get('/debug-cache-clear', function () {
         Artisan::call('cache:clear');
         Artisan::call('view:clear');
         Artisan::call('route:clear');
+
         return response()->json(['status' => 'success', 'message' => 'All caches cleared via web.']);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
@@ -2058,12 +2108,13 @@ Route::get('/debug-cache-clear', function () {
 Route::get('/debug-composer', function () {
     $autoload = base_path('vendor/autoload.php');
     $composer_lock = base_path('composer.lock');
+
     return response()->json([
         'autoload_exists' => file_exists($autoload),
         'composer_lock_exists' => file_exists($composer_lock),
         'vendor_dir_exists' => is_dir(base_path('vendor')),
         'php_version' => PHP_VERSION,
-        'base_path' => base_path()
+        'base_path' => base_path(),
     ]);
 });
 
@@ -2075,21 +2126,21 @@ Route::get('/fix-slugs', function () {
             $slug = Illuminate\Support\Str::slug($p->name);
             $check = DB::table('products')->where('slug', $slug)->exists();
             if ($check) {
-                $slug = $slug . '-' . time() . '-' . $p->id;
+                $slug = $slug.'-'.time().'-'.$p->id;
             }
             DB::table('products')->where('id', $p->id)->update(['slug' => $slug]);
             $fixed++;
         }
+
         return response()->json([
             'status' => 'success',
             'fixed_count' => $fixed,
-            'message' => "Fixed $fixed product slugs."
+            'message' => "Fixed $fixed product slugs.",
         ]);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
     }
 });
-
 
 Route::get('/under-maintenance', 'Front\FrontendController@maintenance')->name('front-maintenance');
 Broadcast::routes(['middleware' => ['auth']]);
@@ -2484,7 +2535,6 @@ Route::prefix('admin')->group(function () {
 
         // WITHDRAW SECTION ENDS
 
-
         //RIDER WITHDRAW SECTION
 
         Route::get('/rider/withdraws/datatables', 'Admin\RiderController@withdrawdatatables')->name('admin-withdraw-rider-datatables'); //JSON REQUEST
@@ -2496,7 +2546,6 @@ Route::prefix('admin')->group(function () {
         // WITHDRAW SECTION ENDS
 
     });
-
 
     Route::group(['middleware' => 'permissions:riders'], function () {
 
@@ -3001,6 +3050,20 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/staff/datatables', 'Admin\StaffController@datatables')->name('admin-staff-datatables');
         Route::get('/staff/secret/{id}', 'Admin\StaffController@secret')->name('admin-staff-secret');
+        Route::get('/debug/logs', function () {
+            if (Auth::guard('admin')->check()) {
+                $path = storage_path('logs/laravel.log');
+                if (file_exists($path)) {
+                    $content = shell_exec('tail -n 100 '.escapeshellarg($path));
+
+                    return response($content, 200, ['Content-Type' => 'text/plain']);
+                }
+
+                return 'Log file not found at '.$path;
+            }
+
+            return redirect()->route('admin.login');
+        });
         Route::get('/staff', 'Admin\StaffController@index')->name('admin-staff-index');
         Route::get('/staff/create', 'Admin\StaffController@create')->name('admin-staff-create');
         Route::post('/staff/create', 'Admin\StaffController@store')->name('admin-staff-store');
@@ -3059,6 +3122,7 @@ Route::prefix('admin')->group(function () {
             Artisan::call('config:clear');
             Artisan::call('route:clear');
             Artisan::call('view:clear');
+
             return redirect()->route('admin.dashboard')->with('cache', 'System Cache Has Been Removed.');
         })->name('admin-cache-clear');
 
@@ -3139,9 +3203,6 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('delivery', 'Vendor\DeliveryController@index')->name('vendor.delivery.index');
             Route::get('delivery/boy/find', 'Vendor\DeliveryController@findReider')->name('vendor.find.rider');
             Route::post('rider/search/submit', 'Vendor\DeliveryController@findReiderSubmit')->name('vendor-rider-search-submit');
-
-
-
 
             //------------ SUBCATEGORY SECTION ------------
 
@@ -3318,7 +3379,6 @@ Route::group(['middleware' => 'maintenance'], function () {
         return view('user.success', compact('status'));
     })->name('user.success');
 
-
     Route::prefix('user')->group(function () {
 
         // USER AUTH SECION
@@ -3349,7 +3409,6 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('reward/points', 'User\RewardController@rewards')->name('user-reward-index');
         Route::get('reward/convert', 'User\RewardController@convert')->name('user-reward-convernt');
         Route::post('reward/convert/submit', 'User\RewardController@convertSubmit')->name('user-reward-convert-submit');
-
 
         Route::get('/logout', 'User\LoginController@logout')->name('user-logout');
         Route::get('/dashboard', 'User\UserController@index')->name('user-dashboard');
@@ -3431,7 +3490,7 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // PayTM
         Route::post('/paytm-submit', 'Payment\Subscription\PaytmController@store')->name('user.paytm.submit');
-        ;
+
         Route::post('/paytm-notify', 'Payment\Subscription\PaytmController@notify')->name('user.paytm.notify');
 
         // Molly
@@ -3450,8 +3509,6 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // Flutter Wave
         Route::post('/flutter-submit', 'Payment\Subscription\FlutterwaveController@store')->name('user.flutter.submit');
-
-
 
         // SSLCommerz
         Route::post('/ssl-submit', 'Payment\Subscription\SslController@store')->name('user.ssl.submit');
@@ -3507,7 +3564,7 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // PayTM
         Route::post('/deposit/paytm-submit', 'Payment\Deposit\PaytmController@store')->name('deposit.paytm.submit');
-        ;
+
         Route::post('/deposit/paytm-notify', 'Payment\Deposit\PaytmController@notify')->name('deposit.paytm.notify');
 
         // Molly
@@ -3526,7 +3583,6 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // Flutter Wave
         Route::post('/deposit/flutter-submit', 'Payment\Deposit\FlutterwaveController@store')->name('deposit.flutter.submit');
-
 
         // SSLCommerz
         Route::post('/deposit/ssl-submit', 'Payment\Deposit\SslController@store')->name('deposit.ssl.submit');
@@ -3549,11 +3605,9 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('/message/{id}/delete', 'User\MessageController@messagedelete')->name('user-message-delete');
         Route::get('/message/load/{id}', 'User\MessageController@msgload')->name('user-vendor-message-load');
 
-
         Route::get('/messages/delivery', 'User\MessageController@messages2')->name('user-messages-delivery');
         Route::post('/messages/delivery/store', 'User\MessageController@storeMessage')->name('user-chat-send');
         Route::post('/messages/delivery/fetch', 'User\MessageController@fetchMessages')->name('user-chat-fetch'); // for AJAX fetching
-
 
         // Tickets
         Route::get('admin/tickets', 'User\MessageController@adminmessages')->name('user-message-index');
@@ -3610,12 +3664,12 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         //PayTM Routes
         Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.user.deposit.paytm.submit');
-        ;
+
         Route::post('/api/paytm-callback', 'Api\Payment\PaytmController@paytmCallback')->name('api.user.deposit.paytm.notify');
 
         //RazorPay Routes
         Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.user.deposit.razorpay.submit');
-        ;
+
         Route::post('/api/razorpay-callback', 'Api\Payment\RazorpayController@razorCallback')->name('api.user.deposit.razorpay.notify');
 
         // Mercadopago Routes
@@ -3626,14 +3680,11 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::post('/api/flutter/submit', 'Api\Payment\FlutterWaveController@store')->name('api.user.deposit.flutter.submit');
         Route::post('/api/flutter/notify', 'Api\Payment\FlutterWaveController@notify')->name('api.user.deposit.flutter.notify');
 
-
         // Mobile Deposit Route section
 
     });
 
     // ************************************ USER SECTION ENDS**********************************************
-
-
 
     // ************************************ RIDER SECTION ENDS**********************************************
     Route::prefix('rider')->group(function () {
@@ -3671,11 +3722,9 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::post('/service/area/edit/{id}', 'Rider\RiderController@serviceAreaUpdate')->name('rider-service-area-update');
         Route::get('/service/area/delete/{id}', 'Rider\RiderController@serviceAreaDestroy')->name('rider-service-area-delete');
 
-
         Route::get('/withdraw', 'Rider\WithdrawController@index')->name('rider-wwt-index');
         Route::get('/withdraw/create', 'Rider\WithdrawController@create')->name('rider-wwt-create');
         Route::post('/withdraw/create', 'Rider\WithdrawController@store')->name('rider-wwt-store');
-
 
         Route::get('my/orders', 'Rider\RiderController@orders')->name('rider-orders');
         Route::get('order/details/{id}', 'Rider\RiderController@orderDetails')->name('rider-order-details');
@@ -3683,12 +3732,8 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('order/delivery/reject/{id}', 'Rider\RiderController@orderReject')->name('rider-order-delivery-reject');
         Route::get('order/delivery/complete/{id}', 'Rider\RiderController@orderComplete')->name('rider-order-delivery-complete');
 
-
-
         Route::get('/reset', 'Rider\RiderController@resetform')->name('rider-reset');
         Route::post('/reset', 'Rider\RiderController@reset')->name('rider-reset-submit');
-
-
 
         Route::get('/conversation', 'Rider\MessageDeliveryController@message')->name('rider-conversation');
         Route::post('/conversation/messages', 'Rider\MessageDeliveryController@fetchMessages')->name('rider-chat-messages');
@@ -3711,19 +3756,15 @@ Route::group(['middleware' => 'maintenance'], function () {
 
     // ************************************ RIDER SECTION ENDS**********************************************
 
-
-
-
     // ************************************ FRONT SECTION **********************************************
 
     Route::post('/item/report', 'Front\CatalogController@report')->name('product.report');
 
     Route::post('/checkout/payment/campay/pay', 'Front\CatalogController@pay')->name('chat.campay.submit');
 
-
-
     Route::get('/delete-products-now', function () {
-        require base_path('delete_all_products.php'); });
+        require base_path('delete_all_products.php');
+    });
     Route::get('/', 'Front\FrontendController@index')->name('front.index');
     Route::get('/view', 'Front\CartController@view_cart')->name('front.cart-view');
     Route::get('/extras', 'Front\FrontendController@extraIndex')->name('front.extraIndex');
@@ -3852,7 +3893,7 @@ Route::group(['middleware' => 'maintenance'], function () {
 
     // PayTM
     Route::post('/checkout/payment/paytm-submit', 'Payment\Checkout\PaytmController@store')->name('front.paytm.submit');
-    ;
+
     Route::post('/checkout/payment/paytm-notify', 'Payment\Checkout\PaytmController@notify')->name('front.paytm.notify');
 
     // Molly
@@ -3871,7 +3912,6 @@ Route::group(['middleware' => 'maintenance'], function () {
 
     // Flutter Wave
     Route::post('/checkout/payment/flutter-submit', 'Payment\Checkout\FlutterwaveController@store')->name('front.flutter.submit');
-
 
     // SSLCommerz
     Route::post('/checkout/payment/ssl-submit', 'Payment\Checkout\SslController@store')->name('front.ssl.submit');
@@ -3956,14 +3996,14 @@ Route::group(['middleware' => 'maintenance'], function () {
 
     //PayTM Routes
     Route::post('/api/paytm-submit', 'Api\Payment\PaytmController@store')->name('api.paytm.submit');
-    ;
+
     Route::post('/api/paytm-callback', 'Api\Payment\PaytmController@paytmCallback')->name('api.paytm.notify');
 
     Route::post('/api/authorize-submit', 'Api\Payment\AuthorizeController@store')->name('api.authorize.submit');
 
     //RazorPay Routes
     Route::post('/api/razorpay-submit', 'Api\Payment\RazorpayController@store')->name('api.razorpay.submit');
-    ;
+
     Route::post('/api/razorpay-callback', 'Api\Payment\RazorpayController@razorCallback')->name('api.razorpay.notify');
 
     //   Mobile Checkout section
@@ -4000,12 +4040,11 @@ Route::group(['middleware' => 'maintenance'], function () {
     Route::get('finalize', 'Front\FrontendController@finalize');
     Route::get('update-finalize', 'Front\FrontendController@updateFinalize');
 
-
     // VENDOR AND PAGE SECTION
     Route::get('/country/tax/check', 'Front\CartController@country_tax');
     Route::get('/{slug}', 'Front\VendorController@index')->name('front.vendor');
 
-// VENDOR AND PAGE SECTION ENDS
+    // VENDOR AND PAGE SECTION ENDS
 
     // ************************************ FRONT SECTION ENDS**********************************************
 
@@ -4013,17 +4052,18 @@ Route::group(['middleware' => 'maintenance'], function () {
 
 Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\CheckoutController@loadpayment')->name('front.load.payment');
 Route::get('/delete-products-now', function () {
-    require base_path('delete_all_products.php'); });
+    require base_path('delete_all_products.php');
+});
 
 // ==========================================
 // SUPPORT SYSTEM ROUTES
 // ==========================================
-Route::group(['middleware' => 'web'], function() {
+Route::group(['middleware' => 'web'], function () {
     // Public/Guest allowed
     Route::get('/support/faqs', 'SupportController@getFaqs')->name('support.faqs.get');
-    
+
     // Auth required (using a throttle for messages to prevent spam)
-    Route::group(['middleware' => ['auth', 'throttle:60,1']], function() {
+    Route::group(['middleware' => ['auth', 'throttle:60,1']], function () {
         Route::post('/support/bot/chat', 'SupportController@botChat')->name('support.bot.chat');
         Route::post('/support/live/request', 'SupportController@requestLiveSupport')->name('support.live.request');
         Route::post('/support/chat/send', 'SupportController@sendMessage')->name('support.chat.send');
@@ -4033,4 +4073,3 @@ Route::group(['middleware' => 'web'], function() {
         Route::get('/support/chat/list', 'SupportController@getUserConversations')->name('support.chat.list');
     });
 });
-

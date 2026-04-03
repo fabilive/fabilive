@@ -14,10 +14,10 @@ class FaqResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'title' => $this->title,
-        'details' => strip_tags($this->details)
-      ];
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'details' => strip_tags($this->details),
+        ];
     }
 }

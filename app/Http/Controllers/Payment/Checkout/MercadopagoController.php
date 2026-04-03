@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
-use Illuminate\Http\Request;
-use Session;
-use OrderHelper;
 use Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Str;
+use OrderHelper;
+use Session;
 
 class MercadopagoController extends CheckoutBaseControlller
 {
@@ -34,30 +32,30 @@ class MercadopagoController extends CheckoutBaseControlller
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $item_name = $this->gs->title . " Order";
-        $item_number = Str::random(4) . time();
+        $item_name = $this->gs->title.' Order';
+        $item_number = Str::random(4).time();
         $item_amount = $total;
         $cancel_url = route('front.payment.cancle');
         $success_url = route('front.payment.return');
 
         \MercadoPago\SDK::setAccessToken($paydata['token']);
         $payment = new \MercadoPago\Payment();
-        $payment->transaction_amount = (string)$item_amount;
+        $payment->transaction_amount = (string) $item_amount;
         $payment->token = $input['token'];
         $payment->description = $item_name;
         $payment->installments = 1;
-        $payment->payer = array(
-            "email" => $input['customer_email']
-        );
+        $payment->payer = [
+            'email' => $input['customer_email'],
+        ];
 
         $payment->save();
 
@@ -75,7 +73,6 @@ class MercadopagoController extends CheckoutBaseControlller
             $new_cart = json_encode($new_cart);
             $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
-
 
             $orderCalculate = PriceHelper::getOrderTotal($input, $cart);
             // dd($orderCalculate,'multi');
@@ -103,7 +100,6 @@ class MercadopagoController extends CheckoutBaseControlller
                 $input['vendor_ids'] = $vendor_ids;
             } else {
 
-
                 // multi shipping
 
                 $orderTotal = $orderCalculate['total_amount'];
@@ -130,20 +126,15 @@ class MercadopagoController extends CheckoutBaseControlller
                 unset($input['packeging']);
             }
 
-
-
-
-
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = FacadesAuth::check() ? FacadesAuth::user()->id : NULL;
+            $input['user_id'] = FacadesAuth::check() ? FacadesAuth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
             $input['order_number'] = $item_number;
             $input['wallet_price'] = $request->wallet_price / $this->curr->value;
-            $input['payment_status'] = "Completed";
+            $input['payment_status'] = 'Completed';
             $input['txnid'] = $payment->id;
-
 
             if ($input['tax_type'] == 'state_tax') {
                 $input['tax_location'] = State::findOrFail($input['tax'])->state;
@@ -151,7 +142,6 @@ class MercadopagoController extends CheckoutBaseControlller
                 $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
             }
             $input['tax'] = Session::get('current_tax');
-
 
             if ($input['dp'] == 1) {
                 $input['status'] = 'completed';
@@ -178,7 +168,7 @@ class MercadopagoController extends CheckoutBaseControlller
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            if ($input['coupon_id'] != "") {
+            if ($input['coupon_id'] != '') {
                 OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
             }
 
@@ -218,12 +208,12 @@ class MercadopagoController extends CheckoutBaseControlller
             //Sending Email To Buyer
             $data = [
                 'to' => $order->customer_email,
-                'type' => "new_order",
+                'type' => 'new_order',
                 'cname' => $order->customer_name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'wtitle' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
+                'wtitle' => '',
                 'onumber' => $order->order_number,
             ];
 
@@ -233,8 +223,8 @@ class MercadopagoController extends CheckoutBaseControlller
             //Sending Email To Admin
             $data = [
                 'to' => $this->ps->contact_email,
-                'subject' => "New Order Recieved!!",
-                'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                'subject' => 'New Order Recieved!!',
+                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);

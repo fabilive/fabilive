@@ -9,7 +9,7 @@ class Complaint extends Model
     protected $fillable = [
         'user_id', 'order_id', 'subject', 'description',
         'status', 'priority', 'admin_response',
-        'assigned_admin_id', 'resolved_at'
+        'assigned_admin_id', 'resolved_at',
     ];
 
     protected $casts = [

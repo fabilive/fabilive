@@ -12,9 +12,10 @@ use Omnipay\Omnipay;
 
 class PaypalController extends CheckoutBaseControlller
 {
-
     public $_api_context;
+
     public $gateway;
+
     public function __construct()
     {
         parent::__construct();
@@ -33,7 +34,7 @@ class PaypalController extends CheckoutBaseControlller
         $order_number = $request->order_number;
         $order = Order::where('order_number', $order_number)->firstOrFail();
         $curr = Currency::where('sign', '=', $order->currency_sign)->firstOrFail();
-        if ($curr->name != "USD") {
+        if ($curr->name != 'USD') {
             return redirect()->back()->with('unsuccess', 'Please Select USD Currency For Paypal.');
         }
         $item_amount = round($order->pay_amount * $order->currency_value, 2);
@@ -41,14 +42,13 @@ class PaypalController extends CheckoutBaseControlller
         $cancel_url = route('api.paypal.cancle');
         $notify_url = route('api.paypal.notify');
 
-
         try {
-            $response = $this->gateway->purchase(array(
+            $response = $this->gateway->purchase([
                 'amount' => $item_amount,
                 'currency' => $curr->name,
                 'returnUrl' => $notify_url,
                 'cancelUrl' => $cancel_url,
-            ))->send();
+            ])->send();
 
             if ($response->isRedirect()) {
                 Session::put('order_number', $order_number);
@@ -62,7 +62,6 @@ class PaypalController extends CheckoutBaseControlller
             return redirect()->back()->with('unsuccess', $th->getMessage());
         }
 
-
         return redirect()->back()->with('unsuccess', __('Unknown error occurred'));
     }
 
@@ -73,7 +72,7 @@ class PaypalController extends CheckoutBaseControlller
         $order_number = Session::get('order_number');
 
         $success_url = route('front.payment.success', 1);
-        $cancel_url = route('payment.checkout') . "?order_number=" . $order_number;
+        $cancel_url = route('payment.checkout').'?order_number='.$order_number;
 
         if (empty($responseData['PayerID']) || empty($responseData['token'])) {
             return [
@@ -82,21 +81,23 @@ class PaypalController extends CheckoutBaseControlller
             ];
         }
 
-        $transaction = $this->gateway->completePurchase(array(
+        $transaction = $this->gateway->completePurchase([
             'payer_id' => $responseData['PayerID'],
             'transactionReference' => $responseData['paymentId'],
-        ));
+        ]);
 
         $response = $transaction->send();
 
         if ($response->isSuccessful()) {
             $order = Order::where('order_number', $order_number)->firstOrFail();
             $data['payment_status'] = 'Completed';
-            $order->method = "Paypal";
+            $order->method = 'Paypal';
             $data['txnid'] = $response->getData()['transactions'][0]['related_resources'][0]['sale']['id'];
             $order->update($data);
+
             return redirect($success_url);
         }
+
         return redirect($cancel_url);
     }
 }

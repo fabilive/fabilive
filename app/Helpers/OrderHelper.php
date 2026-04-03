@@ -2,28 +2,26 @@
 
 namespace App\Helpers;
 
-use App\{
-    Models\Cart,
-    Models\User,
-    Models\Coupon,
-    Models\Product,
-    Models\Transaction,
-    Models\VendorOrder,
-    Models\Notification,
-    Models\UserNotification,
-    Models\Generalsetting
-};
 use App\Models\AffliateBonus;
+use App\Models\Cart;
+use App\Models\Coupon;
+use App\Models\Generalsetting;
+use App\Models\Notification;
+use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\UserNotification;
+use App\Models\VendorOrder;
 use Auth;
-use Session;
 use Illuminate\Support\Str;
+use Session;
 
 class OrderHelper
 {
     public static function auth_check($data)
     {
         try {
-            $resdata = array();
+            $resdata = [];
             $users = User::where('email', '=', $data['personal_email'])->get();
             if (count($users) == 0) {
                 if ($data['personal_pass'] == $data['personal_confirm']) {
@@ -31,9 +29,9 @@ class OrderHelper
                     $user->name = $data['personal_name'];
                     $user->email = $data['personal_email'];
                     $user->password = bcrypt($data['personal_pass']);
-                    $token = md5(time() . $data['personal_name'] . $data['personal_email']);
+                    $token = md5(time().$data['personal_name'].$data['personal_email']);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($data['personal_name'] . $data['personal_email']);
+                    $user->affilate_code = md5($data['personal_name'].$data['personal_email']);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::login($user);
@@ -44,8 +42,9 @@ class OrderHelper
                 }
             } else {
                 $resdata['auth_success'] = false;
-                $resdata['error_message'] = __("This Email Already Exist.");
+                $resdata['error_message'] = __('This Email Already Exist.');
             }
+
             return $resdata;
         } catch (\Exception $e) {
         }
@@ -55,7 +54,7 @@ class OrderHelper
     {
 
         foreach ($cart->items as $key => $prod) {
-            if (!empty($prod['item']['license']) && !empty($prod['item']['license_qty'])) {
+            if (! empty($prod['item']['license']) && ! empty($prod['item']['license_qty'])) {
                 foreach ($prod['item']['license_qty'] as $ttl => $dtl) {
                     if ($dtl != 0) {
                         $dtl--;
@@ -65,7 +64,7 @@ class OrderHelper
                         $final = implode(',', $temp);
                         $produc->license_qty = $final;
                         $produc->update();
-                        $temp =  $produc->license;
+                        $temp = $produc->license;
                         $license = $temp[$ttl];
                         $oldCart = Session::has('cart') ? Session::get('cart') : null;
                         $cart = new Cart($oldCart);
@@ -97,9 +96,9 @@ class OrderHelper
                 }
             }
         }
+
         return $affilate_users;
     }
-
 
     public static function set_currency($new_value)
     {
@@ -118,7 +117,6 @@ class OrderHelper
         }
     }
 
-
     public static function affilate_check($id, $sub, $dp)
     {
         try {
@@ -135,6 +133,7 @@ class OrderHelper
                 $user->affilate_income += $sub;
                 $user->update();
             }
+
             return $user;
         } catch (\Exception $e) {
         }
@@ -146,9 +145,9 @@ class OrderHelper
             $coupon = Coupon::find($id);
             $coupon->used++;
             if ($coupon->times != null) {
-                $i = (int)$coupon->times;
+                $i = (int) $coupon->times;
                 $i--;
-                $coupon->times = (string)$i;
+                $coupon->times = (string) $i;
             }
             $coupon->update();
         } catch (\Exception $e) {
@@ -159,15 +158,15 @@ class OrderHelper
     {
         try {
             foreach ($cart->items as $prod) {
-                $x = (string)$prod['size_qty'];
-                if (!empty($x)) {
+                $x = (string) $prod['size_qty'];
+                if (! empty($x)) {
                     $product = Product::find($prod['item']['id']);
-                    $x = (int)$x;
+                    $x = (int) $x;
                     $x = $x - $prod['qty'];
                     $temp = $product->size_qty;
                     $temp[$prod['size_key']] = $x;
                     $temp1 = implode(',', $temp);
-                    $product->size_qty =  $temp1;
+                    $product->size_qty = $temp1;
                     $product->update();
                 }
             }
@@ -179,11 +178,11 @@ class OrderHelper
     {
         try {
             foreach ($cart->items as $prod) {
-                $x = (string)$prod['stock'];
+                $x = (string) $prod['stock'];
                 if ($x != null) {
 
                     $product = Product::find($prod['item']['id']);
-                    $product->stock =  $prod['stock'];
+                    $product->stock = $prod['stock'];
                     $product->update();
                     if ($product->stock <= 5) {
                         $notification = new Notification;
@@ -198,13 +197,13 @@ class OrderHelper
 
     public static function vendor_order_check($cart, $order)
     {
-  
+
         try {
-            $notf = array();
+            $notf = [];
 
             foreach ($cart->items as $prod) {
                 if ($prod['item']['user_id'] != 0) {
-                    $vorder =  new VendorOrder();
+                    $vorder = new VendorOrder();
                     $vorder->order_id = $order->id;
                     $vorder->user_id = $prod['item']['user_id'];
                     $vorder->qty = $prod['qty'];
@@ -215,7 +214,7 @@ class OrderHelper
                 }
             }
 
-            if (!empty($notf)) {
+            if (! empty($notf)) {
                 $users = array_unique($notf);
                 foreach ($users as $user) {
                     $notification = new UserNotification;
@@ -232,7 +231,7 @@ class OrderHelper
     {
         try {
             $transaction = new Transaction;
-            $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+            $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
             $transaction->user_id = $data->user_id;
             $transaction->amount = $price;
             $transaction->currency_sign = $data->currency_sign;
@@ -251,7 +250,7 @@ class OrderHelper
 
     public static function mollie_currencies()
     {
-        return array(
+        return [
             'AED',
             'AUD',
             'BGN',
@@ -281,13 +280,13 @@ class OrderHelper
             'THB',
             'TWD',
             'USD',
-            'ZAR'
-        );
+            'ZAR',
+        ];
     }
 
     public static function flutter_currencies()
     {
-        return array(
+        return [
             'BIF',
             'CAD',
             'CDF',
@@ -311,20 +310,20 @@ class OrderHelper
             'XOF',
             'ZMK',
             'ZMW',
-            'ZWD'
-        );
+            'ZWD',
+        ];
     }
 
     public static function mercadopago_currencies()
     {
-        return array(
+        return [
             'ARS',
             'BRL',
             'CLP',
             'MXN',
             'PEN',
             'UYU',
-            'VEF'
-        );
+            'VEF',
+        ];
     }
 }

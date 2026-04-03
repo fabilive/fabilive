@@ -12,7 +12,9 @@ use Filament\Tables\Table;
 class SupportBotRuleResource extends Resource
 {
     protected static ?string $model = SupportBotRule::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-cpu-chip';
+
     protected static ?string $navigationGroup = 'Support System';
 
     public static function form(Form $form): Form
@@ -62,7 +64,7 @@ class SupportBotRuleResource extends Resource
                 Tables\Columns\TextColumn::make('priority')->sortable(),
                 Tables\Columns\BooleanColumn::make('is_active'),
             ])
-            ->actions([ Tables\Actions\EditAction::make(), ]);
+            ->actions([Tables\Actions\EditAction::make()]);
     }
 
     public static function getPages(): array

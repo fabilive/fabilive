@@ -14,12 +14,12 @@ class BannerResource extends JsonResource
      */
     public function toArray($request)
     {
-      return [
-        'id' => $this->id,
-        'image' => url('/') . '/assets/images/banners/'.$this->photo,
-        'link' => $this->link,
-        'title' => $this->title,
-        'text' => $this->text
-      ];
+        return [
+            'id' => $this->id,
+            'image' => url('/').'/assets/images/banners/'.$this->photo,
+            'link' => $this->link,
+            'title' => $this->title,
+            'text' => $this->text,
+        ];
     }
 }

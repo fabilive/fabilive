@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\DB;
 class AdminBaseController extends Controller
 {
     protected $gs;
+
     protected $curr;
+
     protected $language;
+
     protected $language_id;
+
     public function __construct()
     {
         $this->middleware('auth:admin');
         $this->gs = DB::table('generalsettings')->find(1);
         $this->language = DB::table('admin_languages')->where('is_default', '=', 1)->first();
-        if (!$this->language) {
+        if (! $this->language) {
             $this->language = DB::table('admin_languages')->first();
         }
         view()->share('langg', $this->language);
@@ -25,7 +29,7 @@ class AdminBaseController extends Controller
             App::setlocale($this->language->name);
         }
         $this->curr = DB::table('currencies')->where('is_default', '=', 1)->first();
-        if (!$this->curr) {
+        if (! $this->curr) {
             $this->curr = DB::table('currencies')->first();
         }
     }

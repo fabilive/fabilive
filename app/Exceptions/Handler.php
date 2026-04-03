@@ -2,9 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
@@ -38,7 +38,7 @@ class Handler extends ExceptionHandler
             return redirect()->guest('/admin/login');
         }
         if ($request->is('user') || $request->is('user/*')) {
-            return redirect()->guest('/')->with('auth-modal',__('Please Login First !!'));
+            return redirect()->guest('/')->with('auth-modal', __('Please Login First !!'));
         }
 
         return redirect()->guest('/');

@@ -3,20 +3,20 @@
 namespace App\Services;
 
 use App\Models\DeliveryJob;
-use App\Models\DeliveryJobStop;
 use App\Models\DeliveryJobEvent;
 use App\Models\Order;
-use App\Models\User;
 use App\Models\Rider;
-use App\Models\VendorOrder;
 use App\Models\Transaction;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\VendorOrder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DeliveryJobService
 {
     protected $feeService;
+
     protected $routeService;
 
     public function __construct(DeliveryFeeService $feeService, DeliveryRouteService $routeService)
@@ -62,15 +62,15 @@ class DeliveryJobService
                     'location_text' => $seller->address,
                     'lat' => $seller->lat,
                     'lng' => $seller->lng,
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ];
             }
 
             // 5. Optimize Stops Sequence
             $optimizedStops = $this->routeService->optimizePickupSequence(
-                $stopsData, 
-                (float)$order->customer_lat, 
-                (float)$order->customer_lng
+                $stopsData,
+                (float) $order->customer_lat,
+                (float) $order->customer_lng
             );
 
             // 6. Save Stops
@@ -85,7 +85,7 @@ class DeliveryJobService
                 'status' => 'pending',
                 'location_text' => $order->customer_address,
                 'lat' => $order->customer_lat,
-                'lng' => $order->customer_lng
+                'lng' => $order->customer_lng,
             ]);
 
             // 8. Log Event
@@ -106,7 +106,7 @@ class DeliveryJobService
 
             $this->logEvent($job, $actorType, $actorId, 'status_changed', array_merge([
                 'old_status' => $oldStatus,
-                'new_status' => $newStatus
+                'new_status' => $newStatus,
             ], $meta));
 
             // Status specific updates
@@ -126,9 +126,7 @@ class DeliveryJobService
         });
     }
 
-    /**
-     */
-    public function completeDeliveryJob(DeliveryJob $job, ?string $proofPhotoPath = null): void
+    public function completeDeliveryJob(DeliveryJob $job, string $proofPhotoPath = null): void
     {
         DB::transaction(function () use ($job, $proofPhotoPath) {
             // 1. Update Job Status & Metadata
@@ -136,7 +134,7 @@ class DeliveryJobService
                 'status' => 'delivered_pending_verification',
                 'delivered_at' => now(),
                 'proof_photo' => $proofPhotoPath,
-                'proof_uploaded_at' => $proofPhotoPath ? now() : null
+                'proof_uploaded_at' => $proofPhotoPath ? now() : null,
             ]);
 
             // 2. Update Order Status
@@ -167,7 +165,7 @@ class DeliveryJobService
             // 1. Update Job Status
             $job->update([
                 'status' => 'delivered_verified',
-                'verified_at' => now()
+                'verified_at' => now(),
             ]);
 
             // 2. Update Order Status to Fully Completed
@@ -180,19 +178,19 @@ class DeliveryJobService
             if ($job->assigned_rider_id) {
                 $rider = Rider::lockForUpdate()->find($job->assigned_rider_id);
                 if ($rider) {
-                    $rider->increment('balance', (float)$job->rider_earnings);
-                    
+                    $rider->increment('balance', (float) $job->rider_earnings);
+
                     // Create Transaction for Rider
                     $transaction = new Transaction;
-                    $transaction->txn_number = Str::random(3).substr(time(), 6,8).Str::random(3);
+                    $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                     $transaction->user_id = $rider->id;
-                    $transaction->amount = (float)$job->rider_earnings;
+                    $transaction->amount = (float) $job->rider_earnings;
                     $transaction->currency_sign = $order->currency_sign;
                     $transaction->currency_code = $order->currency_code;
-                    $transaction->currency_value= $order->currency_value;
+                    $transaction->currency_value = $order->currency_value;
                     $transaction->method = 'Delivery Earning';
                     $transaction->type = 'plus';
-                    $transaction->details = 'Delivery Earning for Order #' . $order->order_number;
+                    $transaction->details = 'Delivery Earning for Order #'.$order->order_number;
                     $transaction->save();
                 }
             }
@@ -204,7 +202,7 @@ class DeliveryJobService
                     // Logic from Admin\OrderController: price - commission
                     $settlementAmount = $vorder->price - $order->commission;
                     $vendor->increment('current_balance', $settlementAmount);
-                    
+
                     // Log to WalletLedger
                     \App\Models\WalletLedger::create([
                         'user_id' => $vendor->id,
@@ -213,7 +211,7 @@ class DeliveryJobService
                         'order_id' => $order->id,
                         'reference' => $order->txnid,
                         'status' => 'completed',
-                        'details' => 'Escrow released upon delivery verification'
+                        'details' => 'Escrow released upon delivery verification',
                     ]);
                 }
             }
@@ -223,7 +221,7 @@ class DeliveryJobService
 
             // 7. Log Events
             $this->logEvent($job, 'admin', Auth::id(), 'job_verified_and_settled');
-            
+
             // 8. Close Chat Threads (Force close now)
             app(DeliveryChatService::class)->closeChatThreads($job);
         });
@@ -239,7 +237,7 @@ class DeliveryJobService
             'actor_type' => $actorType,
             'actor_id' => $actorId,
             'event' => $event,
-            'meta_json' => $meta
+            'meta_json' => $meta,
         ]);
     }
 }

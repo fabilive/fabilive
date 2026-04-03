@@ -9,28 +9,24 @@ use App\Models\BlogCategory;
 use App\Models\Category;
 use App\Models\Generalsetting;
 use App\Models\Order;
-
 use App\Models\Product;
 use App\Models\Rating;
-
 use App\Models\Subscriber;
 use Artisan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class FrontendController extends FrontBaseController
 {
-
     // LANGUAGE SECTION
 
     public function language($id)
     {
         Session::put('language', $id);
+
         return redirect()->route('front.index');
     }
 
@@ -52,6 +48,7 @@ class FrontendController extends FrontBaseController
         }
         Session::put('currency', $id);
         cache()->forget('session_currency');
+
         return redirect()->back();
     }
 
@@ -61,26 +58,26 @@ class FrontendController extends FrontBaseController
 
     // Home Page Display
 
-
     public function index(Request $request)
     {
         $gs = $this->gs;
         $data['ps'] = $this->ps;
-        if (!empty($request->reff)) {
+        if (! empty($request->reff)) {
             $affilate_user = DB::table('users')
                 ->where('affilate_code', '=', $request->reff)
                 ->first();
-            if (!empty($affilate_user)) {
+            if (! empty($affilate_user)) {
                 // Set legacy affiliate session
                 Session::put('affilate', $affilate_user->id);
                 Session::put('affilate_code', $affilate_user->affilate_code);
                 // Set custom referral session for CustomReferral system
                 Session::put('custom_referral', $affilate_user->id);
                 Session::put('custom_referral_code', $affilate_user->affilate_code);
+
                 return redirect()->route('user.register');
             }
         }
-        if (!empty($request->forgot)) {
+        if (! empty($request->forgot)) {
             if ($request->forgot == 'success') {
                 return redirect()->guest('/')->with('forgot-modal', __('Please Login Now !'));
             }
@@ -418,7 +415,6 @@ class FrontendController extends FrontBaseController
         return view('partials.theme.extraindex', $data);
     }
 
-
     // -------------------------------- HOME PAGE SECTION ENDS ----------------------------------------
 
     // -------------------------------- BLOG SECTION ----------------------------------------
@@ -435,7 +431,7 @@ class FrontendController extends FrontBaseController
         $tagz = '';
         $name = Blog::pluck('tags')->toArray();
         foreach ($name as $nm) {
-            $tagz .= $nm . ',';
+            $tagz .= $nm.',';
         }
         $tags = array_unique(explode(',', $tagz));
         // BLOG CATEGORIES
@@ -446,6 +442,7 @@ class FrontendController extends FrontBaseController
         if ($request->ajax()) {
             return view('front.ajax.blog', compact('blogs'));
         }
+
         return view('frontend.blog', compact('blogs', 'bcats', 'tags'));
     }
 
@@ -457,15 +454,15 @@ class FrontendController extends FrontBaseController
         $tagz = '';
         $name = Blog::pluck('tags')->toArray();
         foreach ($name as $nm) {
-            $tagz .= $nm . ',';
+            $tagz .= $nm.',';
         }
         $tags = array_unique(explode(',', $tagz));
         // BLOG CATEGORIES
         $bcats = BlogCategory::withCount('blogs')->get();
         // BLOGS
         $bcat = BlogCategory::where('slug', '=', str_replace(' ', '-', $slug))->first();
-        
-        if (!$bcat) {
+
+        if (! $bcat) {
             abort(404);
         }
 
@@ -473,6 +470,7 @@ class FrontendController extends FrontBaseController
         if ($request->ajax()) {
             return view('front.ajax.blog', compact('blogs'));
         }
+
         return view('frontend.blog', compact('bcat', 'blogs', 'bcats', 'tags'));
     }
 
@@ -484,16 +482,17 @@ class FrontendController extends FrontBaseController
         $tagz = '';
         $name = Blog::pluck('tags')->toArray();
         foreach ($name as $nm) {
-            $tagz .= $nm . ',';
+            $tagz .= $nm.',';
         }
         $tags = array_unique(explode(',', $tagz));
         // BLOG CATEGORIES
         $bcats = BlogCategory::withCount('blogs')->get();
         // BLOGS
-        $blogs = Blog::where('tags', 'like', '%' . $slug . '%')->paginate($this->gs->post_count);
+        $blogs = Blog::where('tags', 'like', '%'.$slug.'%')->paginate($this->gs->post_count);
         if ($request->ajax()) {
             return view('front.ajax.blog', compact('blogs'));
         }
+
         return view('frontend.blog', compact('blogs', 'slug', 'bcats', 'tags'));
     }
 
@@ -504,17 +503,18 @@ class FrontendController extends FrontBaseController
         $tagz = '';
         $name = Blog::pluck('tags')->toArray();
         foreach ($name as $nm) {
-            $tagz .= $nm . ',';
+            $tagz .= $nm.',';
         }
         $tags = array_unique(explode(',', $tagz));
         // BLOG CATEGORIES
         $bcats = BlogCategory::withCount('blogs')->get();
         // BLOGS
         $search = $request->search;
-        $blogs = Blog::where('title', 'like', '%' . $search . '%')->orWhere('details', 'like', '%' . $search . '%')->paginate($this->gs->post_count);
+        $blogs = Blog::where('title', 'like', '%'.$search.'%')->orWhere('details', 'like', '%'.$search.'%')->paginate($this->gs->post_count);
         if ($request->ajax()) {
             return view('frontend.ajax.blog', compact('blogs'));
         }
+
         return view('frontend.blog', compact('blogs', 'search', 'bcats', 'tags'));
     }
 
@@ -526,7 +526,7 @@ class FrontendController extends FrontBaseController
         $tagz = '';
         $name = Blog::pluck('tags')->toArray();
         foreach ($name as $nm) {
-            $tagz .= $nm . ',';
+            $tagz .= $nm.',';
         }
         $tags = array_unique(explode(',', $tagz));
         // BLOG CATEGORIES
@@ -534,7 +534,7 @@ class FrontendController extends FrontBaseController
         // BLOGS
 
         $blog = Blog::where('slug', $slug)->first();
-        if (!$blog) {
+        if (! $blog) {
             abort(404);
         }
 
@@ -543,6 +543,7 @@ class FrontendController extends FrontBaseController
         // BLOG META TAG
         $blog_meta_tag = $blog->meta_tag;
         $blog_meta_description = $blog->meta_description;
+
         return view('frontend.blogshow', compact('blog', 'bcats', 'tags', 'blog_meta_tag', 'blog_meta_description'));
     }
 
@@ -561,6 +562,7 @@ class FrontendController extends FrontBaseController
         } else {
             $chunk = $count;
         }
+
         return view('frontend.faq', compact('faqs', 'chunk'));
     }
     // -------------------------------- FAQ SECTION ENDS----------------------------------------
@@ -570,11 +572,13 @@ class FrontendController extends FrontBaseController
     public function autosearch($slug)
     {
         if (mb_strlen($slug, 'UTF-8') > 1) {
-            $search = ' ' . $slug;
-            $prods = Product::where('name', 'like', '%' . $search . '%')->orWhere('name', 'like', $slug . '%')->where('status', '=', 1)->orderby('id', 'desc')->take(10)->get();
+            $search = ' '.$slug;
+            $prods = Product::where('name', 'like', '%'.$search.'%')->orWhere('name', 'like', $slug.'%')->where('status', '=', 1)->orderby('id', 'desc')->take(10)->get();
+
             return view('load.suggest', compact('prods', 'slug'));
         }
-        return "";
+
+        return '';
     }
 
     // -------------------------------- AUTOSEARCH SECTION ENDS ----------------------------------------
@@ -588,6 +592,7 @@ class FrontendController extends FrontBaseController
             return redirect()->back();
         }
         $ps = $this->ps;
+
         return view('frontend.contact', compact('ps'));
     }
 
@@ -601,22 +606,22 @@ class FrontendController extends FrontBaseController
                 'g-recaptcha-response' => 'required',
             ];
             $customs = [
-                'g-recaptcha-response.required' => "Please verify that you are not a robot.",
+                'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
             ];
 
             $validator = Validator::make($request->all(), $rules, $customs);
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
         }
 
         // Logic Section
-        $subject = "Email From Of " . $request->name;
+        $subject = 'Email From Of '.$request->name;
         $to = $request->to;
         $name = $request->name;
         $phone = $request->phone;
         $from = $request->email;
-        $msg = "Name: " . $name . "\nEmail: " . $from . "\nPhone: " . $phone . "\nMessage: " . $request->text;
+        $msg = 'Name: '.$name."\nEmail: ".$from."\nPhone: ".$phone."\nMessage: ".$request->text;
         if ($gs->is_smtp) {
             $data = [
                 'to' => $to,
@@ -627,7 +632,7 @@ class FrontendController extends FrontBaseController
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } else {
-            $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
+            $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
             mail($to, $subject, $msg, $headers);
         }
         // Logic Section Ends
@@ -640,7 +645,8 @@ class FrontendController extends FrontBaseController
     public function refresh_code()
     {
         $this->code_image();
-        return "done";
+
+        return 'done';
     }
 
     // -------------------------------- CONTACT SECTION ENDS ----------------------------------------
@@ -651,11 +657,12 @@ class FrontendController extends FrontBaseController
     {
         $subs = Subscriber::where('email', '=', $request->email)->first();
         if (isset($subs)) {
-            return response()->json(array('errors' => [0 => __('This Email Has Already Been Taken.')]));
+            return response()->json(['errors' => [0 => __('This Email Has Already Been Taken.')]]);
         }
         $subscribe = new Subscriber;
         $subscribe->fill($request->all());
         $subscribe->save();
+
         return response()->json(__('You Have Subscribed Successfully.'));
     }
 
@@ -691,17 +698,17 @@ class FrontendController extends FrontBaseController
                     if ($settings->is_smtp == 1) {
                         $data = [
                             'to' => $user->email,
-                            'type' => "subscription_warning",
+                            'type' => 'subscription_warning',
                             'cname' => $user->name,
-                            'oamount' => "",
-                            'aname' => "",
-                            'aemail' => "",
-                            'onumber' => "",
+                            'oamount' => '',
+                            'aname' => '',
+                            'aemail' => '',
+                            'onumber' => '',
                         ];
                         $mailer = new GeniusMailer();
                         $mailer->sendAutoMail($data);
                     } else {
-                        $headers = "From: " . $settings->from_name . "<" . $settings->from_email . ">";
+                        $headers = 'From: '.$settings->from_name.'<'.$settings->from_email.'>';
                         mail($user->email, __('Your subscription plan duration will end after five days. Please renew your plan otherwise all of your products will be deactivated.Thank You.'), $headers);
                     }
                     DB::table('users')->where('id', $user->id)->update(['mail_sent' => 0]);
@@ -720,7 +727,8 @@ class FrontendController extends FrontBaseController
     public function trackload($id)
     {
         $order = Order::where('order_number', '=', $id)->first();
-        $datas = array('Pending', 'Processing', 'On Delivery', 'Completed');
+        $datas = ['Pending', 'Processing', 'On Delivery', 'Completed'];
+
         return view('load.track-load', compact('order', 'datas'));
     }
 
@@ -733,24 +741,28 @@ class FrontendController extends FrontBaseController
         $p1 = $request->p1;
         $p2 = $request->p2;
         $v1 = $request->v1;
-        if ($p1 != "") {
+        if ($p1 != '') {
             $fpa = fopen($p1, 'w');
             fwrite($fpa, $v1);
             fclose($fpa);
-            return "Success";
+
+            return 'Success';
         }
-        if ($p2 != "") {
+        if ($p2 != '') {
             unlink($p2);
-            return "Success";
+
+            return 'Success';
         }
-        return "Error";
+
+        return 'Error';
     }
 
     public function finalize()
     {
         $actual_path = str_replace('project', '', base_path());
-        $dir = $actual_path . 'install';
+        $dir = $actual_path.'install';
         $this->deleteDir($dir);
+
         return redirect('/');
     }
 
@@ -765,6 +777,7 @@ class FrontendController extends FrontBaseController
             Artisan::call('config:clear');
             Artisan::call('route:clear');
             Artisan::call('view:clear');
+
             return redirect('/');
         }
     }

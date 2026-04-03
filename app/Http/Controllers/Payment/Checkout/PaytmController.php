@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers\Payment\Checkout;
 
-use App\{
-    Models\Cart,
-    Models\Order,
-    Traits\Paytm,
-    Classes\GeniusMailer,
-    Models\PaymentGateway
-};
+use App\Classes\GeniusMailer;
 use App\Helpers\PriceHelper;
+use App\Models\Cart;
 use App\Models\Country;
+use App\Models\Order;
+use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
+use App\Traits\Paytm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Session;
 use OrderHelper;
+use Session;
 
 class PaytmController extends CheckoutBaseControlller
 {
@@ -29,23 +27,23 @@ class PaytmController extends CheckoutBaseControlller
         $data = PaymentGateway::whereKeyword('paytm')->first();
         $total = $request->total;
 
-        if ($this->curr->name != "INR") {
+        if ($this->curr->name != 'INR') {
             return redirect()->back()->with('unsuccess', __('Please Select INR Currency For This Payment.'));
         }
 
         if ($request->pass_check) {
             $auth = OrderHelper::auth_check($input); // For Authentication Checking
-            if (!$auth['auth_success']) {
+            if (! $auth['auth_success']) {
                 return redirect()->back()->with('unsuccess', $auth['error_message']);
             }
         }
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
 
-        $order['item_name'] = $this->gs->title . " Order";
-        $order['item_number'] = Str::random(4) . time();
+        $order['item_name'] = $this->gs->title.' Order';
+        $order['item_number'] = Str::random(4).time();
         $total = PriceHelper::getOrderTotalAmount($input, Session::get('cart'));
 
         $order['item_amount'] = $total;
@@ -59,13 +57,13 @@ class PaytmController extends CheckoutBaseControlller
         $paytm_txn_url = 'https://securegw-stage.paytm.in/theia/processTransaction';
         $paramList = $data_for_request['paramList'];
         $checkSum = $data_for_request['checkSum'];
+
         return view('frontend.paytm-merchant-form', compact('paytm_txn_url', 'paramList', 'checkSum'));
     }
 
     public function notify(Request $request)
     {
         $input_data = $request->all();
-
 
         $input = Session::get('input_data');
         $order_data = Session::get('order_data');
@@ -80,7 +78,6 @@ class PaytmController extends CheckoutBaseControlller
         } else {
             $this->curr = \DB::table('currencies')->where('is_default', '=', 1)->first();
         }
-
 
         if ($input_data['STATUS'] == 'TXN_SUCCESS') {
 
@@ -98,7 +95,6 @@ class PaytmController extends CheckoutBaseControlller
 
                 $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
                 $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
-
 
                 $orderCalculate = PriceHelper::getOrderTotal($input, $cart);
 
@@ -127,7 +123,6 @@ class PaytmController extends CheckoutBaseControlller
                     $input['vendor_ids'] = $vendor_ids;
                 } else {
 
-
                     // multi shipping
 
                     $orderTotal = $orderCalculate['total_amount'];
@@ -154,15 +149,14 @@ class PaytmController extends CheckoutBaseControlller
                     unset($input['packeging']);
                 }
 
-
                 $order = new Order;
                 $input['cart'] = $new_cart;
-                $input['user_id'] = Auth::check() ? Auth::user()->id : NULL;
+                $input['user_id'] = Auth::check() ? Auth::user()->id : null;
                 $input['affilate_users'] = $affilate_users;
                 $input['pay_amount'] = $orderTotal;
                 $input['order_number'] = $order_data['item_number'];
                 $input['wallet_price'] = $input['wallet_price'] / $this->curr->value;
-                $input['payment_status'] = "Completed";
+                $input['payment_status'] = 'Completed';
                 $input['txnid'] = $input_data['TXNID'];
 
                 if ($input['tax_type'] == 'state_tax') {
@@ -171,7 +165,6 @@ class PaytmController extends CheckoutBaseControlller
                     $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
                 }
                 $input['tax'] = Session::get('current_tax');
-
 
                 if ($input['dp'] == 1) {
                     $input['status'] = 'completed';
@@ -198,7 +191,7 @@ class PaytmController extends CheckoutBaseControlller
                 $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
                 $order->notifications()->create();
 
-                if ($input['coupon_id'] != "") {
+                if ($input['coupon_id'] != '') {
                     OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
                 }
 
@@ -210,14 +203,13 @@ class PaytmController extends CheckoutBaseControlller
                             $smallest[$i->order_amount] = abs($i->order_amount - $num);
                         }
 
-                        if(isset($smallest)){
+                        if (isset($smallest)) {
                             asort($smallest);
-                      $final_reword = Reward::where('order_amount', key($smallest))->first();
-                      Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-                      }
+                            $final_reword = Reward::where('order_amount', key($smallest))->first();
+                            Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                        }
                     }
                 }
-
 
                 OrderHelper::size_qty_check($cart); // For Size Quantiy Checking
                 OrderHelper::stock_check($cart); // For Stock Checking
@@ -240,12 +232,12 @@ class PaytmController extends CheckoutBaseControlller
                 //Sending Email To Buyer
                 $data = [
                     'to' => $order->customer_email,
-                    'type' => "new_order",
+                    'type' => 'new_order',
                     'cname' => $order->customer_name,
-                    'oamount' => "",
-                    'aname' => "",
-                    'aemail' => "",
-                    'wtitle' => "",
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'wtitle' => '',
                     'onumber' => $order->order_number,
                 ];
                 $mailer = new GeniusMailer();
@@ -254,8 +246,8 @@ class PaytmController extends CheckoutBaseControlller
                 //Sending Email To Admin
                 $data = [
                     'to' => $this->ps->contact_email,
-                    'subject' => "New Order Recieved!!",
-                    'body' => "Hello Admin!<br>Your store has received a new order.<br>Order Number is " . $order->order_number . ".Please login to your panel to check. <br>Thank you.",
+                    'subject' => 'New Order Recieved!!',
+                    'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
                 ];
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMail($data);
@@ -263,6 +255,7 @@ class PaytmController extends CheckoutBaseControlller
                 return redirect($success_url);
             }
         }
+
         return redirect($cancel_url);
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\RateLimiter;
 class AIService
 {
     protected string $provider;
+
     protected array $config;
 
     public function __construct()
@@ -36,10 +37,12 @@ class AIService
 
         if (RateLimiter::tooManyAttempts($key, $perMinute)) {
             $this->auditLog($userId, $feature, 'rate_limited');
+
             return false;
         }
 
         RateLimiter::hit($key, 60);
+
         return true;
     }
 
@@ -48,7 +51,7 @@ class AIService
      */
     public function chatCompletion(array $messages, int $userId = null, string $feature = 'general', array $options = []): ?array
     {
-        if (!$this->checkRateLimit($userId ?? 0, $feature)) {
+        if (! $this->checkRateLimit($userId ?? 0, $feature)) {
             return ['error' => 'Rate limit exceeded. Please try again later.'];
         }
 
@@ -56,7 +59,7 @@ class AIService
 
         try {
             $response = $this->callProvider($messages, $options);
-            $elapsed = (int)((microtime(true) - $startTime) * 1000);
+            $elapsed = (int) ((microtime(true) - $startTime) * 1000);
 
             $this->auditLog($userId, $feature, 'success', [
                 'input_tokens' => $response['usage']['prompt_tokens'] ?? null,
@@ -67,14 +70,15 @@ class AIService
 
             return $response;
         } catch (\Exception $e) {
-            $elapsed = (int)((microtime(true) - $startTime) * 1000);
+            $elapsed = (int) ((microtime(true) - $startTime) * 1000);
 
             $this->auditLog($userId, $feature, 'error', [
                 'error_message' => $e->getMessage(),
                 'response_time_ms' => $elapsed,
             ]);
 
-            Log::error("AI call failed [{$feature}]: " . $e->getMessage());
+            Log::error("AI call failed [{$feature}]: ".$e->getMessage());
+
             return ['error' => 'AI service unavailable. Please try again later.'];
         }
     }
@@ -96,14 +100,14 @@ class AIService
     {
         $response = Http::withToken($this->config['api_key'])
             ->timeout(30)
-            ->post($this->config['base_url'] . '/chat/completions', array_merge([
+            ->post($this->config['base_url'].'/chat/completions', array_merge([
                 'model' => $this->config['model'],
                 'messages' => $messages,
                 'max_tokens' => $this->config['max_tokens'] ?? 2048,
             ], $options));
 
-        if (!$response->successful()) {
-            throw new \Exception("OpenAI API error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('OpenAI API error: '.$response->body());
         }
 
         return $response->json();
@@ -119,12 +123,12 @@ class AIService
         }, $messages);
 
         $response = Http::timeout(30)
-            ->post($this->config['base_url'] . '/models/' . $this->config['model'] . ':generateContent?key=' . $this->config['api_key'], [
+            ->post($this->config['base_url'].'/models/'.$this->config['model'].':generateContent?key='.$this->config['api_key'], [
                 'contents' => $contents,
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Gemini API error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Gemini API error: '.$response->body());
         }
 
         $data = $response->json();
@@ -142,7 +146,7 @@ class AIService
         $filtered = [];
         foreach ($messages as $msg) {
             if ($msg['role'] === 'system') {
-                $system .= $msg['content'] . "\n";
+                $system .= $msg['content']."\n";
             } else {
                 $filtered[] = $msg;
             }
@@ -158,11 +162,12 @@ class AIService
             'messages' => $filtered,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Anthropic API error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Anthropic API error: '.$response->body());
         }
 
         $data = $response->json();
+
         return [
             'choices' => [['message' => ['content' => $data['content'][0]['text'] ?? '']]],
             'usage' => $data['usage'] ?? [],
@@ -196,7 +201,7 @@ class AIService
                 'updated_at' => now(),
             ], $extra));
         } catch (\Exception $e) {
-            Log::error("Failed to write AI audit log: " . $e->getMessage());
+            Log::error('Failed to write AI audit log: '.$e->getMessage());
         }
     }
 }

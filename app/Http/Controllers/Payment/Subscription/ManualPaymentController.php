@@ -2,26 +2,24 @@
 
 namespace App\Http\Controllers\Payment\Subscription;
 
-use App\{
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\UserSubscription
-};
-
+use App\Classes\GeniusMailer;
+use App\Models\Subscription;
+use App\Models\UserSubscription;
 use Illuminate\Http\Request;
 
 class ManualPaymentController extends SubscriptionBaseController
 {
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
-           ],[ 
-               'shop_name.unique' => __('This shop name has already been taken.')
-            ]);
+            'shop_name' => 'unique:users',
+        ], [
+            'shop_name.unique' => __('This shop name has already been taken.'),
+        ]);
         $user = $this->user;
 
         $subs = Subscription::findOrFail($request->subs_id);
-        $input = $request->all();  
+        $input = $request->all();
         $user->update($input);
 
         $sub = new UserSubscription;
@@ -41,18 +39,18 @@ class ManualPaymentController extends SubscriptionBaseController
         $sub->status = 0;
         $sub->save();
 
-            $data = [
-                'to' => $user->email,
-                'type' => "vendor_accept",
-                'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
-                'onumber' => "",
-            ];
-            $mailer = new GeniusMailer();
-            $mailer->sendAutoMail($data);        
+        $data = [
+            'to' => $user->email,
+            'type' => 'vendor_accept',
+            'cname' => $user->name,
+            'oamount' => '',
+            'aname' => '',
+            'aemail' => '',
+            'onumber' => '',
+        ];
+        $mailer = new GeniusMailer();
+        $mailer->sendAutoMail($data);
 
-        return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
-    }   
+        return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && ! isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
+    }
 }

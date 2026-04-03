@@ -13,7 +13,6 @@ use Razorpay\Api\Api;
 
 class RazorpayController extends Controller
 {
-
     public function __construct()
     {
         $data = PaymentGateway::whereKeyword('razorpay')->first();
@@ -27,14 +26,14 @@ class RazorpayController extends Controller
     public function store(Request $request)
     {
 
-        if (!$request->has('deposit_number')) {
+        if (! $request->has('deposit_number')) {
             return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Request']);
         }
 
         $deposit_number = $request->deposit_number;
         $order = Deposit::where('deposit_number', $deposit_number)->first();
         $curr = Currency::where('name', '=', $order->currency_code)->first();
-        if ($curr->name != "INR") {
+        if ($curr->name != 'INR') {
             return redirect()->back()->with('unsuccess', 'Please Select INR Currency For Razorpay.');
         }
         $input = $request->all();
@@ -45,7 +44,7 @@ class RazorpayController extends Controller
 
         $item_amount = $order->amount * $curr->value;
 
-        $item_name = $settings->title . " Deposit";
+        $item_name = $settings->title.' Deposit';
 
         $orderData = [
             'receipt' => $order->deposit_number,
@@ -79,23 +78,23 @@ class RazorpayController extends Controller
         }
 
         $data = [
-            "key" => $this->keyId,
-            "amount" => $amount,
-            "name" => $item_name,
-            "description" => $item_name,
-            "prefill" => [
-                "name" => $request->name,
-                "email" => $request->email,
-                "contact" => $request->phone,
+            'key' => $this->keyId,
+            'amount' => $amount,
+            'name' => $item_name,
+            'description' => $item_name,
+            'prefill' => [
+                'name' => $request->name,
+                'email' => $request->email,
+                'contact' => $request->phone,
             ],
-            "notes" => [
-                "address" => $request->address,
-                "merchant_order_id" => $order->order_number,
+            'notes' => [
+                'address' => $request->address,
+                'merchant_order_id' => $order->order_number,
             ],
-            "theme" => [
-                "color" => "{{$settings->colors}}",
+            'theme' => [
+                'color' => "{{$settings->colors}}",
             ],
-            "order_id" => $razorpayOrderId,
+            'order_id' => $razorpayOrderId,
         ];
 
         if ($this->displayCurrency !== 'INR') {
@@ -118,26 +117,25 @@ class RazorpayController extends Controller
         $order = Deposit::where('deposit_number', $order_id)->first();
         $cancel_url = route('user.deposit.send', $order->deposit_number);
 
-        $error = "Payment Failed";
+        $error = 'Payment Failed';
 
         if (empty($_POST['razorpay_payment_id']) === false) {
             //$api = new Api($keyId, $keySecret);
 
-            try
-            {
+            try {
                 // Please note that the razorpay order ID must
                 // come from a trusted source (session here, but
                 // could be database or something else)
-                $attributes = array(
+                $attributes = [
                     'razorpay_order_id' => session('razorpay_order_id'),
                     'razorpay_payment_id' => $_POST['razorpay_payment_id'],
                     'razorpay_signature' => $_POST['razorpay_signature'],
-                );
+                ];
 
                 $this->api->utility->verifyPaymentSignature($attributes);
             } catch (SignatureVerificationError $e) {
                 $success = false;
-                $error = 'Razorpay Error : ' . $e->getMessage();
+                $error = 'Razorpay Error : '.$e->getMessage();
             }
         }
 
@@ -160,7 +158,7 @@ class RazorpayController extends Controller
 
                 if ($order->status == 1) {
                     $transaction = new \App\Models\Transaction;
-                    $transaction->txn_number = Str::random(3) . substr(time(), 6, 8) . Str::random(3);
+                    $transaction->txn_number = Str::random(3).substr(time(), 6, 8).Str::random(3);
                     $transaction->user_id = $order->user_id;
                     $transaction->amount = $order->amount;
                     $transaction->user_id = $order->user_id;
@@ -175,6 +173,7 @@ class RazorpayController extends Controller
                 }
 
             }
+
             return redirect(route('user.success', 1));
 
         } else {
@@ -183,5 +182,4 @@ class RazorpayController extends Controller
         }
 
     }
-
 }

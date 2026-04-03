@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Rider;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Front\FrontBaseController;
 use Auth;
-use Session;
-
+use Illuminate\Http\Request;
 use Validator;
 
 class LoginController extends FrontBaseController
@@ -20,61 +17,58 @@ class LoginController extends FrontBaseController
 
     public function showLoginForm()
     {
-      return view('rider.login');
+        return view('rider.login');
     }
-    
-    
-     public function status($status)
+
+    public function status($status)
     {
         return view('user.success', compact('status'));
     }
-    
+
     public function showVendorLoginForm()
     {
 
-      return view('frontend.vendor-login');
+        return view('frontend.vendor-login');
     }
 
     public function login(Request $request)
     {
         //--- Validation Section
         $rules = [
-                  'email'   => 'required|email',
-                  'password' => 'required'
-                ];
+            'email' => 'required|email',
+            'password' => 'required',
+        ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         //--- Validation Section Ends
 
-      // Attempt to log the user in
-      if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
-        // if successful, then redirect to their intended location
+        // Attempt to log the user in
+        if (Auth::guard('rider')->attempt(['email' => $request->email, 'password' => $request->password])) {
+            // if successful, then redirect to their intended location
 
-        // Check If Account is Banned
-        if(Auth::guard('rider')->user()->ban == 1)
-        {
-          Auth::guard('rider')->logout();
-          return response()->json(array('errors' => [ 0 => 'Your Account Has Been Banned.' ]));
+            // Check If Account is Banned
+            if (Auth::guard('rider')->user()->ban == 1) {
+                Auth::guard('rider')->logout();
+
+                return response()->json(['errors' => [0 => 'Your Account Has Been Banned.']]);
+            }
+
+            // Login as User
+            return response()->json(route('rider-dashboard'));
         }
 
-          // Login as User
-          return response()->json(route('rider-dashboard'));
-      }
-
-      // if unsuccessful, then redirect back to the login with the form data
-          return response()->json(array('errors' => [ 0 => 'Credentials Doesn\'t Match !' ]));
+        // if unsuccessful, then redirect back to the login with the form data
+        return response()->json(['errors' => [0 => 'Credentials Doesn\'t Match !']]);
     }
 
     public function logout()
     {
         Auth::guard('rider')->logout();
+
         return redirect('/');
     }
-
-
-
 }

@@ -2,27 +2,19 @@
 
 namespace App\Http\Controllers\Payment\Subscription;
 
-use App\{
-    Models\User,
-    Models\Subscription,
-    Classes\GeniusMailer,
-    Models\PaymentGateway,
-    Models\UserSubscription
-};
-
-use Illuminate\{
-    Http\Request,
-    Support\Facades\Session
-};
-
+use App\Classes\GeniusMailer;
+use App\Models\PaymentGateway;
+use App\Models\Subscription;
+use App\Models\User;
+use App\Models\UserSubscription;
 use Carbon\Carbon;
-use Razorpay\Api\Api;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-
+use Razorpay\Api\Api;
 
 class RazorpayController extends SubscriptionBaseController
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -38,9 +30,9 @@ class RazorpayController extends SubscriptionBaseController
     {
 
         $this->validate($request, [
-            'shop_name'   => 'unique:users',
+            'shop_name' => 'unique:users',
         ], [
-            'shop_name.unique' => __('This shop name has already been taken.')
+            'shop_name.unique' => __('This shop name has already been taken.'),
         ]);
 
         $subs = Subscription::findOrFail($request->subs_id);
@@ -51,23 +43,23 @@ class RazorpayController extends SubscriptionBaseController
         $curr = $this->curr;
 
         $supported_currency = json_decode($data->currency_id, true);
-        if (!in_array($curr->id, $supported_currency)) {
+        if (! in_array($curr->id, $supported_currency)) {
             return redirect()->back()->with('unsuccess', __('Invalid Currency For Razorpay Payment.'));
         }
 
-        $this->displayCurrency = '' . $curr->name . '';
+        $this->displayCurrency = ''.$curr->name.'';
 
-        $item_name = $subs->title . " Plan";
-        $item_number = Str::random(4) . time();
+        $item_name = $subs->title.' Plan';
+        $item_number = Str::random(4).time();
 
         $cancel_url = route('user.payment.cancle');
         $notify_url = route('user.razorpay.notify');
 
         $orderData = [
-            'receipt'         => $item_number,
-            'amount'          => $item_amount * 100, // 2000 rupees in paise
-            'currency'        => 'INR',
-            'payment_capture' => 1 // auto capture
+            'receipt' => $item_number,
+            'amount' => $item_amount * 100, // 2000 rupees in paise
+            'currency' => 'INR',
+            'payment_capture' => 1, // auto capture
         ];
 
         $razorpayOrder = $this->api->order->create($orderData);
@@ -109,28 +101,28 @@ class RazorpayController extends SubscriptionBaseController
         }
 
         $data = [
-            "key"               => $this->keyId,
-            "amount"            => $amount,
-            "name"              => $item_name,
-            "description"       => $item_name,
-            "prefill"           => [
-                "name"              => $user->name,
-                "email"             => $user->email,
-                "contact"           => $user->phone,
+            'key' => $this->keyId,
+            'amount' => $amount,
+            'name' => $item_name,
+            'description' => $item_name,
+            'prefill' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'contact' => $user->phone,
             ],
-            "notes"             => [
-                "address"           => $user->address,
-                "merchant_order_id" => $item_number,
+            'notes' => [
+                'address' => $user->address,
+                'merchant_order_id' => $item_number,
             ],
-            "theme"             => [
-                "color"             => "{{$this->gs->colors}}"
+            'theme' => [
+                'color' => "{{$this->gs->colors}}",
             ],
-            "order_id"          => $razorpayOrderId,
+            'order_id' => $razorpayOrderId,
         ];
 
         if ($this->displayCurrency !== 'INR') {
-            $data['display_currency']  = $this->displayCurrency;
-            $data['display_amount']    = $displayAmount;
+            $data['display_currency'] = $this->displayCurrency;
+            $data['display_amount'] = $displayAmount;
         }
 
         $json = json_encode($data);
@@ -140,23 +132,20 @@ class RazorpayController extends SubscriptionBaseController
         return view('frontend.razorpay-checkout', compact('data', 'displayCurrency', 'json', 'notify_url'));
     }
 
-
     public function notify(Request $request)
     {
 
         $success = true;
 
-
         if (empty($_POST['razorpay_payment_id']) === false) {
-
 
             try {
 
-                $attributes = array(
+                $attributes = [
                     'razorpay_order_id' => session('razorpay_order_id'),
                     'razorpay_payment_id' => $_POST['razorpay_payment_id'],
-                    'razorpay_signature' => $_POST['razorpay_signature']
-                );
+                    'razorpay_signature' => $_POST['razorpay_signature'],
+                ];
 
                 $this->api->utility->verifyPaymentSignature($attributes);
             } catch (SignatureVerificationError $e) {
@@ -171,8 +160,6 @@ class RazorpayController extends SubscriptionBaseController
             $order_id = $razorpayOrder['receipt'];
             $transaction_id = $_POST['razorpay_payment_id'];
 
-
-
             $order = UserSubscription::where('user_id', '=', Session::get('item_number'))
                 ->orderBy('created_at', 'desc')->first();
 
@@ -183,23 +170,22 @@ class RazorpayController extends SubscriptionBaseController
             $today = Carbon::now()->format('Y-m-d');
             $input = $request->all();
             $user->is_vendor = ($user->is_vendor == 2) ? 2 : 1;
-            if (!empty($package)) {
+            if (! empty($package)) {
                 if ($package->subscription_id == $request->subs_id) {
                     $newday = strtotime($today);
                     $lastday = strtotime($user->date);
                     $secs = $lastday - $newday;
                     $days = $secs / 86400;
                     $total = $days + $subs->days;
-                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $total . ' days'));
+                    $user->date = date('Y-m-d', strtotime($today.' + '.$total.' days'));
                 } else {
-                    $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                    $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
                 }
             } else {
-                $user->date = date('Y-m-d', strtotime($today . ' + ' . $subs->days . ' days'));
+                $user->date = date('Y-m-d', strtotime($today.' + '.$subs->days.' days'));
             }
             $user->mail_sent = 1;
             $user->update($input);
-
 
             $data['txnid'] = $transaction_id;
             $data['status'] = 1;
@@ -207,17 +193,17 @@ class RazorpayController extends SubscriptionBaseController
 
             $maildata = [
                 'to' => $user->email,
-                'type' => "vendor_accept",
+                'type' => 'vendor_accept',
                 'cname' => $user->name,
-                'oamount' => "",
-                'aname' => "",
-                'aemail' => "",
+                'oamount' => '',
+                'aname' => '',
+                'aemail' => '',
                 'onumber' => '',
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($maildata);
 
-            return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && !isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
+            return redirect()->route('user-dashboard')->with('success', strpos(get_class($this), 'SubscriptionController') !== false && ! isset($user) ? (Auth::user()->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')) : ($user->is_vendor == 2 ? __('Vendor Account Activated Successfully') : __('Vendor Application Submitted Successfully. Please wait for admin approval.')));
         } else {
             $razorpayOrder = $this->api->order->fetch(session('razorpay_order_id'));
             $order_id = $razorpayOrder['receipt'];

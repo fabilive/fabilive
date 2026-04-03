@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\{
-    Models\Cart,
-    Models\Product
-};
+use App\Models\Cart;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Generalsetting;
+use App\Models\Product;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class CartController extends FrontBaseController
 {
-
     public function cart(Request $request)
     {
 
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return view('frontend.cart');
         }
         if (Session::has('already')) {
@@ -47,6 +44,7 @@ class CartController extends FrontBaseController
             return view('frontend.ajax.cart-page', compact('products', 'totalPrice', 'mainTotal'));
         }
         Session::forget('notifications');
+
         return view('frontend.cart', compact('products', 'totalPrice', 'mainTotal'));
     }
 
@@ -54,9 +52,10 @@ class CartController extends FrontBaseController
     {
         return view('load.cart');
     }
+
     public function view_cart()
     {
-        if (!Session::has('cart')) {
+        if (! Session::has('cart')) {
             return view('frontend.cart');
         }
         if (Session::has('already')) {
@@ -79,6 +78,7 @@ class CartController extends FrontBaseController
         $products = $cart->items;
         $totalPrice = $cart->totalPrice;
         $mainTotal = $totalPrice;
+
         return view('frontend.ajax.cart-page', compact('products', 'totalPrice', 'mainTotal'));
     }
 
@@ -91,7 +91,7 @@ class CartController extends FrontBaseController
 
         $keys = '';
         $values = '';
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -109,7 +109,7 @@ class CartController extends FrontBaseController
         // Set Size
 
         $size = '';
-        if (!empty($prod->size)) {
+        if (! empty($prod->size)) {
             $size = trim($prod->size[0]);
         }
         $size = str_replace(' ', '-', $size);
@@ -117,7 +117,7 @@ class CartController extends FrontBaseController
         // Set Color
 
         $color = '';
-        if (!empty($prod->color)) {
+        if (! empty($prod->color)) {
             $color = $prod->color[0];
             $color = str_replace('#', '', $color);
         }
@@ -125,14 +125,14 @@ class CartController extends FrontBaseController
         if ($prod->stock_check == 0) {
             if (empty($size)) {
 
-                if (!empty($prod->size_all)) {
+                if (! empty($prod->size_all)) {
                     $size = trim(explode(',', $prod->size_all)[0]);
                 }
                 $size = str_replace(' ', '-', $size);
             }
 
             if (empty($color)) {
-                if (!empty($prod->color_all)) {
+                if (! empty($prod->color_all)) {
                     $color = str_replace('#', '', explode(',', $prod->color_all)[0]);
                 }
             }
@@ -146,30 +146,28 @@ class CartController extends FrontBaseController
             $prod->price = $prc;
         }
 
-
         // Set Attribute
 
-
-        if (!empty($prod->attributes)) {
+        if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
 
             $count = count($attrArr);
             $i = 0;
             $j = 0;
-            if (!empty($attrArr)) {
+            if (! empty($attrArr)) {
                 foreach ($attrArr as $attrKey => $attrVal) {
 
-                    if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                    if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                         if ($j == $count - 1) {
                             $keys .= $attrKey;
                         } else {
-                            $keys .= $attrKey . ',';
+                            $keys .= $attrKey.',';
                         }
                         $j++;
 
                         foreach ($attrVal['values'] as $optionKey => $optionVal) {
 
-                            $values .= $optionVal . ',';
+                            $values .= $optionVal.',';
                             $prod->price += $attrVal['prices'][$optionKey];
                             break;
                         }
@@ -180,38 +178,36 @@ class CartController extends FrontBaseController
         $keys = rtrim($keys, ',');
         $values = rtrim($values, ',');
 
-
-
-
         $oldCart = Session::has('cart') ? Session::get('cart') : null;
         $cart = new Cart($oldCart);
 
-
-        if ($cart->items != null && @$cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+        if ($cart->items != null && @$cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
             return 'digital';
         }
 
         $cart->add($prod, $prod->id, $size, $color, $keys, $values);
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
             return 0;
         }
 
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
-            if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
                 return 0;
             }
         }
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
             'message' => 'You added a new item to the cart.',
-            'timestamp' => now()
+            'timestamp' => now(),
         ];
         Session::put('notifications', $notifications);
         $data[0] = count($cart->items);
+
         return response()->json($data);
     }
 
@@ -224,7 +220,7 @@ class CartController extends FrontBaseController
 
         $keys = '';
         $values = '';
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -242,14 +238,14 @@ class CartController extends FrontBaseController
         // Set Size
 
         $size = '';
-        if (!empty($prod->size)) {
+        if (! empty($prod->size)) {
             $size = trim($prod->size[0]);
         }
 
         // Set Color
 
         $color = '';
-        if (!empty($prod->color)) {
+        if (! empty($prod->color)) {
             $color = $prod->color[0];
             $color = str_replace('#', '', $color);
         }
@@ -257,14 +253,14 @@ class CartController extends FrontBaseController
         if ($prod->stock_check == 0) {
             if (empty($size)) {
 
-                if (!empty($prod->size_all)) {
+                if (! empty($prod->size_all)) {
                     $size = trim(explode(',', $prod->size_all)[0]);
                 }
                 $size = str_replace(' ', '-', $size);
             }
 
             if (empty($color)) {
-                if (!empty($prod->color_all)) {
+                if (! empty($prod->color_all)) {
                     $color = str_replace('#', '', explode(',', $prod->color_all)[0]);
                 }
             }
@@ -278,26 +274,26 @@ class CartController extends FrontBaseController
 
         // Set Attribute
 
-        if (!empty($prod->attributes)) {
+        if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
 
             $count = count($attrArr);
             $i = 0;
             $j = 0;
-            if (!empty($attrArr)) {
+            if (! empty($attrArr)) {
                 foreach ($attrArr as $attrKey => $attrVal) {
 
-                    if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                    if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                         if ($j == $count - 1) {
                             $keys .= $attrKey;
                         } else {
-                            $keys .= $attrKey . ',';
+                            $keys .= $attrKey.',';
                         }
                         $j++;
 
                         foreach ($attrVal['values'] as $optionKey => $optionVal) {
 
-                            $values .= $optionVal . ',';
+                            $values .= $optionVal.',';
 
                             $prod->price += $attrVal['prices'][$optionKey];
                             break;
@@ -311,58 +307,58 @@ class CartController extends FrontBaseController
 
         $oldCart = Session::has('cart') ? Session::get('cart') : null;
         $cart = new Cart($oldCart);
-        if (!empty($cart->items)) {
-            if (!empty($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)])) {
-                $minimum_qty = (int)$prod->minimum_qty;
-                if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
-                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+        if (! empty($cart->items)) {
+            if (! empty($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)])) {
+                $minimum_qty = (int) $prod->minimum_qty;
+                if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
+                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                 }
             } else {
-                $minimum_qty = (int)$prod->minimum_qty;
+                $minimum_qty = (int) $prod->minimum_qty;
                 if ($prod->minimum_qty != null) {
-                    if (1 < $minimum_qty) {
-                        return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+                    if ($minimum_qty > 1) {
+                        return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                     }
                 }
             }
         } else {
-            $minimum_qty = (int)$prod->minimum_qty;
+            $minimum_qty = (int) $prod->minimum_qty;
             if ($prod->minimum_qty != null) {
-                if (1 < $minimum_qty) {
-                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+                if ($minimum_qty > 1) {
+                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                 }
             }
         }
-        
-        if ($cart->items != null && @$cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+
+        if ($cart->items != null && @$cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
             return redirect()->route('front.cart')->with('unsuccess', __('This item is already in the cart.'));
         }
 
         $cart->add($prod, $prod->id, $size, $color, $keys, $values);
 
-
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
             return redirect()->route('front.cart')->with('unsuccess', __('Out Of Stock.'));
         }
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
-            if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
                 return redirect()->route('front.cart')->with('unsuccess', __('Out Of Stock.'));
             }
         }
 
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
             'message' => 'You added a new item to the cart.',
-            'timestamp' => now()
+            'timestamp' => now(),
         ];
         Session::put('notifications', $notifications);
+
         return redirect()->route('front.cart');
     }
-
 
     public function addnumcart(Request $request)
     {
@@ -372,14 +368,14 @@ class CartController extends FrontBaseController
         $size = str_replace(' ', '-', $_GET['size']);
         $color = $_GET['color'];
         $size_qty = $_GET['size_qty'];
-        $size_price = (float)$_GET['size_price'];
+        $size_price = (float) $_GET['size_price'];
         $size_key = $_GET['size_key'];
-        $keys =  $_GET['keys'];
+        $keys = $_GET['keys'];
         $values = $_GET['values'];
         $prices = $_GET['prices'];
         $affilate_user = isset($_GET['affilate_user']) ? $_GET['affilate_user'] : '0';
-        $keys = $keys == "" ? '' : implode(',', $keys);
-        $values = $values == "" ? '' : implode(',', $values);
+        $keys = $keys == '' ? '' : implode(',', $keys);
+        $values = $values == '' ? '' : implode(',', $values);
         $curr = $this->curr;
 
         $size_price = ($size_price / $curr->value);
@@ -388,19 +384,17 @@ class CartController extends FrontBaseController
             $qty = 1;
         }
 
-
-
         if ($prod->user_id != 0) {
             $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
             $prod->price = $prc;
         }
-        if (!empty($prices)) {
+        if (! empty($prices)) {
             foreach ($prices as $data) {
                 $prod->price += ($data / $curr->value);
             }
         }
 
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -415,9 +409,8 @@ class CartController extends FrontBaseController
             }
         }
 
-
         if (empty($size)) {
-            if (!empty($prod->size)) {
+            if (! empty($prod->size)) {
                 $size = trim($prod->size[0]);
             }
             $size = str_replace(' ', '-', $size);
@@ -429,50 +422,50 @@ class CartController extends FrontBaseController
         }
 
         if (empty($color)) {
-            if (!empty($prod->color)) {
+            if (! empty($prod->color)) {
                 $color = $prod->color[0];
             }
         }
 
-
         if ($prod->stock_check == 0) {
             if (empty($size)) {
 
-                if (!empty($prod->size_all)) {
+                if (! empty($prod->size_all)) {
                     $size = trim(explode(',', $prod->size_all)[0]);
                 }
                 $size = str_replace(' ', '-', $size);
             }
 
             if (empty($color)) {
-                if (!empty($prod->color_all)) {
+                if (! empty($prod->color_all)) {
                     $color = explode(',', $prod->color_all)[0];
                 }
             }
         }
 
-
         $color = str_replace('#', '', $color);
         $oldCart = Session::has('cart') ? Session::get('cart') : null;
         $cart = new Cart($oldCart);
 
-        if (!empty($cart->items)) {
-            if (!empty($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)])) {
-                $minimum_qty = (int)$prod->minimum_qty;
-                if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
-                    $data = array();
+        if (! empty($cart->items)) {
+            if (! empty($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)])) {
+                $minimum_qty = (int) $prod->minimum_qty;
+                if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
+                    $data = [];
                     $data[1] = true;
                     $data[2] = $minimum_qty;
+
                     return response()->json($data);
                 }
             } else {
 
                 if ($prod->minimum_qty != null) {
-                    $minimum_qty = (int)$prod->minimum_qty;
+                    $minimum_qty = (int) $prod->minimum_qty;
                     if ($qty < $minimum_qty) {
-                        $data = array();
+                        $data = [];
                         $data[1] = true;
                         $data[2] = $minimum_qty;
+
                         return response()->json($data);
                     }
                 }
@@ -480,51 +473,50 @@ class CartController extends FrontBaseController
         } else {
 
             if ($prod->minimum_qty != null) {
-                $minimum_qty = (int)$prod->minimum_qty;
+                $minimum_qty = (int) $prod->minimum_qty;
                 if ($qty < $minimum_qty) {
-                    $data = array();
+                    $data = [];
                     $data[3] = true;
                     $data[4] = $minimum_qty;
+
                     return response()->json($data);
                 }
             }
         }
 
-        if ($cart->items != null && $cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+        if ($cart->items != null && $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
             return 'digital';
         }
 
-
         $cart->addnum($prod, $prod->id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user);
 
-
-
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
 
             return 0;
         }
         if ($prod->stock_check == 1) {
-            if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
-                if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+                if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
                     return 0;
                 }
             }
         }
 
-
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
             'message' => 'You added a new item to the cart.',
-            'timestamp' => now()
+            'timestamp' => now(),
         ];
         Session::put('notifications', $notifications);
         $data[0] = count($cart->items);
         $data[1] = $cart->totalPrice;
         $data[1] = \PriceHelper::showCurrencyPrice($data[1] * $curr->value);
+
         return response()->json($data);
     }
 
@@ -536,17 +528,17 @@ class CartController extends FrontBaseController
         $size = str_replace(' ', '-', $_GET['size']);
         $color = $_GET['color'];
         $size_qty = $_GET['size_qty'];
-        $size_price = (float)$_GET['size_price'];
+        $size_price = (float) $_GET['size_price'];
         $size_key = $_GET['size_key'];
         $affilate_user = isset($_GET['affilate_user']) ? $_GET['affilate_user'] : '0';
-        $keys =  $_GET['keys'];
-        $keys = explode(",", $keys);
+        $keys = $_GET['keys'];
+        $keys = explode(',', $keys);
         $values = $_GET['values'];
-        $values = explode(",", $values);
+        $values = explode(',', $values);
         $prices = $_GET['prices'];
-        $prices = explode(",", $prices);
-        $keys = $keys == "" ? '' : implode(',', $keys);
-        $values = $values == "" ? '' : implode(',', $values);
+        $prices = explode(',', $prices);
+        $keys = $keys == '' ? '' : implode(',', $keys);
+        $values = $values == '' ? '' : implode(',', $values);
         $curr = $this->curr;
         $size_price = ($size_price / $curr->value);
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'minimum_qty', 'stock_check', 'size_all', 'color_all']);
@@ -554,20 +546,19 @@ class CartController extends FrontBaseController
             $qty = 1;
         }
 
-
         if ($prod->user_id != 0) {
             $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
             $prod->price = $prc;
         }
-        if (!empty($prices)) {
-            if (!empty($prices[0])) {
+        if (! empty($prices)) {
+            if (! empty($prices[0])) {
                 foreach ($prices as $data) {
                     $prod->price += ($data / $curr->value);
                 }
             }
         }
 
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -582,7 +573,7 @@ class CartController extends FrontBaseController
             }
         }
         if (empty($size)) {
-            if (!empty($prod->size)) {
+            if (! empty($prod->size)) {
                 $size = trim($prod->size[0]);
             }
             $size = str_replace(' ', '-', $size);
@@ -593,87 +584,84 @@ class CartController extends FrontBaseController
         }
 
         if (empty($color)) {
-            if (!empty($prod->color)) {
+            if (! empty($prod->color)) {
                 $color = $prod->color[0];
             }
         }
         if ($prod->stock_check == 0) {
             if (empty($size)) {
 
-                if (!empty($prod->size_all)) {
+                if (! empty($prod->size_all)) {
                     $size = trim(explode(',', $prod->size_all)[0]);
                 }
                 $size = str_replace(' ', '-', $size);
             }
 
             if (empty($color)) {
-                if (!empty($prod->color_all)) {
+                if (! empty($prod->color_all)) {
                     $color = explode(',', $prod->color_all)[0];
                 }
             }
         }
-
-
 
         $color = str_replace('#', '', $color);
 
         $oldCart = Session::has('cart') ? Session::get('cart') : null;
         $cart = new Cart($oldCart);
 
-        if (!empty($cart->items)) {
-            if (!empty($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)])) {
-                $minimum_qty = (int)$prod->minimum_qty;
-                if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
-                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+        if (! empty($cart->items)) {
+            if (! empty($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)])) {
+                $minimum_qty = (int) $prod->minimum_qty;
+                if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] < $minimum_qty) {
+                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                 }
             } else {
                 if ($prod->minimum_qty != null) {
-                    $minimum_qty = (int)$prod->minimum_qty;
+                    $minimum_qty = (int) $prod->minimum_qty;
                     if ($qty < $minimum_qty) {
-                        return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+                        return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                     }
                 }
             }
         } else {
-            $minimum_qty = (int)$prod->minimum_qty;
+            $minimum_qty = (int) $prod->minimum_qty;
             if ($prod->minimum_qty != null) {
                 if ($qty < $minimum_qty) {
-                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:') . ' ' . $prod->minimum_qty);
+                    return redirect()->route('front.cart')->with('unsuccess', __('Minimum Quantity is:').' '.$prod->minimum_qty);
                 }
             }
         }
 
         $cart->addnum($prod, $prod->id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user);
 
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
             return redirect()->route('front.cart')->with('unsuccess', __('This item is already in the cart.'));
         }
-        if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
+        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
             return redirect()->route('front.cart')->with('unsuccess', __('Out Of Stock.'));
         }
         if ($prod->stock_check == 1) {
-            if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
-                if ($cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id . $size . $color . str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
+                if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['qty'] > $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['size_qty']) {
                     return redirect()->route('front.cart')->with('unsuccess', __('Out Of Stock.'));
                 }
             }
         }
 
-
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
             'message' => 'You added a new item to the cart.',
-            'timestamp' => now()
+            'timestamp' => now(),
         ];
         Session::put('notifications', $notifications);
+
         return redirect()->route('front.cart')->with('success', __('Successfully Added To Cart.'));
     }
-
-
 
     public function addbyone()
     {
@@ -685,21 +673,21 @@ class CartController extends FrontBaseController
         $itemid = $_GET['itemid'];
         $size_qty = $_GET['size_qty'];
         $size_price = $_GET['size_price'];
-        $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'stock_check',]);
+        $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'stock_check']);
 
         if ($prod->user_id != 0) {
             $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
             $prod->price = $prc;
         }
 
-        if (!empty($prod->attributes)) {
+        if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
             $count = count($attrArr);
             $j = 0;
-            if (!empty($attrArr)) {
+            if (! empty($attrArr)) {
                 foreach ($attrArr as $attrKey => $attrVal) {
 
-                    if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                    if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                         foreach ($attrVal['values'] as $optionKey => $optionVal) {
                             $prod->price += $attrVal['prices'][$optionKey];
@@ -710,7 +698,7 @@ class CartController extends FrontBaseController
             }
         }
 
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -733,7 +721,7 @@ class CartController extends FrontBaseController
 
                 return 0;
             }
-            if (!empty($size_qty)) {
+            if (! empty($size_qty)) {
                 if ($cart->items[$itemid]['qty'] > $cart->items[$itemid]['size_qty']) {
 
                     return 0;
@@ -742,20 +730,21 @@ class CartController extends FrontBaseController
         }
 
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
         Session::put('cart', $cart);
         $data[0] = $cart->totalPrice;
 
         $data[3] = $data[0];
-
 
         $data[1] = $cart->items[$itemid]['qty'];
         $data[2] = $cart->items[$itemid]['price'];
         $data[0] = \PriceHelper::showCurrencyPrice($data[0] * $curr->value);
         $data[2] = \PriceHelper::showCurrencyPrice($data[2] * $curr->value);
         $data[3] = \PriceHelper::showCurrencyPrice($data[3] * $curr->value);
-        $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '(' . $cart->items[$itemid]['discount'] . '% ' . __('Off') . ')';
+        $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '('.$cart->items[$itemid]['discount'].'% '.__('Off').')';
+
         return response()->json($data);
     }
 
@@ -775,13 +764,13 @@ class CartController extends FrontBaseController
             $prod->price = $prc;
         }
 
-        if (!empty($prod->attributes)) {
+        if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
             $count = count($attrArr);
             $j = 0;
-            if (!empty($attrArr)) {
+            if (! empty($attrArr)) {
                 foreach ($attrArr as $attrKey => $attrVal) {
-                    if (is_array($attrVal) && array_key_exists("details_status", $attrVal) && $attrVal['details_status'] == 1) {
+                    if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
 
                         foreach ($attrVal['values'] as $optionKey => $optionVal) {
                             $prod->price += $attrVal['prices'][$optionKey];
@@ -792,7 +781,7 @@ class CartController extends FrontBaseController
             }
         }
 
-        if (!empty($prod->license_qty)) {
+        if (! empty($prod->license_qty)) {
             $lcheck = 1;
             foreach ($prod->license_qty as $ttl => $dtl) {
                 if ($dtl < 1) {
@@ -810,8 +799,9 @@ class CartController extends FrontBaseController
         $cart = new Cart($oldCart);
         $cart->reducing($prod, $itemid, $size_qty, $size_price);
         $cart->totalPrice = 0;
-        foreach ($cart->items as $data)
+        foreach ($cart->items as $data) {
             $cart->totalPrice += $data['price'];
+        }
 
         Session::put('cart', $cart);
         $data[0] = $cart->totalPrice;
@@ -823,7 +813,8 @@ class CartController extends FrontBaseController
         $data[0] = \PriceHelper::showCurrencyPrice($data[0] * $curr->value);
         $data[2] = \PriceHelper::showCurrencyPrice($data[2] * $curr->value);
         $data[3] = \PriceHelper::showCurrencyPrice($data[3] * $curr->value);
-        $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '(' . $cart->items[$itemid]['discount'] . '% ' . __('Off') . ')';
+        $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '('.$cart->items[$itemid]['discount'].'% '.__('Off').')';
+
         return response()->json($data);
     }
 
@@ -845,32 +836,30 @@ class CartController extends FrontBaseController
             $data[0] = $cart->totalPrice;
             $data[3] = $data[0];
 
-
             if ($this->gs->currency_format == 0) {
-                $data[0] = $curr->sign . round($data[0] * $curr->value, 2);
-                $data[3] = $curr->sign . round($data[3] * $curr->value, 2);
+                $data[0] = $curr->sign.round($data[0] * $curr->value, 2);
+                $data[3] = $curr->sign.round($data[3] * $curr->value, 2);
             } else {
-                $data[0] = round($data[0] * $curr->value, 2) . $curr->sign;
-                $data[3] = round($data[3] * $curr->value, 2) . $curr->sign;
+                $data[0] = round($data[0] * $curr->value, 2).$curr->sign;
+                $data[3] = round($data[3] * $curr->value, 2).$curr->sign;
             }
 
             $data[1] = count($cart->items);
+
             return response()->json($data);
         } else {
 
             $data[0] = 0;
 
             if ($this->gs->currency_format == 0) {
-                $data[1] = $curr->sign . round($data[0] * $curr->value, 2);
+                $data[1] = $curr->sign.round($data[0] * $curr->value, 2);
             } else {
-                $data[1] = round($data[0] * $curr->value, 2) . $curr->sign;
+                $data[1] = round($data[0] * $curr->value, 2).$curr->sign;
             }
 
             return response()->json($data);
         }
     }
-
-
 
     public function country_tax(Request $request)
     {
@@ -894,10 +883,9 @@ class CartController extends FrontBaseController
         $tax = $tax;
         Session::put('is_tax', $tax);
 
-
         $gs = Generalsetting::findOrFail(1);
 
-        $total = (float)preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
+        $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
 
         $stotal = ($total * $tax) / 100;
 

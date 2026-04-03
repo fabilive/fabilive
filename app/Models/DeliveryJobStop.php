@@ -17,7 +17,7 @@ class DeliveryJobStop extends Model
         'lng',
         'ready_at',
         'arrived_at',
-        'picked_up_at'
+        'picked_up_at',
     ];
 
     protected $casts = [
