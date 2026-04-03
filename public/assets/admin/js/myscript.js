@@ -772,11 +772,10 @@
     });
 
     // DELETE OPERATION END
-  });
 
   // NORMAL FORM
 
-    .on("submit", "#geniusform, .uplogo-form", function (e) {
+    $(document).on("submit", "#geniusform, .uplogo-form", function (e) {
     e.preventDefault();
     if (admin_loader == 1) {
       $(".gocover").show();
@@ -1229,5 +1228,6 @@
     }
   });
 
+  });
   // **************************************  AJAX REQUESTS SECTION ENDS *****************************************
 })(jQuery);
