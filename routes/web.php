@@ -2309,7 +2309,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/city/edit/{id}', 'Admin\CityController@edit')->name('admin-city-edit');
     Route::post('/city/update/{id}', 'Admin\CityController@update')->name('admin-city-update');
     Route::delete('/city/delete/{id}', 'Admin\CityController@delete')->name('admin-city-delete');
-    Route::get('/city/load/state-wise', 'Admin\CityController@loadCity')->name('state.wise.city');
+    Route::get('/city/load/state-wise', 'Admin\CityController@loadCity')->name('admin-load-city-by-state');
 
     // --------------- ADMIN STATE SECTION --------------------//
 
@@ -2760,7 +2760,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/service-areas/edit/{id}', 'Admin\ServiceAreaController@edit')->name('admin-servicearea-edit');
         Route::post('/service-areas/edit/{id}', 'Admin\ServiceAreaController@update')->name('admin-servicearea-update');
         Route::delete('/service-areas/delete/{id}', 'Admin\ServiceAreaController@destroy')->name('admin-servicearea-delete');
-        Route::get('/service-areas/get-service-area', 'Admin\ServiceAreaController@getServiceArea')->name('front.getServiceArea');
+        Route::get('/service-areas/get-service-area', 'Admin\ServiceAreaController@getServiceArea')->name('admin-load-service-area-by-city');
 
         //------------ ADMIN SERVICE AREA ENDS ------------
 
@@ -3432,9 +3432,6 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         // Suleman Code
         // Display important Codes For Payment Gatweways
-        // Route::post('/payment/{slug1}/{slug2}', 'User\UserController@loadpayment')->name('user.load.payment');
-        // // upper wala route (suleman) ny lagaya ha.
-        // Route::get('/payment/{slug1}/{slug2}', 'User\UserController@loadpayment')->name('user.load.payment');
         Route::match(['get', 'post'], '/payment/{slug1}/{slug2}', 'User\UserController@loadpayment')->name('user.load.payment');
 
         Route::get('/country/wise/state/{country_id}', 'Front\CheckoutController@getState')->name('country.wise.state');
