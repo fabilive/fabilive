@@ -172,7 +172,7 @@
                     @endif
                 </td>
                 <td data-label="{{ __('Order Total') }}">
-                    {{ PriceHelper::showAdminCurrencyPrice($total, $order->currency_sign) }}
+                    {{ PriceHelper::showOrderCurrencyPrice($total, $order->currency_sign) }}
                 </td>
                 <td data-label="{{ __('Order Status') }}">
                     <span class="badge badge-dark p-2">{{ ucwords($order->status) }}</span>

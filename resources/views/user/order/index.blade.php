@@ -63,7 +63,7 @@
                                         {{date('d M Y',strtotime($order->created_at))}}
                                     </td>
                                     <td data-label="{{ __('Order Total') }}">
-                                        {{ PriceHelper::showAdminCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}
+                                        {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount  * $order->currency_value),$order->currency_sign) }}
                                     </td>
                                     <td data-label="{{ __('Order Status') }}">
                                       <div class="order-status {{ $order->status }}">

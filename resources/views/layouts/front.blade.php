@@ -1,5 +1,7 @@
 
 <!DOCTYPE html>
+@php use Brian2694\Toastr\Facades\Toastr; @endphp
+
 <html lang="en">
 
 <head>

@@ -275,7 +275,7 @@
 
               @if (!empty($product->attributes))
                 @php
-                  $attrArr = json_decode($product->attributes, true);
+                  $attrArr = is_array($product->attributes) ? $product->attributes : json_decode($product->attributes, true);
                 @endphp
               @endif
               @if (!empty($attrArr))

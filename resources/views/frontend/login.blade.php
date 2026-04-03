@@ -1,4 +1,6 @@
 @extends('layouts.front')
+@php use Anhskohbo\NoCaptcha\Facades\NoCaptcha; @endphp
+
 @section('content')
     @include('partials.global.common-header')
     <!-- breadcrumb -->
