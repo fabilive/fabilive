@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+@php use App\Helpers\PriceHelper; @endphp
+
 <html>
 <head>
         <meta charset="utf-8">

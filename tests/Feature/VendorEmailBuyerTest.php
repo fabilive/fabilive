@@ -24,7 +24,7 @@ class VendorEmailBuyerTest extends TestCase
             'message' => 'Thank you for your order'
         ]);
         
-        $response->assertJson(0); // Unauthorized return
+        $this->assertEquals(0, $response->json()); // Unauthorized return
 
         // Create an order for this vendor
         $order = Order::factory()->create(['customer_email' => $buyer_email]);
@@ -43,7 +43,7 @@ class VendorEmailBuyerTest extends TestCase
             'message' => 'Thank you for your order'
         ]);
         
-        $response->assertJson(1);
+        $this->assertEquals(1, $response->json());
         $this->assertDatabaseHas('buyer_seller_email_logs', [
             'vendor_id' => $vendor->id,
             'buyer_email' => $buyer_email,
@@ -57,7 +57,8 @@ class VendorEmailBuyerTest extends TestCase
                 'to' => $buyer_email,
                 'subject' => 'Hello ' . $i,
                 'message' => 'Thank you for your order'
-            ])->assertJson(1);
+            ]);
+            $this->assertEquals(1, $response->json());
         }
 
         // 6th attempt should fail due to rate limit
@@ -67,6 +68,6 @@ class VendorEmailBuyerTest extends TestCase
             'message' => 'Thank you for your order'
         ]);
         
-        $response->assertJson(0);
+        $this->assertEquals(0, $response->json());
     }
 }
