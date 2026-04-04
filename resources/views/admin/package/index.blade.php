@@ -33,9 +33,9 @@
                     {{ __('Multiple Packaging') }} :
                   </h4>
                                   <div class="action-list">
-                                      <select class="process select droplinks {{ $gs->multiple_packaging == 1 ? 'drop-success' : 'drop-danger' }}">
-                                        <option data-val="1" value="{{route('admin-gs-status',['multiple_packaging',1])}}" {{ $gs->multiple_packaging == 1 ? 'selected' : '' }}>{{ __('Activated') }}</option>
-                                        <option data-val="0" value="{{route('admin-gs-status',['multiple_packaging',1])}}" {{ $gs->multiple_packaging == 0 ? 'selected' : '' }}>{{ __('Deactivated') }}</option>
+                                      <select class="process select droplinks {{ ($gs->multiple_packaging ?? 0) == 1 ? 'drop-success' : 'drop-danger' }}">
+                                        <option data-val="1" value="{{route('admin-gs-status',['multiple_packaging',1])}}" {{ ($gs->multiple_packaging ?? 0) == 1 ? 'selected' : '' }}>{{ __('Activated') }}</option>
+                                        <option data-val="0" value="{{route('admin-gs-status',['multiple_packaging',0])}}" {{ ($gs->multiple_packaging ?? 0) == 0 ? 'selected' : '' }}>{{ __('Deactivated') }}</option>
                                       </select>
                                     </div>
                 </div>
