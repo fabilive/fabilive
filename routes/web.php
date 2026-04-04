@@ -3049,11 +3049,12 @@ Route::prefix('admin')->group(function () {
 
     //------------ ADMIN STAFF SECTION ------------
 
+    Route::get('/staff/return', 'Admin\StaffController@returnToAdmin')->name('admin-staff-return');
+
     Route::group(['middleware' => 'permissions:manage_staffs'], function () {
 
         Route::get('/staff/datatables', 'Admin\StaffController@datatables')->name('admin-staff-datatables');
         Route::get('/staff/secret/{id}', 'Admin\StaffController@secret')->name('admin-staff-secret');
-        Route::get('/staff/return', 'Admin\StaffController@returnToAdmin')->name('admin-staff-return');
         Route::get('/debug/logs', function () {
             if (Auth::guard('admin')->check()) {
                 $path = storage_path('logs/laravel.log');
