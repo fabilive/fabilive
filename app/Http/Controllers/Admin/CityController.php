@@ -25,7 +25,7 @@ class CityController extends Controller
 
         return DataTables::of($datas)
             ->addColumn('action', function (City $data) use ($state_id) {
-                return '<div class="action-list"><a href="'.route('admin-city-index', $state_id).'"><i class="fas fa-city"></i> Manage City</a><a data-href="'.route('admin-city-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>Edit</a><a href="javascript:;" data-href="'.route('admin-city-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+                return '<div class="action-list"><a data-href="'.route('admin-city-edit', $data->id).'" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>Edit</a><a href="javascript:;" data-href="'.route('admin-city-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
             })
             ->editColumn('state_id', function (City $data) {
                 $state = $data->state->state;
