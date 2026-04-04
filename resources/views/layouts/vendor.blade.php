@@ -72,6 +72,7 @@
 						</div>
 						<div class="right-eliment">
 							<ul class="list">
+								@if(Auth::check())
 								<input type="hidden" id="all_notf_count"
 									value="{{ route('vendor-order-notf-count',Auth::user()->id) }}">
 								<li class="bell-area">
@@ -124,6 +125,7 @@
 										</div>
 									</div>
 								</li>
+								@endif
 							</ul>
 						</div>
 					</div>
@@ -134,11 +136,13 @@
 				<!-- Side Menu Area Start -->
 				<nav id="sidebar" class="nav-sidebar">
 					<ul class="list-unstyled components" id="accordion">
+						@if(Auth::check())
 						<li>
 							<a target="_blank"
 								href="{{ route('front.vendor',str_replace(' ', '-', Auth::user()->shop_name)) }}"
 								class="wave-effect"><i class="fas fa-eye mr-2"></i> {{ __('Visit Store') }}</a>
 						</li>
+						@endif
 						<li>
 							<a href="{{ route('vendor.dashboard') }}" class="wave-effect"><i
 									class="fa fa-home mr-2"></i>{{ __('Dashboard') }}</a>

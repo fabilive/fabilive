@@ -1121,11 +1121,15 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
             success:function(data){
                $('#grandtotal').val(data[0]);
                $('#tgrandtotal').val(data[0]);
-               $('#original_tax').val(data[1]);
-               $('.tax_show').removeClass('d-none');
-               $('#input_tax').val(data[11]);
-               $('#input_tax_type').val(data[12]);
-               $('.original_tax').html(parseFloat(data[1]).toFixed(2));
+               $('#original_tax').val(data[1] ? data[1] : 0);
+               $('.tax_show').removeClass('removeClass').removeClass('d-none');
+               $('#input_tax').val(data[11] ? data[11] : 0);
+               $('#input_tax_type').val(data[12] ? data[12] : 'country_tax');
+               let tax_val = parseFloat(data[1]);
+               if (isNaN(tax_val)) {
+                   tax_val = 0;
+               }
+               $('.original_tax').html(tax_val.toFixed(2));
                   var ttotal = parseFloat($('#grandtotal').val());
                   var tttotal = parseFloat($('#grandtotal').val()) + (parseFloat(mship) + parseFloat(mpack));
                   ttotal = parseFloat(ttotal).toFixed(2);

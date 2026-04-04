@@ -864,24 +864,30 @@ class CartController extends FrontBaseController
 
     public function country_tax(Request $request)
     {
-
+        $tax = 0;
         if ($request->country_id) {
             if ($request->state_id != 0) {
-                $state = State::findOrFail($request->state_id);
-                $tax = $state->tax;
-                $data[11] = $state->id;
-                $data[12] = 'state_tax';
+                $state = State::find($request->state_id);
+                if ($state) {
+                    $tax = $state->tax;
+                    $data[11] = $state->id;
+                    $data[12] = 'state_tax';
+                }
             } else {
-                $country = Country::findOrFail($request->country_id);
-                $tax = $country->tax;
-                $data[11] = $country->id;
-                $data[12] = 'country_tax';
+                $country = Country::find($request->country_id);
+                if ($country) {
+                    $tax = $country->tax;
+                    $data[11] = $country->id;
+                    $data[12] = 'country_tax';
+                }
             }
-        } else {
-            $tax = 0;
         }
 
-        $tax = $tax;
+        if (! isset($data[11])) {
+            $data[11] = 0;
+            $data[12] = 'country_tax';
+        }
+
         Session::put('is_tax', $tax);
 
         $gs = Generalsetting::findOrFail(1);

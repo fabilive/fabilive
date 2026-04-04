@@ -12,6 +12,36 @@ use Illuminate\Support\Facades\Schema;
 
 // ************************************ ADMIN SECTION **********************************************
 
+// SCHEMA POLISH ROUTE (Fixes missing tables/columns)
+Route::get('/admin/schema-polish', function () {
+    try {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
+            \Illuminate\Support\Facades\Schema::create('user_notifications', function ($table) {
+                $table->id();
+                $table->integer('user_id')->nullable();
+                $table->integer('order_id')->nullable();
+                $table->integer('is_read')->default(0);
+                $table->timestamps();
+            });
+        }
+        
+        if (! \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+            \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
+                $table->id();
+                $table->integer('order_id')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->integer('vendor_id')->nullable();
+                $table->integer('is_read')->default(0);
+                $table->timestamps();
+            });
+        }
+
+        return "Schema polished successfully! Missing tables were created.";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
+
 // CAMPAY PAYMENT GATEWAY DB REPAIR ROUTE
 Route::get('/fix-campay-db', function () {
     try {
