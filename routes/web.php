@@ -2149,6 +2149,16 @@ Broadcast::routes(['middleware' => ['auth']]);
 
 Route::prefix('admin')->group(function () {
 
+    // TEMPORARY DIAGNOSTIC - remove after debugging
+    Route::get('/debug-admin-500', function () {
+        return response()->json([
+            'status' => 'admin_routes_working',
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'admin_table' => \Illuminate\Support\Facades\Schema::hasTable('admins'),
+        ]);
+    });
+
     //------------ ADMIN GROWTH TRACKING SECTION ------------
     Route::group(['middleware' => 'permissions:growth'], function () {
         Route::get('/referrals/datatables', 'Admin\ReferralController@datatables')->name('admin-referral-datatables');
