@@ -371,6 +371,15 @@
             <a href="{{ route('admin-pick-index') }}"><span>{{ __('Pickup Locations') }}</span></a>
         </li>
         <li>
+            <a href="{{ route('admin-deliveryfee-index') }}"><span>{{ __('Delivery Fee Module') }}</span></a>
+        </li>
+        <li>
+            <a href="{{ route('admin-distancefee-index') }}"><span>{{ __('Distance Fee Module') }}</span></a>
+        </li>
+        <li>
+            <a href="{{ route('admin-servicearea-index') }}"><span>{{ __('Service Area') }}</span></a>
+        </li>
+        <li>
             <a href="{{ route('admin-gs-contents') }}"><span>{{ __('Website Contents') }}</span></a>
         </li>
         <li>
