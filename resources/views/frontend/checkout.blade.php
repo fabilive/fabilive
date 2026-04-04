@@ -359,6 +359,17 @@
                                              .round($packaging[0]['price'] * $curr->value,2) : 'Package not found'}}
                                           </p>
                                        </div>
+                                       <div>
+                                          <h5 class="label mr-2">{{ __('Shipping Method :') }} </h5>
+                                          <button type="button" class="mybtn1" data-bs-toggle="modal"
+                                             data-bs-target="#vendor_shipping{{$vendor_id}}">
+                                             {{ __('Select Shipping') }}
+                                          </button>
+                                          <p id="shipping_text{{$vendor_id}}">
+                                             {{isset($shipping[0]) ? $shipping[0]['title'] .'+'. $curr->sign
+                                             .round($shipping[0]['price'] * $curr->value,2) : 'Shipping not found'}}
+                                          </p>
+                                       </div>
                                        @include('includes.vendor_shipping', ['shipping' => $shipping, 'vendor_id' =>
                                        $vendor_id])
                                        @include('includes.vendor_packaging', ['packaging' => $packaging, 'vendor_id' =>
@@ -692,11 +703,20 @@
 
                   <div class="packeging-area">
                      <h4 class="title">{{ __('Packaging') }}</h4>
+                     <div class="radio-design">
+                        <input type="radio" class="packing" data-price="0"
+                           data-form="{{ __('None') }}" id="free-package-none" name="packeging_id"
+                           value="0" checked>
+                        <span class="checkmark"></span>
+                        <label for="free-package-none">
+                           {{ __('None') }}
+                        </label>
+                     </div>
                      @foreach($package_data as $data)
                      <div class="radio-design">
                         <input type="radio" class="packing" data-price="{{ round($data->price * $curr->value,2) }}"
                            data-form="{{$data->title}}" id="free-package{{ $data->id }}" name="packeging_id"
-                           value="{{ $data->id }}" {{ ($loop->first) ? 'checked' : '' }}>
+                           value="{{ $data->id }}">
                         <span class="checkmark"></span>
                         <label for="free-package{{ $data->id }}">
                            {{ $data->title }}
