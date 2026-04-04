@@ -2153,20 +2153,31 @@ Route::prefix('admin')->group(function () {
     Route::get('/debug-admin-500', function () {
         try {
             $rendered = view('admin.login')->render();
+            $authConfig = config('auth.guards.admin');
+            $providerConfig = config('auth.providers');
             return response()->json([
                 'status' => 'view_rendered_ok',
                 'view_length' => strlen($rendered),
+                'admin_guard' => $authConfig,
+                'providers' => $providerConfig,
+                'admin_model_exists' => class_exists(\App\Models\Admin::class),
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
-                'status' => 'view_render_failed',
+                'status' => 'error',
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => collect($e->getTrace())->take(5)->map(function ($t) {
-                    return ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?') . ' ' . ($t['class'] ?? '') . ($t['type'] ?? '') . ($t['function'] ?? '');
-                })->toArray(),
             ]);
+        }
+    });
+
+    // Test with middleware
+    Route::middleware('guest:admin')->get('/debug-admin-guest', function () {
+        try {
+            return response()->json(['status' => 'guest_middleware_passed']);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'error', 'error' => $e->getMessage()]);
         }
     });
 
