@@ -43,6 +43,7 @@
     </ul>
 </li>
 
+@endif
 
 @if(Auth::guard('admin')->user()->sectionCheck('earning'))
 
@@ -68,9 +69,6 @@
     </ul>
 </li>
 @endif
-
-@endif
-
 @if(Auth::guard('admin')->user()->sectionCheck('categories'))
 
 <li>
@@ -298,9 +296,6 @@
 </li>
 
 @endif
-
-@endif
-
 <li>
     <a href="#support_sys" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
         <i class="fas fa-robot"></i>{{ __('Support System') }}
