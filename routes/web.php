@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Schema;
 // SCHEMA POLISH ROUTE (Fixes missing tables/columns)
 Route::get('/admin/schema-polish', function () {
     try {
+        // user_notifications
         if (! \Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
             \Illuminate\Support\Facades\Schema::create('user_notifications', function ($table) {
                 $table->id();
@@ -25,6 +26,7 @@ Route::get('/admin/schema-polish', function () {
             });
         }
         
+        // notifications
         if (! \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
             \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
                 $table->id();
@@ -36,7 +38,98 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        return "Schema polished successfully! Missing tables were created.";
+        // admin_languages
+        if (! \Illuminate\Support\Facades\Schema::hasTable('admin_languages')) {
+            \Illuminate\Support\Facades\Schema::create('admin_languages', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('language')->nullable();
+                $table->string('file')->nullable();
+                $table->integer('is_default')->default(0);
+                $table->integer('rtl')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('admin_languages')->insert([
+                'id' => 1,
+                'name' => 'English',
+                'language' => 'English',
+                'is_default' => 1,
+            ]);
+        }
+
+        // languages
+        if (! \Illuminate\Support\Facades\Schema::hasTable('languages')) {
+            \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('language')->nullable();
+                $table->string('file')->nullable();
+                $table->integer('is_default')->default(0);
+                $table->integer('rtl')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('languages')->insert([
+                'id' => 1,
+                'name' => 'English',
+                'language' => 'English',
+                'is_default' => 1,
+            ]);
+        }
+
+        // currencies
+        if (! \Illuminate\Support\Facades\Schema::hasTable('currencies')) {
+            \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('sign')->nullable();
+                $table->double('value')->default(1);
+                $table->integer('is_default')->default(0);
+            });
+            \Illuminate\Support\Facades\DB::table('currencies')->insert([
+                'id' => 1,
+                'name' => 'CFA',
+                'sign' => 'CFA',
+                'value' => 1,
+                'is_default' => 1,
+            ]);
+        }
+
+        // countries, states, cities
+        if (! \Illuminate\Support\Facades\Schema::hasTable('countries')) {
+            \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
+                $table->id();
+                $table->string('country_name')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+        if (! \Illuminate\Support\Facades\Schema::hasTable('states')) {
+            \Illuminate\Support\Facades\Schema::create('states', function ($table) {
+                $table->id();
+                $table->string('state_name')->nullable();
+                $table->integer('country_id')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+        if (! \Illuminate\Support\Facades\Schema::hasTable('cities')) {
+            \Illuminate\Support\Facades\Schema::create('cities', function ($table) {
+                $table->id();
+                $table->string('city_name')->nullable();
+                $table->integer('state_id')->nullable();
+                $table->integer('status')->default(1);
+            });
+        }
+
+        // Generalsettings columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            $gs_cols = ['physical', 'digital', 'license', 'listing', 'vendor_ship_info', 'affilite', 'is_admin_loader', 'wholesell'];
+            foreach ($gs_cols as $col) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                    \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col) {
+                        $table->integer($col)->default(1);
+                    });
+                }
+            }
+        }
+
+        return "Schema polished successfully! All critical tables and columns have been verified/created.";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
@@ -262,89 +355,10 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
-        if (DB::table('admin_languages')->where('is_default', 1)->count() == 0) {
-            if (DB::table('admin_languages')->count() > 0) {
-                DB::table('admin_languages')->where('id', DB::table('admin_languages')->min('id'))->update(['is_default' => 1]);
-            } else {
-                DB::table('admin_languages')->insert(['name' => 'English', 'language' => 'English', 'is_default' => 1, 'rtl' => 0]);
-            }
-        }
+        // Admin language check moved to schema-polish
 
-        // Force Enable Product Types & missing GS columns
-        $gs_check = \Illuminate\Support\Facades\DB::table('generalsettings')->find(1);
-        if ($gs_check) {
-            $gs_cols = ['physical', 'digital', 'license', 'listing', 'vendor_ship_info', 'affilite', 'is_admin_loader', 'wholesell'];
-            foreach ($gs_cols as $col) {
-                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
-                    \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col) {
-                        $table->integer($col)->default(1);
-                    });
-                }
-            }
-            \Illuminate\Support\Facades\DB::table('generalsettings')->where('id', 1)->update([
-                'physical' => 1,
-                'digital' => 1,
-                'license' => 1,
-                'listing' => 1,
-                'vendor_ship_info' => 1,
-                'affilite' => 1,
-                'is_admin_loader' => 0,
-                'wholesell' => 1,
-            ]);
-        }
-
-        if (! \Illuminate\Support\Facades\Schema::hasTable('countries')) {
-            \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
-                $table->id();
-                $table->string('country_name')->nullable();
-                $table->integer('status')->default(1);
-            });
-        } else {
-            if (! \Illuminate\Support\Facades\Schema::hasColumn('countries', 'country_name')) {
-                \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
-                    $table->string('country_name')->nullable();
-                });
-            }
-            if (! \Illuminate\Support\Facades\Schema::hasColumn('countries', 'status')) {
-                \Illuminate\Support\Facades\Schema::table('countries', function ($table) {
-                    $table->integer('status')->default(1);
-                });
-            }
-        }
-
-        if (! \Illuminate\Support\Facades\Schema::hasTable('states')) {
-            \Illuminate\Support\Facades\Schema::create('states', function ($table) {
-                $table->id();
-                $table->string('state_name')->nullable();
-                $table->integer('country_id')->nullable();
-                $table->integer('status')->default(1);
-            });
-        } else {
-            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'state_name')) {
-                \Illuminate\Support\Facades\Schema::table('states', function ($table) {
-                    $table->string('state_name')->nullable();
-                });
-            }
-            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'country_id')) {
-                \Illuminate\Support\Facades\Schema::table('states', function ($table) {
-                    $table->integer('country_id')->nullable();
-                });
-            }
-            if (! \Illuminate\Support\Facades\Schema::hasColumn('states', 'status')) {
-                \Illuminate\Support\Facades\Schema::table('states', function ($table) {
-                    $table->integer('status')->default(1);
-                });
-            }
-        }
-
-        if (! \Illuminate\Support\Facades\Schema::hasTable('cities')) {
-            \Illuminate\Support\Facades\Schema::create('cities', function ($table) {
-                $table->id();
-                $table->string('city_name')->nullable();
-                $table->integer('state_id')->nullable();
-                $table->integer('status')->default(1);
-            });
-        } else {
+        // GeneralSettings and Location tables moved to schema-polish
+ else {
             if (! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'city_name')) {
                 \Illuminate\Support\Facades\Schema::table('cities', function ($table) {
                     $table->string('city_name')->nullable();

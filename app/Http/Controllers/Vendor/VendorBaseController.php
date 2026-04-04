@@ -33,16 +33,19 @@ class VendorBaseController extends Controller
             $this->user = Auth::user();
 
             // Set Global Language
-
-            // Set Global Language
-
             if (Session::has('language')) {
                 $this->language = DB::table('languages')->find(Session::get('language'));
             } else {
                 $this->language = DB::table('languages')->where('is_default', '=', 1)->first();
             }
+
+            // Fallback if language is still null
+            if (! $this->language) {
+                $this->language = (object) ['name' => 'English', 'id' => 1];
+            }
+
             view()->share('langg', $this->language);
-            App::setlocale($this->language->name);
+            App::setlocale($this->language->name ?? 'English');
 
             // Set Global Currency
 
