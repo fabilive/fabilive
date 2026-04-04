@@ -6,7 +6,6 @@ use App\Helpers\PriceHelper;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class SubscriptionController extends AdminBaseController
 {

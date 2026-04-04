@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Report;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class ReportController extends AdminBaseController
 {

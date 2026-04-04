@@ -8,7 +8,6 @@ use App\Models\Generalsetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class EmailController extends AdminBaseController
 {

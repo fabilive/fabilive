@@ -16,7 +16,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class OrderCreateController extends AdminBaseController
 {

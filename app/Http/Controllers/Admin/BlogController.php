@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class BlogController extends AdminBaseController
 {

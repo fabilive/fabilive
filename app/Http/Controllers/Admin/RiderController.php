@@ -8,7 +8,6 @@ use App\Models\Withdraw;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Yajra\DataTables\Facades\DataTables;
 
 class RiderController extends AdminBaseController
 {

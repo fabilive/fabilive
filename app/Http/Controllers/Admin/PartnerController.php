@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\PriceHelper;
-use Yajra\DataTables\Facades\DataTables;
 use App\{
     Models\Partner
 };

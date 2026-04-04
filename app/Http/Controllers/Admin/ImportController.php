@@ -13,7 +13,6 @@ use Illuminate\Support\Str;
 use Image;
 use Yajra\DataTables\Facades\DataTables as Datatables;
 use Intervention\Image\Facades\Image;
-use Yajra\DataTables\Facades\DataTables;
 
 class ImportController extends AdminBaseController
 {

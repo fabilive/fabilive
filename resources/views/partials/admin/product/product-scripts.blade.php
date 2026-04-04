@@ -549,6 +549,72 @@
     // Whole Sell Section Ends
     
     
+    // Hierarchical Location Selection (Cascading Dropdowns)
+    
+    // Country to State
+    $(document).on('change', '#countrycode', function() {
+        var country_id = $(this).val();
+        var state_select = $('#statecode');
+        var city_select = $('#citycode');
+        var area_select = $('#service_area_id');
+
+        state_select.html('<option value="">-- Select State --</option>').prop('disabled', true);
+        city_select.html('<option value="">-- Select City --</option>').prop('disabled', true);
+        area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+        if (country_id) {
+            var url = $(this).find(':selected').data('href');
+            $.get(url, function(data) {
+                if (data.length > 0) {
+                    $.each(data, function(index, state) {
+                        state_select.append('<option value="' + state.id + '">' + state.state_name + '</option>');
+                    });
+                    state_select.prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // State to City
+    $(document).on('change', '#statecode', function() {
+        var state_id = $(this).val();
+        var city_select = $('#citycode');
+        var area_select = $('#service_area_id');
+
+        city_select.html('<option value="">-- Select City --</option>').prop('disabled', true);
+        area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+        if (state_id) {
+            $.get("{{ route('admin-load-city-by-state') }}", { state_id: state_id }, function(data) {
+                if (data.length > 0) {
+                    $.each(data, function(index, city) {
+                        city_select.append('<option value="' + city.id + '">' + city.city_name + '</option>');
+                    });
+                    city_select.prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // City to Service Area
+    $(document).on('change', '#citycode', function() {
+        var city_id = $(this).val();
+        var area_select = $('#service_area_id');
+
+        area_select.html('<option value="">-- Select Service Area --</option>').prop('disabled', true);
+
+        if (city_id) {
+            $.get("{{ route('admin-load-service-area-by-city') }}", { city_id: city_id }, function(data) {
+                if (data.length > 0) {
+                    $.each(data, function(index, area) {
+                        area_select.append('<option value="' + area.id + '">' + area.location + '</option>');
+                    });
+                    area_select.prop('disabled', false);
+                }
+            });
+        }
+    });
+
     })(jQuery);
     
     
