@@ -19,7 +19,7 @@
 														<select id="countrycode" class="input-field" name="country_id" required>
 															<option value="">{{ __('Select Country') }}</option>
 															@foreach($countries as $country)
-																<option value="{{$country->id}}" data-href="{{route('admin-state-load',$country->id)}}">{{$country->country_name}}</option>
+																<option value="{{$country->id}}" data-href="{{route('country.wise.state',$country->id)}}">{{$country->country_name}}</option>
 															@endforeach
 														</select>
 													</div>
