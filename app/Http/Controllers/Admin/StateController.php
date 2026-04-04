@@ -75,7 +75,7 @@ class StateController extends Controller
         }
 
         $state = new State();
-        $state->state = $request->state;
+        $state->name = $request->state;
         $state->country_id = $country;
         $state->save();
         $mgs = __('Data Added Successfully.');
@@ -112,8 +112,8 @@ class StateController extends Controller
         }
 
         $state = State::findOrFail($id);
-        $state->state = $request->state;
-        $state->update();
+        $state->name = $request->state;
+        $state->save();
         $mgs = __('Data Updated Successfully.');
 
         return response()->json($mgs);
