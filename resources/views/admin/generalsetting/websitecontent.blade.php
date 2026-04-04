@@ -206,7 +206,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="tawk-area">
-                                        <input class="input-field" name="rider_percentage_commission" value="{{$gs->rider_percentage_commission}}">
+                                        <input class="input-field" name="rider_percentage_commission" value="{{$gs->rider_percentage_commission ?? ''}}">
                                     </div>
                                 </div>
                             </div>
@@ -222,7 +222,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="tawk-area">
-                                  <input class="input-field" name="referral_amount" value="{{$gs->referral_amount}}">
+                                  <input class="input-field" name="referral_amount" value="{{$gs->referral_amount ?? ''}}">
                                 </div>
                             </div>
                           </div>
@@ -238,7 +238,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="tawk-area">
-                                  <input class="input-field" name="same_servicearea_delivery_fee" value="{{$gs->same_servicearea_delivery_fee}}">
+                                  <input class="input-field" name="same_servicearea_delivery_fee" value="{{$gs->same_servicearea_delivery_fee ?? ''}}">
                                 </div>
                             </div>
                           </div>
@@ -254,7 +254,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="tawk-area">
-                                  <input class="input-field" name="referral_bonus" value="{{$gs->referral_bonus}}">
+                                  <input class="input-field" name="referral_bonus" value="{{$gs->referral_bonus ?? ''}}">
                                 </div>
                             </div>
                           </div>
@@ -353,7 +353,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="tawk-area">
-                                      <textarea class="input-field" name="partner_title">{{$gs->partner_title}}</textarea>
+                                      <textarea class="input-field" name="partner_title">{{$gs->partner_title ?? ''}}</textarea>
                                     </div>
                                 </div>
                               </div>
@@ -367,7 +367,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="tawk-area">
-                                      <textarea class="input-field" name="partner_text">{{$gs->partner_text}}</textarea>
+                                      <textarea class="input-field" name="partner_text">{{$gs->partner_text ?? ''}}</textarea>
                                     </div>
                                 </div>
                               </div>
