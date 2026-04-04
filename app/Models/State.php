@@ -8,7 +8,19 @@ class State extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['state', 'country_id', 'status', 'tax'];
+    protected $fillable = ['state', 'name', 'country_id', 'status', 'tax'];
+
+    protected $appends = ['state', 'name'];
+
+    public function getStateAttribute()
+    {
+        return $this->attributes['state'] ?? $this->attributes['name'] ?? null;
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->attributes['name'] ?? $this->attributes['state'] ?? null;
+    }
 
     public function country()
     {
