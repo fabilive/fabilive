@@ -74,7 +74,7 @@ class CampayController extends CheckoutBaseControlller
         $campay = new Campay();
         try {
             $phoneNumber = $request->phone; // Assuming phone is provided in checkout
-            $response = $campay->collect($order->pay_amount, $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
+            $response = $campay->collect(round($order->pay_amount), $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
 
             if (isset($response['reference'])) {
                 $order->txnid = $response['reference'];

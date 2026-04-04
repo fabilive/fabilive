@@ -1153,7 +1153,8 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
       let view = $(this).attr('view');
       let title = $(this).attr('data-form');
       $('#shipping_text'+ref).html(title +'+'+ view);
-      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + parseFloat(cartDeliveryFee);
+      var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
+      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
       ttotal = parseFloat(ttotal).toFixed(2);
    	if(pos == 0){
    			$('#final-cost').html('{{ $curr->sign }}'+ttotal);
@@ -1170,7 +1171,8 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
       let view = $(this).attr('view');
       let title = $(this).attr('data-form');
       $('#packing_text'+ref).html(title +'+'+ view);
-      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + parseFloat(cartDeliveryFee);
+      var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
+      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
       ttotal = parseFloat(ttotal).toFixed(2);
       if(pos == 0){
    			$('#final-cost').html('{{ $curr->sign }}'+ttotal);

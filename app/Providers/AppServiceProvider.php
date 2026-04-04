@@ -45,11 +45,11 @@ class AppServiceProvider extends ServiceProvider
 
         $gs = null;
         try {
-            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
+            $gs = cache()->remember('generalsettings_model', now()->addDay(), function () {
+                return \App\Models\Generalsetting::find(1);
             });
         } catch (\Exception $e) {
-            $gs = DB::table('generalsettings')->first();
+            $gs = \App\Models\Generalsetting::find(1);
         }
 
         // Absolute fail-safe for missing properties

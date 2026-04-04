@@ -176,7 +176,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="tawk-area">
-                                  <input class="input-field" name="capcha_site_key" value="{{$gs->capcha_site_key}}">
+                                  <input class="input-field" name="capcha_site_key" value="{{$gs->capcha_site_key ?? ''}}">
                                 </div>
                             </div>
                           </div>
@@ -191,7 +191,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="tawk-area">
-                                  <input class="input-field" name="capcha_secret_key" value="{{$gs->capcha_secret_key}}">
+                                  <input class="input-field" name="capcha_secret_key" value="{{$gs->capcha_secret_key ?? ''}}">
                                 </div>
                             </div>
                           </div>
@@ -322,7 +322,7 @@
                               </div>
                               <div class="col-lg-6">
                                   <div class="tawk-area">
-                                    <textarea class="input-field" name="talkto">{{$gs->talkto}}</textarea>
+                                    <textarea class="input-field" name="talkto">{{$gs->talkto ?? ''}}</textarea>
                                   </div>
                               </div>
                             </div>
