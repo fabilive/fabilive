@@ -2151,12 +2151,23 @@ Route::prefix('admin')->group(function () {
 
     // TEMPORARY DIAGNOSTIC - remove after debugging
     Route::get('/debug-admin-500', function () {
-        return response()->json([
-            'status' => 'admin_routes_working',
-            'php_version' => PHP_VERSION,
-            'laravel_version' => app()->version(),
-            'admin_table' => \Illuminate\Support\Facades\Schema::hasTable('admins'),
-        ]);
+        try {
+            $rendered = view('admin.login')->render();
+            return response()->json([
+                'status' => 'view_rendered_ok',
+                'view_length' => strlen($rendered),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'view_render_failed',
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => collect($e->getTrace())->take(5)->map(function ($t) {
+                    return ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?') . ' ' . ($t['class'] ?? '') . ($t['type'] ?? '') . ($t['function'] ?? '');
+                })->toArray(),
+            ]);
+        }
     });
 
     //------------ ADMIN GROWTH TRACKING SECTION ------------
