@@ -62,10 +62,13 @@ class OrderController extends VendorBaseController
                 $completed = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'completed')->count() > 0 ? 'selected' : '';
                 $declined = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'declined')->count() > 0 ? 'selected' : '';
 
+                $vorder = $data->vendororders()->where('user_id', '=', $this->user->id)->first();
+                $vstatus = $vorder ? $vorder->status : 'pending';
+
                 return '
                                 <div class="action-list">
                                 <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-primary product-btn"><i class="fa fa-eye"></i>  '.__('Details').' </a>
-                                    <select class="vendor-btn  '.$data->vendororders()->where('user_id', '=', $this->user->id)->first()->status.' ">
+                                    <select class="vendor-btn  '.$vstatus.' ">
                                     <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'pending']).' "   '.$pending.'  > '.__('Pending').' </option>
                                     <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'processing']).' "  '.$processing.'   > '.__('Processing').' </option>
                                     <option value=" '.route('vendor-order-status', ['id1' => $data->order_number, 'status' => 'completed']).' "  '.$completed.'   > '.__('Completed').' </option>

@@ -10,11 +10,20 @@
             </div>
             <div class="modal-body">
                 <div class="packeging-area">
+                    <div class="radio-design">
+                        <input type="radio" class="packing" view="{{ App\Models\Product::convertPrice(0) }}" data-form="@lang('None')"
+                            id="free-package-none{{$vendor_id}}" ref="{{$vendor_id}}" data-price="0" name="packeging[{{$vendor_id}}]"
+                            value="0" checked>
+                        <span class="checkmark"></span>
+                        <label for="free-package-none{{$vendor_id}}">
+                            @lang('None')
+                        </label>
+                    </div>
                     @forelse($packaging as $data)
                     <div class="radio-design">
                         <input type="radio" class="packing" view="{{ $curr->sign }}{{ round($data->price * $curr->value,2) }}" data-form="{{$data->title}}"
                             id="free-package{{ $data->id }}" ref="{{$vendor_id}}" data-price="{{ round($data->price * $curr->value,2) }}" name="packeging[{{$vendor_id}}]"
-                            value="{{ $data->id }}" {{ ($loop->first) ? 'checked' : '' }}>
+                            value="{{ $data->id }}">
                         <span class="checkmark"></span>
                         <label for="free-package{{ $data->id }}">
                             {{ $data->title }}

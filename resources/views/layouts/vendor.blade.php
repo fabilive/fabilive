@@ -30,7 +30,11 @@
 	 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 
 	<!-- stylesheet -->
-	@if(DB::table('admin_languages')->where('is_default','=',1)->first()->rtl == 1)
+	@php
+		$admin_lang = DB::table('admin_languages')->where('is_default','=',1)->first();
+		$rtl = $admin_lang ? $admin_lang->rtl : 0;
+	@endphp
+	@if($rtl == 1)
 
 	<link href="{{asset('assets/admin/css/rtl/style.css')}}" rel="stylesheet" />
 	<link href="{{asset('assets/admin/css/rtl/custom.css')}}" rel="stylesheet" />

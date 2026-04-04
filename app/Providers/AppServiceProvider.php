@@ -21,9 +21,12 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         // V75-V83: GLOBAL CONFIG FORCE (Override stale config cache immediately)
-        if (Schema::hasTable('cache')) {
-            config(['cache.default' => 'database']);
-            config(['session.driver' => 'database']);
+        try {
+            if (Schema::hasTable('cache')) {
+                config(['cache.default' => 'database']);
+                config(['session.driver' => 'database']);
+            }
+        } catch (\Exception $e) {
         }
 
         // Always force reCAPTCHA from env()

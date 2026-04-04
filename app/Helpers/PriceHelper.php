@@ -146,10 +146,10 @@ class PriceHelper
                     $vendor_packing_ids[$vendor_id] = $input['packaging_id'] != 0 ? $input['packaging_id'] : null;
                 }
 
-                $shipping = $input['shipping_id'] != 0 ? Shipping::findOrFail($input['shipping_id']) : null;
-                $packeing = $input['packaging_id'] != 0 ? Package::findOrFail($input['packaging_id']) : null;
+                $shipping = ($input['shipping_id'] != 0) ? Shipping::find($input['shipping_id']) : null;
+                $packeing = ($input['packaging_id'] != 0) ? Package::find($input['packaging_id']) : null;
 
-                $totalAmount = $totalAmount + @$shipping->price + @$packeing->price;
+                $totalAmount = $totalAmount + ($shipping ? $shipping->price : 0) + ($packeing ? $packeing->price : 0);
 
                 return [
                     'total_amount' => $totalAmount,
@@ -174,10 +174,14 @@ class PriceHelper
                 $vendor_ids = [];
                 if ($input['shipping'] && $input['shipping'] != 0) {
                     foreach ($shippingData as $key => $shipping_id) {
-                        $shipping = Shipping::findOrFail($shipping_id);
-                        $shipping_cost += $shipping->price;
-                        if (! in_array($shipping->user_id, $vendor_ids)) {
-                            $vendor_ids[] = $shipping->user_id;
+                        if ($shipping_id != 0) {
+                            $shipping = Shipping::find($shipping_id);
+                            if ($shipping) {
+                                $shipping_cost += $shipping->price;
+                                if (! in_array($shipping->user_id, $vendor_ids)) {
+                                    $vendor_ids[] = $shipping->user_id;
+                                }
+                            }
                         }
                     }
                 }
@@ -190,10 +194,14 @@ class PriceHelper
 
                 if ($input['packeging'] && $input['packeging'] != 0) {
                     foreach ($packegingData as $key => $packaging_id) {
-                        $packeing = Package::findOrFail($packaging_id);
-                        $packaging_cost += $packeing->price;
-                        if (! in_array($packeing->user_id, $vendor_ids)) {
-                            $vendor_ids[] = $packeing->user_id;
+                        if ($packaging_id != 0) {
+                            $packeing = Package::find($packaging_id);
+                            if ($packeing) {
+                                $packaging_cost += $packeing->price;
+                                if (! in_array($packeing->user_id, $vendor_ids)) {
+                                    $vendor_ids[] = $packeing->user_id;
+                                }
+                            }
                         }
                     }
                 }
@@ -265,9 +273,9 @@ class PriceHelper
                     $vendor_packing_ids[$vendor_id] = $input['packaging_id'];
                 }
 
-                $shipping = Shipping::findOrFail($input['shipping_id']);
-                $packeing = Package::findOrFail($input['packaging_id']);
-                $totalAmount = $totalAmount + $shipping->price + $packeing->price;
+                $shipping = ($input['shipping_id'] != 0) ? Shipping::find($input['shipping_id']) : null;
+                $packeing = ($input['packaging_id'] != 0) ? Package::find($input['packaging_id']) : null;
+                $totalAmount = $totalAmount + ($shipping ? $shipping->price : 0) + ($packeing ? $packeing->price : 0);
 
                 return round($totalAmount / $curr->value, 2);
             } else {
@@ -277,19 +285,27 @@ class PriceHelper
                 $vendor_ids = [];
                 if ($input['shipping']) {
                     foreach ($input['shipping'] as $key => $shipping_id) {
-                        $shipping = Shipping::findOrFail($shipping_id);
-                        $shipping_cost += $shipping->price;
-                        if (! in_array($shipping->user_id, $vendor_ids)) {
-                            $vendor_ids[] = $shipping->user_id;
+                        if ($shipping_id != 0) {
+                            $shipping = Shipping::find($shipping_id);
+                            if ($shipping) {
+                                $shipping_cost += $shipping->price;
+                                if (! in_array($shipping->user_id, $vendor_ids)) {
+                                    $vendor_ids[] = $shipping->user_id;
+                                }
+                            }
                         }
                     }
                 }
                 if ($input['packeging']) {
                     foreach ($input['packeging'] as $key => $packaging_id) {
-                        $packeing = Package::findOrFail($packaging_id);
-                        $packaging_cost += $packeing->price;
-                        if (! in_array($packeing->user_id, $vendor_ids)) {
-                            $vendor_ids[] = $packeing->user_id;
+                        if ($packaging_id != 0) {
+                            $packeing = Package::find($packaging_id);
+                            if ($packeing) {
+                                $packaging_cost += $packeing->price;
+                                if (! in_array($packeing->user_id, $vendor_ids)) {
+                                    $vendor_ids[] = $packeing->user_id;
+                                }
+                            }
                         }
                     }
                 }
