@@ -2149,38 +2149,6 @@ Broadcast::routes(['middleware' => ['auth']]);
 
 Route::prefix('admin')->group(function () {
 
-    // TEMPORARY DIAGNOSTIC - remove after debugging
-    Route::get('/debug-admin-500', function () {
-        try {
-            $rendered = view('admin.login')->render();
-            $authConfig = config('auth.guards.admin');
-            $providerConfig = config('auth.providers');
-            return response()->json([
-                'status' => 'view_rendered_ok',
-                'view_length' => strlen($rendered),
-                'admin_guard' => $authConfig,
-                'providers' => $providerConfig,
-                'admin_model_exists' => class_exists(\App\Models\Admin::class),
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-        }
-    });
-
-    // Test with middleware
-    Route::middleware('guest:admin')->get('/debug-admin-guest', function () {
-        try {
-            return response()->json(['status' => 'guest_middleware_passed']);
-        } catch (\Throwable $e) {
-            return response()->json(['status' => 'error', 'error' => $e->getMessage()]);
-        }
-    });
-
     //------------ ADMIN GROWTH TRACKING SECTION ------------
     Route::group(['middleware' => 'permissions:growth'], function () {
         Route::get('/referrals/datatables', 'Admin\ReferralController@datatables')->name('admin-referral-datatables');
