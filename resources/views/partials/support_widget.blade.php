@@ -296,12 +296,6 @@
             localStorage.setItem('fabi-mbokoai-closed', 'true');
         });
 
-        // Set initial state based on localStorage
-        if (!localStorage.getItem('fabi-mbokoai-closed')) {
-            windowEl.style.display = 'flex';
-            launcher.style.transform = 'scale(0.9)';
-        }
-
         // Back Button
         backBtn.addEventListener('click', () => {
             resetToContext();
