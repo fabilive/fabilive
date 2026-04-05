@@ -8,10 +8,9 @@ use App\Models\Package;
 use App\Models\Shipping;
 use App\Models\VendorOrder;
 use App\Services\DeliveryJobService;
-use Datatables;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 use App\Helpers\PriceHelper;
-use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends VendorBaseController
 {
