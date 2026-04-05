@@ -55,7 +55,7 @@ class RiderRegisterController extends Controller
         $input = $request->all();
         $upload = function ($field, $path) use ($request, &$input) {
             if ($file = $request->file($field)) {
-                $name = \PriceHelper::ImageCreateName($file);
+                $name = \App\Helpers\PriceHelper::ImageCreateName($file);
                 $file->move($path, $name);
                 $input[$field] = $name;
             }

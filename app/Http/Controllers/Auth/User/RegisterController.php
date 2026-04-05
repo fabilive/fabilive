@@ -127,7 +127,7 @@ class RegisterController extends Controller
                         'shop_name' => 'unique:users,shop_name',
                         'reg_number' => 'required',
                         'shop_number' => 'max:10',
-                        'selfie_image' => 'nullable|file|mimes:jpg,jpeg,png', // <-- Changed to nullable
+                        'selfie_image' => 'required|file|mimes:jpg,jpeg,png',
                     ], [
                         'shop_name.unique' => __('This Shop Name has already been taken.'),
                         'shop_number.max' => __('Shop Number Must Be Less Than 10 Digits.'),
@@ -236,7 +236,7 @@ class RegisterController extends Controller
         if ($gs->is_verification_email == 1 && ! $existingUser) {
             $to = $user->email;
             $subject = 'Verify your email address.';
-            $msg = 'Dear Customer,<br>Please click the link below to verify your email address: <a href='.url('user/register/verify/'.$user->verification_link).'>'.url('user/register/verify/'.$user->verification_link).'</a>';
+            $msg = 'Dear ' . $user->name . ',<br><br>Thank you for joining Fabilive! Please click the link below to verify your email address and activate your account:<br><br><a href="'.url('user/register/verify/'.$user->verification_link).'" class="button">Verify Email Address</a>';
             $data = ['to' => $to, 'subject' => $subject, 'body' => $msg];
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);

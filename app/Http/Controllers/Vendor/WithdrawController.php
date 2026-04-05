@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Vendor;
 
 use App\Models\Withdraw;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class WithdrawController extends VendorBaseController
 {
@@ -50,10 +52,17 @@ class WithdrawController extends VendorBaseController
                     $from->update();
 
                     $newwithdraw = new Withdraw();
-                    if ($request->methods == 'Campay') {
-                        if ($request->network) {
-                            $newwithdraw['network'] = $request->network;
+                    if ($request->methods == 'Campay' || $request->methods == 'MTN Mobile Money' || $request->methods == 'Orange Money') {
+                        if ($request->methods == 'MTN Mobile Money') {
+                            $newwithdraw['network'] = 'MTN';
+                        } elseif ($request->methods == 'Orange Money') {
+                            $newwithdraw['network'] = 'Orange';
+                        } else {
+                            if ($request->network) {
+                                $newwithdraw['network'] = $request->network;
+                            }
                         }
+                        
                         if ($request->campay_acc_no) {
                             $newwithdraw['campay_acc_no'] = $request->campay_acc_no;
                         }

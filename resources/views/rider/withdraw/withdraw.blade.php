@@ -157,6 +157,8 @@
             <select class="form-control" name="methods" id="withmethod" required>
                 <option value="">{{ __('Select Withdraw Method') }}</option>
                 <option value="Bank">{{ __('Bank') }}</option>
+                <option value="MTN Mobile Money">{{ __('MTN Mobile Money') }}</option>
+                <option value="Orange Money">{{ __('Orange Money') }}</option>
                 <option value="Campay">{{ __('Campay') }}</option>
             </select>
         </div>
@@ -264,10 +266,19 @@
         let method = $(this).val();
         $('#campay, #bank').hide().find('input, select').attr('required', false);
 
-        if (method === 'Campay') {
-            $('#campay').show().find('input, select').attr('required', true);
-        } else if (method === 'Bank') {
+        if (method === 'Bank') {
             $('#bank').show().find('input, select').attr('required', true);
+        } else if (method === 'Campay' || method === 'MTN Mobile Money' || method === 'Orange Money') {
+            $('#campay').show().find('input, select').attr('required', true);
+
+            // If it's a specific MM method, we can hide the network selector as it's implied
+            if (method === 'MTN Mobile Money' || method === 'Orange Money') {
+                $('#campay').find('label:contains("Select Network")').parent().hide();
+                $('#campay').find('select[name="network"]').attr('required', false);
+            } else {
+                $('#campay').find('label:contains("Select Network")').parent().show();
+                $('#campay').find('select[name="network"]').attr('required', true);
+            }
         }
     });
 })(jQuery);

@@ -48,6 +48,8 @@
                                     <select class="form-control" name="methods" id="withmethod" required>
                                         <option value="">{{ __('Select Withdraw Method') }}</option>
                                         <option value="Bank">{{ __('Bank') }}</option>
+                                        <option value="MTN Mobile Money">{{ __('MTN Mobile Money') }}</option>
+                                        <option value="Orange Money">{{ __('Orange Money') }}</option>
                                         <option value="Campay">{{ __('Campay') }}</option>
                                     </select>
                                 </div>
@@ -178,10 +180,20 @@
             $("#paypal, #campay").hide();
             $("#bank").find('input, select').attr('required', true);
             $("#paypal, #campay").find('input, select').attr('required', false);
-        } else if (method == "Campay") {
+        } else if (method == "Campay" || method == "MTN Mobile Money" || method == "Orange Money") {
             $("#campay").show();
             $("#bank, #paypal").hide();
             $("#campay").find('input, select').attr('required', true);
+            
+            // If it's a specific MM method, we can hide the network selector as it's implied
+            if(method == "MTN Mobile Money" || method == "Orange Money"){
+                $("#campay").find('label[for="network"]').parent().parent().hide();
+                $("#campay").find('select[name="network"]').attr('required', false);
+            } else {
+                $("#campay").find('label[for="network"]').parent().parent().show();
+                $("#campay").find('select[name="network"]').attr('required', true);
+            }
+
             $("#bank, #paypal").find('input, select').attr('required', false);
         } else if (method != "") {
             $("#paypal").show();

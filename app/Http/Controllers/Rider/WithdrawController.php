@@ -6,20 +6,21 @@ use App\Models\Currency;
 use App\Models\Rider;
 use App\Models\Withdraw;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WithdrawController extends RiderBaseController
 {
     public function index()
     {
         $withdraws = Withdraw::where('user_id', '=', $this->rider->id)->where('type', '=', 'rider')->latest('id')->get();
-        $sign = Currency::where('is_default', '=', 1)->first();
+        $sign = \App\Models\Currency::where('is_default', '=', 1)->first();
 
         return view('rider.withdraw.index', compact('withdraws', 'sign'));
     }
 
     public function create()
     {
-        $sign = Currency::where('is_default', '=', 1)->first();
+        $sign = \App\Models\Currency::where('is_default', '=', 1)->first();
 
         return view('rider.withdraw.withdraw', compact('sign'));
     }
@@ -28,7 +29,7 @@ class WithdrawController extends RiderBaseController
     {
         try {
             DB::beginTransaction();
-            $from = Rider::lockForUpdate()->findOrFail($this->rider->id);
+            $from = \App\Models\Rider::lockForUpdate()->findOrFail($this->rider->id);
             $withdrawcharge = $this->gs;
             $charge = $withdrawcharge->withdraw_fee;
 
@@ -56,8 +57,14 @@ class WithdrawController extends RiderBaseController
                     $newwithdraw['type'] = 'rider';
                     $newwithdraw['reference'] = $request->reference;
 
-                    if ($request->methods == 'Campay') {
-                        $newwithdraw['network'] = $request->network;
+                    if ($request->methods == 'Campay' || $request->methods == 'MTN Mobile Money' || $request->methods == 'Orange Money') {
+                        if ($request->methods == 'MTN Mobile Money') {
+                            $newwithdraw['network'] = 'MTN';
+                        } elseif ($request->methods == 'Orange Money') {
+                            $newwithdraw['network'] = 'Orange';
+                        } else {
+                            $newwithdraw['network'] = $request->network;
+                        }
                         $newwithdraw['campay_acc_no'] = $request->campay_acc_no;
                         $newwithdraw['campay_acc_name'] = $request->campay_acc_name;
                     }

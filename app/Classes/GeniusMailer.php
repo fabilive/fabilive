@@ -11,13 +11,15 @@ use PHPMailer\PHPMailer\PHPMailer;
 class GeniusMailer
 {
     public $mail;
-
     public $gs;
+    public $social;
 
     public function __construct()
     {
-        $this->gs = Generalsetting::first(); // Safer than findOrFail(1)
-        if (! $this->gs) {
+        $this->gs = Generalsetting::first();
+        $this->social = \App\Models\Socialsetting::first();
+
+        if (!$this->gs) {
             $this->gs = (object) [
                 'is_smtp' => 0,
                 'from_email' => 'admin@fabilive.com',
@@ -25,6 +27,7 @@ class GeniusMailer
                 'title' => 'Fabilive',
             ];
         }
+
         $this->mail = new PHPMailer(true);
         $this->mail->Timeout = 10;
         if (isset($this->gs->is_smtp) && $this->gs->is_smtp == 1) {
@@ -39,18 +42,16 @@ class GeniusMailer
             $this->mail->CharSet = 'utf-8';
         }
 
-        // V85: Fallback From Logic
-        $from_email = (! empty($this->gs->from_email) && trim($this->gs->from_email) != '') ? $this->gs->from_email : 'support@fabilive.com';
-        $from_name = (! empty($this->gs->from_name) && trim($this->gs->from_name) != '') ? $this->gs->from_name : 'Fabilive';
+        $from_email = (!empty($this->gs->from_email) && trim($this->gs->from_email) != '') ? $this->gs->from_email : 'support@fabilive.com';
+        $from_name = (!empty($this->gs->from_name) && trim($this->gs->from_name) != '') ? $this->gs->from_name : 'Fabilive';
         $this->mail->setFrom($from_email, $from_name);
     }
 
     public function sendAutoMail(array $data)
     {
         $temp = DB::table('email_templates')->where('email_type', '=', $data['type'])->first();
-        if (! $temp) {
-            Log::warning('Email template missing: '.$data['type']);
-
+        if (!$temp) {
+            Log::warning('Email template missing: ' . $data['type']);
             return false;
         }
 
@@ -70,14 +71,20 @@ class GeniusMailer
             }
             $body = preg_replace('/{website_title}/', $this->gs->title, $body);
 
-            // From already set in constructor, but can be overridden here if needed
+            // Wrap in HTML Template
+            $html_body = view('emails.base', [
+                'body' => $body,
+                'gs' => $this->gs,
+                'social' => $this->social
+            ])->render();
+
             $this->addRecipients($data['to']);
             $this->mail->isHTML(true);
             $this->mail->Subject = $temp->email_subject;
-            $this->mail->Body = $body;
+            $this->mail->Body = $html_body;
             $this->mail->send();
         } catch (Exception $e) {
-            Log::error('Mailer AutoMail Error: '.$this->mail->ErrorInfo);
+            Log::error('Mailer AutoMail Error: ' . $this->mail->ErrorInfo);
         }
 
         return true;
@@ -86,17 +93,30 @@ class GeniusMailer
     public function sendCustomMail(array $mailData)
     {
         try {
-            // From already set in constructor
             $this->addRecipients($mailData['to']);
+
+            // Wrap in HTML Template
+            $html_body = view('emails.base', [
+                'body' => $mailData['body'],
+                'gs' => $this->gs,
+                'social' => $this->social
+            ])->render();
 
             $this->mail->isHTML(true);
             $this->mail->Subject = $mailData['subject'];
-            $this->mail->Body = $mailData['body'];
-            $this->mail->SMTPSecure = 'tls';
-            $this->mail->Port = 587;
+            $this->mail->Body = $html_body;
+            
+            // Standardizing SMTP for custom mail too if config exists
+            if (isset($this->gs->is_smtp) && $this->gs->is_smtp == 1) {
+                // Already configured in constructor if we use $this->mail
+            } else {
+                 $this->mail->SMTPSecure = 'tls';
+                 $this->mail->Port = 587;
+            }
+
             $this->mail->send();
         } catch (Exception $e) {
-            Log::error('Mailer CustomMail Error: '.$this->mail->ErrorInfo);
+            Log::error('Mailer CustomMail Error: ' . $this->mail->ErrorInfo);
         }
 
         return true;
