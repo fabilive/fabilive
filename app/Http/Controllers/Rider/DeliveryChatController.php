@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Events\DeliveryMessageSent;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryChatThread;
 use App\Models\Message;
@@ -69,8 +70,7 @@ class DeliveryChatController extends Controller
             'message' => $request->message,
         ]);
 
-        // Simple broadcast or polling? I'll just save for now.
-        // Real-time can be added if requested, but user just wants the ability to chat.
+        broadcast(new DeliveryMessageSent($message));
 
         return response()->json([
             'status' => true,

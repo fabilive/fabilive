@@ -29,11 +29,10 @@ class EnsureDeliveryChatAccess
             return response()->json(['message' => 'Chat thread not found.'], 404);
         }
 
-        $user = Auth::user();
-        $isRider = $user->id === $thread->rider_id;
-        $isBuyer = $user->id === $thread->buyer_id;
-        $isSeller = $user->id === $thread->seller_id;
-        $isAdmin = ($user instanceof \App\Models\Admin) || ($user->is_admin ?? false) || (Auth::guard('admin')->check());
+        $isRider = Auth::guard('rider')->check() && Auth::guard('rider')->id() === $thread->rider_id;
+        $isBuyer = (Auth::guard('web')->check() || Auth::guard('api')->check()) && Auth::id() === $thread->buyer_id;
+        $isSeller = (Auth::guard('web')->check() || Auth::guard('api')->check()) && Auth::id() === $thread->seller_id;
+        $isAdmin = Auth::guard('admin')->check() || (Auth::user() && (Auth::user() instanceof \App\Models\Admin || (Auth::user()->is_admin ?? false)));
 
         if (! $isRider && ! $isBuyer && ! $isSeller && ! $isAdmin) {
             return response()->json(['message' => 'Unauthorized access to this chat.'], 403);

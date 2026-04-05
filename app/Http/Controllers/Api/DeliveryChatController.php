@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\MessageSents;
+use App\Events\DeliveryMessageSent;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryChatThread;
 use App\Models\Message;
@@ -17,10 +17,14 @@ class DeliveryChatController extends Controller
     public function fetchMessages(int $threadId)
     {
         $thread = DeliveryChatThread::findOrFail($threadId);
-        $user = Auth::user();
+        $currUser = Auth::user();
 
         // 1. Authorization Check: Must be part of the thread
-        if ($user->id !== $thread->rider_id && $user->id !== $thread->buyer_id && $user->id !== $thread->seller_id) {
+        $isRider = ($currUser instanceof \App\Models\Rider) && $currUser->id === $thread->rider_id;
+        $isBuyer = ($currUser instanceof \App\Models\User) && $currUser->id === $thread->buyer_id;
+        $isSeller = ($currUser instanceof \App\Models\User) && $currUser->id === $thread->seller_id;
+
+        if (!$isRider && !$isBuyer && !$isSeller) {
             return response()->json(['status' => false, 'message' => 'Unauthorized access to this chat.'], 403);
         }
 
@@ -50,10 +54,14 @@ class DeliveryChatController extends Controller
         ]);
 
         $thread = DeliveryChatThread::findOrFail($request->delivery_chat_thread_id);
-        $user = Auth::user();
+        $currUser = Auth::user();
 
         // 1. Authorization Check
-        if ($user->id !== $thread->rider_id && $user->id !== $thread->buyer_id && $user->id !== $thread->seller_id) {
+        $isRider = ($currUser instanceof \App\Models\Rider) && $currUser->id === $thread->rider_id;
+        $isBuyer = ($currUser instanceof \App\Models\User) && $currUser->id === $thread->buyer_id;
+        $isSeller = ($currUser instanceof \App\Models\User) && $currUser->id === $thread->seller_id;
+
+        if (!$isRider && !$isBuyer && !$isSeller) {
             return response()->json(['status' => false, 'message' => 'Unauthorized.'], 403);
         }
 
@@ -62,23 +70,15 @@ class DeliveryChatController extends Controller
             return response()->json(['status' => false, 'message' => 'Cannot send messages to an archived chat.'], 403);
         }
 
-        // Determine recipient
-        $receiverId = null;
-        if ($user->id === $thread->rider_id) {
-            $receiverId = $thread->thread_type === 'rider_buyer' ? $thread->buyer_id : $thread->seller_id;
-        } else {
-            $receiverId = $thread->rider_id;
-        }
-
         $message = Message::create([
             'delivery_chat_thread_id' => $thread->id,
-            'sent_user' => $user->id,
+            'sent_user' => $currUser->id,
             'message' => $request->message,
             // Mapping to existing message table fields if necessary
         ]);
 
-        // Broadcast event (using existing MessageSents if compatible or create new)
-        broadcast(new MessageSents($message));
+        // Broadcast event
+        broadcast(new DeliveryMessageSent($message));
 
         return response()->json([
             'status' => true,

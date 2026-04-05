@@ -58,4 +58,9 @@ class Rider extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ManageAgreement::class, 'rider_id');
     }
+
+    public function chatThreads()
+    {
+        return $this->hasMany(DeliveryChatThread::class, 'rider_id');
+    }
 }
