@@ -285,12 +285,22 @@
         launcher.addEventListener('click', () => {
             windowEl.style.display = windowEl.style.display === 'none' ? 'flex' : 'none';
             launcher.style.transform = windowEl.style.display === 'none' ? 'scale(1)' : 'scale(0.9)';
+            if (windowEl.style.display === 'none') {
+                localStorage.setItem('fabi-mbokoai-closed', 'true');
+            }
         });
 
         closeBtn.addEventListener('click', () => {
             windowEl.style.display = 'none';
             launcher.style.transform = 'scale(1)';
+            localStorage.setItem('fabi-mbokoai-closed', 'true');
         });
+
+        // Set initial state based on localStorage
+        if (!localStorage.getItem('fabi-mbokoai-closed')) {
+            windowEl.style.display = 'flex';
+            launcher.style.transform = 'scale(0.9)';
+        }
 
         // Back Button
         backBtn.addEventListener('click', () => {

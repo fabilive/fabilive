@@ -40,8 +40,8 @@ class CampayController extends CheckoutBaseControlller
             return redirect()->back()->with('unsuccess', $orderCalculate['message']);
         }
 
-        // Calculate total including delivery fee (logic from WalletPaymentController)
-        $orderTotal = ($orderCalculate['total_amount'] ?? 0) + ($input['total_delivery_fee'] ?? 0);
+        // Total including delivery fee is now calculated inside PriceHelper::getOrderTotal
+        $orderTotal = $orderCalculate['total_amount'] ?? 0;
 
         $order = new Order;
         $order_number = Str::random(4).time();

@@ -35,6 +35,7 @@
 									                        <th>{{ __("Type") }}</th>
 									                        <th>{{ __("Stock") }}</th>
 									                        <th>{{ __("Price") }}</th>
+									                        <th>{{ __("Location") }}</th>
 									                        <th>{{ __("Status") }}</th>
 									                        <th>{{ __("Options") }}</th>
 														</tr>
@@ -208,6 +209,7 @@
                         { data: 'type', name: 'type' },
                         { data: 'stock', name: 'stock' },
                         { data: 'price', name: 'price' },
+                        { data: 'location', name: 'location' },
                         { data: 'status', searchable: false, orderable: false},
             			{ data: 'action', searchable: false, orderable: false }
 

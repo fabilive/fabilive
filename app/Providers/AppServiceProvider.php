@@ -20,23 +20,24 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        // 1. Force DB-based cache/session if available to bypass stale file caches
+        // Test database connectivity once — skip all DB operations if unreachable
+        $dbAvailable = false;
         try {
-            if (Schema::hasTable('cache')) {
-                config(['cache.default' => 'database']);
-                config(['session.driver' => 'database']);
-            }
-        } catch (\Exception $e) {}
+            DB::connection()->getPdo();
+            $dbAvailable = true;
+        } catch (\Exception $e) {
+            \Log::warning('AppServiceProvider: Database unreachable — using in-memory defaults. Error: ' . $e->getMessage());
+        }
 
         // 2. Global General Settings with Fail-safe
         $gs = null;
-        try {
-            if (Schema::hasTable('generalsettings')) {
+        if ($dbAvailable) {
+            try {
                 $gs = cache()->remember('generalsettings_model', now()->addDay(), function () {
                     return DB::table('generalsettings')->find(1);
                 });
-            }
-        } catch (\Exception $e) {}
+            } catch (\Exception $e) {}
+        }
 
         if (!$gs) {
             $gs = new \stdClass();
@@ -48,28 +49,39 @@ class AppServiceProvider extends ServiceProvider
             $gs->is_capcha = 0;
             $gs->rtl = 0;
             $gs->is_affilite = 0;
+            $gs->tawk_to = '';
+            $gs->is_tawk = 0;
+            $gs->currency_format = 0;
+            $gs->fixed_commission = 0;
+            $gs->percentage_commission = 0;
+            $gs->multiple_shipping = 0;
+            $gs->multiple_packaging = 0;
+            $gs->guest_checkout = 1;
+            $gs->is_maintain = 0;
+            $gs->is_verification_email = 0;
+            $gs->is_smtp = 0;
         }
         view()->share('gs', $gs);
 
         // 3. Global Admin Language Fail-safe
         $admin_lang = null;
-        try {
-            if (Schema::hasTable('admin_languages')) {
+        if ($dbAvailable) {
+            try {
                 $admin_lang = cache()->remember('admin_language_model_default', now()->addDay(), function () {
                     return DB::table('admin_languages')->where('is_default', 1)->first();
                 });
-            }
-        } catch (\Exception $e) {}
+            } catch (\Exception $e) {}
+        }
         view()->share('admin_lang', $admin_lang);
 
         // 4. View Composers for Contextual Variables
-        view()->composer('*', function ($settings) use ($gs) {
+        view()->composer('*', function ($settings) use ($gs, $dbAvailable) {
             $settings->with('gs', $gs);
             
             // Language Fail-safe
             $langg = null;
-            try {
-                if (Schema::hasTable('languages')) {
+            if ($dbAvailable) {
+                try {
                     if (Session::has('language')) {
                         $langg = cache()->remember('language_model_'.Session::get('language'), now()->addDay(), function () {
                             return DB::table('languages')->find(Session::get('language'));
@@ -79,8 +91,8 @@ class AppServiceProvider extends ServiceProvider
                             return DB::table('languages')->where('is_default', 1)->first();
                         });
                     }
-                }
-            } catch (\Exception $e) {}
+                } catch (\Exception $e) {}
+            }
 
             if (!$langg) {
                 $langg = new \stdClass();
@@ -92,8 +104,8 @@ class AppServiceProvider extends ServiceProvider
 
             // Currency Fail-safe
             $curr = null;
-            try {
-                if (Schema::hasTable('currencies')) {
+            if ($dbAvailable) {
+                try {
                     if (Session::has('currency')) {
                         $curr = cache()->remember('currency_model_'.Session::get('currency'), now()->addDay(), function () {
                             return DB::table('currencies')->find(Session::get('currency'));
@@ -103,8 +115,8 @@ class AppServiceProvider extends ServiceProvider
                             return DB::table('currencies')->where('is_default', 1)->first();
                         });
                     }
-                }
-            } catch (\Exception $e) {}
+                } catch (\Exception $e) {}
+            }
 
             if (!$curr) {
                 $curr = new \stdClass();
@@ -117,11 +129,13 @@ class AppServiceProvider extends ServiceProvider
 
             // Settings Tables Fail-safe
             $ps = null; $seo = null; $social = null;
-            try {
-                if (Schema::hasTable('pagesettings')) $ps = DB::table('pagesettings')->first();
-                if (Schema::hasTable('seotools')) $seo = DB::table('seotools')->first();
-                if (Schema::hasTable('socialsettings')) $social = DB::table('socialsettings')->first();
-            } catch (\Exception $e) {}
+            if ($dbAvailable) {
+                try {
+                    $ps = DB::table('pagesettings')->first();
+                    $seo = DB::table('seotools')->first();
+                    $social = DB::table('socialsettings')->first();
+                } catch (\Exception $e) {}
+            }
 
             $settings->with('ps', $ps);
             $settings->with('seo', $seo);
@@ -129,16 +143,20 @@ class AppServiceProvider extends ServiceProvider
 
             // Font Fail-safe
             $font = null;
-            try {
-                if (Schema::hasTable('fonts')) $font = DB::table('fonts')->where('is_default', 1)->first();
-            } catch (\Exception $e) {}
+            if ($dbAvailable) {
+                try {
+                    $font = DB::table('fonts')->where('is_default', 1)->first();
+                } catch (\Exception $e) {}
+            }
             $settings->with('default_font', $font);
 
             // Blog Fail-safe
-            $blogs = [];
-            try {
-                if (Schema::hasTable('blogs')) $blogs = DB::table('blogs')->orderby('id', 'desc')->limit(3)->get();
-            } catch (\Exception $e) {}
+            $blogs = collect();
+            if ($dbAvailable) {
+                try {
+                    $blogs = DB::table('blogs')->orderby('id', 'desc')->limit(3)->get();
+                } catch (\Exception $e) {}
+            }
             $settings->with('footer_blogs', $blogs);
 
             // Extra session variables

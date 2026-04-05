@@ -76,7 +76,8 @@ class RiderRegisterController extends Controller
         $upload('criminal_records', 'assets/images/criminalrecords');
 
         $input['password'] = Hash::make($request['password']);
-        // $input['email_token'] = md5(time() . $request->name . $request->email);// $input['rider_status'] = 'pending';$rider->fill($input)->save();
+        $input['rider_status'] = 'pending';
+        $rider->fill($input)->save();
 
         $token = null;
         if ($gs->is_verification_email != 'No') {

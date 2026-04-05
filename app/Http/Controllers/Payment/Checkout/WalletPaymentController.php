@@ -213,7 +213,7 @@ class WalletPaymentController extends CheckoutBaseControlller
             if ($this->gs->multiple_shipping == 0) {
                 // below line deduct nahi karni yeah jub shipping_cost ki value database mien store hoon gie tu yeah line uncomment karni ha aor haan shippings table mien price column mien value v fir daini ha.
                 // $orderTotal = $orderCalculate['total_amount'];
-                $orderTotal = $orderCalculate['total_amount'] + ($input['total_delivery_fee'] ?? 0);
+                $orderTotal = $orderCalculate['total_amount'];
                 $shipping = $orderCalculate['shipping'];
                 $packeing = $orderCalculate['packeing'];
                 $is_shipping = $orderCalculate['is_shipping'];
@@ -232,7 +232,7 @@ class WalletPaymentController extends CheckoutBaseControlller
                 $input['vendor_ids'] = $vendor_ids;
             } else {
                 // $orderTotal = $orderCalculate['total_amount'];
-                $orderTotal = $orderCalculate['total_amount'] + ($input['total_delivery_fee'] ?? 0);
+                $orderTotal = $orderCalculate['total_amount'];
                 $shipping = $orderCalculate['shipping'];
                 $packeing = $orderCalculate['packeing'];
                 $is_shipping = $orderCalculate['is_shipping'];

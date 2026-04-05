@@ -127,8 +127,11 @@ class PriceHelper
             });
 
             $totalAmount = $cart->totalPrice;
+            $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
+            $totalAmount += $delivery_fee;
+
             $tax_amount = 0;
-            if ($input['tax'] && @$input['tax_type']) {
+            if (isset($input['tax']) && @$input['tax_type']) {
                 if (@$input['tax_type'] == 'state_tax') {
                     $tax = State::findOrFail($input['tax'])->tax;
                 } else {
@@ -255,7 +258,10 @@ class PriceHelper
                 return DB::table('generalsettings')->first();
             });
             $totalAmount = $cart->totalPrice;
-            if ($input['tax'] && @$input['tax_type']) {
+            $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
+            $totalAmount += $delivery_fee;
+
+            if (isset($input['tax']) && @$input['tax_type']) {
                 if (@$input['tax_type'] == 'state_tax') {
                     $tax = State::findOrFail($input['tax'])->tax;
                 } else {
