@@ -11,7 +11,7 @@ class WithdrawController extends VendorBaseController
 {
     public function index()
     {
-        $withdraws = Withdraw::where('user_id', '=', $this->user->id)->where('type', '=', 'vendor')->latest('id')->get();
+        $withdraws = Withdraw::where('user_id', '=', $this->user->id)->latest('id')->get();
         $sign = $this->curr;
 
         return view('vendor.withdraw.index', compact('withdraws', 'sign'));
@@ -81,7 +81,6 @@ class WithdrawController extends VendorBaseController
                     $newwithdraw['reference'] = $request->reference;
                     $newwithdraw['amount'] = $finalamount;
                     $newwithdraw['fee'] = $fee;
-                    $newwithdraw['type'] = 'vendor';
                     $newwithdraw->save();
 
                     \App\Models\WalletLedger::create([

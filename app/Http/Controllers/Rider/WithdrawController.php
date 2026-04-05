@@ -12,7 +12,7 @@ class WithdrawController extends RiderBaseController
 {
     public function index()
     {
-        $withdraws = Withdraw::where('user_id', '=', $this->rider->id)->where('type', '=', 'rider')->latest('id')->get();
+        $withdraws = Withdraw::where('user_id', '=', $this->rider->id)->latest('id')->get();
         $sign = \App\Models\Currency::where('is_default', '=', 1)->first();
 
         return view('rider.withdraw.index', compact('withdraws', 'sign'));
@@ -54,7 +54,6 @@ class WithdrawController extends RiderBaseController
                     $newwithdraw['method'] = $request->methods;
                     $newwithdraw['amount'] = number_format($finalamount, 2, '.', '');
                     $newwithdraw['fee'] = $fee;
-                    $newwithdraw['type'] = 'rider';
                     $newwithdraw['reference'] = $request->reference;
 
                     if ($request->methods == 'Campay' || $request->methods == 'MTN Mobile Money' || $request->methods == 'Orange Money') {
