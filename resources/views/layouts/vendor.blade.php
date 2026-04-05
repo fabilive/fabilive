@@ -31,7 +31,6 @@
 
 	<!-- stylesheet -->
 	@php
-		$admin_lang = DB::table('admin_languages')->where('is_default','=',1)->first();
 		$rtl = $admin_lang ? $admin_lang->rtl : 0;
 	@endphp
 	@if($rtl == 1)

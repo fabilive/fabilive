@@ -20,133 +20,130 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        // V75-V83: GLOBAL CONFIG FORCE (Override stale config cache immediately)
+        // 1. Force DB-based cache/session if available to bypass stale file caches
         try {
             if (Schema::hasTable('cache')) {
                 config(['cache.default' => 'database']);
                 config(['session.driver' => 'database']);
             }
-        } catch (\Exception $e) {
-        }
+        } catch (\Exception $e) {}
 
-        // Always force reCAPTCHA from env()
-        config(['nocaptcha.secret' => env('NOCAPTCHA_SECRET', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFojJ4WifJWeE')]);
-        config(['nocaptcha.sitekey' => env('NOCAPTCHA_SITEKEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')]);
-
-        // FAIL-SAFE: If the filesystem is locked, force array cache if DB not available
-        if (config('cache.default') === 'file') {
-            try {
-                if (! is_writable(storage_path('framework/cache/data'))) {
-                    if (! Schema::hasTable('cache')) {
-                        config(['cache.default' => 'array']);
-                    }
-                }
-            } catch (\Exception $e) {
-                config(['cache.default' => 'array']);
-            }
-        }
-
+        // 2. Global General Settings with Fail-safe
         $gs = null;
         try {
-            $gs = cache()->remember('generalsettings_model', now()->addDay(), function () {
-                return \App\Models\Generalsetting::find(1);
-            });
-        } catch (\Exception $e) {
-            $gs = \App\Models\Generalsetting::find(1);
+            if (Schema::hasTable('generalsettings')) {
+                $gs = cache()->remember('generalsettings_model', now()->addDay(), function () {
+                    return DB::table('generalsettings')->find(1);
+                });
+            }
+        } catch (\Exception $e) {}
+
+        if (!$gs) {
+            $gs = new \stdClass();
+            $gs->title = "Fabilive";
+            $gs->logo = "logo.png";
+            $gs->favicon = "favicon.png";
+            $gs->is_admin_loader = 0;
+            $gs->wholesell = 0;
+            $gs->is_capcha = 0;
+            $gs->rtl = 0;
+            $gs->is_affilite = 0;
         }
+        view()->share('gs', $gs);
 
-        // Absolute fail-safe for missing properties
-        if ($gs) {
-            $gs->is_capcha = 0; // Force disable Captcha globally for recovery
-            if (! isset($gs->rtl)) {
-                $gs->rtl = 0;
+        // 3. Global Admin Language Fail-safe
+        $admin_lang = null;
+        try {
+            if (Schema::hasTable('admin_languages')) {
+                $admin_lang = cache()->remember('admin_language_model_default', now()->addDay(), function () {
+                    return DB::table('admin_languages')->where('is_default', 1)->first();
+                });
             }
-            if (! isset($gs->is_admin_loader)) {
-                $gs->is_admin_loader = 0;
-            }
-            if (! isset($gs->is_verification_email)) {
-                $gs->is_verification_email = 0;
-            }
-            if (! isset($gs->is_guest_checkout)) {
-                $gs->is_guest_checkout = 0;
-            }
-            if (! isset($gs->wholesell)) {
-                $gs->wholesell = 0;
-            }
-            if (! isset($gs->verify_product)) {
-                $gs->verify_product = 0;
-            }
-            if (! isset($gs->is_affilate)) {
-                $gs->is_affilate = 0;
-            }
-            if (! isset($gs->affilate_charge)) {
-                $gs->affilate_charge = 0;
-            }
+        } catch (\Exception $e) {}
+        view()->share('admin_lang', $admin_lang);
 
-            // Logo file existence fallback — gracefully handle in memory only (don't update DB)
-            $logoPath = public_path('assets/images/'.($gs->logo ?? ''));
-            if (empty($gs->logo) || ! file_exists($logoPath)) {
-                $gs->logo = 'logo.png';
-            }
-
-            // Footer logo fallback — gracefully handle in memory only
-            if (! empty($gs->footer_logo)) {
-                $footerLogoPath = public_path('assets/images/'.$gs->footer_logo);
-                if (! file_exists($footerLogoPath)) {
-                    $gs->footer_logo = 'logo.png';
-                }
-            }
-        }
-
+        // 4. View Composers for Contextual Variables
         view()->composer('*', function ($settings) use ($gs) {
             $settings->with('gs', $gs);
-
+            
+            // Language Fail-safe
+            $langg = null;
             try {
-                $ps = cache()->remember('pagesettings', now()->addDay(), function () {
-                    return DB::table('pagesettings')->first();
-                });
-                $seo = cache()->remember('seotools', now()->addDay(), function () {
-                    return DB::table('seotools')->first();
-                });
-                $social = cache()->remember('socialsettings', now()->addDay(), function () {
-                    return DB::table('socialsettings')->first();
-                });
-            } catch (\Exception $e) {
-                $ps = DB::table('pagesettings')->first();
-                $seo = DB::table('seotools')->first();
-                $social = DB::table('socialsettings')->first();
+                if (Schema::hasTable('languages')) {
+                    if (Session::has('language')) {
+                        $langg = cache()->remember('language_model_'.Session::get('language'), now()->addDay(), function () {
+                            return DB::table('languages')->find(Session::get('language'));
+                        });
+                    } else {
+                        $langg = cache()->remember('language_model_default', now()->addDay(), function () {
+                            return DB::table('languages')->where('is_default', 1)->first();
+                        });
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            if (!$langg) {
+                $langg = new \stdClass();
+                $langg->id = 1;
+                $langg->name = "English";
+                $langg->rtl = 0;
             }
+            $settings->with('langg', $langg);
+
+            // Currency Fail-safe
+            $curr = null;
+            try {
+                if (Schema::hasTable('currencies')) {
+                    if (Session::has('currency')) {
+                        $curr = cache()->remember('currency_model_'.Session::get('currency'), now()->addDay(), function () {
+                            return DB::table('currencies')->find(Session::get('currency'));
+                        });
+                    } else {
+                        $curr = cache()->remember('currency_model_default', now()->addDay(), function () {
+                            return DB::table('currencies')->where('is_default', 1)->first();
+                        });
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            if (!$curr) {
+                $curr = new \stdClass();
+                $curr->id = 1;
+                $curr->name = "CFA";
+                $curr->sign = "CFA";
+                $curr->value = 1;
+            }
+            $settings->with('curr', $curr);
+
+            // Settings Tables Fail-safe
+            $ps = null; $seo = null; $social = null;
+            try {
+                if (Schema::hasTable('pagesettings')) $ps = DB::table('pagesettings')->first();
+                if (Schema::hasTable('seotools')) $seo = DB::table('seotools')->first();
+                if (Schema::hasTable('socialsettings')) $social = DB::table('socialsettings')->first();
+            } catch (\Exception $e) {}
 
             $settings->with('ps', $ps);
             $settings->with('seo', $seo);
             $settings->with('socialsetting', $social);
 
-            $settings->with('default_font', cache()->remember('default_font', now()->addDay(), function () {
-                return Font::whereIsDefault(1)->first();
-            }));
+            // Font Fail-safe
+            $font = null;
+            try {
+                if (Schema::hasTable('fonts')) $font = DB::table('fonts')->where('is_default', 1)->first();
+            } catch (\Exception $e) {}
+            $settings->with('default_font', $font);
 
-            if (Session::has('currency')) {
-                $settings->with('curr', Currency::find(Session::get('currency')));
-            } else {
-                $settings->with('curr', Currency::where('is_default', '=', 1)->first());
-            }
+            // Blog Fail-safe
+            $blogs = [];
+            try {
+                if (Schema::hasTable('blogs')) $blogs = DB::table('blogs')->orderby('id', 'desc')->limit(3)->get();
+            } catch (\Exception $e) {}
+            $settings->with('footer_blogs', $blogs);
 
-            if (Session::has('language')) {
-                $settings->with('langg', Language::find(Session::get('language')));
-            } else {
-                $settings->with('langg', Language::where('is_default', '=', 1)->first());
-            }
-
-            if (! Session::has('visited')) {
-                Session::put('visited', 1);
-                $visited = 1;
-            } else {
-                $visited = 0;
-            }
-
-            $settings->with('visited', $visited);
-
-            $settings->with('footer_blogs', DB::table('blogs')->orderby('id', 'desc')->limit(3)->get());
+            // Extra session variables
+            $settings->with('visited', Session::has('visited') ? 0 : 1);
+            if (!Session::has('visited')) Session::put('visited', 1);
         });
     }
 

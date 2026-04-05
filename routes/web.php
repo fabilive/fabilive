@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Schema;
 
 // ************************************ ADMIN SECTION **********************************************
 
-// SCHEMA POLISH ROUTE (Fixes missing tables/columns)
+// SCHEMA POLISH ROUTE (Fixes missing tables/columns/records)
 Route::get('/admin/schema-polish', function () {
     try {
-        // user_notifications
+        // 1. user_notifications
         if (! \Illuminate\Support\Facades\Schema::hasTable('user_notifications')) {
             \Illuminate\Support\Facades\Schema::create('user_notifications', function ($table) {
                 $table->id();
@@ -26,7 +26,7 @@ Route::get('/admin/schema-polish', function () {
             });
         }
         
-        // notifications
+        // 2. notifications
         if (! \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
             \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
                 $table->id();
@@ -38,7 +38,7 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        // admin_languages
+        // 3. admin_languages
         if (! \Illuminate\Support\Facades\Schema::hasTable('admin_languages')) {
             \Illuminate\Support\Facades\Schema::create('admin_languages', function ($table) {
                 $table->id();
@@ -48,15 +48,19 @@ Route::get('/admin/schema-polish', function () {
                 $table->integer('is_default')->default(0);
                 $table->integer('rtl')->default(0);
             });
+        }
+        if (\Illuminate\Support\Facades\DB::table('admin_languages')->count() == 0) {
             \Illuminate\Support\Facades\DB::table('admin_languages')->insert([
                 'id' => 1,
                 'name' => 'English',
                 'language' => 'English',
+                'file' => 'english.json',
                 'is_default' => 1,
+                'rtl' => 0
             ]);
         }
 
-        // languages
+        // 4. languages
         if (! \Illuminate\Support\Facades\Schema::hasTable('languages')) {
             \Illuminate\Support\Facades\Schema::create('languages', function ($table) {
                 $table->id();
@@ -66,15 +70,19 @@ Route::get('/admin/schema-polish', function () {
                 $table->integer('is_default')->default(0);
                 $table->integer('rtl')->default(0);
             });
+        }
+        if (\Illuminate\Support\Facades\DB::table('languages')->count() == 0) {
             \Illuminate\Support\Facades\DB::table('languages')->insert([
                 'id' => 1,
                 'name' => 'English',
                 'language' => 'English',
+                'file' => 'english.json',
                 'is_default' => 1,
+                'rtl' => 0
             ]);
         }
 
-        // currencies
+        // 5. currencies
         if (! \Illuminate\Support\Facades\Schema::hasTable('currencies')) {
             \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
                 $table->id();
@@ -83,6 +91,8 @@ Route::get('/admin/schema-polish', function () {
                 $table->double('value')->default(1);
                 $table->integer('is_default')->default(0);
             });
+        }
+        if (\Illuminate\Support\Facades\DB::table('currencies')->count() == 0) {
             \Illuminate\Support\Facades\DB::table('currencies')->insert([
                 'id' => 1,
                 'name' => 'CFA',
@@ -92,7 +102,7 @@ Route::get('/admin/schema-polish', function () {
             ]);
         }
 
-        // countries, states, cities
+        // 6. countries, states, cities
         if (! \Illuminate\Support\Facades\Schema::hasTable('countries')) {
             \Illuminate\Support\Facades\Schema::create('countries', function ($table) {
                 $table->id();
@@ -117,21 +127,62 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        // Generalsettings columns
-        if (\Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
-            $gs_cols = ['physical', 'digital', 'license', 'listing', 'vendor_ship_info', 'affilite', 'is_admin_loader', 'wholesell'];
-            foreach ($gs_cols as $col) {
-                if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
-                    \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col) {
-                        $table->integer($col)->default(1);
+        // 7. Generalsettings columns & record
+        if (! \Illuminate\Support\Facades\Schema::hasTable('generalsettings')) {
+            \Illuminate\Support\Facades\Schema::create('generalsettings', function ($table) {
+                $table->id();
+            });
+        }
+        
+        $gs_cols = [
+            'title' => 'string',
+            'logo' => 'string',
+            'favicon' => 'string',
+            'admin_loader' => 'string',
+            'is_admin_loader' => 'integer',
+            'wholesell' => 'integer',
+            'affilite' => 'integer',
+            'vendor_ship_info' => 'integer',
+            'physical' => 'integer',
+            'digital' => 'integer',
+            'license' => 'integer',
+            'listing' => 'integer'
+        ];
+        
+        foreach ($gs_cols as $col => $type) {
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('generalsettings', $col)) {
+                \Illuminate\Support\Facades\Schema::table('generalsettings', function ($table) use ($col, $type) {
+                    if ($type == 'string') $table->string($col)->nullable();
+                    else $table->integer($col)->default(0);
+                });
+            }
+        }
+        
+        if (\Illuminate\Support\Facades\DB::table('generalsettings')->count() == 0) {
+            \Illuminate\Support\Facades\DB::table('generalsettings')->insert([
+                'id' => 1,
+                'title' => 'Fabilive',
+                'logo' => 'logo.png',
+                'is_admin_loader' => 0,
+                'wholesell' => 0
+            ]);
+        }
+
+        // 8. User columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+            $u_cols = ['shop_name', 'is_provider', 'photo'];
+            foreach ($u_cols as $col) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('users', $col)) {
+                    \Illuminate\Support\Facades\Schema::table('users', function ($table) use ($col) {
+                        $table->string($col)->nullable();
                     });
                 }
             }
         }
 
-        return "Schema polished successfully! All critical tables and columns have been verified/created.";
+        return "Schema polished successfully! All critical tables, columns, and records have been verified/created. <br><br> <a href='".route('vendor.dashboard')."'>Go to Vendor Dashboard</a>";
     } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
+        return "Error polishing schema: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
     }
 });
 
