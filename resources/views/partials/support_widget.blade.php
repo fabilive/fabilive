@@ -5,7 +5,7 @@
     </button>
 
     <!-- Main Widget Window -->
-    <div id="fabi-support-window" style="display: none; width: 380px; height: 550px; background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; border: 1px solid #eee;">
+    <div id="fabi-support-window" style="display: none; width: 380px; height: 550px; background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; border: 1px solid #eee;">
         
         <!-- Header -->
         <div style="background: #000; color: #fff; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
