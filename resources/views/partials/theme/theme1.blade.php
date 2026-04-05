@@ -345,6 +345,7 @@
                     </div>
                 </div>
                 <div class="row g-4">
+                    @if(isset($arrivals[0]))
                     <div class="col-xxl-6 col-md-12">
                         <div class="banner-wrapper hover-img-zoom banner-one custom-class-122 bg-light">
 
@@ -393,7 +394,9 @@
 
                         </div>
                     </div>
+                    @endif
 
+                    @if(isset($arrivals[1]))
                     <div class="col-xxl-3 col-md-6">
                         <div class="banner-wrapper hover-img-zoom banner-one custom-class-123">
                             <div class="banner-image overflow-hidden transation"><img
@@ -409,6 +412,8 @@
                             </div>
                         </div>
                     </div>
+                    @endif
+                    @if(isset($arrivals[2]))
                     <div class="col-xxl-3 col-md-6">
                         <div class="banner-wrapper hover-img-zoom banner-one custom-class-124"
                              style="position:relative; overflow:hidden; border-radius:8px;">
@@ -443,6 +448,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                 </div>
             </div>
