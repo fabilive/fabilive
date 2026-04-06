@@ -22,8 +22,6 @@ use Illuminate\Support\Str;
 use Image;
 use Validator;
 use App\Helpers\PriceHelper;
-use Intervention\Image\Facades\Image;
-use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends VendorBaseController
 {
