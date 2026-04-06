@@ -30,9 +30,9 @@ class ProductController extends AdminBaseController
     public function datatables(Request $request)
     {
         if ($request->type == 'all') {
-            $datas = Product::with('cities')->whereProductType('normal')->latest('id')->get();
+            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal')->latest('id')->get();
         } elseif ($request->type == 'deactive') {
-            $datas = Product::with('cities')->whereProductType('normal')->whereStatus(0)->latest('id')->get();
+            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal')->whereStatus(0)->latest('id')->get();
         }
 
         //--- Integrating This Collection Into Datatables
@@ -45,7 +45,9 @@ class ProductController extends AdminBaseController
                 return $name.'<br>'.$id.$id3.$data->checkVendor();
             })
             ->editColumn('price', function (Product $data) {
-                $price = $data->price * $this->curr->value;
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
+                $value = $curr ? $curr->value : 1;
+                $price = $data->price * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -61,7 +63,10 @@ class ProductController extends AdminBaseController
 
             })
             ->addColumn('location', function (Product $data) {
-                return $data->cities ? $data->cities->city_name : __('N/A');
+                if ($data->cities) {
+                    return $data->cities->city_name;
+                }
+                return __('N/A');
             })
             ->addColumn('status', function (Product $data) {
                 $class = $data->status == 1 ? 'drop-success' : 'drop-danger';

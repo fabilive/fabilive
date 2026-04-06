@@ -35,7 +35,8 @@ class OrderController extends VendorBaseController
                 $order = Order::findOrFail($data->id);
                 $user = $this->user;
                 $price = $order->vendororders()->where('user_id', '=', $user->id)->sum('price');
-                $price = round($price * $order->currency_value, 2);
+                $order_curr_value = ($order->currency_value > 0) ? $order->currency_value : 1;
+                $price = round($price * $order_curr_value, 2);
                 if ($order->is_shipping == 1 && 0) {
                     $vendor_shipping = json_decode($order->vendor_shipping_id);
                     $user_id = auth()->id();

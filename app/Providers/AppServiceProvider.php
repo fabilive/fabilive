@@ -102,25 +102,19 @@ class AppServiceProvider extends ServiceProvider
             }
             $settings->with('langg', $langg);
 
-            // Currency Fail-safe
+            // Currency Fail-safe (Forced to CFA)
             $curr = null;
             if ($dbAvailable) {
                 try {
-                    if (Session::has('currency')) {
-                        $curr = cache()->remember('currency_model_'.Session::get('currency'), now()->addDay(), function () {
-                            return DB::table('currencies')->find(Session::get('currency'));
-                        });
-                    } else {
-                        $curr = cache()->remember('currency_model_default', now()->addDay(), function () {
-                            return DB::table('currencies')->where('is_default', 1)->first();
-                        });
-                    }
+                    $curr = cache()->remember('currency_model_cfa', now()->addDay(), function () {
+                        return DB::table('currencies')->where('name', 'CFA')->first();
+                    });
                 } catch (\Exception $e) {}
             }
 
             if (!$curr) {
                 $curr = new \stdClass();
-                $curr->id = 1;
+                $curr->id = 12; // Assuming 12 based on previous context, but fail-safe below handles it
                 $curr->name = "CFA";
                 $curr->sign = "CFA";
                 $curr->value = 1;

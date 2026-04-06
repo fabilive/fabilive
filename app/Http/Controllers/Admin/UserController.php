@@ -518,8 +518,9 @@ class UserController extends AdminBaseController
                 return $status;
             })
             ->editColumn('amount', function (Withdraw $data) {
-                $sign = $this->curr;
-                $amount = $data->amount * $sign->value;
+                $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
+                $value = $sign ? $sign->value : 1;
+                $amount = $data->amount * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($amount);
             })
@@ -539,7 +540,7 @@ class UserController extends AdminBaseController
     //*** GET Request
     public function withdrawdetails($id)
     {
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
         $withdraw = Withdraw::findOrFail($id);
 
         return view('admin.user.withdraw-details', compact('withdraw', 'sign'));
@@ -604,7 +605,7 @@ class UserController extends AdminBaseController
     //*** GET Request
     public function deposit($id)
     {
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
         $data = User::findOrFail($id);
 
         return view('admin.user.deposit', compact('data', 'sign'));
@@ -612,7 +613,7 @@ class UserController extends AdminBaseController
 
     public function depositupdate(Request $request, $id)
     {
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
         $user = User::findOrFail($id);
         if ($request->type == 'plus') {
             $user->balance += (float) $request->amount;
@@ -678,10 +679,10 @@ class UserController extends AdminBaseController
         $sub->user_id = $user->id;
         $sub->subscription_id = $subs->id;
         $sub->title = $subs->title;
-        $sub->currency_sign = $this->curr->sign;
-        $sub->currency_code = $this->curr->name;
-        $sub->currency_value = $this->curr->value;
-        $sub->price = $subs->price * $this->curr->value;
+        $sub->currency_sign = $this->curr ? $this->curr->sign : 'CFA';
+        $sub->currency_code = $this->curr ? $this->curr->name : 'CFA';
+        $sub->currency_value = $this->curr ? $this->curr->value : 1;
+        $sub->price = $subs->price * $sub->currency_value;
         $sub->price = $sub->price / $this->curr->value;
         $sub->days = $subs->days;
         $sub->allowed_products = $subs->allowed_products;

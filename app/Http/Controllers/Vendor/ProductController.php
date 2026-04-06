@@ -42,7 +42,9 @@ class ProductController extends VendorBaseController
                 return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
-                $price = round($data->price * $this->curr->value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
+                $curr_value = $curr ? $curr->value : 1;
+                $price = round($data->price * $curr_value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -74,7 +76,9 @@ class ProductController extends VendorBaseController
                 return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
-                $price = round($data->price * $this->curr->value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
+                $curr_value = $curr ? $curr->value : 1;
+                $price = round($data->price * $curr_value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })

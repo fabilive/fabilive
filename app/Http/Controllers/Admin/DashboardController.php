@@ -32,7 +32,7 @@ class DashboardController extends AdminBaseController
         $data['products'] = Product::all();
         $data['blogs'] = Blog::all();
         $data['total_commission'] = Order::sum('commission');
-        $data['default_currency'] = \App\Models\Currency::where('is_default', 1)->first();
+        $data['default_currency'] = \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
         $data['pproducts'] = Product::latest('id')->take(5)->get();
         $data['rorders'] = Order::latest('id')->take(5)->get();
         $data['poproducts'] = Product::latest('views')->take(5)->get();

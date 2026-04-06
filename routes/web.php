@@ -2297,6 +2297,11 @@ Route::prefix('admin')->group(function () {
 
     //------------ ADMIN DASHBOARD & PROFILE SECTION ------------
     Route::get('/', 'Admin\DashboardController@index')->name('admin.dashboard');
+
+    // Server Error Logs
+    Route::get('/logs', 'Admin\LogController@index')->name('admin-logs-index');
+    Route::get('/logs/clear', 'Admin\LogController@clear')->name('admin-logs-clear');
+
     Route::get('/profile', 'Admin\DashboardController@profile')->name('admin.profile');
     Route::post('/profile/update', 'Admin\DashboardController@profileupdate')->name('admin.profile.update');
     Route::get('/password', 'Admin\DashboardController@passwordreset')->name('admin.password');

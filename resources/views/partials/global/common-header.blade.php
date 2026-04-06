@@ -36,7 +36,8 @@
                         @php
                             $currencies = App\Models\Currency::all();
                         @endphp
-                        <li class="my-account-dropdown">
+                        {{-- Currency Switcher Hidden --}}
+                        {{-- <li class="my-account-dropdown">
                             <div class="currency-selector nice-select">
                                 <span class="text-dark">
                                     {{ Session::has('currency')
@@ -58,7 +59,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </li>
+                        </li> --}}
                         <li class="my-account-dropdown">
                             <a href="my-account.html" class="has-dropdown"><i
                                     class="flaticon-user-3 flat-mini me-1"></i>{{ __('My Account') }}</a>
@@ -135,7 +136,8 @@
                             @php
                                 $currencies = App\Models\Currency::all();
                             @endphp
-                            <li class="my-account-dropdown">
+                            {{-- Currency Switcher Hidden --}}
+                            {{-- <li class="my-account-dropdown">
                                 <div class="currency-selector nice-select">
                                     <span class="text-dark">
                                         {{ Session::has('currency')
@@ -157,7 +159,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </li>
+                            </li> --}}
                             <li class="my-account-dropdown">
                                 <a href="my-account.html" class="has-dropdown"><i
                                         class="flaticon-user-3 flat-mini me-1"></i>{{ __('My Account') }}</a>

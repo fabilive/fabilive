@@ -486,6 +486,11 @@
 </li>
 
 <li>
+    <a href="{{ route('admin-logs-index') }}" class=" wave-effect"><i class="fas fa-exclamation-triangle"></i>{{ __('Server Error Logs')
+        }}</a>
+</li>
+
+<li>
     <a href="{{ route('admin-cache-clear') }}" class=" wave-effect"><i class="fas fa-sync"></i>{{ __('Clear Cache')
         }}</a>
 </li>

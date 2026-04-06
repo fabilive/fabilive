@@ -87,6 +87,13 @@ class OrderController extends AdminBaseController
     public function datatables($status)
     {
         $defaultCurrency = \App\Models\Currency::where('is_default', 1)->first();
+        if (!$defaultCurrency) {
+            $defaultCurrency = \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
+        }
+        
+        $currValue = $defaultCurrency ? $defaultCurrency->value : 1;
+        $currSign = $defaultCurrency ? $defaultCurrency->sign : 'CFA';
+
         if ($status == 'pending') {
             $datas = Order::where('status', '=', 'pending')->latest('id')->get();
         } elseif ($status == 'processing') {
@@ -105,16 +112,16 @@ class OrderController extends AdminBaseController
 
                 return $id;
             })
-            ->editColumn('pay_amount', function (Order $data) use ($defaultCurrency) {
+            ->editColumn('pay_amount', function (Order $data) use ($currValue, $currSign) {
                 return PriceHelper::showOrderCurrencyPrice(
-                    (($data->pay_amount + $data->wallet_price) * $defaultCurrency->value),
-                    $defaultCurrency->sign
+                    (($data->pay_amount + $data->wallet_price) * $currValue),
+                    $currSign
                 );
             })
-            ->addColumn('commission', function (Order $data) use ($defaultCurrency) {
+            ->addColumn('commission', function (Order $data) use ($currValue, $currSign) {
                 return PriceHelper::showOrderCurrencyPrice(
-                    ($data->commission * $defaultCurrency->value),
-                    $defaultCurrency->sign
+                    ($data->commission * $currValue),
+                    $currSign
                 );
             })
             ->addColumn('action', function (Order $data) {

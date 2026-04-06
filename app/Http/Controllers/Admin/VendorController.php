@@ -212,8 +212,9 @@ class VendorController extends AdminBaseController
                 return $status;
             })
             ->editColumn('amount', function (Withdraw $data) {
-                $sign = $this->curr;
-                $amount = $data->amount * $sign->value;
+                $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
+                $value = $sign ? $sign->value : 1;
+                $amount = $data->amount * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($amount);
             })
@@ -233,7 +234,7 @@ class VendorController extends AdminBaseController
     //*** GET Request
     public function withdrawdetails($id)
     {
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
         $withdraw = Withdraw::findOrFail($id);
 
         return view('admin.vendor.withdraw-details', compact('withdraw', 'sign'));
