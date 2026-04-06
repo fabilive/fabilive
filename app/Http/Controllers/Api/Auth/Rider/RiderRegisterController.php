@@ -58,6 +58,14 @@ class RiderRegisterController extends Controller
                 $name = \App\Helpers\PriceHelper::ImageCreateName($file);
                 $file->move($path, $name);
                 $input[$field] = $name;
+            } elseif ($request->filled($field)) {
+                // Check if it's base64 (useful for selfie camera capture)
+                $data = $request->get($field);
+                if (is_string($data) && strpos($data, 'data:image') === 0) {
+                    if ($name = \App\Helpers\PriceHelper::saveBase64Image($data, public_path($path))) {
+                         $input[$field] = $name;
+                    }
+                }
             }
         };
         $upload('national_id_front_image', 'assets/images/rideridfront');

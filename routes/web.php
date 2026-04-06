@@ -3425,6 +3425,15 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('/withdraw/create', 'Vendor\WithdrawController@create')->name('vendor-wt-create');
             Route::post('/withdraw/create', 'Vendor\WithdrawController@store')->name('vendor-wt-store');
 
+            // Saved Withdrawal Accounts
+            Route::get('/withdraw-accounts', 'Vendor\WithdrawAccountController@index')->name('vendor-withdraw-accounts-index');
+            Route::get('/withdraw-accounts/create', 'Vendor\WithdrawAccountController@create')->name('vendor-withdraw-accounts-create');
+            Route::post('/withdraw-accounts/create', 'Vendor\WithdrawAccountController@store')->name('vendor-withdraw-accounts-store');
+            Route::get('/withdraw-accounts/edit/{id}', 'Vendor\WithdrawAccountController@edit')->name('vendor-withdraw-accounts-edit');
+            Route::post('/withdraw-accounts/update/{id}', 'Vendor\WithdrawAccountController@update')->name('vendor-withdraw-accounts-update');
+            Route::get('/withdraw-accounts/delete/{id}', 'Vendor\WithdrawAccountController@destroy')->name('vendor-withdraw-accounts-delete');
+            Route::get('/withdraw-accounts/default/{id}', 'Vendor\WithdrawAccountController@setDefault')->name('vendor-withdraw-accounts-default');
+
             //------------ VENDOR SERVICE ------------
 
             Route::get('/service/datatables', 'Vendor\ServiceController@datatables')->name('vendor-service-datatables');
@@ -3822,6 +3831,15 @@ Route::group(['middleware' => 'maintenance'], function () {
         Route::get('/withdraw', 'Rider\WithdrawController@index')->name('rider-wwt-index');
         Route::get('/withdraw/create', 'Rider\WithdrawController@create')->name('rider-wwt-create');
         Route::post('/withdraw/create', 'Rider\WithdrawController@store')->name('rider-wwt-store');
+
+        // Saved Withdrawal Accounts
+        Route::get('/withdraw-accounts', 'Rider\WithdrawAccountController@index')->name('rider-withdraw-accounts-index');
+        Route::get('/withdraw-accounts/create', 'Rider\WithdrawAccountController@create')->name('rider-withdraw-accounts-create');
+        Route::post('/withdraw-accounts/create', 'Rider\WithdrawAccountController@store')->name('rider-withdraw-accounts-store');
+        Route::get('/withdraw-accounts/edit/{id}', 'Rider\WithdrawAccountController@edit')->name('rider-withdraw-accounts-edit');
+        Route::post('/withdraw-accounts/update/{id}', 'Rider\WithdrawAccountController@update')->name('rider-withdraw-accounts-update');
+        Route::get('/withdraw-accounts/delete/{id}', 'Rider\WithdrawAccountController@destroy')->name('rider-withdraw-accounts-delete');
+        Route::get('/withdraw-accounts/default/{id}', 'Rider\WithdrawAccountController@setDefault')->name('rider-withdraw-accounts-default');
 
         Route::get('my/orders', 'Rider\RiderController@orders')->name('rider-orders');
         Route::get('order/details/{id}', 'Rider\RiderController@orderDetails')->name('rider-order-details');

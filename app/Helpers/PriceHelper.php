@@ -111,6 +111,51 @@ class PriceHelper
         return $name;
     }
 
+    /**
+     * Save base64 image data as a file.
+     * 
+     * @param string $base64Data The base64 string (e.g., "data:image/png;base64,iVBOR...")
+     * @param string $path The directory path where the image should be saved
+     * @return string|null The generated filename or null on failure
+     */
+    public static function saveBase64Image($base64Data, $path)
+    {
+        try {
+            // Check if it is a base64 string
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+                $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
+                $type = strtolower($type[1]); // png, jpg, etc.
+
+                if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                    return null;
+                }
+
+                $base64Data = base64_decode($base64Data);
+
+                if ($base64Data === false) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+
+            $filename = time() . uniqid() . '.' . $type;
+            
+            // Fix double slashes or missing slashes in path
+            $path = rtrim($path, '/');
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            file_put_contents($path . '/' . $filename, $base64Data);
+
+            return $filename;
+        } catch (\Exception $e) {
+            \Log::error("Base64 Image Save Error: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public static function getOrderTotal($input, $cart)
     {
 

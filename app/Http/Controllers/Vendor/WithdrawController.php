@@ -21,8 +21,11 @@ class WithdrawController extends VendorBaseController
     {
         $sign = $this->curr;
         $actualBalance = $this->user->current_balance;
+        $savedAccounts = \App\Models\PartnerWithdrawAccount::where('user_id', $this->user->id)
+            ->where('user_type', 'vendor')
+            ->get();
 
-        return view('vendor.withdraw.create', compact('sign', 'actualBalance'));
+        return view('vendor.withdraw.create', compact('sign', 'actualBalance', 'savedAccounts'));
     }
 
     public function store(Request $request)

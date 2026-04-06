@@ -15,6 +15,7 @@
             <li class=""><a class="{{ Request::url() == route('rider-service-area') ? 'active':'' }}" href="{{ route('rider-service-area') }}">{{ __('Service Area') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-profile') ? 'active':'' }}" href="{{ route('rider-profile') }}">{{ __('Edit Profile') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-wwt-index') ? 'active':'' }}" href="{{route('rider-wwt-index')}}">{{ __('Withdraw') }}</a></li>
+            <li class=""><a class="{{ Request::url() == route('rider-withdraw-accounts-index') ? 'active':'' }}" href="{{ route('rider-withdraw-accounts-index') }}">{{ __('Withdrawal Accounts') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('rider-reset') ? 'active':'' }}" href="{{ route('rider-reset') }}">{{ __('Reset Password') }}</a></li>
             <li class=""><a class="" href="{{ route('rider-logout') }}">{{ __('Logout') }}</a></li>
           </ul>

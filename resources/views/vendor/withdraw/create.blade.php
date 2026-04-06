@@ -55,6 +55,32 @@
                                 </div>
                             </div>
 
+                            @if(count($savedAccounts) > 0)
+                            <div class="item form-group">
+                                <label class="control-label col-sm-12" for="saved_account">{{ __('Select Saved Account') }}</label>
+                                <div class="col-sm-12">
+                                    <select class="form-control" id="saved_account">
+                                        <option value="">{{ __('Select a saved account') }}</option>
+                                        @foreach($savedAccounts as $acc)
+                                            <option value="{{ $acc->id }}" 
+                                                data-method="{{ $acc->method }}"
+                                                data-acc_name="{{ $acc->acc_name }}"
+                                                data-acc_number="{{ $acc->acc_number }}"
+                                                data-bank_name="{{ $acc->bank_name }}"
+                                                data-iban="{{ $acc->iban }}"
+                                                data-swift="{{ $acc->swift }}"
+                                                data-network="{{ $acc->network }}"
+                                                data-address="{{ $acc->address }}"
+                                                {{ $acc->is_default ? 'selected' : '' }}
+                                            >
+                                                {{ $acc->method }} - {{ $acc->acc_name }} ({{ $acc->acc_number ?: $acc->iban }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            @endif
+
                             <div class="item form-group">
                                 <label class="control-label col-sm-12" for="name">{{ __('Withdraw Amount') }} *
 
@@ -173,6 +199,48 @@
 <script type="text/javascript">
 (function($) {
     "use strict";
+
+    function updateFieldsBySavedAccount() {
+        var $el = $("#saved_account option:selected");
+        if ($el.val() == "") return;
+
+        var method = $el.data('method');
+        var acc_name = $el.data('acc_name');
+        var acc_number = $el.data('acc_number');
+        var bank_name = $el.data('bank_name');
+        var iban = $el.data('iban');
+        var swift = $el.data('swift');
+        var network = $el.data('network');
+        var address = $el.data('address');
+
+        $("#withmethod").val(method).trigger('change');
+
+        // Populate fields based on method
+        if (method == "Bank") {
+            $('input[name="acc_name"]').val(acc_name);
+            $('input[name="iban"]').val(iban || acc_number);
+            $('input[name="swift"]').val(swift);
+            $('input[name="address"]').val(address);
+        } else {
+            $('input[name="campay_acc_name"]').val(acc_name);
+            $('input[name="campay_acc_no"]').val(acc_number);
+            if (network) {
+                $('select[name="network"]').val(network);
+            }
+        }
+    }
+
+    $("#saved_account").change(function() {
+        updateFieldsBySavedAccount();
+    });
+
+    // Auto-fill if default is selected on load
+    $(document).ready(function() {
+        if ($("#saved_account").val() != "") {
+            updateFieldsBySavedAccount();
+        }
+    });
+
     $("#withmethod").change(function () {
         var method = $(this).val();
         if (method == "Bank") {

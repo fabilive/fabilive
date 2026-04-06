@@ -291,6 +291,14 @@ class RegisterController extends Controller
                 $filename = PriceHelper::ImageCreateName($file);
                 $file->move("assets/images/{$folder}", $filename);
                 $user->{$field} = $filename; // Saves the filename in DB
+            } elseif ($request->filled($field)) {
+                // Check if it's base64 (useful for selfie camera capture)
+                $data = $request->get($field);
+                if (is_string($data) && strpos($data, 'data:image') === 0) {
+                    if ($filename = PriceHelper::saveBase64Image($data, public_path("assets/images/{$folder}"))) {
+                         $user->{$field} = $filename;
+                    }
+                }
             } elseif ($field === 'selfie_image') {
                 $user->selfie_image = null; // Ensure it's null if not provided
             }

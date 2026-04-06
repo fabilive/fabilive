@@ -209,6 +209,10 @@
 								__('Withdraws') }}</a>
 						</li>
 						<li>
+							<a href="{{ route('vendor-withdraw-accounts-index') }}" class=" wave-effect"><i class="fas fa-wallet"></i>{{
+								__('Withdrawal Accounts') }}</a>
+						</li>
+						<li>
 							<a href="#general" class="accordion-toggle wave-effect" data-toggle="collapse"
 								aria-expanded="false">
 								<i class="fas fa-cogs"></i>{{ __('Settings') }}

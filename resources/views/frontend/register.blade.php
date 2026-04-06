@@ -57,15 +57,26 @@
                                             <p>
                                                 <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('affilate_code') ? Session::get('affilate_code') : (Session::has('custom_referral_code') ? Session::get('custom_referral_code') : '') }}">
                                             </p>
-                                            {{-- V90.7: Captcha DISABLED for recovery --}}
-                                            {{-- @if($gs->is_capcha == 1)
-                                            <div class="form-input mb-3">
-                                                 {!! NoCaptcha::display() !!}
-                                                 @error('g-recaptcha-response')
-                                                 <p class="my-2">{{$message}}</p>
-                                                 @enderror
-                                             </div>
-                                             @endif --}}
+                                            @if(request()->source == 'sell')
+                                            <div class="form-group mb-3">
+                                                <label><strong>{{ __('Live Selfie Verification') }} *</strong></label>
+                                                <p class="small text-muted">{{ __('Please take a live selfie for identity verification.') }}</p>
+                                                
+                                                <div id="selfie-container" class="text-center">
+                                                    <video id="selfie-video" width="100%" autoplay playsinline class="rounded border mb-2" style="display:none; max-width: 400px;"></video>
+                                                    <canvas id="selfie-canvas" style="display:none;"></canvas>
+                                                    <img id="selfie-preview" src="" class="img-fluid rounded border mb-2" style="display:none; max-width: 400px;">
+                                                    
+                                                    <div class="btn-group w-100">
+                                                        <button type="button" id="start-camera" class="btn btn-sm btn-info">{{ __('Open Camera') }}</button>
+                                                        <button type="button" id="capture-photo" class="btn btn-sm btn-success" style="display:none;">{{ __('Capture Selfie') }}</button>
+                                                        <button type="button" id="retake-photo" class="btn btn-sm btn-warning" style="display:none;">{{ __('Retake') }}</button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="selfie" id="selfie-input" required>
+                                            </div>
+                                            @endif
+
                                             <input id="processdata" type="hidden" value="{{ __('Processing...') }}">
                                                 <button class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
                                             </p>
@@ -90,9 +101,38 @@
         {!! NoCaptcha::renderJs() !!}
     @endif --}}
 
+    <script src="{{ asset('assets/js/selfie-capture.js') }}"></script>
+
 <script type="text/javascript">
     let isSubmitting = false;
     $(document).ready(function() {
+        @if(request()->source == 'sell')
+        if (window.SelfieCapture) {
+            SelfieCapture.init('#selfie-video', '#selfie-canvas', '#selfie-input', '#selfie-preview');
+            
+            $('#start-camera').on('click', async function() {
+                const started = await SelfieCapture.startCamera();
+                if (started) {
+                    $('#selfie-video').show();
+                    $('#start-camera').hide();
+                    $('#capture-photo').show();
+                }
+            });
+            
+            $('#capture-photo').on('click', function() {
+                SelfieCapture.capture();
+                $('#capture-photo').hide();
+                $('#retake-photo').show();
+            });
+            
+            $('#retake-photo').on('click', function() {
+                SelfieCapture.retake();
+                $('#retake-photo').hide();
+                $('#capture-photo').show();
+            });
+        }
+        @endif
+
         $("#registerform").off('submit').on('submit', function(e){
             e.preventDefault();
             e.stopImmediatePropagation();

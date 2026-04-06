@@ -75,15 +75,29 @@ class RegisterController extends Controller
         }
         $rider = new Rider;
         $input = $request->all();
-        if ($imageFront = $request->file('live_selfie_company')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
-            $imageFront->move('assets/images/liveselfiecompany', $image_name_front);
-            $input['live_selfie_company'] = $image_name_front;
+
+        // Handle Live Selfie (Company)
+        if ($request->has('live_selfie_company')) {
+            if ($request->file('live_selfie_company')) {
+                $imageFront = $request->file('live_selfie_company');
+                $image_name_front = PriceHelper::ImageCreateName($imageFront);
+                $imageFront->move('assets/images/liveselfiecompany', $image_name_front);
+                $input['live_selfie_company'] = $image_name_front;
+            } elseif (is_string($request->live_selfie_company) && str_starts_with($request->live_selfie_company, 'data:image')) {
+                $input['live_selfie_company'] = PriceHelper::saveBase64Image($request->live_selfie_company, 'assets/images/liveselfiecompany');
+            }
         }
-        if ($imageFront = $request->file('live_selfie_individual')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
-            $imageFront->move('assets/images/liveselfieindividual', $image_name_front);
-            $input['live_selfie_individual'] = $image_name_front;
+
+        // Handle Live Selfie (Individual)
+        if ($request->has('live_selfie_individual')) {
+            if ($request->file('live_selfie_individual')) {
+                $imageFront = $request->file('live_selfie_individual');
+                $image_name_front = PriceHelper::ImageCreateName($imageFront);
+                $imageFront->move('assets/images/liveselfieindividual', $image_name_front);
+                $input['live_selfie_individual'] = $image_name_front;
+            } elseif (is_string($request->live_selfie_individual) && str_starts_with($request->live_selfie_individual, 'data:image')) {
+                $input['live_selfie_individual'] = PriceHelper::saveBase64Image($request->live_selfie_individual, 'assets/images/liveselfieindividual');
+            }
         }
         if ($imageFront = $request->file('company_registration_document')) {
             $image_name_front = \PriceHelper::ImageCreateName($imageFront);

@@ -21,8 +21,11 @@ class WithdrawController extends RiderBaseController
     public function create()
     {
         $sign = \App\Models\Currency::where('is_default', '=', 1)->first();
+        $savedAccounts = \App\Models\PartnerWithdrawAccount::where('user_id', $this->rider->id)
+            ->where('user_type', 'rider')
+            ->get();
 
-        return view('rider.withdraw.withdraw', compact('sign'));
+        return view('rider.withdraw.withdraw', compact('sign', 'savedAccounts'));
     }
 
     public function store(Request $request)
