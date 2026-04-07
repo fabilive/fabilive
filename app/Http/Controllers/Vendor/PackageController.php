@@ -52,66 +52,67 @@ class PackageController extends VendorBaseController
     //*** POST Request
     public function store(Request $request)
     {
-        //--- Validation Section
-        $rules = ['title' => 'unique:packages'];
-        $customs = ['title.unique' => __('This title has already been taken.')];
-        $validator = Validator::make($request->all(), $rules, $customs);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+        try {
+            //--- Validation Section
+            $rules = ['title' => 'unique:packages'];
+            $customs = ['title.unique' => __('This title has already been taken.')];
+            $validator = Validator::make($request->all(), $rules, $customs);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+            //--- Validation Section Ends
+
+            //--- Logic Section
+            $sign = $this->curr;
+            $data = new Package();
+            $input = $request->all();
+            $input['user_id'] = $this->user->id;
+            $input['price'] = ($input['price'] / $sign->value);
+            $data->fill($input)->save();
+            $msg = __('New Data Added Successfully.');
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not add package info. Please try again later.')]]);
         }
-        //--- Validation Section Ends
-
-        //--- Logic Section
-        $sign = $this->curr;
-        $data = new Package();
-        $input = $request->all();
-        $input['user_id'] = $this->user->id;
-        $input['price'] = ($input['price'] / $sign->value);
-        $data->fill($input)->save();
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('New Data Added Successfully.');
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
     }
 
     //*** GET Request
     public function edit($id)
     {
-        $sign = $this->curr;
-        $data = Package::findOrFail($id);
-
-        return view('vendor.package.edit', compact('data', 'sign'));
+        try {
+            $sign = $this->curr;
+            $data = Package::findOrFail($id);
+            return view('vendor.package.edit', compact('data', 'sign'));
+        } catch (\Exception $e) {
+            return back()->with('error', __('Package info not found.'));
+        }
     }
 
     //*** POST Request
     public function update(Request $request, $id)
     {
-        //--- Validation Section
-        $rules = ['title' => 'unique:packages,title,'.$id];
-        $customs = ['title.unique' => __('This title has already been taken.')];
-        $validator = Validator::make($request->all(), $rules, $customs);
+        try {
+            //--- Validation Section
+            $rules = ['title' => 'unique:packages,title,'.$id];
+            $customs = ['title.unique' => __('This title has already been taken.')];
+            $validator = Validator::make($request->all(), $rules, $customs);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+            //--- Validation Section Ends
+
+            //--- Logic Section
+            $sign = $this->curr;
+            $data = Package::findOrFail($id);
+            $input = $request->all();
+            $input['price'] = ($input['price'] / $sign->value);
+            $data->update($input);
+            $msg = __('Data Updated Successfully.');
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update package info. Please try again later.')]]);
         }
-        //--- Validation Section Ends
-
-        //--- Logic Section
-        $sign = $this->curr;
-        $data = Package::findOrFail($id);
-        $input = $request->all();
-        $input['price'] = ($input['price'] / $sign->value);
-        $data->update($input);
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('Data Updated Successfully.');
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
     }
 
     //*** GET Request Delete

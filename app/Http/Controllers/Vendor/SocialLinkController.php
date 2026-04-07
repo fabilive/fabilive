@@ -47,43 +47,41 @@ class SocialLinkController extends VendorBaseController
     //*** POST Request
     public function store(Request $request)
     {
-        //--- Logic Section
-        $data = new SocialLink;
-        $input = $request->all();
-        $input['user_id'] = $this->user->id;
-        $data->fill($input)->save();
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('New Data Added Successfully.').'<a href="'.route('vendor-sociallink-index').'">'.__('View Lists').'</a>';
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
+        try {
+            $data = new SocialLink;
+            $input = $request->all();
+            $input['user_id'] = $this->user->id;
+            $data->fill($input)->save();
+            $msg = __('New Data Added Successfully.').'<a href="'.route('vendor-sociallink-index').'">'.__('View Lists').'</a>';
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not add social link. Please try again later.')]]);
+        }
     }
 
     //*** GET Request
     public function edit($id)
     {
-        $data = SocialLink::findOrFail($id);
-
-        return view('vendor.sociallink.edit', compact('data'));
+        try {
+            $data = SocialLink::findOrFail($id);
+            return view('vendor.sociallink.edit', compact('data'));
+        } catch (\Exception $e) {
+            return back()->with('error', __('Social link not found.'));
+        }
     }
 
     //*** POST Request
     public function update(Request $request, $id)
     {
-        //--- Logic Section
-        $data = SocialLink::findOrFail($id);
-        $input = $request->all();
-        $data->update($input);
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('Data Updated Successfully.').'<a href="'.route('vendor-sociallink-index').'">'.__('View Lists').'</a>';
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
-
+        try {
+            $data = SocialLink::findOrFail($id);
+            $input = $request->all();
+            $data->update($input);
+            $msg = __('Data Updated Successfully.').'<a href="'.route('vendor-sociallink-index').'">'.__('View Lists').'</a>';
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update social link. Please try again later.')]]);
+        }
     }
 
     //*** GET Request

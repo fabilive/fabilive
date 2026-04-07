@@ -14,8 +14,12 @@ class ServiceController extends VendorBaseController
     //*** JSON Request
     public function datatables()
     {
-        $user = $this->user;
-        $datas = $user->services()->latest('id')->get();
+        try {
+            $user = $this->user;
+            $datas = $user->services()->latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
@@ -54,90 +58,91 @@ class ServiceController extends VendorBaseController
     //*** POST Request
     public function store(Request $request)
     {
-        //--- Validation Section
-        $rules = [
-            'photo' => 'required|mimes:jpeg,jpg,png,svg',
-        ];
+        try {
+            //--- Validation Section
+            $rules = [
+                'photo' => 'required|mimes:jpeg,jpg,png,svg',
+            ];
 
-        $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
-        }
-        //--- Validation Section Ends
-
-        //--- Logic Section
-        $data = new Service();
-        $input = $request->all();
-        if ($file = $request->file('photo')) {
-            $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-            if (! in_array($file->getClientOriginalExtension(), $extensions)) {
-                return response()->json(['errors' => ['Image format not supported']]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
+            //--- Validation Section Ends
 
-            $name = \PriceHelper::ImageCreateName($file);
-            $file->move('assets/images/services', $name);
-            $input['photo'] = $name;
+            //--- Logic Section
+            $data = new Service();
+            $input = $request->all();
+            if ($file = $request->file('photo')) {
+                $extensions = ['jpeg', 'jpg', 'png', 'svg'];
+                if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                    return response()->json(['errors' => ['Image format not supported']]);
+                }
+
+                $name = \PriceHelper::ImageCreateName($file);
+                $file->move('assets/images/services', $name);
+                $input['photo'] = $name;
+            }
+            $input['user_id'] = $this->user->id;
+            $data->fill($input)->save();
+            $msg = __('New Data Added Successfully.');
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not add service. Please try again later.')]]);
         }
-        $input['user_id'] = $this->user->id;
-        $data->fill($input)->save();
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('New Data Added Successfully.');
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
     }
 
     //*** GET Request
     public function edit($id)
     {
-        $data = Service::findOrFail($id);
-
-        return view('vendor.service.edit', compact('data'));
+        try {
+            $data = Service::findOrFail($id);
+            return view('vendor.service.edit', compact('data'));
+        } catch (\Exception $e) {
+            return back()->with('error', __('Service not found.'));
+        }
     }
 
     //*** POST Request
     public function update(Request $request, $id)
     {
-        //--- Validation Section
-        $rules = [
-            'photo' => 'mimes:jpeg,jpg,png,svg',
-        ];
+        try {
+            //--- Validation Section
+            $rules = [
+                'photo' => 'mimes:jpeg,jpg,png,svg',
+            ];
 
-        $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
-        }
-        //--- Validation Section Ends
-
-        //--- Logic Section
-        $data = Service::findOrFail($id);
-        $input = $request->all();
-        if ($file = $request->file('photo')) {
-            $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-            if (! in_array($file->getClientOriginalExtension(), $extensions)) {
-                return response()->json(['errors' => ['Image format not supported']]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
-            $name = \PriceHelper::ImageCreateName($file);
-            $file->move('assets/images/services', $name);
-            if ($data->photo != null) {
-                if (file_exists(public_path().'/assets/images/services/'.$data->photo)) {
-                    unlink(public_path().'/assets/images/services/'.$data->photo);
+            //--- Validation Section Ends
+
+            //--- Logic Section
+            $data = Service::findOrFail($id);
+            $input = $request->all();
+            if ($file = $request->file('photo')) {
+                $extensions = ['jpeg', 'jpg', 'png', 'svg'];
+                if (! in_array($file->getClientOriginalExtension(), $extensions)) {
+                    return response()->json(['errors' => ['Image format not supported']]);
                 }
+                $name = \PriceHelper::ImageCreateName($file);
+                $file->move('assets/images/services', $name);
+                if ($data->photo != null) {
+                    if (file_exists(public_path().'/assets/images/services/'.$data->photo)) {
+                        unlink(public_path().'/assets/images/services/'.$data->photo);
+                    }
+                }
+                $input['photo'] = $name;
             }
-            $input['photo'] = $name;
+            $data->update($input);
+            $msg = __('Data Updated Successfully.');
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update service. Please try again later.')]]);
         }
-        $data->update($input);
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('Data Updated Successfully.');
-
-        return response()->json($msg);
-        //--- Redirect Section Ends
     }
 
     //*** GET Request Delete

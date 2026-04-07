@@ -10,10 +10,14 @@ class WithdrawAccountController extends VendorBaseController
 {
     public function index()
     {
-        $accounts = PartnerWithdrawAccount::where('user_id', $this->user->id)
-            ->where('user_type', 'vendor')
-            ->orderBy('is_default', 'desc')
-            ->get();
+        try {
+            $accounts = PartnerWithdrawAccount::where('user_id', $this->user->id)
+                ->where('user_type', 'vendor')
+                ->orderBy('is_default', 'desc')
+                ->get();
+        } catch (\Exception $e) {
+            $accounts = collect();
+        }
         return view('vendor.withdraw_accounts.index', compact('accounts'));
     }
 
@@ -24,74 +28,86 @@ class WithdrawAccountController extends VendorBaseController
 
     public function store(Request $request)
     {
-        $rules = [
-            'method' => 'required',
-            'acc_number' => 'required',
-            'acc_name' => 'required',
-        ];
+        try {
+            $rules = [
+                'method' => 'required',
+                'acc_number' => 'required',
+                'acc_name' => 'required',
+            ];
 
-        if ($request->method == 'Bank') {
-            $rules['bank_name'] = 'required';
-            $rules['iban'] = 'required';
+            if ($request->method == 'Bank') {
+                $rules['bank_name'] = 'required';
+                $rules['iban'] = 'required';
+            }
+
+            $validator = \Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+
+            $input = $request->all();
+            $input['user_id'] = $this->user->id;
+            $input['user_type'] = 'vendor';
+
+            // If this is the first account, make it default
+            $count = PartnerWithdrawAccount::where('user_id', $this->user->id)
+                ->where('user_type', 'vendor')
+                ->count();
+            if ($count == 0) {
+                $input['is_default'] = 1;
+            }
+
+            PartnerWithdrawAccount::create($input);
+
+            return response()->json(__('Withdrawal account added successfully.'));
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not add withdrawal account. Please try again later.')]]);
         }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
-        }
-
-        $input = $request->all();
-        $input['user_id'] = $this->user->id;
-        $input['user_type'] = 'vendor';
-
-        // If this is the first account, make it default
-        $count = PartnerWithdrawAccount::where('user_id', $this->user->id)
-            ->where('user_type', 'vendor')
-            ->count();
-        if ($count == 0) {
-            $input['is_default'] = 1;
-        }
-
-        PartnerWithdrawAccount::create($input);
-
-        return response()->json(__('Withdrawal account added successfully.'));
     }
 
     public function edit($id)
     {
-        $account = PartnerWithdrawAccount::where('user_id', $this->user->id)
-            ->where('user_type', 'vendor')
-            ->findOrFail($id);
-        return view('vendor.withdraw_accounts.edit', compact('account'));
+        try {
+            $account = PartnerWithdrawAccount::where('user_id', $this->user->id)
+                ->where('user_type', 'vendor')
+                ->findOrFail($id);
+            return view('vendor.withdraw_accounts.edit', compact('account'));
+        } catch (\Exception $e) {
+            return back()->with('error', __('Withdrawal account not found.'));
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $account = PartnerWithdrawAccount::where('user_id', $this->user->id)
-            ->where('user_type', 'vendor')
-            ->findOrFail($id);
+        try {
+            $account = PartnerWithdrawAccount::where('user_id', $this->user->id)
+                ->where('user_type', 'vendor')
+                ->findOrFail($id);
 
-        $rules = [
-            'method' => 'required',
-            'acc_number' => 'required',
-            'acc_name' => 'required',
-        ];
+            $rules = [
+                'method' => 'required',
+                'acc_number' => 'required',
+                'acc_name' => 'required',
+            ];
 
-        if ($request->method == 'Bank') {
-            $rules['bank_name'] = 'required';
-            $rules['iban'] = 'required';
+            if ($request->method == 'Bank') {
+                $rules['bank_name'] = 'required';
+                $rules['iban'] = 'required';
+            }
+
+            $validator = \Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+
+            $account->update($request->all());
+
+            return response()->json(__('Withdrawal account updated successfully.'));
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update withdrawal account. Please try again later.')]]);
         }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
-        }
-
-        $account->update($request->all());
-
-        return response()->json(__('Withdrawal account updated successfully.'));
     }
 
     public function destroy($id)

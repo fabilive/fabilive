@@ -16,16 +16,20 @@ class OrderController extends VendorBaseController
 {
     public function datatables()
     {
-        $user = $this->user;
-        $datas = Order::with(['vendororders' => function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        }])->orderby('id', 'desc')->get()->reject(function ($item) use ($user) {
-            if ($item->vendororders()->where('user_id', '=', $user->id)->count() == 0) {
-                return true;
-            }
+        try {
+            $user = $this->user;
+            $datas = Order::with(['vendororders' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }])->orderby('id', 'desc')->get()->reject(function ($item) use ($user) {
+                if ($item->vendororders()->where('user_id', '=', $user->id)->count() == 0) {
+                    return true;
+                }
 
-            return false;
-        });
+                return false;
+            });
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         return Datatables::of($datas)
             ->editColumn('totalQty', function (Order $data) {
@@ -353,7 +357,7 @@ class OrderController extends VendorBaseController
             'updated_at' => now(),
         ]);
 
-        $gs = \App\Models\Generalsetting::findOrFail(1);
+        $gs = $this->gs;
         if ($gs->is_smtp == 1) {
             $data = [
                 'to' => $request->to,

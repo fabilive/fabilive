@@ -28,24 +28,28 @@ class ProductController extends VendorBaseController
     //*** JSON Request
     public function datatables()
     {
-        $user = $this->user;
-        $datas = $user->products()->where('product_type', 'normal')->latest('id')->get();
-        // $datas = $user->products()->latest('id')->get();
+        try {
+            $user = $this->user;
+            $datas = $user->products()->where('product_type', 'normal')->latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
-        return Datatables::of($datas)
+            $editColumn_price = function (Product $data) {
+                $curr = $this->curr;
+                $value = $curr ? $curr->value : 1;
+                $price = round($data->price * $value, 2);
+
+                return \PriceHelper::showAdminCurrencyPrice($price);
+            };
+            return \Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
                 $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
                 $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
 
                 return $name.'<br>'.$id;
             })
-            ->editColumn('price', function (Product $data) {
-                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
-                $value = $curr ? $curr->value : 1;
-                $price = round($data->price * $value, 2);
-
-                return \PriceHelper::showAdminCurrencyPrice($price);
-            })
+            ->editColumn('price', $editColumn_price)
             ->addColumn('status', function (Product $data) {
                 $class = $data->status == 1 ? 'drop-success' : 'drop-danger';
                 $s = $data->status == 1 ? 'selected' : '';
@@ -63,23 +67,28 @@ class ProductController extends VendorBaseController
     //*** JSON Request
     public function catalogdatatables()
     {
-        $datas = Product::where('product_type', 'normal')->where('status', '=', 1)->where('is_catalog', '=', 1)->latest('id')->get();
+        try {
+            $datas = Product::where('product_type', 'normal')->where('status', '=', 1)->where('is_catalog', '=', 1)->latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         //--- Integrating This Collection Into Datatables
-        return Datatables::of($datas)
+            $editColumn_catalog_price = function (Product $data) {
+                $curr = $this->curr;
+                $value = $curr ? $curr->value : 1;
+                $price = round($data->price * $value, 2);
+
+                return \PriceHelper::showAdminCurrencyPrice($price);
+            };
+            return \Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
                 $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
                 $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
 
                 return $name.'<br>'.$id;
             })
-            ->editColumn('price', function (Product $data) {
-                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
-                $value = $curr ? $curr->value : 1;
-                $price = round($data->price * $value, 2);
-
-                return \PriceHelper::showAdminCurrencyPrice($price);
-            })
+            ->editColumn('price', $editColumn_catalog_price)
             ->addColumn('action', function (Product $data) {
                 $user = $this->user;
                 $ck = $user->products()->where('catalog_id', '=', $data->id)->count() > 0;
@@ -109,7 +118,7 @@ class ProductController extends VendorBaseController
     public function create($slug)
     {
         $user = $this->user;
-        if (Generalsetting::find(1)->verify_product == 1) {
+        if (($this->gs->verify_product ?? 0) == 1) {
             if (! $user->checkStatus()) {
                 // Session::flash('unsuccess', __('You must complete your verfication first.'));
                 Session::flash('unsuccess', __("To guarantee Trust & Security for buyers and the marketplace, and also to prevent fraud and ensure legal accountability, please provide the following requirements: 
@@ -122,7 +131,7 @@ class ProductController extends VendorBaseController
         }
         $cats = Category::all();
         $countries = Country::where('status', 1)->get();
-        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+        $sign = $this->curr;
 
         $cities = City::where('status', 1)
             ->whereHas('state', function ($q) {
@@ -202,7 +211,7 @@ class ProductController extends VendorBaseController
 
         return response()->json(['status' => true, 'file_name' => $image_name]);
 
-        $img = Image::make(public_path().'/assets/images/products/'.$data->photo)->resize(285, 285);
+        $img = \Image::make(public_path().'/assets/images/products/'.$data->photo)->resize(285, 285);
         $thumbnail = time().Str::random(8).'.jpg';
         $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
         $data->thumbnail = $thumbnail;
@@ -225,7 +234,7 @@ class ProductController extends VendorBaseController
         $user = $this->user;
         $package = $user->subscribes()->orderBy('id', 'desc')->first();
         $prods = $user->products()->orderBy('id', 'desc')->get()->count();
-        if (Generalsetting::find(1)->verify_product == 1) {
+        if (($this->gs->verify_product ?? 0) == 1) {
             if (! $user->checkStatus()) {
                 return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
             }
@@ -311,19 +320,19 @@ class ProductController extends VendorBaseController
                             $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
                             $thumb_url = '';
                             if (strpos($contentType, 'image/') !== false) {
-                                $fimg = Image::make($line[5])->resize(800, 800);
+                                $fimg = \Image::make($line[5])->resize(800, 800);
                                 $fphoto = time().Str::random(8).'.jpg';
                                 $fimg->save(public_path().'/assets/images/products/'.$fphoto);
                                 $input['photo'] = $fphoto;
                                 $thumb_url = $line[5];
                             } else {
-                                $fimg = Image::make(public_path().'/assets/images/noimage.png')->resize(800, 800);
+                                $fimg = \Image::make(public_path().'/assets/images/noimage.png')->resize(800, 800);
                                 $fphoto = time().Str::random(8).'.jpg';
                                 $fimg->save(public_path().'/assets/images/products/'.$fphoto);
                                 $input['photo'] = $fphoto;
                                 $thumb_url = public_path().'/assets/images/noimage.png';
                             }
-                            $timg = Image::make($thumb_url)->resize(285, 285);
+                            $timg = \Image::make($thumb_url)->resize(285, 285);
                             $thumbnail = time().Str::random(8).'.jpg';
                             $timg->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
                             $input['thumbnail'] = $thumbnail;
@@ -361,7 +370,7 @@ class ProductController extends VendorBaseController
             $user = $this->user;
             $package = $user->subscribes()->latest('id')->first();
             $prods = $user->products()->latest('id')->get()->count();
-            if (Generalsetting::find(1)->verify_product == 1) {
+            if (($this->gs->verify_product ?? 0) == 1) {
                 if (! $user->checkStatus()) {
                     return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
                 }
@@ -376,7 +385,7 @@ class ProductController extends VendorBaseController
                     return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                 }
                 $data = new Product;
-                $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $sign = $this->curr;
                 $input = $request->all();
                 if ($file = $request->file('file')) {
                     $extensions = ['zip'];
@@ -598,7 +607,7 @@ class ProductController extends VendorBaseController
                 } else {
                     $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
                 }
-                $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
+                $img = \Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
                 $thumbnail = time().Str::random(8).'.jpg';
                 $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
                 $prod->thumbnail = $thumbnail;
@@ -614,7 +623,7 @@ class ProductController extends VendorBaseController
                         if (in_array($key, $request->galval)) {
                             $gallery = new Gallery;
                             $name = \PriceHelper::ImageCreateName($file);
-                            $img = Image::make($file->getRealPath())->resize(800, 800);
+                            $img = \Image::make($file->getRealPath())->resize(800, 800);
                             $thumbnail = time().Str::random(8).'.jpg';
                             $img->save(public_path().'/assets/images/galleries/'.$name);
                             $gallery['photo'] = $name;
@@ -800,8 +809,8 @@ class ProductController extends VendorBaseController
                     $input['license'] = null;
                     $input['license_qty'] = null;
                 } else {
-                    $license = explode(',,', $prod->license);
-                    $license_qty = explode(',', $prod->license_qty);
+                    $license = explode(',,', $data->license);
+                    $license_qty = explode(',', $data->license_qty);
                     $input['license'] = implode(',,', $license);
                     $input['license_qty'] = implode(',', $license_qty);
                 }
@@ -914,7 +923,7 @@ class ProductController extends VendorBaseController
         $user = $this->user;
         $package = $user->subscribes()->latest('id')->first();
         $prods = $user->products()->latest('id')->get()->count();
-        if (Generalsetting::find(1)->verify_product == 1) {
+        if (($this->gs->verify_product ?? 0) == 1) {
             if (! $user->checkStatus()) {
                 return response()->json(['errors' => [0 => __('You must complete your verfication first.')]]);
             }
@@ -1172,13 +1181,13 @@ class ProductController extends VendorBaseController
             $photo = $prod->photo;
             if ($request->is_photo == '0') {
                 // Set Photo
-                $newimg = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(800, 800);
+                $newimg = \Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(800, 800);
                 $photo = time().Str::random(8).'.jpg';
                 $newimg->save(public_path().'/assets/images/products/'.$photo);
             }
 
             // Set Thumbnail
-            $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
+            $img = \Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
             $thumbnail = time().Str::random(8).'.jpg';
             $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
             $prod->thumbnail = $thumbnail;
@@ -1196,7 +1205,7 @@ class ProductController extends VendorBaseController
                     if (in_array($key, $request->galval)) {
                         $gallery = new Gallery;
                         $name = \PriceHelper::ImageCreateName($file);
-                        $img = Image::make($file->getRealPath())->resize(800, 800);
+                        $img = \Image::make($file->getRealPath())->resize(800, 800);
                         $thumbnail = time().Str::random(8).'.jpg';
                         $img->save(public_path().'/assets/images/galleries/'.$name);
                         $gallery['photo'] = $name;

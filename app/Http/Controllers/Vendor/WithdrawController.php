@@ -11,7 +11,11 @@ class WithdrawController extends VendorBaseController
 {
     public function index()
     {
-        $withdraws = Withdraw::where('user_id', '=', $this->user->id)->latest('id')->get();
+        try {
+            $withdraws = Withdraw::where('user_id', '=', $this->user->id)->latest('id')->get();
+        } catch (\Exception $e) {
+            $withdraws = collect();
+        }
         $sign = $this->curr;
 
         return view('vendor.withdraw.index', compact('withdraws', 'sign'));
@@ -20,10 +24,14 @@ class WithdrawController extends VendorBaseController
     public function create()
     {
         $sign = $this->curr;
-        $actualBalance = $this->user->current_balance;
-        $savedAccounts = \App\Models\PartnerWithdrawAccount::where('user_id', $this->user->id)
-            ->where('user_type', 'vendor')
-            ->get();
+        $actualBalance = $this->user ? $this->user->current_balance : 0;
+        try {
+            $savedAccounts = \App\Models\PartnerWithdrawAccount::where('user_id', $this->user->id)
+                ->where('user_type', 'vendor')
+                ->get();
+        } catch (\Exception $e) {
+            $savedAccounts = collect();
+        }
 
         return view('vendor.withdraw.create', compact('sign', 'actualBalance', 'savedAccounts'));
     }

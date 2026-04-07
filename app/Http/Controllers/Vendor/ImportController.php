@@ -57,11 +57,14 @@ class ImportController extends VendorBaseController
 
     public function index()
     {
-        if ($this->gs && isset($this->gs->affilite) && $this->gs->affilite == 1) {
-            return view('vendor.productimport.index');
-        } else {
-            return back();
+        try {
+            if ($this->gs && isset($this->gs->affilite) && $this->gs->affilite == 1) {
+                return view('vendor.productimport.index');
+            }
+        } catch (\Exception $e) {
         }
+
+        return back();
     }
 
     //*** GET Request
@@ -83,7 +86,11 @@ class ImportController extends VendorBaseController
     //*** GET Request
     public function importCSV()
     {
-        $cats = Category::all();
+        try {
+            $cats = Category::all();
+        } catch (\Exception $e) {
+            $cats = collect();
+        }
         $sign = $this->curr;
 
         return view('vendor.productimport.importcsv', compact('cats', 'sign'));
@@ -559,7 +566,7 @@ class ImportController extends VendorBaseController
             $package = $user->subscribes()->latest('id')->first();
             $prods = $user->products()->latest('id')->get()->count();
 
-            if (Generalsetting::find(1)->verify_product == 1) {
+            if (($this->gs->verify_product ?? 0) == 1) {
                 if (! $user->checkStatus()) {
                     return response()->json(['errors' => [0 => __('You must complete your verification first.')]]);
                 }

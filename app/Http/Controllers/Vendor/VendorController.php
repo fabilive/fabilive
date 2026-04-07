@@ -147,8 +147,12 @@ class VendorController extends VendorBaseController
             $input['shop_image'] = $name;
         }
 
-        $data->update($input);
-        $msg = __('Successfully updated your profile');
+        try {
+            $data->update($input);
+            $msg = __('Successfully updated your profile');
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update profile. Please try again later.')]]);
+        }
 
         return response()->json($msg);
     }
@@ -173,10 +177,12 @@ class VendorController extends VendorBaseController
         if ($request->l_check == '') {
             $input['l_check'] = 0;
         }
-        $data->update($input);
-        //--- Logic Section Ends
-        //--- Redirect Section
-        $msg = __('Data Updated Successfully.');
+        try {
+            $data->update($input);
+            $msg = __('Data Updated Successfully.');
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Could not update social links. Please try again later.')]]);
+        }
 
         return response()->json($msg);
         //--- Redirect Section Ends
@@ -221,17 +227,23 @@ class VendorController extends VendorBaseController
     //*** GET Request
     public function subcatload($id)
     {
-        $cat = Category::findOrFail($id);
-
-        return view('load.subcategory', compact('cat'));
+        try {
+            $cat = Category::findOrFail($id);
+            return view('load.subcategory', compact('cat'));
+        } catch (\Exception $e) {
+            return view('load.subcategory', ['cat' => null]);
+        }
     }
 
     //*** GET Request
     public function childcatload($id)
     {
-        $subcat = Subcategory::findOrFail($id);
-
-        return view('load.childcategory', compact('subcat'));
+        try {
+            $subcat = Subcategory::findOrFail($id);
+            return view('load.childcategory', compact('subcat'));
+        } catch (\Exception $e) {
+            return view('load.childcategory', ['subcat' => null]);
+        }
     }
 
     //*** GET Request
@@ -248,10 +260,13 @@ class VendorController extends VendorBaseController
     //*** GET Request
     public function warningVerify($id)
     {
-        $verify = Verification::findOrFail($id);
-        $data = $this->user;
-
-        return view('vendor.verify', compact('data', 'verify'));
+        try {
+            $verify = Verification::findOrFail($id);
+            $data = $this->user;
+            return view('vendor.verify', compact('data', 'verify'));
+        } catch (\Exception $e) {
+            return back()->with('error', __('Verification data not found.'));
+        }
     }
 
     //*** POST Request
@@ -293,34 +308,38 @@ class VendorController extends VendorBaseController
         }
         $input['status'] = 'Pending';
         $input['user_id'] = $this->user->id;
-        if ($request->verify_id != '0') {
-            $verify = Verification::findOrFail($request->verify_id);
-            $input['admin_warning'] = 0;
-            $verify->update($input);
-        } else {
-
-            $data->fill($input)->save();
+        try {
+            if ($request->verify_id != '0') {
+                $verify = Verification::findOrFail($request->verify_id);
+                $input['admin_warning'] = 0;
+                $verify->update($input);
+            } else {
+                $data->fill($input)->save();
+            }
+            $msg = '<div class="text-center"><i class="fas fa-check-circle fa-4x"></i><br><h3>'.__('Your Documents Submitted Successfully.').'</h3></div>';
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [__('Documents submission failed. Please try again.')]]);
         }
-
-        //--- Redirect Section
-        $msg = '<div class="text-center"><i class="fas fa-check-circle fa-4x"></i><br><h3>'.__('Your Documents Submitted Successfully.').'</h3></div>';
-
-        return response()->json($msg);
         //--- Redirect Section Ends
     }
 
     public function sellerMessages()
     {
-        $data = $this->user;
-        $sellerId = $data->id;
+        try {
+            $data = $this->user;
+            $sellerId = $data->id;
 
-        $customers = User::whereIn('id', function ($query) use ($sellerId) {
-            $query->select('sender_id')
-                ->from('live_messages')
-                ->where('receiver_id', $sellerId);
-        })->get();
+            $customers = User::whereIn('id', function ($query) use ($sellerId) {
+                $query->select('sender_id')
+                    ->from('live_messages')
+                    ->where('receiver_id', $sellerId);
+            })->get();
 
-        return view('vendor.messages', compact('customers'));
+            return view('vendor.messages', compact('customers'));
+        } catch (\Exception $e) {
+            return view('vendor.messages', ['customers' => collect()]);
+        }
     }
 
     public function sellerChat($customerId)
