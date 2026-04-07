@@ -10,6 +10,22 @@ class Generalsetting extends Model
 
     public $timestamps = false;
 
+    public static $dbAvailable = null;
+
+    public static function isDbValid()
+    {
+        if (self::$dbAvailable !== null) {
+            return self::$dbAvailable;
+        }
+        try {
+            \DB::connection()->getPdo();
+            self::$dbAvailable = true;
+        } catch (\Exception $e) {
+            self::$dbAvailable = false;
+        }
+        return self::$dbAvailable;
+    }
+
     /**
      * Get the first general setting record with a robust fail-safe.
      * 
@@ -18,15 +34,12 @@ class Generalsetting extends Model
     public static function safeFirst()
     {
         try {
-            // 1. Try to fetch from cache first for performance
-            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                // 2. Check DB connectivity before querying
-                \DB::connection()->getPdo();
-                return \DB::table('generalsettings')->first();
-            });
-
-            if ($gs) return $gs;
-
+            if (self::isDbValid()) {
+                $gs = cache()->remember('generalsettings', now()->addDay(), function () {
+                    return \DB::table('generalsettings')->first();
+                });
+                if ($gs) return $gs;
+            }
         } catch (\Exception $e) {
             // Silently fail to in-memory defaults
         }

@@ -6,7 +6,6 @@ use App\Models\Category;
 use App\Models\Gallery;
 use App\Models\Generalsetting;
 use App\Models\Product;
-use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Validator;

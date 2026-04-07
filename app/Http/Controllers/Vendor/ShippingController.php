@@ -7,7 +7,6 @@ use Datatables;
 use Illuminate\Http\Request;
 use Validator;
 use App\Helpers\PriceHelper;
-use Yajra\DataTables\Facades\DataTables;
 
 class ShippingController extends VendorBaseController
 {

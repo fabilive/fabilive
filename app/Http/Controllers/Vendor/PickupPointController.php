@@ -6,7 +6,6 @@ use App\Models\Pickup;
 use Datatables;
 use Illuminate\Http\Request;
 use Validator;
-use Yajra\DataTables\Facades\DataTables;
 
 class PickupPointController extends VendorBaseController
 {

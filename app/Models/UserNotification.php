@@ -10,7 +10,7 @@ class UserNotification extends Model
     public static function countOrder($id)
     {
         try {
-            if (Schema::hasTable('user_notifications')) {
+            if (\App\Models\Generalsetting::isDbValid() && Schema::hasTable('user_notifications')) {
                 return UserNotification::where('user_id', '=', $id)->where('is_read', '=', 0)->count();
             }
         } catch (\Exception $e) {

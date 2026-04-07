@@ -23,13 +23,7 @@ class VendorBaseController extends Controller
         $this->middleware('auth');
 
         // Test database connectivity
-        $dbAvailable = false;
-        try {
-            \DB::connection()->getPdo();
-            $dbAvailable = true;
-        } catch (\Exception $e) {
-            \Log::warning('VendorBaseController: Database unreachable — using in-memory defaults.');
-        }
+        $dbAvailable = \App\Models\Generalsetting::isDbValid();
 
         // Set Global GeneralSettings with absolute fail-safe
         $this->gs = \App\Models\Generalsetting::safeFirst();

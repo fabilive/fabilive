@@ -21,13 +21,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         // Test database connectivity once — skip all DB operations if unreachable
-        $dbAvailable = false;
-        try {
-            DB::connection()->getPdo();
-            $dbAvailable = true;
-        } catch (\Exception $e) {
-            \Log::warning('AppServiceProvider: Database unreachable — using in-memory defaults. Error: ' . $e->getMessage());
-        }
+        $dbAvailable = \App\Models\Generalsetting::isDbValid();
 
         // 2. Global General Settings with Fail-safe
         $gs = \App\Models\Generalsetting::safeFirst();

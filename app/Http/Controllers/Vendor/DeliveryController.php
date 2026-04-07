@@ -8,10 +8,7 @@ use App\Models\Rider;
 use App\Models\RiderServiceArea;
 use App\Models\Shipping;
 use App\Helpers\PriceHelper;
-use Yajra\DataTables\Facades\DataTables;
-use App\{
-    Models\Order
-};
+use App\Models\Order;
 use Datatables;
 use Illuminate\Http\Request;
 

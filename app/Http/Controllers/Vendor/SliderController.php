@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Models\Slider;
 use Datatables;
 use App\Helpers\PriceHelper;
-use Yajra\DataTables\Facades\DataTables;
-use Illuminate\{Http\Request};
+use Illuminate\Http\Request;
 use Validator;
 
 class SliderController extends VendorBaseController
