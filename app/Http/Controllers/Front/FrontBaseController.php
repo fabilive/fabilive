@@ -24,49 +24,15 @@ class FrontBaseController extends Controller
     public function __construct()
     {
         //$this->auth_guests();
-        try {
-            $this->gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
-            });
-        } catch (\Exception $e) {
-            $this->gs = (object)[
-                'title' => 'Fabilive',
-                'header_email' => 'support@fabilive.com',
-                'header_phone' => '+123456789',
-                'footer_text' => 'Fabilive',
-                'copyright_text' => '© 2026 Fabilive',
-                'is_capcha' => 0,
-                'is_verification_email' => 0,
-                'is_affilite' => 0,
-                'affilite' => 0,
-                'physical' => 1,
-                'digital' => 1,
-                'license' => 1,
-                'listing' => 1,
-                'vendor_ship_info' => 0,
-                'is_provider' => 0,
-                'guest_checkout' => 1,
-                'currency_format' => 0,
-                'withdraw_fee' => 0,
-                'withdraw_charge' => 0,
-                'is_maintain' => 0,
-                'is_slider' => 1,
-                'is_category' => 1,
-                'is_tag' => 1,
-                'is_attribute' => 1,
-                'is_smtp' => 0,
-                'is_talkto' => 0,
-                'is_disqus' => 0,
-                'is_loader' => 1,
-            ];
-        }
+        $this->gs = \App\Models\Generalsetting::safeFirst();
 
         // Set Global PageSettings
-
         try {
             $this->ps = cache()->remember('pagesettings', now()->addDay(), function () {
+                \DB::connection()->getPdo();
                 return DB::table('pagesettings')->first();
             });
+            if (!$this->ps) throw new \Exception('No settings');
         } catch (\Exception $e) {
             $this->ps = (object)[
                 'contact_email' => 'contact@fabilive.com',
@@ -80,21 +46,39 @@ class FrontBaseController extends Controller
 
         $this->middleware(function ($request, $next) {
 
-            if (Session::has('language')) {
-                $this->language = Language::find(Session::get('language'));
-            } else {
-                $this->language = Language::where('is_default', '=', 1)->first();
-            }
-            if (! Session::has('language')) {
-                $this->language = Language::where('is_default', '=', 1)->first();
+            $this->language = null;
+            try {
+                if (Session::has('language')) {
+                    $this->language = Language::find(Session::get('language'));
+                } else {
+                    $this->language = Language::where('is_default', '=', 1)->first();
+                }
+            } catch (\Exception $e) {}
+
+            if (!$this->language) {
+                $this->language = new \stdClass();
+                $this->language->name = "English";
+                $this->language->id = 1;
+                $this->language->file = "english.json";
+                $this->language->rtl = 0;
             }
 
-            App::setLocale($this->language->name);
+            App::setLocale($this->language->name ?? 'English');
 
-            if (Session::has('currency')) {
-                $this->curr = Currency::find(Session::get('currency'));
-            } else {
-                $this->curr = Currency::where('is_default', '=', 1)->first();
+            $this->curr = null;
+            try {
+                if (Session::has('currency')) {
+                    $this->curr = Currency::find(Session::get('currency'));
+                } else {
+                    $this->curr = Currency::where('is_default', '=', 1)->first();
+                }
+            } catch (\Exception $e) {}
+
+            if (!$this->curr) {
+                $this->curr = new \stdClass();
+                $this->curr->name = "CFA";
+                $this->curr->sign = "CFA";
+                $this->curr->value = 1;
             }
 
             return $next($request);

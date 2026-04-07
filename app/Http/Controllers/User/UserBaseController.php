@@ -14,7 +14,7 @@ class UserBaseController extends Controller
 
     protected $curr;
 
-    protected $language_id;
+    protected $language;
 
     protected $user;
 
@@ -22,30 +22,48 @@ class UserBaseController extends Controller
     {
         $this->middleware('auth');
 
-        $this->middleware(function ($request, $next) {
+        // Set Global GeneralSettings
+        $this->gs = \App\Models\Generalsetting::safeFirst();
 
-            // Set Global GeneralSettings
-            $this->gs = DB::table('generalsettings')->find(1);
+        $this->middleware(function ($request, $next) {
 
             // Set Global Users
             $this->user = Auth::user();
 
-            // Set Global Language
+            $this->language = null;
+            try {
+                if (Session::has('language')) {
+                    $this->language = DB::table('languages')->find(Session::get('language'));
+                } else {
+                    $this->language = DB::table('languages')->where('is_default', '=', 1)->first();
+                }
+            } catch (\Exception $e) {}
 
-            if (Session::has('language')) {
-                $this->language = DB::table('languages')->find(Session::get('language'));
-            } else {
-                $this->language = DB::table('languages')->where('is_default', '=', 1)->first();
+            if (!$this->language) {
+                $this->language = new \stdClass();
+                $this->language->name = "English";
+                $this->language->id = 1;
+                $this->language->file = "english.json";
+                $this->language->rtl = 0;
             }
+
             view()->share('langg', $this->language);
-            App::setlocale($this->language->name);
+            App::setlocale($this->language->name ?? 'English');
 
-            // Set Global Currency
+            $this->curr = null;
+            try {
+                if (Session::has('currency')) {
+                    $this->curr = DB::table('currencies')->find(Session::get('currency'));
+                } else {
+                    $this->curr = DB::table('currencies')->where('is_default', '=', 1)->first();
+                }
+            } catch (\Exception $e) {}
 
-            if (Session::has('currency')) {
-                $this->curr = DB::table('currencies')->find(Session::get('currency'));
-            } else {
-                $this->curr = DB::table('currencies')->where('is_default', '=', 1)->first();
+            if (!$this->curr) {
+                $this->curr = new \stdClass();
+                $this->curr->name = "CFA";
+                $this->curr->sign = "CFA";
+                $this->curr->value = 1;
             }
 
             return $next($request);
