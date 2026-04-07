@@ -9,10 +9,9 @@ use App\Models\Product;
 use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Image;
 use Validator;
 use App\Helpers\PriceHelper;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Facades\Image as Image;
 use Yajra\DataTables\Facades\DataTables;
 
 class ImportController extends VendorBaseController
