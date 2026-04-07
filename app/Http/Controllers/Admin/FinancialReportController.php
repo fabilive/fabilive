@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\AdminBaseController;
 use App\Services\CommissionReportingService;
 use Illuminate\Http\Request;
 
-class FinancialReportController extends Controller
+class FinancialReportController extends AdminBaseController
 {
     protected $reportingService;
 
     public function __construct(CommissionReportingService $reportingService)
     {
+        parent::__construct();
         $this->reportingService = $reportingService;
     }
 

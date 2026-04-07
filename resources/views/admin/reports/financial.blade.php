@@ -23,13 +23,13 @@
                         <div class="col-md-4">
                             <div class="card p-3 mb-4 shadow-sm border-0">
                                 <h6 class="text-muted">{{ __('Total Admin Commission') }}</h6>
-                                <h3 class="mb-0 text-primary">{{ $gs->currency_sign }}{{ number_format($summary['total_admin_commission'], 2) }}</h3>
+                                <h3 class="mb-0 text-primary">{{ $curr->sign }}{{ number_format($summary['total_admin_commission'], 2) }}</h3>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card p-3 mb-4 shadow-sm border-0">
                                 <h6 class="text-muted">{{ __('Total Delivery Fees') }}</h6>
-                                <h3 class="mb-0 text-success">{{ $gs->currency_sign }}{{ number_format($summary['total_delivery_fees'], 2) }}</h3>
+                                <h3 class="mb-0 text-success">{{ $curr->sign }}{{ number_format($summary['total_delivery_fees'], 2) }}</h3>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -78,9 +78,9 @@
                                     @foreach($reconciliationData as $data)
                                     <tr>
                                         <td>{{ $data['order_number'] }}</td>
-                                        <td>{{ $gs->currency_sign }}{{ number_format($data['gross_amount'], 2) }}</td>
-                                        <td>{{ $gs->currency_sign }}{{ number_format($data['admin_commission'], 2) }}</td>
-                                        <td>{{ $gs->currency_sign }}{{ number_format($data['rider_fee'], 2) }}</td>
+                                        <td>{{ $curr->sign }}{{ number_format($data['gross_amount'], 2) }}</td>
+                                        <td>{{ $curr->sign }}{{ number_format($data['admin_commission'], 2) }}</td>
+                                        <td>{{ $curr->sign }}{{ number_format($data['rider_fee'], 2) }}</td>
                                         <td><span class="badge badge-info">{{ $data['delivery_job_status'] }}</span></td>
                                         <td>{{ $data['date'] }}</td>
                                     </tr>
