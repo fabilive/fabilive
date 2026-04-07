@@ -14,9 +14,7 @@ class PriceHelper
 {
     public static function showPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         if (is_numeric($price) && floor($price) != $price) {
             return number_format($price, 2, $gs->decimal_separator, $gs->thousand_separator);
         } else {
@@ -26,9 +24,7 @@ class PriceHelper
 
     public static function apishowPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         if (is_numeric($price) && floor($price) != $price) {
             return round($price, 2);
         } else {
@@ -38,23 +34,31 @@ class PriceHelper
 
     public static function showCurrencyPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $new_price = 0;
         if (is_numeric($price) && floor($price) != $price) {
             $new_price = number_format($price, 2, $gs->decimal_separator, $gs->thousand_separator);
         } else {
             $new_price = number_format($price, 0, $gs->decimal_separator, $gs->thousand_separator);
         }
-        if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
-        } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+
+        $curr = null;
+        try {
+            if (Session::has('currency')) {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } else {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            }
+        } catch (\Exception $e) {}
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
 
         if ($gs->currency_format == 0) {
@@ -66,9 +70,7 @@ class PriceHelper
 
     public static function showAdminCurrencyPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $new_price = 0;
         if (is_numeric($price) && floor($price) != $price) {
             $new_price = number_format($price, 2, $gs->decimal_separator, $gs->thousand_separator);
@@ -76,7 +78,16 @@ class PriceHelper
             $new_price = number_format($price, 0, $gs->decimal_separator, $gs->thousand_separator);
         }
 
-        $curr = Currency::where('is_default', '=', 1)->first();
+        $curr = null;
+        try {
+            $curr = Currency::where('is_default', '=', 1)->first();
+        } catch (\Exception $e) {}
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
+        }
 
         if ($gs->currency_format == 0) {
             return $curr->sign.$new_price;
@@ -87,9 +98,7 @@ class PriceHelper
 
     public static function showOrderCurrencyPrice($price, $currency)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $new_price = 0;
         if (is_numeric($price) && floor($price) != $price) {
             $new_price = number_format($price, 2, $gs->decimal_separator, $gs->thousand_separator);
@@ -167,9 +176,7 @@ class PriceHelper
                 }
             }
 
-            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
-            });
+            $gs = \App\Models\Generalsetting::safeFirst();
 
             $totalAmount = $cart->totalPrice;
             $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
@@ -299,9 +306,7 @@ class PriceHelper
                 }
             }
 
-            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
-            });
+            $gs = \App\Models\Generalsetting::safeFirst();
             $totalAmount = $cart->totalPrice;
             $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
             $totalAmount += $delivery_fee;

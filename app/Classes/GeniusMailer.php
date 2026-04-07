@@ -16,17 +16,8 @@ class GeniusMailer
 
     public function __construct()
     {
-        $this->gs = Generalsetting::first();
-        $this->social = \App\Models\Socialsetting::first();
-
-        if (!$this->gs) {
-            $this->gs = (object) [
-                'is_smtp' => 0,
-                'from_email' => 'admin@fabilive.com',
-                'from_name' => 'Fabilive',
-                'title' => 'Fabilive',
-            ];
-        }
+        $this->gs = Generalsetting::safeFirst();
+        $this->social = \App\Models\Socialsetting::safeFirst();
 
         $this->mail = new PHPMailer(true);
         $this->mail->Timeout = 10;

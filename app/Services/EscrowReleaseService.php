@@ -32,7 +32,7 @@ class EscrowReleaseService
             throw new Exception("Escrow release requires explicit Admin verification for order #{$order->order_number}");
         }
 
-        $gs = Generalsetting::first();
+        $gs = Generalsetting::safeFirst();
 
         try {
             return DB::transaction(function () use ($order, $gs) {

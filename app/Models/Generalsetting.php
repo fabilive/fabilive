@@ -10,6 +10,61 @@ class Generalsetting extends Model
 
     public $timestamps = false;
 
+    /**
+     * Get the first general setting record with a robust fail-safe.
+     * 
+     * @return object|\stdClass
+     */
+    public static function safeFirst()
+    {
+        try {
+            // 1. Try to fetch from cache first for performance
+            $gs = cache()->remember('generalsettings', now()->addDay(), function () {
+                // 2. Check DB connectivity before querying
+                \DB::connection()->getPdo();
+                return \DB::table('generalsettings')->first();
+            });
+
+            if ($gs) return $gs;
+
+        } catch (\Exception $e) {
+            // Silently fail to in-memory defaults
+        }
+
+        // 3. Fallback to in-memory defaults if DB is down or record is missing
+        $gs = new \stdClass();
+        $gs->title = "Fabilive";
+        $gs->logo = "logo.png";
+        $gs->favicon = "favicon.png";
+        $gs->is_admin_loader = 0;
+        $gs->wholesell = 0;
+        $gs->is_capcha = 0;
+        $gs->rtl = 0;
+        $gs->is_affilite = 0;
+        $gs->affilite = 0;
+        $gs->physical = 1;
+        $gs->digital = 1;
+        $gs->license = 1;
+        $gs->listing = 1;
+        $gs->vendor_ship_info = 1;
+        $gs->tawk_to = '';
+        $gs->is_tawk = 0;
+        $gs->currency_format = 0;
+        $gs->fixed_commission = 0;
+        $gs->percentage_commission = 0;
+        $gs->multiple_shipping = 0;
+        $gs->multiple_packaging = 0;
+        $gs->guest_checkout = 1;
+        $gs->is_maintain = 0;
+        $gs->is_verification_email = 0;
+        $gs->is_smtp = 0;
+        $gs->admin_loader = 'loader.gif';
+        $gs->decimal_separator = '.';
+        $gs->thousand_separator = ',';
+
+        return $gs;
+    }
+
     public function upload($name, $file, $oldname)
     {
         $destination = public_path('assets/images');

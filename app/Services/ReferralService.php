@@ -53,7 +53,7 @@ class ReferralService
      */
     public function applyReferral(string $code, $newUser, string $role = 'buyer'): ReferralUsage
     {
-        $gs = Generalsetting::first();
+        $gs = Generalsetting::safeFirst();
 
         if (! $gs || ! ($gs->referral_system_active ?? true)) {
             throw new Exception('Referral system is currently disabled.');

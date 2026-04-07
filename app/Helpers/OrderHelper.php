@@ -82,7 +82,7 @@ class OrderHelper
     {
         $affilate_users = null;
         $i = 0;
-        $gs = Generalsetting::find(1);
+        $gs = Generalsetting::safeFirst();
         $percentage = $gs->affilate_charge / 100;
         foreach ($cart->items as $prod) {
 

@@ -203,9 +203,7 @@ class Product extends Model
 
     public function vendorPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
         if ($this->user_id != 0) {
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
@@ -216,9 +214,7 @@ class Product extends Model
 
     public function vendorSizePrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
         if ($this->user_id != 0) {
             $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
@@ -256,19 +252,27 @@ class Product extends Model
 
     public function setCurrency()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
-        if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
-        } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+        $curr = null;
+        try {
+            if (Session::has('currency')) {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } else {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            }
+        } catch (\Exception $e) {}
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
+
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
@@ -280,9 +284,7 @@ class Product extends Model
 
     public function showPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
 
         // getPriceAttribute already handles the Regular vs Sale logic
         $price = $this->price;
@@ -314,13 +316,25 @@ class Product extends Model
         }
 
         if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } catch (\Exception $e) {}
         } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            } catch (\Exception $e) {}
+        }
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
 
         $price = $price * $curr->value;
@@ -335,9 +349,7 @@ class Product extends Model
 
     public function adminShowPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
 
         if ($this->user_id != 0) {
@@ -373,7 +385,17 @@ class Product extends Model
 
         // Attribute Section Ends
 
-        $curr = Currency::where('is_default', '=', 1)->first();
+        $curr = null;
+        try {
+            $curr = Currency::where('is_default', '=', 1)->first();
+        } catch (\Exception $e) {}
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
+        }
+
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
 
@@ -391,9 +413,7 @@ class Product extends Model
             return '';
         }
 
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
 
         $price = $this->previous_price;
 
@@ -424,13 +444,25 @@ class Product extends Model
         }
 
         if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } catch (\Exception $e) {}
         } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            } catch (\Exception $e) {}
+        }
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
 
         $price = $price * $curr->value;
@@ -445,17 +477,27 @@ class Product extends Model
 
     public static function convertPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } catch (\Exception $e) {}
         } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            } catch (\Exception $e) {}
+        }
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
@@ -468,10 +510,17 @@ class Product extends Model
 
     public static function vendorConvertPrice($price)
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
-        $curr = Currency::where('is_default', '=', 1)->first();
+        $gs = \App\Models\Generalsetting::safeFirst();
+        $curr = null;
+        try {
+            $curr = Currency::where('is_default', '=', 1)->first();
+        } catch (\Exception $e) {}
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
+        }
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
@@ -634,9 +683,7 @@ class Product extends Model
             return 0;
         }
 
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
         $preprice = $this->previous_price;
 
@@ -714,9 +761,7 @@ class Product extends Model
 
     public function ApishowPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
 
         if ($this->user_id != 0) {
@@ -770,9 +815,7 @@ class Product extends Model
 
     public function ApishowDetailsPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
 
         if ($this->user_id != 0) {
@@ -802,13 +845,25 @@ class Product extends Model
         // Attribute Section Ends
 
         if (Session::has('currency')) {
-            $curr = cache()->remember('session_currency', now()->addDay(), function () {
-                return Currency::find(Session::get('currency'));
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('session_currency', now()->addDay(), function () {
+                    return Currency::find(Session::get('currency'));
+                });
+            } catch (\Exception $e) {}
         } else {
-            $curr = cache()->remember('default_currency', now()->addDay(), function () {
-                return Currency::where('is_default', '=', 1)->first();
-            });
+            $curr = null;
+            try {
+                $curr = cache()->remember('default_currency', now()->addDay(), function () {
+                    return Currency::where('is_default', '=', 1)->first();
+                });
+            } catch (\Exception $e) {}
+        }
+
+        if (!$curr) {
+            $curr = new \stdClass();
+            $curr->sign = "CFA";
+            $curr->value = 1;
         }
 
         $price = $price * $curr->value;
@@ -819,9 +874,7 @@ class Product extends Model
 
     public function ApishowPreviousPrice()
     {
-        $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-            return DB::table('generalsettings')->first();
-        });
+        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->previous_price;
         if (! $price) {
             return '';

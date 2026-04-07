@@ -12,7 +12,7 @@ class DeliveryFeeService
      */
     public function calculateFee(int $sellersCount): array
     {
-        $gs = Generalsetting::first();
+        $gs = Generalsetting::safeFirst();
         $baseFee = $gs->delivery_base_fee ?? 1000;
         $stopoverFee = $gs->delivery_stopover_fee ?? 300;
 

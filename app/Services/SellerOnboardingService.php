@@ -95,7 +95,7 @@ class SellerOnboardingService
     private function sendApprovalEmail(User $user): void
     {
         try {
-            $gs = Generalsetting::first();
+            $gs = Generalsetting::safeFirst();
             $siteName = $gs->title ?? 'Fabilive';
 
             $data = [

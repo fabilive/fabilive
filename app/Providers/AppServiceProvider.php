@@ -30,45 +30,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // 2. Global General Settings with Fail-safe
-        $gs = null;
-        if ($dbAvailable) {
-            try {
-                $gs = cache()->remember('generalsettings_model', now()->addDay(), function () {
-                    return DB::table('generalsettings')->find(1);
-                });
-            } catch (\Exception $e) {}
-        }
-
-        if (!$gs) {
-            $gs = new \stdClass();
-            $gs->title = "Fabilive";
-            $gs->logo = "logo.png";
-            $gs->favicon = "favicon.png";
-            $gs->is_admin_loader = 0;
-            $gs->wholesell = 0;
-            $gs->is_capcha = 0;
-            $gs->rtl = 0;
-            $gs->is_affilite = 0;
-            $gs->affilite = 0;
-            $gs->physical = 1;
-            $gs->digital = 1;
-            $gs->license = 1;
-            $gs->listing = 1;
-            $gs->vendor_ship_info = 1;
-            $gs->tawk_to = '';
-            $gs->is_tawk = 0;
-            $gs->currency_format = 0;
-            $gs->fixed_commission = 0;
-            $gs->percentage_commission = 0;
-            $gs->multiple_shipping = 0;
-            $gs->multiple_packaging = 0;
-            $gs->guest_checkout = 1;
-            $gs->is_maintain = 0;
-            $gs->is_verification_email = 0;
-            $gs->is_smtp = 0;
-            $gs->admin_loader = 'loader.gif';
-            $gs->is_admin_loader = 0;
-        }
+        $gs = \App\Models\Generalsetting::safeFirst();
         view()->share('gs', $gs);
 
         // 3. Global Admin Language Fail-safe

@@ -88,7 +88,7 @@ class RiderOnboardingService
     private function sendApprovalEmail(Rider $rider): void
     {
         try {
-            $gs = Generalsetting::first();
+            $gs = Generalsetting::safeFirst();
             $siteName = $gs->title ?? 'Fabilive';
 
             $data = [
@@ -112,7 +112,7 @@ class RiderOnboardingService
     private function sendRejectionEmail(Rider $rider, string $reason): void
     {
         try {
-            $gs = Generalsetting::first();
+            $gs = Generalsetting::safeFirst();
             $siteName = $gs->title ?? 'Fabilive';
 
             $data = [
