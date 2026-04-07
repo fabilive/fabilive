@@ -6,8 +6,7 @@ use App\Models\Gallery;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Image;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Facades\Image as Image;
 
 class GalleryController extends VendorBaseController
 {

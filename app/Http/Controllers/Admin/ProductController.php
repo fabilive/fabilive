@@ -15,14 +15,13 @@ use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\ServiceArea;
 use App\Models\Subcategory;
-use App\Services\AI\ThreeDGeneratorService;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Image;
+use Intervention\Image\Facades\Image as Image;
 use Yajra\DataTables\Facades\DataTables as Datatables;
-use Intervention\Image\Facades\Image;
 
 class ProductController extends AdminBaseController
 {
@@ -99,7 +98,9 @@ class ProductController extends AdminBaseController
                 return $name.'<br>'.$id.$id3.$data->checkVendor();
             })
             ->editColumn('price', function (Product $data) {
-                $price = $data->price * $this->curr->value;
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $value = $curr ? $curr->value : 1;
+                $price = $data->price * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -168,7 +169,7 @@ class ProductController extends AdminBaseController
             ->pluck('city_name', 'id');
 
         $cats = Category::all();
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         if ($slug == 'physical') {
             return view('admin.product.create.physical', compact('cats', 'sign', 'cities', 'countries'));
         } elseif ($slug == 'digital') {
@@ -236,14 +237,7 @@ class ProductController extends AdminBaseController
         $data->thumbnail = $thumbnail;
         $data->update();
 
-        // 3D Model Generation
-        if (config('ai.features.photo_enhancer')) {
-            $threeDService = new ThreeDGeneratorService();
-            $threeDModelPath = $threeDService->generateForProduct($data, public_path($path));
-            if ($threeDModelPath) {
-                $data->update(['3d_model' => $threeDModelPath]);
-            }
-        }
+        return response()->json(['status' => true, 'file_name' => $image_name]);
 
         return response()->json(['status' => true, 'file_name' => $image_name]);
     }
@@ -264,7 +258,7 @@ class ProductController extends AdminBaseController
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
             $data = new Product;
-            $sign = $this->curr;
+            $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
             $input = $request->all();
             if ($file = $request->file('file')) {
                 $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
@@ -317,10 +311,10 @@ class ProductController extends AdminBaseController
                         $input['color'] = implode(',', $request->color);
                         $input['size'] = implode(',', $request->size);
                         $input['size_qty'] = implode(',', $request->size_qty);
-                        $size_prices = $request->size_price;
+                        $size_prices = $request->size_price ?? [];
                         $s_price = [];
                         foreach ($size_prices as $key => $sPrice) {
-                            $s_price[$key] = $sPrice / $sign->value;
+                            $s_price[$key] = $sPrice;
                         }
                         $input['size_price'] = implode(',', $s_price);
                     }
@@ -386,8 +380,8 @@ class ProductController extends AdminBaseController
             if (! empty($request->tags)) {
                 $input['tags'] = implode(',', $request->tags);
             }
-            $input['price'] = ($input['price'] / $sign->value);
-            $input['previous_price'] = ($input['previous_price'] / $sign->value);
+            $input['price'] = $input['price'];
+            $input['previous_price'] = $input['previous_price'];
             if ($request->cross_products) {
                 $input['cross_products'] = implode(',', $request->cross_products);
             }
@@ -400,7 +394,7 @@ class ProductController extends AdminBaseController
                         if ($request->has("$in_name")) {
                             $attrArr["$in_name"]['values'] = $request["$in_name"];
                             foreach ($request["$in_name".'_price'] as $aprice) {
-                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                $ttt["$in_name".'_price'][] = $aprice;
                             }
                             $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($catAttr->details_status) {
@@ -420,7 +414,7 @@ class ProductController extends AdminBaseController
                         if ($request->has("$in_name")) {
                             $attrArr["$in_name"]['values'] = $request["$in_name"];
                             foreach ($request["$in_name".'_price'] as $aprice) {
-                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                $ttt["$in_name".'_price'][] = $aprice;
                             }
                             $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($subAttr->details_status) {
@@ -440,7 +434,7 @@ class ProductController extends AdminBaseController
                         if ($request->has("$in_name")) {
                             $attrArr["$in_name"]['values'] = $request["$in_name"];
                             foreach ($request["$in_name".'_price'] as $aprice) {
-                                $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                $ttt["$in_name".'_price'][] = $aprice;
                             }
                             $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                             if ($childAttr->details_status) {
@@ -477,15 +471,6 @@ class ProductController extends AdminBaseController
             $prod->thumbnail = $thumbnail;
             $prod->update();
 
-            // 3D Model Generation
-            if (config('ai.features.photo_enhancer')) {
-                $threeDService = new ThreeDGeneratorService();
-                $threeDModelPath = $threeDService->generateForProduct($prod, public_path('assets/images/products/'.$prod->photo));
-                if ($threeDModelPath) {
-                    $prod->update(['3d_model' => $threeDModelPath]);
-                }
-            }
-
             $lastid = $data->id;
             if ($files = $request->file('gallery')) {
                 foreach ($files as $key => $file) {
@@ -514,7 +499,7 @@ class ProductController extends AdminBaseController
     {
 
         $cats = Category::all();
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         return view('admin.product.productcsv', compact('cats', 'sign'));
     }
@@ -638,9 +623,8 @@ class ProductController extends AdminBaseController
                         $timg->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
                         $input['thumbnail'] = $thumbnail;
 
-                        // Conert Price According to Currency
-                        $input['price'] = ($input['price'] / $sign->value);
-                        $input['previous_price'] = ($input['previous_price'] / $sign->value);
+                        $input['price'] = $input['price'];
+                        $input['previous_price'] = $input['previous_price'];
 
                         // Save Data
                         $data->fill($input)->save();
@@ -670,7 +654,7 @@ class ProductController extends AdminBaseController
         $countries = Country::where('status', 1)->get();
         $cats = Category::all();
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         $cities = City::where('status', 1)
             ->whereHas('state', function ($q) {
@@ -712,7 +696,7 @@ class ProductController extends AdminBaseController
 
         //-- Logic Section
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         $input = $request->all();
 
         //Check Types
@@ -874,8 +858,8 @@ class ProductController extends AdminBaseController
             $input['tags'] = null;
         }
 
-        $input['price'] = $input['price'] / $sign->value;
-        $input['previous_price'] = $input['previous_price'] / $sign->value;
+        $input['price'] = $input['price'];
+        $input['previous_price'] = $input['previous_price'];
 
         // store filtering attributes for physical product
         $attrArr = [];

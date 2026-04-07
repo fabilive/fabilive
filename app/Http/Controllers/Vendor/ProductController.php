@@ -13,7 +13,7 @@ use App\Models\Gallery;
 use App\Models\Generalsetting;
 use App\Models\Product;
 use App\Models\Subcategory;
-use App\Services\AI\ThreeDGeneratorService;
+
 use Datatables;
 use DB;
 use Illuminate\Http\Request;
@@ -40,9 +40,9 @@ class ProductController extends VendorBaseController
                 return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
-                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
-                $curr_value = $curr ? $curr->value : 1;
-                $price = round($data->price * $curr_value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $value = $curr ? $curr->value : 1;
+                $price = round($data->price * $value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -74,9 +74,9 @@ class ProductController extends VendorBaseController
                 return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
-                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
-                $curr_value = $curr ? $curr->value : 1;
-                $price = round($data->price * $curr_value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $value = $curr ? $curr->value : 1;
+                $price = round($data->price * $value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -122,7 +122,7 @@ class ProductController extends VendorBaseController
         }
         $cats = Category::all();
         $countries = Country::where('status', 1)->get();
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         $cities = City::where('status', 1)
             ->whereHas('state', function ($q) {
@@ -196,25 +196,7 @@ class ProductController extends VendorBaseController
         $path = 'assets/images/products/'.$image_name;
         file_put_contents(public_path($path), $image);
 
-        // --- AI PHOTO ENHANCER OPTIMIZATION ---
-        $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
-        $aiPhotoUrls = $enhancer->optimizeAndStore(public_path($path), $image_name, 'products');
-
-        if ($aiPhotoUrls['provider'] === 'cloudinary') {
-            $image_name = $aiPhotoUrls['original'];
-            @unlink(public_path($path)); // remove local heavy image
-        }
-        if ($data->photo != null) {
-            if (file_exists(public_path().'/assets/images/products/'.$data->photo)) {
-                unlink(public_path().'/assets/images/products/'.$data->photo);
-            }
-        }
-        if ($aiPhotoUrls['provider'] === 'cloudinary') {
-            $input['photo'] = $aiPhotoUrls['original'];
-            $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
-        } else {
-            $input['photo'] = $image_name;
-        }
+        $input['photo'] = $image_name;
 
         $data->update($input);
 
@@ -225,15 +207,6 @@ class ProductController extends VendorBaseController
         $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
         $data->thumbnail = $thumbnail;
         $data->update();
-
-        // 3D Model Generation
-        if (config('ai.features.photo_enhancer')) {
-            $threeDService = new ThreeDGeneratorService();
-            $threeDModelPath = $threeDService->generateForProduct($data, public_path($path));
-            if ($threeDModelPath) {
-                $data->update(['3d_model' => $threeDModelPath]);
-            }
-        }
 
         return response()->json(['status' => true, 'file_name' => $image_name]);
     }
@@ -282,7 +255,7 @@ class ProductController extends VendorBaseController
                 if ($i != 1) {
                     if (! Product::where('sku', $line[0])->exists()) {
                         $data = new Product;
-                        $sign = Currency::where('is_default', '=', 1)->first();
+                        $sign = \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
                         $input['type'] = 'Physical';
                         $input['sku'] = $line[0];
                         $input['category_id'] = null;
@@ -403,7 +376,7 @@ class ProductController extends VendorBaseController
                     return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                 }
                 $data = new Product;
-                $sign = $this->curr;
+                $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
                 $input = $request->all();
                 if ($file = $request->file('file')) {
                     $extensions = ['zip'];
@@ -422,18 +395,8 @@ class ProductController extends VendorBaseController
                 $image_name = time().Str::random(8).'.png';
                 $path = 'assets/images/products/'.$image_name;
                 file_put_contents(public_path($path), $image);
-
-                // --- AI PHOTO ENHANCER OPTIMIZATION ---
-                $enhancer = app(\App\Services\AI\PhotoEnhancerService::class);
-                $aiPhotoUrls = $enhancer->optimizeAndStore(public_path($path), $image_name, 'products');
-
-                if ($aiPhotoUrls['provider'] === 'cloudinary') {
-                    $input['photo'] = $aiPhotoUrls['original'];
-                    $input['thumbnail'] = $aiPhotoUrls['thumbnail'];
-                    @unlink(public_path($path)); // remove local heavy image
-                } else {
-                    $input['photo'] = $image_name;
-                }
+                $input['photo'] = $image_name;
+                $input['thumbnail'] = $image_name; // Fallback
                 if ($request->type == 'Physical' || $request->type == 'Listing') {
                     $rules = ['sku' => 'min:8|unique:products'];
                     $validator = Validator::make($request->all(), $rules);
@@ -540,8 +503,8 @@ class ProductController extends VendorBaseController
                 if (! empty($request->tags)) {
                     $input['tags'] = implode(',', $request->tags);
                 }
-                $input['price'] = ($input['price'] / $sign->value);
-                $input['previous_price'] = ($input['previous_price'] / $sign->value);
+                $input['price'] = $input['price'];
+                $input['previous_price'] = $input['previous_price'];
                 $input['user_id'] = $this->user->id;
                 $attrArr = [];
                 if (! empty($request->category_id)) {
@@ -635,24 +598,11 @@ class ProductController extends VendorBaseController
                 } else {
                     $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
                 }
-                if (isset($aiPhotoUrls) && $aiPhotoUrls['provider'] === 'cloudinary') {
-                    $prod->thumbnail = $aiPhotoUrls['thumbnail'];
-                } else {
-                    $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
-                    $thumbnail = time().Str::random(8).'.jpg';
-                    $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
-                    $prod->thumbnail = $thumbnail;
-                }
+                $img = Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
+                $thumbnail = time().Str::random(8).'.jpg';
+                $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
+                $prod->thumbnail = $thumbnail;
                 $prod->update();
-
-                // 3D Model Generation
-                if (config('ai.features.photo_enhancer')) {
-                    $threeDService = new ThreeDGeneratorService();
-                    $threeDModelPath = $threeDService->generateForProduct($prod, public_path('assets/images/products/'.$prod->photo));
-                    if ($threeDModelPath) {
-                        $prod->update(['3d_model' => $threeDModelPath]);
-                    }
-                }
 
                 $lastid = $data->id;
                 if ($files = $request->file('gallery')) {
@@ -691,7 +641,7 @@ class ProductController extends VendorBaseController
     {
         $cats = Category::all();
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         $cities = City::where('status', 1)
             ->whereHas('state', function ($q) {
@@ -719,7 +669,7 @@ class ProductController extends VendorBaseController
     {
         $cats = Category::all();
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         if ($data->type == 'Digital') {
             return view('vendor.product.edit.catalog.digital', compact('cats', 'data', 'sign'));
@@ -741,7 +691,7 @@ class ProductController extends VendorBaseController
             return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         $input = $request->all();
         if ($request->type_check == 1) {
             $input['link'] = null;
@@ -985,7 +935,7 @@ class ProductController extends VendorBaseController
 
             //--- Logic Section
             $data = new Product;
-            $sign = $this->curr;
+            $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
             $input = $request->all();
             // Check File
             if ($file = $request->file('file')) {
@@ -1133,8 +1083,8 @@ class ProductController extends VendorBaseController
             }
 
             // Conert Price According to Currency
-            $input['price'] = ($input['price'] / $sign->value);
-            $input['previous_price'] = ($input['previous_price'] / $sign->value);
+            $input['price'] = $input['price'];
+            $input['previous_price'] = $input['previous_price'];
             $input['user_id'] = $this->user->id;
 
             // store filtering attributes for physical product

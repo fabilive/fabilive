@@ -31,7 +31,9 @@ class ImportController extends AdminBaseController
                 return $name.'<br>'.$id.$id2;
             })
             ->editColumn('price', function (Product $data) {
-                $price = $data->price * $this->curr->value;
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $value = $curr ? $curr->value : 1;
+                $price = $data->price * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -68,7 +70,7 @@ class ImportController extends AdminBaseController
     public function createImport()
     {
         $cats = Category::all();
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         return view('admin.productimport.createone', compact('cats', 'sign'));
     }
@@ -77,7 +79,7 @@ class ImportController extends AdminBaseController
     public function importCSV()
     {
         $cats = Category::all();
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         return view('admin.productimport.importcsv', compact('cats', 'sign'));
     }
@@ -136,7 +138,7 @@ class ImportController extends AdminBaseController
 
         //--- Logic Section
         $data = new Product;
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         $input = $request->all();
 
         // Check File
@@ -330,7 +332,7 @@ class ImportController extends AdminBaseController
     {
         $cats = Category::all();
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
         return view('admin.productimport.editone', compact('cats', 'data', 'sign'));
     }
@@ -354,7 +356,7 @@ class ImportController extends AdminBaseController
 
         //-- Logic Section
         $data = Product::findOrFail($id);
-        $sign = $this->curr;
+        $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         $input = $request->all();
 
         //Check Types
