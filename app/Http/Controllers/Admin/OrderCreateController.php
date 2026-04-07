@@ -31,7 +31,14 @@ class OrderCreateController extends AdminBaseController
             $products = [];
         }
 
-        $sign = $this->curr;
+        // Hardened currency access
+        $sign = $this->curr ?? \DB::table('currencies')->where('is_default', 1)->first() ?? \DB::table('currencies')->first();
+        if (!$sign) {
+            $sign = new \stdClass();
+            $sign->sign = 'CFA';
+            $sign->value = 1;
+        }
+
         Session::forget('order_products');
 
         return view('admin.order.create.index', compact('products', 'selectd_products', 'sign'));
@@ -39,17 +46,20 @@ class OrderCreateController extends AdminBaseController
 
     public function datatables()
     {
+        // Hardened currency access
+        $curr = $this->curr ?? \DB::table('currencies')->where('is_default', 1)->first() ?? \DB::table('currencies')->first();
+        $curr_value = $curr ? $curr->value : 1;
+        $curr_sign = $curr ? $curr->sign : 'CFA';
 
-        //--- Integrating This Collection Into Datatables
         $datas = Product::whereStatus(1);
 
         return Datatables::of($datas)
-            ->editColumn('name', function (Product $data) {
-                $price = $data->price * $this->curr->value;
+            ->editColumn('name', function (Product $data) use ($curr_value, $curr_sign) {
+                $price = $data->price * $curr_value;
                 $img = '<img src="'.asset('assets/images/thumbnails/'.$data->thumbnail).'" alt="'.$data->name.'" class="img-thumbnail" width="100"> <br>';
                 $name = mb_strlen($data->name, 'UTF-8') > 50 ? mb_substr($data->name, 0, 50, 'UTF-8').'...' : $data->name;
 
-                return $img.$name.$data->checkVendor().'<br><small>'.__('Price').': '.$price.' '.$this->curr->sign.'</small>';
+                return $img.$name.$data->checkVendor().'<br><small>'.__('Price').': '.$price.' '.$curr_sign.'</small>';
             })
 
             ->addColumn('action', function (Product $data) {
