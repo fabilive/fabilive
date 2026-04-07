@@ -88,5 +88,9 @@ class AdminBaseController extends Controller
             $this->curr->sign = "CFA";
             $this->curr->value = 1;
         }
+
+        view()->share('gs', $this->gs);
+        view()->share('curr', $this->curr);
+        view()->share('admin_lang', $this->language);
     }
 }

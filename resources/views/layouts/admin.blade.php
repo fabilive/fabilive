@@ -29,9 +29,6 @@
 	<link rel="stylesheet" href="{{ asset('assets/css/responsive-fixes.css') }}">
 
 	<!-- stylesheet -->
-	@php
-		$admin_lang = DB::table('admin_languages')->where('is_default','=',1)->first();
-	@endphp
 	@if($admin_lang && isset($admin_lang->rtl) && $admin_lang->rtl == 1)
 
 	<link href="{{asset('assets/admin/css/rtl/style.css')}}" rel="stylesheet" />
@@ -199,9 +196,6 @@
 			</div>
 		</div>
 	</div>
-	@php
-	$curr = \App\Models\Currency::where('is_default','=',1)->first();
-	@endphp
 	<script type="text/javascript">
 		var mainurl = "{{url('/')}}";
 			  var admin_loader = {{ $gs->is_admin_loader ?? 0 }};

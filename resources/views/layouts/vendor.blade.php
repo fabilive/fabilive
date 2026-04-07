@@ -260,9 +260,6 @@
 			</div>
 		</div>
 	</div>
-	@php
-	$curr = \App\Models\Currency::where('is_default','=',1)->first();
-	@endphp
 	<script type="text/javascript">
 		var mainurl = "{{url('/')}}";
 		   var admin_loader = {{ $gs->is_admin_loader }};

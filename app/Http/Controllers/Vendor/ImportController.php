@@ -51,7 +51,7 @@ class ImportController extends VendorBaseController
 
     public function index()
     {
-        if ($this->gs->affilite == 1) {
+        if ($this->gs && isset($this->gs->affilite) && $this->gs->affilite == 1) {
             return view('vendor.productimport.index');
         } else {
             return back();
@@ -61,14 +61,17 @@ class ImportController extends VendorBaseController
     //*** GET Request
     public function createImport()
     {
-        $cats = Category::all();
+        $cats = collect();
+        try {
+            $cats = Category::all();
+        } catch (\Exception $e) {}
+
         $sign = $this->curr;
-        if ($this->gs->affilite == 1) {
+        if ($this->gs && isset($this->gs->affilite) && $this->gs->affilite == 1) {
             return view('vendor.productimport.createone', compact('cats', 'sign'));
         } else {
             return back();
         }
-
     }
 
     //*** GET Request

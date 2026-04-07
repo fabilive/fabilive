@@ -41,7 +41,20 @@ class OrderCreateController extends AdminBaseController
 
         Session::forget('order_products');
 
-        return view('admin.order.create.index', compact('products', 'selectd_products', 'sign'));
+        $users = collect();
+        try {
+            $userQuery = \App\Models\User::query();
+            if (\Schema::hasTable('users')) {
+                if (\Schema::hasColumn('users', 'ban')) {
+                    $userQuery->where('ban', '!=', 1);
+                }
+                $users = $userQuery->latest('id')->get();
+            }
+        } catch (\Exception $e) {
+            \Log::warning('OrderCreateController: Could not fetch users for POS.');
+        }
+
+        return view('admin.order.create.index', compact('products', 'selectd_products', 'sign', 'users'));
     }
 
     public function datatables()
