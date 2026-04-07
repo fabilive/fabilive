@@ -12,7 +12,11 @@ class PickupPointController extends VendorBaseController
 {
     public function datatables()
     {
-        $datas = Pickup::latest('id')->get();
+        try {
+            $datas = Pickup::latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         return Datatables::of($datas)
             ->addColumn('action', function (Pickup $data) {

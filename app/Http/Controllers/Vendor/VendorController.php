@@ -22,15 +22,30 @@ class VendorController extends VendorBaseController
         $data['sales'] = '';
         for ($i = 0; $i < 30; $i++) {
             $data['days'] .= "'".date('d M', strtotime('-'.$i.' days'))."',";
-            $data['sales'] .= "'".VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->whereDate('created_at', '=', date('Y-m-d', strtotime('-'.$i.' days')))->count()."',";
+            try {
+                $count = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->whereDate('created_at', '=', date('Y-m-d', strtotime('-'.$i.' days')))->count();
+                $data['sales'] .= "'".$count."',";
+            } catch (\Exception $e) {
+                $data['sales'] .= "'0',";
+            }
         }
-        $data['pproducts'] = Product::where('user_id', '=', $this->user->id)->latest('id')->take(6)->get();
-        $data['rorders'] = VendorOrder::where('user_id', '=', $this->user->id)->latest('id')->take(10)->get();
+        
+        $data['pproducts'] = collect();
+        $data['rorders'] = collect();
+        $data['pending'] = collect();
+        $data['processing'] = collect();
+        $data['completed'] = collect();
+        
+        try {
+            $data['pproducts'] = Product::where('user_id', '=', $this->user->id)->latest('id')->take(6)->get();
+            $data['rorders'] = VendorOrder::where('user_id', '=', $this->user->id)->latest('id')->take(10)->get();
+            $data['pending'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'pending')->get();
+            $data['processing'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'processing')->get();
+            $data['completed'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->get();
+        } catch (\Exception $e) {}
+
         $data['user'] = $this->user;
-        $data['pending'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'pending')->get();
-        $data['processing'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'processing')->get();
-        $data['completed'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->get();
-        $actualBalance = $this->user->current_balance;
+        $actualBalance = $this->user ? $this->user->current_balance : 0;
         $data['actual_balance'] = $actualBalance;
 
         return view('vendor.index', $data);
@@ -179,8 +194,7 @@ class VendorController extends VendorBaseController
     //*** GET Request
     public function ship()
     {
-        $gs = Generalsetting::find(1);
-        if ($gs->vendor_ship_info == 0) {
+        if ($this->gs->vendor_ship_info == 0) {
             return redirect()->back();
         }
         $data = $this->user;

@@ -19,8 +19,12 @@ class ImportController extends VendorBaseController
     //*** JSON Request
     public function datatables()
     {
-        $user = $this->user;
-        $datas = $user->products()->where('product_type', 'affiliate')->latest('id')->get();
+        try {
+            $user = $this->user;
+            $datas = $user->products()->where('product_type', 'affiliate')->latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
@@ -31,7 +35,9 @@ class ImportController extends VendorBaseController
                 return $name.'<br>'.$id;
             })
             ->editColumn('price', function (Product $data) {
-                $price = round($data->price * $this->curr->value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $val = $curr ? $curr->value : 1;
+                $price = round($data->price * $val, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -719,8 +725,17 @@ class ImportController extends VendorBaseController
     //*** GET Request
     public function edit($id)
     {
-        $cats = Category::all();
-        $data = Product::findOrFail($id);
+        $cats = collect();
+        try {
+            $cats = Category::all();
+        } catch (\Exception $e) {}
+
+        try {
+            $data = Product::findOrFail($id);
+        } catch (\Exception $e) {
+            return back()->with('error', __('Data not found.'));
+        }
+
         $sign = $this->curr;
 
         return view('vendor.productimport.editone', compact('cats', 'data', 'sign'));
@@ -729,19 +744,25 @@ class ImportController extends VendorBaseController
     //*** POST Request
     public function update(Request $request, $id)
     {
+        try {
+            $prod = Product::find($id);
+            if (!$prod) {
+                return response()->json(['errors' => [0 => __('Product not found.')]]);
+            }
+            //--- Validation Section
+            $rules = [
+                'file' => 'mimes:zip',
+            ];
 
-        $prod = Product::find($id);
-        //--- Validation Section
-        $rules = [
-            'file' => 'mimes:zip',
-        ];
+            $validator = Validator::make($request->all(), $rules);
 
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+            //--- Validation Section Ends
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [0 => $e->getMessage()]]);
         }
-        //--- Validation Section Ends
 
         //-- Logic Section
         $data = Product::findOrFail($id);

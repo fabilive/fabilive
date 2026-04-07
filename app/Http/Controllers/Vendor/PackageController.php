@@ -14,12 +14,18 @@ class PackageController extends VendorBaseController
     //*** JSON Request
     public function datatables()
     {
-        $datas = Package::where('user_id', $this->user->id)->get();
+        try {
+            $datas = Package::where('user_id', $this->user->id)->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)
             ->editColumn('price', function (Package $data) {
-                $price = round($data->price * $this->curr->value, 2);
+                $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
+                $val = $curr ? $curr->value : 1;
+                $price = round($data->price * $val, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             })

@@ -47,16 +47,18 @@ class VendorBaseController extends Controller
             $this->gs->logo = "logo.png";
             $this->gs->favicon = "favicon.png";
             $this->gs->vendor_ship_info = 1;
+            $this->gs->is_affilite = 0;
             $this->gs->affilite = 0;
+            $this->gs->physical = 1;
+            $this->gs->digital = 1;
+            $this->gs->license = 1;
+            $this->gs->listing = 1;
             $this->gs->currency_format = 0;
             $this->gs->withdraw_fee = 0;
             $this->gs->withdraw_charge = 0;
             $this->gs->tax = 0;
-            $this->gs->tax = 0;
             $this->gs->admin_loader = "loader.gif";
         }
-
-        view()->share('gs', $this->gs);
 
         $this->middleware(function ($request, $next) {
             $dbAvailable = false;
@@ -109,6 +111,7 @@ class VendorBaseController extends Controller
             }
 
             view()->share('curr', $this->curr);
+            view()->share('gs', $this->gs);
 
             return $next($request);
         });

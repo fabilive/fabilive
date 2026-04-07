@@ -73,16 +73,16 @@
 							<ul class="list">
 								@if(Auth::check())
 								<input type="hidden" id="all_notf_count"
-									value="{{ route('vendor-order-notf-count',Auth::user()->id) }}">
+									value="{{ route('vendor-order-notf-count', Auth::id()) }}">
 								<li class="bell-area">
 									<a id="notf_order" class="dropdown-toggle-1" href="javascript:;">
 										<i class="icofont-cart"></i>
 										<span id="order-notf-count">{{
-											App\Models\UserNotification::countOrder(Auth::user()->id) }}</span>
+											App\Models\UserNotification::countOrder(Auth::id()) }}</span>
 									</a>
 									<div class="dropdown-menu">
 										<div class="dropdownmenu-wrapper"
-											data-href="{{ route('vendor-order-notf-show',Auth::user()->id) }}"
+											data-href="{{ route('vendor-order-notf-show', Auth::id()) }}"
 											id="order-notf-show">
 										</div>
 									</div>
@@ -105,7 +105,7 @@
 												<h5>{{ __('Welcome!') }}</h5>
 												<li>
 													<a target="_blank"
-														href="{{ route('front.vendor',str_replace(' ', '-', Auth::user()->shop_name)) }}"><i
+														href="{{ route('front.vendor',str_replace(' ', '-', optional(Auth::user())->shop_name)) }}"><i
 															class="fas fa-eye"></i> {{ __('Visit Store') }}</a>
 												</li>
 												<li>

@@ -12,7 +12,11 @@ class SocialLinkController extends VendorBaseController
     //*** JSON Request
     public function datatables()
     {
-        $datas = $this->user->sociallinks()->latest('id')->get();
+        try {
+            $datas = $this->user->sociallinks()->latest('id')->get();
+        } catch (\Exception $e) {
+            $datas = collect();
+        }
 
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)

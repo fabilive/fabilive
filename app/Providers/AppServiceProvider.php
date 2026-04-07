@@ -49,6 +49,12 @@ class AppServiceProvider extends ServiceProvider
             $gs->is_capcha = 0;
             $gs->rtl = 0;
             $gs->is_affilite = 0;
+            $gs->affilite = 0;
+            $gs->physical = 1;
+            $gs->digital = 1;
+            $gs->license = 1;
+            $gs->listing = 1;
+            $gs->vendor_ship_info = 1;
             $gs->tawk_to = '';
             $gs->is_tawk = 0;
             $gs->currency_format = 0;
@@ -60,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
             $gs->is_maintain = 0;
             $gs->is_verification_email = 0;
             $gs->is_smtp = 0;
+            $gs->admin_loader = 'loader.gif';
+            $gs->is_admin_loader = 0;
         }
         view()->share('gs', $gs);
 
