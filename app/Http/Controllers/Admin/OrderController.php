@@ -890,7 +890,11 @@ class OrderController extends AdminBaseController
     {
 
         $sku = $request->sku;
-        $product = Product::whereUserId($request->vendor_id)->whereStatus(1)->where('sku', $sku)->first();
+        $productQuery = Product::whereUserId($request->vendor_id);
+        if (\Schema::hasColumn('products', 'status')) {
+            $productQuery->where('status', 1);
+        }
+        $product = $productQuery->where('sku', $sku)->first();
         $data = [];
         if (! $product) {
             $data[0] = false;

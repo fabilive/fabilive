@@ -29,10 +29,14 @@ class ProductController extends AdminBaseController
     public function datatables(Request $request)
     {
         if ($request->type == 'all') {
-            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal')->latest('id')->get();
+            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal');
         } elseif ($request->type == 'deactive') {
-            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal')->whereStatus(0)->latest('id')->get();
+            $datas = Product::with(['cities', 'state', 'country'])->whereProductType('normal');
+            if (\Schema::hasColumn('products', 'status')) {
+                $datas->where('status', 0);
+            }
         }
+        $datas = $datas->latest('id')->get();
 
         //--- Integrating This Collection Into Datatables
         return Datatables::of($datas)

@@ -51,7 +51,10 @@ class OrderCreateController extends AdminBaseController
         $curr_value = $curr ? $curr->value : 1;
         $curr_sign = $curr ? $curr->sign : 'CFA';
 
-        $datas = Product::whereStatus(1);
+        $datas = Product::query();
+        if (\Schema::hasColumn('products', 'status')) {
+            $datas->where('status', 1);
+        }
 
         return Datatables::of($datas)
             ->editColumn('name', function (Product $data) use ($curr_value, $curr_sign) {
@@ -138,7 +141,8 @@ class OrderCreateController extends AdminBaseController
         $values = $values == '' ? '' : $values;
         $curr = $this->curr;
 
-        $size_price = ($size_price / $curr->value);
+        $curr_value = ($curr && $curr->value > 0) ? $curr->value : 1;
+        $size_price = ($size_price / $curr_value);
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'minimum_qty', 'stock_check', 'size_all', 'color_all']);
         if ($prod->type != 'Physical') {
             $qty = 1;
