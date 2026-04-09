@@ -47,7 +47,15 @@ class Generalsetting extends Model
         // 3. Fallback to in-memory defaults if DB is down or record is missing
         $gs = new \stdClass();
         $gs->title = "Fabilive";
-        $gs->logo = "logo.png";
+        
+        // Fail-safe Logo trial
+        $logo_fallback = "logo.png";
+        if (file_exists(public_path('assets/images/logo.png'))) {
+            $logo_fallback = "logo.png";
+        } elseif (file_exists(public_path('assets/images/fabilive_logo_transparent.png'))) {
+            $logo_fallback = "fabilive_logo_transparent.png";
+        }
+        $gs->logo = $logo_fallback;
         $gs->favicon = "favicon.png";
         $gs->is_admin_loader = 0;
         $gs->wholesell = 0;

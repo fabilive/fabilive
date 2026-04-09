@@ -223,7 +223,7 @@
         <div class="position-relative">
             <span class="nextBtn"></span>
             <span class="prevBtn"></span>
-            <section class="home-slider owl-theme owl-carousel">
+            <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
                 @foreach ($sliders as $data)
                     <div class="banner-slide-item"
                         style="position: relative; height: 600px; background: {{ $data->video || $data->{'3d_model'} ? 'black' : "url('" . asset('assets/images/sliders/' . $data->photo) . "')" }} no-repeat center center / cover;">
