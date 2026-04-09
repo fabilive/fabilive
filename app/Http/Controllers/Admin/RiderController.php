@@ -110,13 +110,52 @@ class RiderController extends AdminBaseController
 
     public function destroy($id)
     {
-        $user = Rider::findOrFail($id);
+        try {
+            $user = Rider::findOrFail($id);
 
-        return true;
-        $user->delete();
-        $msg = __('Data Deleted Successfully.');
+            // Agreements (safe)
+            try {
+                if ($user->agreements->count() > 0) {
+                    foreach ($user->agreements as $gal) {
+                        $gal->delete();
+                    }
+                }
+            } catch (\Exception $e) {}
 
-        return response()->json($msg);
+            // Chat Threads (safe)
+            try {
+                if ($user->chatThreads->count() > 0) {
+                    foreach ($user->chatThreads as $gal) {
+                        $gal->delete();
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            // Withdraws (safe)
+            try {
+                $withdraws = Withdraw::where('type', 'rider')->where('user_id', $user->id)->get();
+                if ($withdraws->count() > 0) {
+                    foreach ($withdraws as $gal) {
+                        $gal->delete();
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            // Delete rider photo
+            if ($user->photo != null) {
+                if (file_exists(public_path().'/assets/images/riders/'.$user->photo)) {
+                    @unlink(public_path().'/assets/images/riders/'.$user->photo);
+                }
+            }
+
+            $user->delete();
+            $msg = __('Data Deleted Successfully.');
+
+            return response()->json($msg);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Delete failed: '.$e->getMessage()], 500);
+        }
     }
 
     public function withdrawdatatables()
