@@ -105,25 +105,50 @@ class FrontendController extends FrontBaseController
             return view('frontend.index', $data);
         }
 
+        // Robust Slider Fetch: Attempt DB update, fallback to stale cache on failure
+        $data['sliders'] = cache()->get('homepage_sliders', collect());
         try {
-            $data['sliders'] = cache()->remember('homepage_sliders', now()->addDay(), function() {
-                return DB::table('sliders')->get();
-            });
+            $db_sliders = DB::table('sliders')->get();
+            if ($db_sliders->count() > 0) {
+                cache()->put('homepage_sliders', $db_sliders, now()->addDay());
+                $data['sliders'] = $db_sliders;
+            }
         } catch (\Exception $e) {}
 
+        // Robust Category Fetch: Attempt DB update, fallback to stale cache on failure
+        $data['featured_categories'] = cache()->get('homepage_featured_categories', collect());
         try {
-            $data['featured_categories'] = cache()->remember('homepage_featured_categories', now()->addDay(), function() {
-                return Category::withCount('products')->where('is_featured', 1)->get();
-            });
+            $db_cats = Category::withCount('products')->where('is_featured', 1)->get();
+            if ($db_cats->count() > 0) {
+                cache()->put('homepage_featured_categories', $db_cats, now()->addDay());
+                $data['featured_categories'] = $db_cats;
+            }
         } catch (\Exception $e) {}
 
+        // Robust Arrivals Fetch: Attempt DB update, fallback to stale cache on failure
+        $data['arrivals'] = cache()->get('homepage_arrivals', []);
         try {
-            $data['arrivals'] = cache()->remember('homepage_arrivals', now()->addDay(), function() {
-                return ArrivalSection::all()->toArray();
-            });
+            $db_arrivals = ArrivalSection::all()->toArray();
+            if (!empty($db_arrivals)) {
+                cache()->put('homepage_arrivals', $db_arrivals, now()->addDay());
+                $data['arrivals'] = $db_arrivals;
+            }
         } catch (\Exception $e) {}
-        try { $data['products'] = Product::where('status', 1)->count(); } catch (\Exception $e) {}
-        try { $data['ratings'] = Rating::count(); } catch (\Exception $e) {}
+
+        // Robust Counts: Attempt DB update, fallback to stale cache on failure
+        $data['products'] = cache()->get('homepage_products_count', 0);
+        try {
+            $p_count = Product::where('status', 1)->count();
+            cache()->put('homepage_products_count', $p_count, now()->addHour());
+            $data['products'] = $p_count;
+        } catch (\Exception $e) {}
+
+        $data['ratings'] = cache()->get('homepage_ratings_count', 0);
+        try {
+            $r_count = Rating::count();
+            cache()->put('homepage_ratings_count', $r_count, now()->addHour());
+            $data['ratings'] = $r_count;
+        } catch (\Exception $e) {}
 
         try {
             $data['hot_products'] = cache()->remember('homepage_hot_products', now()->addHour(), function() use ($gs) {
