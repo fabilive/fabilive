@@ -223,23 +223,26 @@
         <div class="position-relative">
             <span class="nextBtn"></span>
             <span class="prevBtn"></span>
-            <!-- Bulletproof Slider Fallback -->
-            @if($sliders->isEmpty())
-                <div class="bulletproof-slider" style="display: block !important; width: 100%; min-height: 600px; background: url('{{ asset('assets/images/sliders/electronics_hero.png') }}') no-repeat center center / cover; position: relative;">
-                    <div class="container d-flex align-items: center justify-content-center" style="min-height: 600px;">
-                        <div class="text-center">
-                            <h2 style="color: #000; font-weight: bold; font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Welcome to Fabilive</h2>
-                            <p style="color: #000; font-size: 1.5rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Premium Multi-Vendor Platform</p>
+            <!-- Forced Static Slider (Fallback Mode) -->
+            @php
+                $show_static = $sliders->isEmpty();
+            @endphp
+
+            @if($show_static)
+                <div class="static-banner" style="display: block !important; width: 100%; min-height: 600px; background: url('{{ asset('assets/images/sliders/electronics_hero.png?v=fixed') }}') no-repeat center center / cover; position: relative; z-index: 10;">
+                    <div class="container d-flex align-items-center justify-content-center" style="min-height: 600px;">
+                        <div class="text-center" style="background: rgba(255,255,255,0.2); padding: 40px; border-radius: 20px; backdrop-filter: blur(5px);">
+                            <h2 style="color: #000; font-weight: bold; font-size: 3.5rem; margin-bottom: 20px;">Welcome to Fabilive</h2>
+                            <p style="color: #000; font-size: 1.5rem; font-weight: 500;">Your Premium Shopping Destination</p>
                         </div>
                     </div>
                 </div>
-            @endif
-
-            <section class="home-slider owl-theme owl-carousel" style="{{ $sliders->isEmpty() ? 'display: none !important;' : 'display: block !important;' }} min-height: 600px; opacity: 1 !important; visibility: visible !important;">
-                @foreach ($sliders as $slide_data)
-                    <div class="banner-slide-item"
-                        style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . $slide_data->photo) . "')" }} no-repeat center center / cover; display: flex !important;">
-
+            @else
+                <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
+                    @foreach ($sliders as $slide_data)
+                        <div class="banner-slide-item"
+                            style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . $slide_data->photo) . "')" }} no-repeat center center / cover; display: flex !important;">
+    
                         @if(isset($slide_data->video) && $slide_data->video)
                             <video autoplay muted loop playsinline>
                                 <source src="{{ asset('assets/videos/' . $slide_data->video) }}" type="video/mp4">
