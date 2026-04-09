@@ -117,9 +117,9 @@ class FrontendController extends FrontBaseController
         $s2->link = '#'; $s2->position = 'left';
 
         $s3 = new \stdClass();
-        $s3->photo = 'general_hero.png';
+        $s3->photo = 'gadgets_hero.png';
         $s3->video = null; $s3->{'3d_model'} = null;
-        $s3->subtitle_text = 'Limited Edition'; $s3->title_text = 'Shop Now'; $s3->details_text = 'Best Deals Online';
+        $s3->subtitle_text = 'Limited Edition'; $s3->title_text = 'Modern Gadgets'; $s3->details_text = 'Best Deals Online';
         $s3->link = '#'; $s3->position = 'right';
 
         $data['sliders'] = collect([$s1, $s2, $s3]);
@@ -128,13 +128,19 @@ class FrontendController extends FrontBaseController
             return view('frontend.index', $data);
         }
 
-        // Robust Slider Fetch: Attempt DB update, fallback to existing placeholder/cache on failure
-        $data['sliders'] = cache()->get('homepage_sliders', $data['sliders']);
+        // Robust Slider Fetch: Only use cache/DB if they contain actual slides
+        $cached_sliders = cache()->get('homepage_sliders');
+        if ($cached_sliders && $cached_sliders->count() > 0) {
+            $data['sliders'] = $cached_sliders;
+        }
+        
         try {
-            $db_sliders = DB::table('sliders')->get();
-            if ($db_sliders->count() > 0) {
-                cache()->put('homepage_sliders', $db_sliders, now()->addDay());
-                $data['sliders'] = $db_sliders;
+            if (\App\Models\Generalsetting::isDbValid()) {
+                $db_sliders = DB::table('sliders')->get();
+                if ($db_sliders->count() > 0) {
+                    cache()->put('homepage_sliders', $db_sliders, now()->addDay());
+                    $data['sliders'] = $db_sliders;
+                }
             }
         } catch (\Exception $e) {}
 
