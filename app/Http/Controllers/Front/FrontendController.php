@@ -62,355 +62,225 @@ class FrontendController extends FrontBaseController
     {
         $gs = $this->gs;
         $data['ps'] = $this->ps;
-        if (! empty($request->reff)) {
-            $affilate_user = DB::table('users')
-                ->where('affilate_code', '=', $request->reff)
-                ->first();
-            if (! empty($affilate_user)) {
-                // Set legacy affiliate session
-                Session::put('affilate', $affilate_user->id);
-                Session::put('affilate_code', $affilate_user->affilate_code);
-                // Set custom referral session for CustomReferral system
-                Session::put('custom_referral', $affilate_user->id);
-                Session::put('custom_referral_code', $affilate_user->affilate_code);
 
-                return redirect()->route('user.register');
-            }
+        if (! empty($request->reff)) {
+            try {
+                $affilate_user = DB::table('users')
+                    ->where('affilate_code', '=', $request->reff)
+                    ->first();
+                if (! empty($affilate_user)) {
+                    Session::put('affilate', $affilate_user->id);
+                    Session::put('affilate_code', $affilate_user->affilate_code);
+                    Session::put('custom_referral', $affilate_user->id);
+                    Session::put('custom_referral_code', $affilate_user->affilate_code);
+                    return redirect()->route('user.register');
+                }
+            } catch (\Exception $e) {}
         }
+
         if (! empty($request->forgot)) {
             if ($request->forgot == 'success') {
                 return redirect()->guest('/')->with('forgot-modal', __('Please Login Now !'));
             }
         }
-        $data['sliders'] = DB::table('sliders')
-            ->get();
-        $data['featured_categories'] = Category::withCount('products')->where('is_featured', 1)->get();
-        $data['arrivals'] = ArrivalSection::get()->toArray();
-        $data['products'] = Product::where('status', 1)->count();
-        $data['ratings'] = Rating::count();
-        $data['hot_products'] = Product::whereHot(1)->whereStatus(1)
-            ->take($gs->hot_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
-        $data['latest_products'] = Product::whereStatus(1)
-            ->take($gs->new_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->latest('id')
-            ->get();
-        $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
-            ->take($gs->sale_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
-        $data['best_products'] = Product::query()->whereStatus(1)->whereBest(1)
-            ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
-        $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
-            ->take($gs->popular_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
 
-        $data['top_products'] = Product::whereStatus(1)->whereTop(1)
+        // Default empty collections — prevents blade variable-undefined errors
+        $data['sliders']           = collect();
+        $data['featured_categories'] = collect();
+        $data['arrivals']          = [];
+        $data['products']          = 0;
+        $data['ratings']           = 0;
+        $data['hot_products']      = collect();
+        $data['latest_products']   = collect();
+        $data['sale_products']     = collect();
+        $data['best_products']     = collect();
+        $data['popular_products']  = collect();
+        $data['top_products']      = collect();
+        $data['big_products']      = collect();
+        $data['trending_products'] = collect();
+        $data['flash_products']    = null;
+        $data['blogs']             = collect();
 
-            ->take($gs->top_rated_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->orderby('id', 'desc')
-            ->withCount('ratings')->withAvg('ratings', 'rating')
-            ->get();
+        if (!\App\Models\Generalsetting::isDbValid()) {
+            return view('frontend.index', $data);
+        }
 
-        $data['big_products'] = Product::whereStatus(1)->whereBig(1)
+        try { $data['sliders'] = DB::table('sliders')->get(); } catch (\Exception $e) {}
+        try { $data['featured_categories'] = Category::withCount('products')->where('is_featured', 1)->get(); } catch (\Exception $e) {}
+        try { $data['arrivals'] = ArrivalSection::get()->toArray(); } catch (\Exception $e) {}
+        try { $data['products'] = Product::where('status', 1)->count(); } catch (\Exception $e) {}
+        try { $data['ratings'] = Rating::count(); } catch (\Exception $e) {}
 
-            ->take($gs->big_save_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->orderby('id', 'desc')
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->get();
+        try {
+            $data['hot_products'] = Product::whereHot(1)->whereStatus(1)
+                ->take($gs->hot_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
 
-        $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
+        try {
+            $data['latest_products'] = Product::whereStatus(1)
+                ->take($gs->new_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
 
-            ->take($gs->trending_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
+        try {
+            $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
+                ->take($gs->sale_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
 
-        $data['flash_products'] = Product::whereStatus(1)->whereIsDiscount(1)
-            ->where('discount_date', '>=', date('Y-m-d'))
+        try {
+            $data['best_products'] = Product::whereStatus(1)->whereBest(1)
+                ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
 
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->latest()->first();
+        try {
+            $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
+                ->take($gs->popular_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
 
-        $data['blogs'] = Blog::latest()->take(2)->get();
+        try {
+            $data['top_products'] = Product::whereStatus(1)->whereTop(1)
+                ->take($gs->top_rated_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
+
+        try {
+            $data['big_products'] = Product::whereStatus(1)->whereBig(1)
+                ->take($gs->big_save_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
+
+        try {
+            $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
+                ->take($gs->trending_count ?: 8)
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->withCount('ratings')->withAvg('ratings', 'rating')
+                ->latest('id')->get();
+        } catch (\Exception $e) {}
+
+        try {
+            $data['flash_products'] = Product::whereStatus(1)->whereIsDiscount(1)
+                ->where('discount_date', '>=', date('Y-m-d'))
+                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                ->latest()->first();
+        } catch (\Exception $e) {}
+
+        try { $data['blogs'] = Blog::latest()->take(2)->get(); } catch (\Exception $e) {}
 
         return view('frontend.index', $data);
     }
 
     // Home Page Ajax Display
 
+
     public function extraIndex()
     {
         $gs = $this->gs;
 
-        $data['hot_products'] = Product::whereHot(1)->whereStatus(1)
-            ->take($gs->hot_count)
+        // Default empty collections — prevents blade variable-undefined errors
+        $data['hot_products']      = collect();
+        $data['latest_products']   = collect();
+        $data['sale_products']     = collect();
+        $data['best_products']     = collect();
+        $data['popular_products']  = collect();
+        $data['top_products']      = collect();
+        $data['big_products']      = collect();
+        $data['trending_products'] = collect();
+        $data['flash_products']    = null;
+        $data['blogs']             = collect();
+        $data['ps']                = $this->ps;
 
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
+        if (\App\Models\Generalsetting::isDbValid()) {
+            try {
+                $data['hot_products'] = Product::whereHot(1)->whereStatus(1)
+                    ->take($gs->hot_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-        $data['latest_products'] = Product::whereLatest(1)->whereStatus(1)
+            try {
+                $data['latest_products'] = Product::whereStatus(1)
+                    ->take($gs->new_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-            ->take($gs->new_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
+            try {
+                $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
+                    ->take($gs->sale_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-        $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
+            try {
+                $data['best_products'] = Product::whereStatus(1)->whereBest(1)
+                    ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-            ->take($gs->sale_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
+            try {
+                $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
+                    ->take($gs->popular_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-        $data['best_products'] = Product::query()->whereStatus(1)->whereBest(1)
+            try {
+                $data['top_products'] = Product::whereStatus(1)->whereTop(1)
+                    ->take($gs->top_rated_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-            ->take($gs->best_seller_count)
-            // get category id and created at
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
+            try {
+                $data['big_products'] = Product::whereStatus(1)->whereBig(1)
+                    ->take($gs->big_save_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
+            try {
+                $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
+                    ->take($gs->trending_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            } catch (\Exception $e) {}
 
-        $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
+            try {
+                $data['flash_products'] = Product::whereStatus(1)->whereIsDiscount(1)
+                    ->where('discount_date', '>=', date('Y-m-d'))
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->latest()->first();
+            } catch (\Exception $e) {}
 
-            ->take($gs->popular_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
-
-        $data['top_products'] = Product::whereStatus(1)->whereTop(1)
-
-            ->take($gs->top_rated_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->orderby('id', 'desc')
-            ->withCount('ratings')->withAvg('ratings', 'rating')
-            ->get();
-
-        $data['big_products'] = Product::whereStatus(1)->whereBig(1)
-
-            ->take($gs->big_save_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->orderby('id', 'desc')
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->get();
-
-        $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
-
-            ->take($gs->trending_count)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
-            ->get();
-
-        $data['flash_products'] = Product::whereStatus(1)->whereIsDiscount(1)
-            ->where('discount_date', '>=', date('Y-m-d'))
-
-            ->with(['user' => function ($query) {
-                $query->select('id', 'is_vendor');
-            }])
-            ->when('user', function ($query) {
-                foreach ($query as $q) {
-                    if ($q->is_vendor == 2) {
-                        return $q;
-                    }
-                }
-            })
-            ->latest()->first();
-
-        $data['blogs'] = Blog::latest()->take(2)->get();
-        $data['ps'] = $this->ps;
+            try { $data['blogs'] = Blog::latest()->take(2)->get(); } catch (\Exception $e) {}
+        }
 
         return view('partials.theme.extraindex', $data);
     }
@@ -422,9 +292,12 @@ class FrontendController extends FrontBaseController
     public function blog(Request $request)
     {
 
-        if (DB::table('pagesettings')->first()->blog == 0) {
-            return redirect()->back();
-        }
+        try {
+            $ps = \App\Models\Pagesetting::safeFirst();
+            if ($ps->blog == 0) {
+                return redirect()->back();
+            }
+        } catch (\Exception $e) {}
 
         // BLOG TAGS
         $tags = null;
