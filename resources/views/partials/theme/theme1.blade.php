@@ -224,19 +224,28 @@
             <span class="nextBtn"></span>
             <span class="prevBtn"></span>
             <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
-                @foreach ($sliders as $data)
+                @if($sliders->isEmpty())
                     <div class="banner-slide-item"
-                        style="position: relative; height: 600px; background: {{ $data->video || $data->{'3d_model'} ? 'black' : "url('" . asset('assets/images/sliders/' . $data->photo) . "')" }} no-repeat center center / cover;">
+                        style="position: relative; height: 600px; background: url('{{ asset('assets/images/sliders/electronics_hero.png') }}') no-repeat center center / cover; display: flex !important; align-items: center; justify-content: center;">
+                        <div class="container text-center">
+                            <h2 style="color: #000; font-weight: bold; font-size: 3rem;">Welcome to Fabilive</h2>
+                            <p style="color: #000; font-size: 1.2rem;">Premium Multi-Vendor Platform</p>
+                        </div>
+                    </div>
+                @endif
+                @foreach ($sliders as $slide_data)
+                    <div class="banner-slide-item"
+                        style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . $slide_data->photo) . "')" }} no-repeat center center / cover; display: flex !important;">
 
-                        @if($data->video)
+                        @if(isset($slide_data->video) && $slide_data->video)
                             <video autoplay muted loop playsinline>
-                                <source src="{{ asset('assets/videos/' . $data->video) }}" type="video/mp4">
+                                <source src="{{ asset('assets/videos/' . $slide_data->video) }}" type="video/mp4">
                             </video>
                         @endif
 
-                        @if($data->{'3d_model'})
+                        @if(isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'})
                             <model-viewer 
-                                src="{{ asset('assets/models/' . $data->{'3d_model'}) }}" 
+                                src="{{ asset('assets/models/' . $slide_data->{'3d_model'}) }}" 
                                 alt="A 3D robot model" 
                                 auto-rotate 
                                 camera-controls 
