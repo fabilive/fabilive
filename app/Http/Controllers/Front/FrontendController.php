@@ -119,8 +119,8 @@ class FrontendController extends FrontBaseController
             return view('frontend.index', $data);
         }
 
-        // Robust Slider Fetch: Attempt DB update, fallback to stale cache on failure
-        $data['sliders'] = cache()->get('homepage_sliders', collect());
+        // Robust Slider Fetch: Attempt DB update, fallback to existing placeholder/cache on failure
+        $data['sliders'] = cache()->get('homepage_sliders', $data['sliders']);
         try {
             $db_sliders = DB::table('sliders')->get();
             if ($db_sliders->count() > 0) {
