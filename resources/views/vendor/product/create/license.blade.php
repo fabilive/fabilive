@@ -403,7 +403,7 @@
 													</div>
 												</div>
 												<input type="hidden" id="feature_photo" name="photo" value="">
-												<input type="file" name="gallery[]" class="hidden" id="uploadgallery" accept="image/*"
+												<input type="file" name="gallery[]" class="hidden" id="uploadgallery"
 													multiple>
 												<div class="row mb-4">
 													<div class="col-lg-12 mb-2">

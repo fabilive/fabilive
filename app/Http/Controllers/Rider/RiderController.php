@@ -163,7 +163,8 @@ class RiderController extends RiderBaseController
     public function serviceAreaStore(Request $request)
     {
         $rules = [
-            'service_area_id' => 'required|exists:service_areas,id|unique:rider_service_areas,service_area_id,NULL,id,rider_id,'.$this->rider->id,
+            'service_area_id' => 'required|array',
+            'service_area_id.*' => 'exists:service_areas,id',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -172,12 +173,21 @@ class RiderController extends RiderBaseController
             return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
         }
 
-        $service_area = new RiderServiceArea();
-        $service_area->rider_id = $this->rider->id;
-        $service_area->service_area_id = $request->service_area_id;
-        $service_area->save();
+        foreach ($request->service_area_id as $area_id) {
+            // Check if already selected to prevent duplicates
+            $exists = RiderServiceArea::where('rider_id', $this->rider->id)
+                ->where('service_area_id', $area_id)
+                ->exists();
 
-        return response()->json(__('Successfully created your service area'));
+            if (! $exists) {
+                $service_area = new RiderServiceArea();
+                $service_area->rider_id = $this->rider->id;
+                $service_area->service_area_id = $area_id;
+                $service_area->save();
+            }
+        }
+
+        return response()->json(__('Successfully created your service area(s)'));
     }
 
     public function serviceAreaUpdate(Request $request, $id)

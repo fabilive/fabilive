@@ -58,9 +58,9 @@
                                             <div class="row mb-4">
                                                 <div class="col-lg-12 mb-3">
                                                     <label for="service_area_id">@lang('Service Area')</label>
-                                                    <select class="service_area input-field form-control" name="service_area_id" id="service_area_id">
+                                                    <select class="service_area input-field form-control" name="service_area_id[]" id="service_area_id" multiple>
                                                         @foreach ($service_areas as $area)
-                                                            <option value="{{ $area->id }}">{{ $area->name }}</option>
+                                                            <option value="{{ $area->id }}">{{ $area->location }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -86,8 +86,9 @@
 <script>
     $(document).ready(function() {
     $('.service_area').select2({
-        placeholder: "Select Service Area",
-        allowClear: true
+        placeholder: "Select Service Area(s)",
+        allowClear: true,
+        multiple: true
     });
 });
 </script>

@@ -255,7 +255,7 @@ class ProductController extends AdminBaseController
         try {
             $rules = [
                 'photo' => 'required',
-                'file' => 'mimes:zip',
+                'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif',
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -469,15 +469,31 @@ class ProductController extends AdminBaseController
             } else {
                 $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
             }
-            $img = Image::make(public_path('assets/images/products/'.$prod->photo))->resize(285, 285);
-            $thumbnail = time().Str::random(8).'.jpg';
-            $img->save(public_path('assets/images/thumbnails/'.$thumbnail));
-            $prod->thumbnail = $thumbnail;
+            // Safeguard main photo resizing
+            $main_photo_path = public_path('assets/images/products/'.$prod->photo);
+            if (file_exists($main_photo_path)) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime = finfo_file($finfo, $main_photo_path);
+                finfo_close($finfo);
+
+                if (strpos($mime, 'image/') === 0) {
+                    $img = Image::make($main_photo_path)->resize(285, 285);
+                    $thumbnail = time().Str::random(8).'.jpg';
+                    $img->save(public_path('assets/images/thumbnails/'.$thumbnail));
+                    $prod->thumbnail = $thumbnail;
+                } else {
+                    $prod->thumbnail = 'noimage.png'; // Or some default
+                }
+            }
             $prod->update();
 
             $lastid = $data->id;
             if ($files = $request->file('gallery')) {
                 foreach ($files as $key => $file) {
+                    $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
+                    if (! in_array(strtolower($file->getClientOriginalExtension()), $extensions)) {
+                        continue;
+                    }
                     if (in_array($key, $request->galval)) {
                         $gallery = new Gallery;
                         $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());

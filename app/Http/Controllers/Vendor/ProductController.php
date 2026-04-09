@@ -378,7 +378,7 @@ class ProductController extends VendorBaseController
             if (! $package || $package->allowed_products == 0 || $prods < $package->allowed_products) {
                 $rules = [
                     'photo' => 'required',
-                    'file' => 'mimes:zip',
+                    'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif',
                 ];
                 $validator = Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
@@ -388,9 +388,9 @@ class ProductController extends VendorBaseController
                 $sign = $this->curr;
                 $input = $request->all();
                 if ($file = $request->file('file')) {
-                    $extensions = ['zip'];
+                    $extensions = ['zip', 'rar', '7z', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'mp4', 'mov', 'avi', 'webm', 'webp', 'svg', 'gif'];
                     if (! in_array($file->getClientOriginalExtension(), $extensions)) {
-                        return response()->json(['errors' => ['Image format not supported']]);
+                        return response()->json(['errors' => ['File format not supported']]);
                     }
                     $name = \PriceHelper::ImageCreateName($file);
                     $file->move(public_path('assets/files'), $name);
@@ -607,25 +607,43 @@ class ProductController extends VendorBaseController
                 } else {
                     $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
                 }
-                $img = \Image::make(public_path().'/assets/images/products/'.$prod->photo)->resize(285, 285);
-                $thumbnail = time().Str::random(8).'.jpg';
-                $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
-                $prod->thumbnail = $thumbnail;
+                // Safeguard main photo resizing
+                $main_photo_path = public_path().'/assets/images/products/'.$prod->photo;
+                if (file_exists($main_photo_path)) {
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mime = finfo_file($finfo, $main_photo_path);
+                    finfo_close($finfo);
+
+                    if (strpos($mime, 'image/') === 0) {
+                        $img = \Image::make($main_photo_path)->resize(285, 285);
+                        $thumbnail = time().Str::random(8).'.jpg';
+                        $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
+                        $prod->thumbnail = $thumbnail;
+                    } else {
+                        $prod->thumbnail = 'noimage.png'; // Or some default
+                    }
+                }
                 $prod->update();
 
                 $lastid = $data->id;
                 if ($files = $request->file('gallery')) {
                     foreach ($files as $key => $file) {
-                        $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-                        if (! in_array($file->getClientOriginalExtension(), $extensions)) {
-                            return response()->json(['errors' => ['Image format not supported']]);
+                        $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
+                        if (! in_array(strtolower($file->getClientOriginalExtension()), $extensions)) {
+                            return response()->json(['errors' => ['File format not supported: '.$file->getClientOriginalExtension()]]);
                         }
                         if (in_array($key, $request->galval)) {
                             $gallery = new Gallery;
                             $name = \PriceHelper::ImageCreateName($file);
-                            $img = \Image::make($file->getRealPath())->resize(800, 800);
-                            $thumbnail = time().Str::random(8).'.jpg';
-                            $img->save(public_path().'/assets/images/galleries/'.$name);
+                            
+                            $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif']);
+                            if ($is_image) {
+                                $img = \Image::make($file->getRealPath())->resize(800, 800);
+                                $img->save(public_path().'/assets/images/galleries/'.$name);
+                            } else {
+                                $file->move(public_path().'/assets/images/galleries/', $name);
+                            }
+
                             $gallery['photo'] = $name;
                             $gallery['product_id'] = $lastid;
                             $gallery->save();

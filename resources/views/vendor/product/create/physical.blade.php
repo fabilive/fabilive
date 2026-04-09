@@ -701,7 +701,7 @@
                                         </div>
                                         <input type="hidden" id="feature_photo" name="photo" value="">
                                         <input type="file" name="gallery[]" class="hidden" id="uploadgallery"
-                                            accept="image/*" multiple>
+                                            multiple>
                                         <div class="row mb-4">
                                             <div class="col-lg-12 mb-2">
                                                 <div class="left-area">
