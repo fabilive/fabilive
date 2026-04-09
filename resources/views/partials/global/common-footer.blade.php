@@ -1,6 +1,6 @@
 @php
-$categories = App\Models\Category::with('subs')->where('status',1)->get();
-$pages = App\Models\Page::get();
+    $categories = isset($global_categories) ? $global_categories : collect();
+    $pages = isset($global_pages) ? $global_pages : collect();
 @endphp
 @if($ps->newsletter==1)
     <!--==================== Newsleter Section Start ====================-->
@@ -52,7 +52,7 @@ $pages = App\Models\Page::get();
                     </div>
                 </div>
                 <div class="footer-widget media-widget mb-4">
-                    @foreach(DB::table('social_links')->where('user_id',0)->where('status',1)->get() as $link)
+                    @foreach((isset($global_social_links) ? $global_social_links : collect()) as $link)
                         <a href="{{ $link->link }}" target="_blank">
                             <i class="{{ $link->icon }}"></i>
                         </a>
@@ -111,7 +111,7 @@ $pages = App\Models\Page::get();
                                 <a href="{{ route('front.faq') }}">{{ __('Faq') }}</a>
                             </li>
                             @endif
-                            @foreach(DB::table('pages')->where('footer','=',1)->get() as $data)
+                            @foreach((isset($global_pages) ? $global_pages : collect())->where('footer','=',1) as $data)
                             <li><a href="{{ route('front.vendor',$data->slug) }}">{{ $data->title }}</a></li>
                         @endforeach
                         @if($ps->contact == 1)

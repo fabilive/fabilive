@@ -213,8 +213,8 @@
         </div>
     </div>
     @php
-        $categories = App\Models\Category::with('subs')->where('status', 1)->get();
-        $pages = App\Models\Page::get();
+        $categories = isset($global_categories) ? $global_categories : collect();
+        $pages = isset($global_pages) ? $global_pages : collect();
     @endphp
     <div class="main-nav py-4 d-none d-lg-block">
         <div class="container-fluid">

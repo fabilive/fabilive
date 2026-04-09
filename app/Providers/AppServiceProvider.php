@@ -119,6 +119,51 @@ class AppServiceProvider extends ServiceProvider
             }
             $settings->with('footer_blogs', $blogs);
 
+            // Fail-safe global collections for Blade templates
+            $categories = collect();
+            $pages = collect();
+            $social_links = collect();
+            $partners = collect();
+            $services = collect();
+
+            if ($dbAvailable) {
+                try {
+                    $categories = cache()->remember('global_categories', now()->addDay(), function() {
+                        return \App\Models\Category::with('subs')->where('status', 1)->get();
+                    });
+                } catch (\Exception $e) {}
+
+                try {
+                    $pages = cache()->remember('global_pages', now()->addDay(), function() {
+                        return \App\Models\Page::get();
+                    });
+                } catch (\Exception $e) {}
+
+                try {
+                    $social_links = cache()->remember('global_social_links', now()->addDay(), function() {
+                        return DB::table('social_links')->where('user_id', 0)->where('status', 1)->get();
+                    });
+                } catch (\Exception $e) {}
+
+                try {
+                    $partners = cache()->remember('global_partners', now()->addDay(), function() {
+                        return DB::table('partners')->get();
+                    });
+                } catch (\Exception $e) {}
+
+                try {
+                    $services = cache()->remember('global_services', now()->addDay(), function() {
+                        return DB::table('services')->where('user_id','=',0)->get();
+                    });
+                } catch (\Exception $e) {}
+            }
+
+            $settings->with('global_categories', $categories);
+            $settings->with('global_pages', $pages);
+            $settings->with('global_social_links', $social_links);
+            $settings->with('global_partners', $partners);
+            $settings->with('global_services', $services);
+
             // Extra session variables
             $settings->with('visited', Session::has('visited') ? 0 : 1);
             if (!Session::has('visited')) Session::put('visited', 1);

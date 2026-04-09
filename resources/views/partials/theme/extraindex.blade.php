@@ -166,7 +166,7 @@
             </div>
         </div>
         <div class="row g-3">
-            @foreach (DB::table('partners')->get() as $data)
+            @foreach ((isset($global_partners) ? $global_partners : collect()) as $data)
             <div class="col-6 col-sm-4 col-lg-3 col-xl-2">
                 <div class="simple-service">
                     <img src="{{ asset('assets/images/partner/'.$data->photo) }}" alt="">
@@ -236,7 +236,7 @@
                     </div>
                 </div>
             </div> --}}
-            @foreach (DB::table('services')->get() as $service)
+            @foreach ((isset($global_services) ? $global_services : collect()) as $service)
             <div class="col">
                 <div class="simple-service px-3 md-my-10 d-flex align-items-center">
                     <div class="box-80px rounded-pill position-relative bg-white">

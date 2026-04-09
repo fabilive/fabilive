@@ -221,7 +221,14 @@
   </div>
   <script>
     var mainurl = "{{ url('/') }}";
-    var gs      = {!! json_encode(DB::table('generalsettings')->where('id','=',1)->first(['is_loader','decimal_separator','thousand_separator','is_cookie','is_talkto','talkto'])) !!};
+    var gs      = {!! json_encode([
+        'is_loader' => $gs->is_loader ?? 0,
+        'decimal_separator' => $gs->decimal_separator ?? '.',
+        'thousand_separator' => $gs->thousand_separator ?? ',',
+        'is_cookie' => $gs->is_cookie ?? 0,
+        'is_talkto' => $gs->is_talkto ?? 0,
+        'talkto' => $gs->talkto ?? '',
+    ]) !!};
     var ps_category = {{ $ps->category }};
 
     var lang = {
