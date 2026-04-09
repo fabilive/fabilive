@@ -272,23 +272,23 @@
 
                         <!-- Text Section -->
                         <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
-                            <div class="banner-wrapper-item text-{{ $data->position }}" style="width: 100%;">
-                                <div class="banner-content-box {{ $data->position == 'right' ? 'ms-auto' : ($data->position == 'center' ? 'mx-auto' : '') }}">
-                                    <div class="banner-content" style="text-align: {{ $data->position }};">
+                            <div class="banner-wrapper-item text-{{ $slide_data->position }}" style="width: 100%;">
+                                <div class="banner-content-box {{ $slide_data->position == 'right' ? 'ms-auto' : ($slide_data->position == 'center' ? 'mx-auto' : '') }}">
+                                    <div class="banner-content" style="text-align: {{ $slide_data->position }};">
 
                                         <!-- Subtitle -->
                                         <span class="subtitle animate-stagger-1">
-                                            {{ $data->subtitle_text }}
+                                            {{ $slide_data->subtitle_text }}
                                         </span>
 
                                         <!-- Title -->
                                         <h1 class="title animate-stagger-2">
-                                            {{ $data->title_text }}
+                                            {{ $slide_data->title_text }}
                                         </h1>
 
                                         <!-- Paragraph -->
                                         <p class="details-text animate-stagger-2">
-                                            {{ $data->details_text }}
+                                            {{ $slide_data->details_text }}
                                         </p>
 
                                         <!-- Button -->
@@ -305,6 +305,7 @@
                     </div>
                 @endforeach
             </section>
+            @endif
         </div>
     @endif
 
