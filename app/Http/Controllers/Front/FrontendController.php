@@ -103,17 +103,26 @@ class FrontendController extends FrontBaseController
 
         // Final Fallback: If sliders are still empty, inject a placeholder demo slider
         // This MUST be before isDbValid check to ensure homepage works offline
-        $placeholder = new \stdClass();
-        $placeholder->subtitle_text = 'Welcome to Fabilive';
-        $placeholder->title_text = 'Premium Multi-Vendor Platform';
-        $placeholder->details_text = 'Discover the best deals on electronics, fashion, and more.';
-        $placeholder->photo = 'electronics_hero.png'; // Verified existing asset
-        $placeholder->link = route('front.index');
-        $placeholder->video = null;
-        $placeholder->{'3d_model'} = null;
-        $placeholder->position = 'left';
-        $placeholder->link = '#';
-        $data['sliders'] = collect([$placeholder]);
+        // Create 3 Premium Placeholder Slides for Fail-safe
+        $s1 = new \stdClass();
+        $s1->photo = 'electronics_hero.png';
+        $s1->video = null; $s1->{'3d_model'} = null;
+        $s1->subtitle_text = 'Flash Sale'; $s1->title_text = 'Latest Electronics'; $s1->details_text = 'Up to 50% Off';
+        $s1->link = '#'; $s1->position = 'center';
+
+        $s2 = new \stdClass();
+        $s2->photo = 'fashion_hero.png';
+        $s2->video = null; $s2->{'3d_model'} = null;
+        $s2->subtitle_text = 'New Arrival'; $s2->title_text = 'Men Fashion'; $s2->details_text = 'Premium Quality Items';
+        $s2->link = '#'; $s2->position = 'left';
+
+        $s3 = new \stdClass();
+        $s3->photo = 'general_hero.png';
+        $s3->video = null; $s3->{'3d_model'} = null;
+        $s3->subtitle_text = 'Limited Edition'; $s3->title_text = 'Shop Now'; $s3->details_text = 'Best Deals Online';
+        $s3->link = '#'; $s3->position = 'right';
+
+        $data['sliders'] = collect([$s1, $s2, $s3]);
 
         if (!\App\Models\Generalsetting::isDbValid()) {
             return view('frontend.index', $data);
