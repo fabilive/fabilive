@@ -10,6 +10,48 @@ class Pagesetting extends Model
 
     public $timestamps = false;
 
+    /**
+     * Get the first page setting record with a robust fail-safe.
+     * 
+     * @return object|\stdClass
+     */
+    public static function safeFirst()
+    {
+        try {
+            if (Generalsetting::isDbValid()) {
+                $ps = cache()->remember('pagesettings', now()->addDay(), function () {
+                    return \DB::table('pagesettings')->first();
+                });
+                if ($ps) return $ps;
+            }
+        } catch (\Exception $e) {
+            // Silently fail to in-memory defaults
+        }
+
+        // Fallback to in-memory defaults if DB is down or record is missing
+        $ps = new \stdClass();
+        
+        // Essential visibility flags set to 1 by default
+        $ps->slider = 1;
+        $ps->arrival_section = 1;
+        $ps->category = 1;
+        $ps->popular_products = 1;
+        $ps->featured_category = 1;
+        $ps->best_sellers = 1;
+        $ps->top_big_trending = 1;
+        $ps->top_brand = 1;
+        $ps->blog = 1;
+        $ps->faq = 1;
+        $ps->contact = 1;
+        $ps->deal_of_the_day = 1;
+        $ps->partner = 1;
+        $ps->our_services = 1;
+        $ps->newsletter = 1;
+        $ps->bottom_banner = 0; // Optional
+        
+        return $ps;
+    }
+
     public function upload($name, $file, $oldname)
     {
         $destination = public_path('assets/images');

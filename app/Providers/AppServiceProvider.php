@@ -86,10 +86,12 @@ class AppServiceProvider extends ServiceProvider
             $settings->with('curr', $curr);
 
             // Settings Tables Fail-safe
-            $ps = null; $seo = null; $social = null;
+            $ps = \App\Models\Pagesetting::safeFirst();
+            $seo = null;
+            $social = null;
+
             if ($dbAvailable) {
                 try {
-                    $ps = DB::table('pagesettings')->first();
                     $seo = DB::table('seotools')->first();
                     $social = DB::table('socialsettings')->first();
                 } catch (\Exception $e) {}

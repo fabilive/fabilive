@@ -11,15 +11,15 @@
                                 Arrival') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-Trending-two">{{ __('Trending')
+                            <a class="nav-link" data-bs-toggle="pill" href="#pills-best-selling-two">{{ __('Top Sellers')
                                 }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-best-selling-two">{{ __('Best
-                                Selling') }}</a>
+                            <a class="nav-link" data-bs-toggle="pill" href="#pills-featured-two">{{ __('Buyers Choice') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-featured-two">{{ __('Popular') }}</a>
+                            <a class="nav-link" data-bs-toggle="pill" href="#pills-Trending-two">{{ __('Trending')
+                                }}</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -191,7 +191,7 @@
             <div class="col-lg-5">
                 <span class="text-secondary pb-2 d-table tagline mx-auto text-uppercase text-center">{{ __('Top
                     Products') }}</span>
-                <h2 class="main-title mb-4 text-center text-secondary">{{ __('Best Selling Products') }}</h2>
+                <h2 class="main-title mb-4 text-center text-secondary">{{ __('Top Sales Products') }}</h2>
 
             </div>
         </div>

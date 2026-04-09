@@ -104,7 +104,7 @@ class FrontendController extends FrontBaseController
             ->withAvg('ratings', 'rating')
             ->orderby('id', 'desc')
             ->get();
-        $data['latest_products'] = Product::whereLatest(1)->whereStatus(1)
+        $data['latest_products'] = Product::whereStatus(1)
             ->take($gs->new_count)
             ->with(['user' => function ($query) {
                 $query->select('id', 'is_vendor');
@@ -118,7 +118,7 @@ class FrontendController extends FrontBaseController
             })
             ->withCount('ratings')
             ->withAvg('ratings', 'rating')
-            ->orderby('id', 'desc')
+            ->latest('id')
             ->get();
         $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
             ->take($gs->sale_count)
@@ -137,7 +137,7 @@ class FrontendController extends FrontBaseController
             ->orderby('id', 'desc')
             ->get();
         $data['best_products'] = Product::query()->whereStatus(1)->whereBest(1)
-            ->take($gs->best_seller_count)
+            ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
             ->with(['user' => function ($query) {
                 $query->select('id', 'is_vendor');
             }])
