@@ -105,42 +105,64 @@ class FrontendController extends FrontBaseController
             return view('frontend.index', $data);
         }
 
-        try { $data['sliders'] = DB::table('sliders')->get(); } catch (\Exception $e) {}
-        try { $data['featured_categories'] = Category::withCount('products')->where('is_featured', 1)->get(); } catch (\Exception $e) {}
-        try { $data['arrivals'] = ArrivalSection::get()->toArray(); } catch (\Exception $e) {}
+        try {
+            $data['sliders'] = cache()->remember('homepage_sliders', now()->addDay(), function() {
+                return DB::table('sliders')->get();
+            });
+        } catch (\Exception $e) {}
+
+        try {
+            $data['featured_categories'] = cache()->remember('homepage_featured_categories', now()->addDay(), function() {
+                return Category::withCount('products')->where('is_featured', 1)->get();
+            });
+        } catch (\Exception $e) {}
+
+        try {
+            $data['arrivals'] = cache()->remember('homepage_arrivals', now()->addDay(), function() {
+                return ArrivalSection::all()->toArray();
+            });
+        } catch (\Exception $e) {}
         try { $data['products'] = Product::where('status', 1)->count(); } catch (\Exception $e) {}
         try { $data['ratings'] = Rating::count(); } catch (\Exception $e) {}
 
         try {
-            $data['hot_products'] = Product::whereHot(1)->whereStatus(1)
-                ->take($gs->hot_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['hot_products'] = cache()->remember('homepage_hot_products', now()->addHour(), function() use ($gs) {
+                return Product::whereHot(1)->whereStatus(1)
+                    ->take($gs->hot_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['latest_products'] = Product::whereStatus(1)
-                ->take($gs->new_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['latest_products'] = cache()->remember('homepage_latest_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)
+                    ->take($gs->new_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
-                ->take($gs->sale_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['sale_products'] = cache()->remember('homepage_sale_products', now()->addHour(), function() use ($gs) {
+                return Product::whereSale(1)->whereStatus(1)
+                    ->take($gs->sale_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['best_products'] = Product::whereStatus(1)->whereBest(1)
-                ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['best_products'] = cache()->remember('homepage_best_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)->whereBest(1)
+                    ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
