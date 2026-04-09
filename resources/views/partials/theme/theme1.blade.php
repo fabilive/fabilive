@@ -306,7 +306,29 @@
                             <div class="product-wrapper" style="border-radius:12px;overflow:hidden;position:relative;">
                                 <div class="product-image" style="height:200px;overflow:hidden;">
                                     @php
-                                        $fcat_image = $fcategory->image ? asset('assets/images/categories/' . $fcategory->image) : ($fcategory->photo ? asset('assets/images/categories/' . $fcategory->photo) : asset('assets/images/noimage.png'));
+                                        $slug = $fcategory->slug;
+                                        $fcat_image = asset('assets/images/noimage.png');
+                                        
+                                        // Priority 1: Database fields
+                                        if($fcategory->image && file_exists(public_path('assets/images/categories/'.$fcategory->image))) {
+                                            $fcat_image = asset('assets/images/categories/' . $fcategory->image);
+                                        } elseif($fcategory->photo && file_exists(public_path('assets/images/categories/'.$fcategory->photo))) {
+                                            $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
+                                        } else {
+                                            // Priority 2: Filesystem Pattern Matching (Fallback)
+                                            $patterns = [
+                                                'category_'.$slug.'.png',
+                                                'category_'.$slug.'.jpg',
+                                                '1568878538electronic.jpg',
+                                                '1568878596home.jpg'
+                                            ];
+                                            foreach($patterns as $p) {
+                                                if(file_exists(public_path('assets/images/categories/'.$p))) {
+                                                    $fcat_image = asset('assets/images/categories/'.$p);
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     @endphp
                                     <img src="{{ $fcat_image }}"
                                          alt="{{ $fcategory->name }}"

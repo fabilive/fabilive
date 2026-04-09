@@ -156,7 +156,7 @@ class FrontendController extends FrontBaseController
             $placeholder->subtitle_text = 'Welcome to Fabilive';
             $placeholder->title_text = 'Premium Multi-Vendor Platform';
             $placeholder->details_text = 'Discover the best deals on electronics, fashion, and more.';
-            $placeholder->photo = 'placeholder_slider.jpg'; // This should ideally exist or we can use a generic asset
+            $placeholder->photo = 'electronics_hero.png'; // Verified existing asset in public/assets/images/sliders/
             $placeholder->link = route('front.index');
             $placeholder->video = null;
             $placeholder->{'3d_model'} = null;

@@ -222,7 +222,22 @@
                 <div class="col-xl-7 col-lg-9">
                     <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
                         <a class="navbar-brand" href="{{ route('front.index') }}">
-                            <img class="nav-logo" src="{{ isset($gs->logo) && $gs->logo ? asset('assets/images/'.$gs->logo) : asset('assets/images/logo.png') }}" alt="Fabilive Logo">
+                            @php
+                                $logo_options = [
+                                    isset($gs->logo) ? 'assets/images/'.$gs->logo : null,
+                                    'assets/images/1739963696logopurplepng.png',
+                                    'assets/images/1745842520logopurple1png.png',
+                                    'assets/images/logo.png'
+                                ];
+                                $active_logo = 'assets/images/logo.png';
+                                foreach($logo_options as $opt) {
+                                    if($opt && file_exists(public_path($opt))) {
+                                        $active_logo = $opt;
+                                        break;
+                                    }
+                                }
+                            @endphp
+                            <img class="nav-logo" src="{{ asset($active_logo) }}" alt="Fabilive Logo">
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
