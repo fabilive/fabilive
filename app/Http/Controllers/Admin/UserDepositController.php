@@ -14,34 +14,43 @@ class UserDepositController extends AdminBaseController
     //*** JSON Request
     public function datatables($status)
     {
-        $datas = Deposit::whereStatus($status)->Latest('id')->get();
+        try {
+            $datas = Deposit::whereStatus($status)->latest('id')->get();
 
-        //--- Integrating This Collection Into Datatables
-        return Datatables::of($datas)
-            ->addColumn('name', function (Deposit $data) {
-                $name = '<a href="'.route('admin-user-show', $data->user_id).'" target="_blank">'.$data->user->name.'</a>';
+            //--- Integrating This Collection Into Datatables
+            return Datatables::of($datas)
+                ->addColumn('name', function (Deposit $data) {
+                    if ($data->user_id && $data->user && $data->user->name) {
+                        $name = '<a href="'.route('admin-user-show', $data->user_id).'" target="_blank">'.$data->user->name.'</a>';
+                    } else {
+                        $name = '<span class="text-danger">'.__('Deleted Customer').' (ID: '.$data->user_id.')</span>';
+                    }
 
-                return $name;
-            })
-            ->editColumn('amount', function (Deposit $data) {
-                $price = $data->amount * $data->currency_value;
+                    return $name;
+                })
+                ->editColumn('amount', function (Deposit $data) {
+                    $val = (float) ($data->currency_value ?: 1);
+                    $price = $data->amount * $val;
 
-                return PriceHelper::showAdminCurrencyPrice($price);
-            })
-            ->addColumn('action', function (Deposit $data) {
-                if ($data->status == 1) {
-                    return '<span class="badge badge-success deposit-completed">'.__('Completed').'</span';
-                } else {
-                    $class = $data->status == 1 ? 'drop-success' : 'drop-warning';
-                    $s = $data->status == 1 ? 'selected' : '';
-                    $ns = $data->status == 0 ? 'selected' : '';
+                    return PriceHelper::showAdminCurrencyPrice($price);
+                })
+                ->addColumn('action', function (Deposit $data) {
+                    if ($data->status == 1) {
+                        return '<span class="badge badge-success deposit-completed">'.__('Completed').'</span>';
+                    } else {
+                        $class = $data->status == 1 ? 'drop-success' : 'drop-warning';
+                        $s = $data->status == 1 ? 'selected' : '';
+                        $ns = $data->status == 0 ? 'selected' : '';
 
-                    return '<div class="action-list"><select class="process select vendor-droplinks '.$class.'"><option data-val="1" value="'.route('admin-user-deposit-status', ['id1' => $data->id, 'id2' => 1]).'" '.$s.'>'.__('Completed').'</option><option data-val="0" value="'.route('admin-user-deposit-status', ['id1' => $data->id, 'id2' => 0]).'" '.$ns.'>'.__('Pending').'</option></select></div>';
-                }
+                        return '<div class="action-list"><select class="process select vendor-droplinks '.$class.'"><option data-val="1" value="'.route('admin-user-deposit-status', ['id1' => $data->id, 'id2' => 1]).'" '.$s.'>'.__('Completed').'</option><option data-val="0" value="'.route('admin-user-deposit-status', ['id1' => $data->id, 'id2' => 0]).'" '.$ns.'>'.__('Pending').'</option></select></div>';
+                    }
 
-            })
-            ->rawColumns(['name', 'action'])
-            ->toJson(); //--- Returning Json Data To Client Side
+                })
+                ->rawColumns(['name', 'action'])
+                ->toJson(); //--- Returning Json Data To Client Side
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'DataTables execution failed: '.$e->getMessage()], 500);
+        }
     }
 
     //*** GET Request
