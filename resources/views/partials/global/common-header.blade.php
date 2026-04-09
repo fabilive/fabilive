@@ -225,8 +225,8 @@
                             @php
                                 $logo_options = [
                                     isset($gs->logo) ? 'assets/images/'.$gs->logo : null,
+                                    'assets/images/fabilive_logo_final.png',
                                     'assets/images/fabilive_logo_black.png',
-                                    'assets/images/1739963696logopurplepng.png',
                                     'assets/images/logo.png'
                                 ];
                                 $active_logo = 'assets/images/logo.png';
@@ -237,7 +237,7 @@
                                     }
                                 }
                             @endphp
-                            <img class="nav-logo" src="{{ asset($active_logo) }}" alt="Fabilive Logo">
+                            <img class="nav-logo" src="{{ asset($active_logo) }}" alt="Fabilive Logo" style="background: white !important; border: 1px solid #eee;">
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"

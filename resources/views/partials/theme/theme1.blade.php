@@ -317,6 +317,10 @@
                                         } else {
                                             // Priority 2: Filesystem Pattern Matching (Fallback)
                                             $patterns = [
+                                                'garden_lifestyle.png',
+                                                'services_lifestyle.png',
+                                                'food_lifestyle.png',
+                                                'digital_lifestyle.png',
                                                 'category_home_garden_black.png',
                                                 'category_services_black.png',
                                                 'category_food_drinks_black.png',
@@ -330,7 +334,11 @@
                                                 if(file_exists(public_path('assets/images/categories/'.$p))) {
                                                     // Only use if it somewhat matches the slug
                                                     $p_name = str_replace('_', ' ', $p);
-                                                    if(str_contains($p_name, str_replace('-', ' ', $slug)) || str_contains($slug, 'home') || str_contains($slug, 'service') || str_contains($slug, 'food') || str_contains($slug, 'digital')) {
+                                                    if(str_contains($p_name, str_replace('-', ' ', $slug)) || 
+                                                       (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
+                                                       (str_contains($slug, 'service') && str_contains($p, 'service')) || 
+                                                       (str_contains($slug, 'food') && str_contains($p, 'food')) || 
+                                                       (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
                                                         $fcat_image = asset('assets/images/categories/'.$p);
                                                         break;
                                                     }
