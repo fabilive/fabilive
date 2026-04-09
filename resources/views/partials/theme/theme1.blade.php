@@ -226,7 +226,7 @@
             <section class="home-slider owl-theme owl-carousel">
                 @foreach ($sliders as $data)
                     <div class="banner-slide-item"
-                        style="position: relative; background: {{ $data->video || $data->{'3d_model'} ? 'black' : "url('" . asset('assets/images/sliders/' . $data->photo) . "')" }} no-repeat center center / cover;">
+                        style="position: relative; height: 600px; background: {{ $data->video || $data->{'3d_model'} ? 'black' : "url('" . asset('assets/images/sliders/' . $data->photo) . "')" }} no-repeat center center / cover;">
 
                         @if($data->video)
                             <video autoplay muted loop playsinline>
