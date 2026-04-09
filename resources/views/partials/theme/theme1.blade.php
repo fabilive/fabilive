@@ -317,6 +317,10 @@
                                         } else {
                                             // Priority 2: Filesystem Pattern Matching (Fallback)
                                             $patterns = [
+                                                'category_home_garden_black.png',
+                                                'category_services_black.png',
+                                                'category_food_drinks_black.png',
+                                                'category_digital_black.png',
                                                 'category_'.$slug.'.png',
                                                 'category_'.$slug.'.jpg',
                                                 '1568878538electronic.jpg',
@@ -324,8 +328,12 @@
                                             ];
                                             foreach($patterns as $p) {
                                                 if(file_exists(public_path('assets/images/categories/'.$p))) {
-                                                    $fcat_image = asset('assets/images/categories/'.$p);
-                                                    break;
+                                                    // Only use if it somewhat matches the slug
+                                                    $p_name = str_replace('_', ' ', $p);
+                                                    if(str_contains($p_name, str_replace('-', ' ', $slug)) || str_contains($slug, 'home') || str_contains($slug, 'service') || str_contains($slug, 'food') || str_contains($slug, 'digital')) {
+                                                        $fcat_image = asset('assets/images/categories/'.$p);
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }

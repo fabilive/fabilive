@@ -225,8 +225,8 @@
                             @php
                                 $logo_options = [
                                     isset($gs->logo) ? 'assets/images/'.$gs->logo : null,
+                                    'assets/images/fabilive_logo_black.png',
                                     'assets/images/1739963696logopurplepng.png',
-                                    'assets/images/1745842520logopurple1png.png',
                                     'assets/images/logo.png'
                                 ];
                                 $active_logo = 'assets/images/logo.png';
