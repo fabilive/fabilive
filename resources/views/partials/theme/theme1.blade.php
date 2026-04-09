@@ -223,16 +223,19 @@
         <div class="position-relative">
             <span class="nextBtn"></span>
             <span class="prevBtn"></span>
-            <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
-                @if($sliders->isEmpty())
-                    <div class="banner-slide-item"
-                        style="position: relative; height: 600px; background: url('{{ asset('assets/images/sliders/electronics_hero.png') }}') no-repeat center center / cover; display: flex !important; align-items: center; justify-content: center;">
-                        <div class="container text-center">
-                            <h2 style="color: #000; font-weight: bold; font-size: 3rem;">Welcome to Fabilive</h2>
-                            <p style="color: #000; font-size: 1.2rem;">Premium Multi-Vendor Platform</p>
+            <!-- Bulletproof Slider Fallback -->
+            @if($sliders->isEmpty())
+                <div class="bulletproof-slider" style="display: block !important; width: 100%; min-height: 600px; background: url('{{ asset('assets/images/sliders/electronics_hero.png') }}') no-repeat center center / cover; position: relative;">
+                    <div class="container d-flex align-items: center justify-content-center" style="min-height: 600px;">
+                        <div class="text-center">
+                            <h2 style="color: #000; font-weight: bold; font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Welcome to Fabilive</h2>
+                            <p style="color: #000; font-size: 1.5rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Premium Multi-Vendor Platform</p>
                         </div>
                     </div>
-                @endif
+                </div>
+            @endif
+
+            <section class="home-slider owl-theme owl-carousel" style="{{ $sliders->isEmpty() ? 'display: none !important;' : 'display: block !important;' }} min-height: 600px; opacity: 1 !important; visibility: visible !important;">
                 @foreach ($sliders as $slide_data)
                     <div class="banner-slide-item"
                         style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . $slide_data->photo) . "')" }} no-repeat center center / cover; display: flex !important;">

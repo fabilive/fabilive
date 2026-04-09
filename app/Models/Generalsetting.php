@@ -48,12 +48,20 @@ class Generalsetting extends Model
         $gs = new \stdClass();
         $gs->title = "Fabilive";
         
-        // Fail-safe Logo trial
+        // Fail-safe Logo trial (Prioritize user-uploaded files found on server)
         $logo_fallback = "logo.png";
-        if (file_exists(public_path('assets/images/logo.png'))) {
-            $logo_fallback = "logo.png";
-        } elseif (file_exists(public_path('assets/images/fabilive_logo_transparent.png'))) {
-            $logo_fallback = "fabilive_logo_transparent.png";
+        $logo_trials = [
+            "1739963696logopurplepng.png",
+            "1745842520logopurple1png.png",
+            "1580538562logo.png",
+            "logo.png",
+            "fabilive_logo_white_bg.png"
+        ];
+        foreach($logo_trials as $trial) {
+            if (file_exists(public_path('assets/images/'.$trial))) {
+                $logo_fallback = $trial;
+                break;
+            }
         }
         $gs->logo = $logo_fallback;
         $gs->favicon = "favicon.png";
