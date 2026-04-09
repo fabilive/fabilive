@@ -305,7 +305,7 @@
                         <a href="{{ route('front.category', $fcategory->slug) }}" style="text-decoration:none;">
                             <div class="product-wrapper" style="border-radius:12px;overflow:hidden;position:relative;">
                                 <div class="product-image" style="height:200px;overflow:hidden;">
-                                    <img src="{{ asset('assets/images/categories/' . $fcategory->image) }}"
+                                    <img src="{{ $fcategory->image ? asset('assets/images/categories/' . $fcategory->image) : ($fcategory->photo ? asset('assets/images/categories/' . $fcategory->photo) : asset('assets/images/noimage.png')) }}"
                                          alt="{{ $fcategory->name }}"
                                          style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;">
                                 </div>

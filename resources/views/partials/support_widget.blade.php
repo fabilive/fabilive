@@ -20,7 +20,7 @@
         <div id="fabi-support-body" style="flex: 1; overflow-y: auto; padding: 0; background: #fff;">
             <!-- Step 1: Select Context -->
             <div id="fabi-support-context-selection" style="padding: 25px; text-align: center;">
-                <img src="{{asset('assets/images/'.$gs->logo)}}" style="width: 80px; margin-bottom: 20px; border-radius: 10px;">
+                <img src="{{asset('assets/images/logo.png')}}" style="width: 80px; margin-bottom: 20px; border-radius: 10px;">
                 <h3 style="margin-bottom: 10px; font-size: 18px; color: #000;">Welcome to MbokoAi</h3>
                 <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we help you today?</p>
                 
@@ -118,7 +118,7 @@
         let conversationStatus = null;
         let pollInterval = null;
         let selectedRating = 0;
-        const botLogo = "{{asset('assets/images/'.$gs->logo)}}";
+        const botLogo = "{{asset('assets/images/logo.png')}}";
 
         // Initial Inbox Load
         loadInbox();
