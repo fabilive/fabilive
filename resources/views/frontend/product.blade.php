@@ -261,13 +261,13 @@
                      <div class="product type-product">
                         <div class="product-wrapper">
                            <div class="product-image">
-                              <a href="{{ route('front.product', $prod['slug']) }}"
+                              <a href="{{ route('front.product', $prod['slug'] ?: 'missing-slug') }}"
                                  class="woocommerce-LoopProduct-link"><img
                                     src="{{ $prod->thumbnail }}"
                                     alt="Product Image"></a>
                               <div class="wishlist-view">
                                  <div class="quickview-button">
-                                    <a class="quickview-btn" href="{{ route('front.product', $prod['slug']) }}"
+                                    <a class="quickview-btn" href="{{ route('front.product', $prod['slug'] ?: 'missing-slug') }}"
                                        data-bs-toggle="tooltip" data-bs-placement="top" title=""
                                        data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View')
                                        }}</a>
@@ -281,7 +281,7 @@
                            </div>
                            <div class="product-info">
                               <h3 class="product-title"><a
-                                    href="{{ route('front.product', $prod['slug']) }}">{{$prod->name }}</a></h3>
+                                    href="{{ route('front.product', $prod['slug'] ?: 'missing-slug') }}">{{$prod->name }}</a></h3>
                               <div class="product-price">
                                  <div class="price">
                                     <ins>{{ $prod->showPrice() }}</ins>
@@ -342,7 +342,7 @@
                      <div class="product type-product">
                         <div class="product-wrapper">
                            <div class="product-image">
-                              <a href="{{ route('front.product', $item->slug) }}"
+                              <a href="{{ route('front.product', $item->slug ?: 'missing-slug') }}"
                                  class="woocommerce-LoopProduct-link"><img
                                     src="{{ $item->thumbnail ? (file_exists(public_path('assets/images/thumbnails/'.$item->thumbnail)) ? asset('assets/images/thumbnails/'.$item->thumbnail) : asset('assets/images/products/'.$item->thumbnail)) : asset('assets/images/noimage.png') }}"
                                     alt="Product Image"></a>
@@ -399,7 +399,7 @@
                               </div>
                            </div>
                            <div class="product-info">
-                              <h3 class="product-title"><a href="{{ route('front.product', $item->slug) }}">{{
+                              <h3 class="product-title"><a href="{{ route('front.product', $item->slug ?: 'missing-slug') }}">{{
                                     $item->showName()}}</a></h3>
                               <div class="product-price">
                                  <div class="price">
