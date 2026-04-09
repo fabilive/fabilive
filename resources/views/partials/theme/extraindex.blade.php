@@ -1,4 +1,3 @@
-@if($ps->top_big_trending==1)
 <!--==================== Top Collection Section Start ====================-->
 <div class="full-row bg-white">
     <div class="container">
@@ -81,11 +80,11 @@
     </div>
 </div>
 <!--==================== Top Collection Section End ====================-->
-@endif
 
 
 
-@if($ps->category==1)
+
+<!--==================== Top Products Section Start ====================-->
 <div class="full-row">
     <div class="container">
         <div class="row justify-content-center">
@@ -109,7 +108,7 @@
     </div>
 </div>
 <!--==================== Top Products Section End ====================-->
-@endif
+
 
 @if($ps->deal_of_the_day==1)
 
@@ -184,7 +183,7 @@
 <!--==================== Service Section End ====================-->
 
 <!--==================== Top Products Section Start ====================-->
-@if($ps->best_sellers==1)
+<!--==================== Top Products Section Start ====================-->
 <div class="full-row">
     <div class="container">
         <div class="row justify-content-center">
@@ -214,7 +213,7 @@
     </div>
 </div>
 <!--==================== Top Products Section End ====================-->
-@endif
+
 
 
 

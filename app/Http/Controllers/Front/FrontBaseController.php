@@ -27,22 +27,7 @@ class FrontBaseController extends Controller
         $this->gs = \App\Models\Generalsetting::safeFirst();
 
         // Set Global PageSettings
-        try {
-            $this->ps = cache()->remember('pagesettings', now()->addDay(), function () {
-                \DB::connection()->getPdo();
-                return DB::table('pagesettings')->first();
-            });
-            if (!$this->ps) throw new \Exception('No settings');
-        } catch (\Exception $e) {
-            $this->ps = (object)[
-                'contact_email' => 'contact@fabilive.com',
-                'contact_title' => 'Contact Us',
-                'contact_text' => 'Contact Us',
-                'side_text' => 'Fabilive',
-                'faq_title' => 'FAQ',
-                'faq_subtitle' => 'Frequently Asked Questions',
-            ];
-        }
+        $this->ps = \App\Models\Pagesetting::safeFirst();
 
         $this->middleware(function ($request, $next) {
 

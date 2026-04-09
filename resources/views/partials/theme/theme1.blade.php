@@ -328,133 +328,131 @@
 
 
 
-    @if ($ps->arrival_section == 1)
-        <!--==================== Best Month Offer Section Start ====================-->
-        <div class="full-row px-sm-5">
-            <div class="container-fluid">
-                <div class="row justify-content-center wow fadeInUp animated" data-wow-delay="200ms"
-                    data-wow-duration="1000ms">
-                    <div class="col-xxl-5 col-xl-7 col-lg-9">
-                        <div class="text-center mb-40">
-                            <h2 class="text-center font-500 mb-4">{{ __('Best Month Offer') }}</h2>
-                            <span class="sub-title">
-                                {{ __('Enjoy unbeatable deals and exclusive discounts available only this month.
-                                                        Don’t miss out on your chance to save big!') }}
-                            </span>
-                        </div>
+    <!--==================== Best Month Offer Section Start ====================-->
+    <div class="full-row px-sm-5">
+        <div class="container-fluid">
+            <div class="row justify-content-center wow fadeInUp animated" data-wow-delay="200ms"
+                data-wow-duration="1000ms">
+                <div class="col-xxl-5 col-xl-7 col-lg-9">
+                    <div class="text-center mb-40">
+                        <h2 class="text-center font-500 mb-4">{{ __('Best Month Offer') }}</h2>
+                        <span class="sub-title">
+                            {{ __('Enjoy unbeatable deals and exclusive discounts available only this month.
+                                                    Don’t miss out on your chance to save big!') }}
+                        </span>
                     </div>
-                </div>
-                <div class="row g-4">
-                    @if(isset($arrivals[0]))
-                    <div class="col-xxl-6 col-md-12">
-                        <div class="banner-wrapper hover-img-zoom banner-one custom-class-122 bg-light">
-
-                            <div class="banner-image overflow-hidden transation">
-                                <img src="{{ asset('assets/images/arrival/' . $arrivals[0]['photo']) }}" alt="Banner Image">
-                            </div>
-
-                            <div class="banner-content y-center position-absolute">
-                                <div class="middle-content">
-
-                                    <span class="up-to-sale"
-                                    style="color:#ffffff;
-                                           background:rgba(0,0,0,0.35);
-                                           padding:4px 10px;
-                                           border-radius:3px;">
-
-                                        {{ $arrivals[0]['up_sale'] }}
-                                    </span>
-
-                                    <h3>
-                                        <a href="{{ $arrivals[0]['url'] }}"
-                                           style="color:#ffffff; background:rgba(0,0,0,0.35); padding:6px 12px; border-radius:3px; text-decoration:none; transition: color 0.3s;"
-                                           class="arrival-link">
-                                            {{ $arrivals[0]['title'] }}
-                                        </a>
-
-                                        <style>
-                                            .arrival-link:hover {
-                                                color: #ff6a00 !important;
-                                            }
-                                        </style>
-                                    </h3>
-
-
-                                    <a href="{{ $arrivals[0]['url'] }}"
-                                    class="category arrival-link"
-                                    style="color:#ffffff;
-                                           background:rgba(0,0,0,0.35);
-                                           padding:4px 10px;
-                                           border-radius:3px;">
-                                     {{ $arrivals[0]['header'] }}
-                                 </a>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(isset($arrivals[1]))
-                    <div class="col-xxl-3 col-md-6">
-                        <div class="banner-wrapper hover-img-zoom banner-one custom-class-123">
-                            <div class="banner-image overflow-hidden transation"><img
-                                    src="{{ asset('assets/images/arrival/' . $arrivals[1]['photo']) }}" alt="Banner Image">
-                            </div>
-                            <div class="banner-content position-absolute">
-                                <div class="middle-content">
-                                    <span class="up-to-sale">{{ $arrivals[1]['up_sale'] }}</span>
-                                    <h3><a href="{{ $arrivals[1]['url'] }}"
-                                            class="text-dark text-decoration-none">{{ $arrivals[1]['title'] }}</a></h3>
-                                    <a href="{{ $arrivals[1]['url'] }}" class="category">{{ $arrivals[1]['header'] }}</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    @if(isset($arrivals[2]))
-                    <div class="col-xxl-3 col-md-6">
-                        <div class="banner-wrapper hover-img-zoom banner-one custom-class-124"
-                             style="position:relative; overflow:hidden; border-radius:8px;">
-
-                            <div class="banner-image overflow-hidden transation">
-                                <img src="{{ asset('assets/images/arrival/' . $arrivals[2]['photo']) }}"
-                                     alt="Banner Image"
-                                     style="width:100%; display:block;">
-
-                                <!-- Overlay -->
-                                <div style="position:absolute; top:0; left:0; width:100%; height:100%;
-                                            background:rgba(0,0,0,0.35); pointer-events:none;" class="p-3">
-                                </div>
-                            </div>
-
-                            <div class="banner-content position-absolute" style="top:10px; left:10px;">
-                                <span style="color:#ffffff; padding:4px 10px; border-radius:3px;">{{ $arrivals[2]['up_sale'] }}</span>
-
-                                <h5>
-                                    <a href="{{ $arrivals[2]['url'] }}" class="arrival-link"
-                                       style="color:#ffffff; text-decoration:none; padding:6px 12px; border-radius:3px"
-                                      >
-                                       {{ $arrivals[2]['title'] }}
-                                    </a>
-                                </h5>
-
-                                <a href="{{ $arrivals[2]['url'] }}"
-                                   style="color:#ffffff; padding:4px 10px; border-radius:3px; text-decoration:none;"
-                                    class="arrival-link">
-                                   {{ $arrivals[2]['header'] }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
                 </div>
             </div>
+            <div class="row g-4">
+                @if(isset($arrivals[0]))
+                <div class="col-xxl-6 col-md-12">
+                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-122 bg-light">
+
+                        <div class="banner-image overflow-hidden transation">
+                            <img src="{{ asset('assets/images/arrival/' . $arrivals[0]['photo']) }}" alt="Banner Image">
+                        </div>
+
+                        <div class="banner-content y-center position-absolute">
+                            <div class="middle-content">
+
+                                <span class="up-to-sale"
+                                style="color:#ffffff;
+                                       background:rgba(0,0,0,0.35);
+                                       padding:4px 10px;
+                                       border-radius:3px;">
+
+                                    {{ $arrivals[0]['up_sale'] }}
+                                </span>
+
+                                <h3>
+                                    <a href="{{ $arrivals[0]['url'] }}"
+                                       style="color:#ffffff; background:rgba(0,0,0,0.35); padding:6px 12px; border-radius:3px; text-decoration:none; transition: color 0.3s;"
+                                       class="arrival-link">
+                                        {{ $arrivals[0]['title'] }}
+                                    </a>
+
+                                    <style>
+                                        .arrival-link:hover {
+                                            color: #ff6a00 !important;
+                                        }
+                                    </style>
+                                </h3>
+
+
+                                <a href="{{ $arrivals[0]['url'] }}"
+                                class="category arrival-link"
+                                style="color:#ffffff;
+                                       background:rgba(0,0,0,0.35);
+                                       padding:4px 10px;
+                                       border-radius:3px;">
+                                 {{ $arrivals[0]['header'] }}
+                             </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                @endif
+
+                @if(isset($arrivals[1]))
+                <div class="col-xxl-3 col-md-6">
+                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-123">
+                        <div class="banner-image overflow-hidden transation"><img
+                                src="{{ asset('assets/images/arrival/' . $arrivals[1]['photo']) }}" alt="Banner Image">
+                        </div>
+                        <div class="banner-content position-absolute">
+                            <div class="middle-content">
+                                <span class="up-to-sale">{{ $arrivals[1]['up_sale'] }}</span>
+                                <h3><a href="{{ $arrivals[1]['url'] }}"
+                                        class="text-dark text-decoration-none">{{ $arrivals[1]['title'] }}</a></h3>
+                                <a href="{{ $arrivals[1]['url'] }}" class="category">{{ $arrivals[1]['header'] }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($arrivals[2]))
+                <div class="col-xxl-3 col-md-6">
+                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-124"
+                         style="position:relative; overflow:hidden; border-radius:8px;">
+
+                        <div class="banner-image overflow-hidden transation">
+                            <img src="{{ asset('assets/images/arrival/' . $arrivals[2]['photo']) }}"
+                                 alt="Banner Image"
+                                 style="width:100%; display:block;">
+
+                            <!-- Overlay -->
+                            <div style="position:absolute; top:0; left:0; width:100%; height:100%;
+                                        background:rgba(0,0,0,0.35); pointer-events:none;" class="p-3">
+                            </div>
+                        </div>
+
+                        <div class="banner-content position-absolute" style="top:10px; left:10px;">
+                            <span style="color:#ffffff; padding:4px 10px; border-radius:3px;">{{ $arrivals[2]['up_sale'] }}</span>
+
+                            <h5>
+                                <a href="{{ $arrivals[2]['url'] }}" class="arrival-link"
+                                   style="color:#ffffff; text-decoration:none; padding:6px 12px; border-radius:3px"
+                                  >
+                                   {{ $arrivals[2]['title'] }}
+                                </a>
+                            </h5>
+
+                            <a href="{{ $arrivals[2]['url'] }}"
+                               style="color:#ffffff; padding:4px 10px; border-radius:3px; text-decoration:none;"
+                                class="arrival-link">
+                               {{ $arrivals[2]['header'] }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+            </div>
         </div>
-        <!--==================== Best Month Offer Section End ====================-->
-    @endif
+    </div>
+    <!--==================== Best Month Offer Section End ====================-->
 
 
     @include('partials.theme.extraindex')
