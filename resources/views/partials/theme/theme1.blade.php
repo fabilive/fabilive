@@ -219,7 +219,7 @@
     @include('partials.global.subscription-popup')
 
 
-    @if ($ps->slider == 1)
+    @if ($ps->slider == 1 || (isset($sliders) && !$sliders->isEmpty()))
         <div class="position-relative">
             <span class="nextBtn"></span>
             <span class="prevBtn"></span>

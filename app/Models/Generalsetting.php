@@ -48,8 +48,21 @@ class Generalsetting extends Model
         $gs = new \stdClass();
         $gs->title = "Fabilive";
         
-        // Reset Logo to use database-first behavior (respecting user's Admin Dashboard)
-        $gs->logo = $gs->logo ?? "logo.png";
+        // Smart Logo Discovery (Prioritizing User assets)
+        $logo_fallback = "logo.png";
+        $logo_trials = [
+            "1739963696logopurplepng.png",
+            "1745842520logopurple1png.png",
+            "1580538562logo.png",
+            "logo.png"
+        ];
+        foreach($logo_trials as $trial) {
+            if (file_exists(public_path('assets/images/'.$trial))) {
+                $logo_fallback = $trial;
+                break;
+            }
+        }
+        $gs->logo = $logo_fallback;
         $gs->favicon = "favicon.png";
         $gs->is_admin_loader = 0;
         $gs->wholesell = 0;
