@@ -76,8 +76,8 @@
                                                 </p>
 
                                                 <p>
-                                                    <label for="selfieFile1">{{ __('Live Selfie (Required - Use Camera or Upload File)') }}</label>
-                                                    <input type="file" id="selfieFile1" name="live_selfie_company" class="form-control">
+                                                    <label for="selfieFile1">{{ __('Live Selfie (Required - Use Camera)') }}</label>
+                                                    <input type="hidden" id="selfieFile1" name="live_selfie_company">
                                                 </p>
                                                 <video id="cam_company" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_company" class="w-100 rounded mb-2" style="display:none;">
@@ -135,8 +135,8 @@
                                                     <input type="file" name="driver_license_individual" class="form-control">
                                                 </p>
                                                 <p>
-                                                    <label for="selfieFile">{{ __('Live Selfie (Required - Use Camera or Upload File)') }}</label>
-                                                    <input type="file" id="selfieFile" name="live_selfie_individual" class="form-control">
+                                                    <label for="selfieFile">{{ __('Live Selfie (Required - Use Camera)') }}</label>
+                                                    <input type="hidden" id="selfieFile" name="live_selfie_individual">
                                                 </p>
                                                 <video id="cam_individual" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_individual" class="w-100 rounded mb-2" style="display:none;">

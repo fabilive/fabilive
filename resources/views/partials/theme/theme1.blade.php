@@ -264,12 +264,12 @@
 
                                         <!-- Subtitle -->
                                         <span class="subtitle animate-stagger-1">
-                                            {{ $slide_data->subtitle_text }}
+                                            {{ str_replace('2026', '', $slide_data->subtitle_text) }}
                                         </span>
 
                                         <!-- Title -->
                                         <h1 class="title animate-stagger-2">
-                                            {{ $slide_data->title_text }}
+                                            {{ str_replace('2026', '', $slide_data->title_text) }}
                                         </h1>
 
                                         <!-- Paragraph -->
