@@ -237,11 +237,14 @@ class UserController extends AdminBaseController
                 }
             }
 
-            // Social Providers
-            if ($user->socialProviders->count() > 0) {
-                foreach ($user->socialProviders as $gal) {
-                    $gal->delete();
+            // Social Providers (safe)
+            try {
+                if ($user->socialProviders->count() > 0) {
+                    foreach ($user->socialProviders as $gal) {
+                        $gal->delete();
+                    }
                 }
+            } catch (\Exception $e) {
             }
 
             // Conversations + messages
