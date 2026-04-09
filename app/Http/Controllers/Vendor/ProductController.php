@@ -45,7 +45,8 @@ class ProductController extends VendorBaseController
             return \Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
                 $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
-                $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
+                $prod_url = $data->slug ? route('front.product', $data->slug) : 'javascript:;';
+                $id = '<small>'.__('Product ID').': <a href="'.$prod_url.'" '.($data->slug ? 'target="_blank"' : '').'>'.sprintf("%'.08d", $data->id).'</a></small>';
 
                 return $name.'<br>'.$id;
             })
@@ -84,7 +85,8 @@ class ProductController extends VendorBaseController
             return \Datatables::of($datas)
             ->editColumn('name', function (Product $data) {
                 $name = mb_strlen(strip_tags($data->name), 'UTF-8') > 50 ? mb_substr(strip_tags($data->name), 0, 50, 'UTF-8').'...' : strip_tags($data->name);
-                $id = '<small>'.__('Product ID').': <a href="'.route('front.product', $data->slug).'" target="_blank">'.sprintf("%'.08d", $data->id).'</a></small>';
+                $prod_url = $data->slug ? route('front.product', $data->slug) : 'javascript:;';
+                $id = '<small>'.__('Product ID').': <a href="'.$prod_url.'" '.($data->slug ? 'target="_blank"' : '').'>'.sprintf("%'.08d", $data->id).'</a></small>';
 
                 return $name.'<br>'.$id;
             })
