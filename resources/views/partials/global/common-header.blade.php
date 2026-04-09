@@ -221,8 +221,9 @@
             <div class="row">
                 <div class="col-xl-7 col-lg-9">
                     <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
-                        <a class="navbar-brand" href="{{ route('front.index') }}"><img class="nav-logo "
-                                src="{{ asset('assets/images/logo.png') }}" alt="Fabilive Logo"></a>
+                        <a class="navbar-brand" href="{{ route('front.index') }}">
+                            <img class="nav-logo" src="{{ isset($gs->logo) && $gs->logo ? asset('assets/images/'.$gs->logo) : asset('assets/images/logo.png') }}" alt="Fabilive Logo">
+                        </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">

@@ -150,6 +150,21 @@ class FrontendController extends FrontBaseController
             $data['ratings'] = $r_count;
         } catch (\Exception $e) {}
 
+        // Final Fallback: If sliders are still empty, inject a placeholder demo slider
+        if ($data['sliders']->isEmpty()) {
+            $placeholder = new \stdClass();
+            $placeholder->subtitle_text = 'Welcome to Fabilive';
+            $placeholder->title_text = 'Premium Multi-Vendor Platform';
+            $placeholder->details_text = 'Discover the best deals on electronics, fashion, and more.';
+            $placeholder->photo = 'placeholder_slider.jpg'; // This should ideally exist or we can use a generic asset
+            $placeholder->link = route('front.index');
+            $placeholder->video = null;
+            $placeholder->{'3d_model'} = null;
+            $placeholder->position = 'left';
+            $placeholder->link = '#';
+            $data['sliders'] = collect([$placeholder]);
+        }
+
         try {
             $data['hot_products'] = cache()->remember('homepage_hot_products', now()->addHour(), function() use ($gs) {
                 return Product::whereHot(1)->whereStatus(1)
