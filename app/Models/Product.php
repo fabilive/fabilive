@@ -110,17 +110,31 @@ class Product extends Model
     /**
      * Handle Cloudinary or full URLs correctly in the photo attribute.
      */
+    protected static $pathCache = [];
+
+    private function resolveImagePath($filename, $preferThumb = false)
+    {
+        if (empty($filename)) return asset('assets/images/noimage.png');
+        if (str_starts_with($filename, 'http')) return $filename;
+        $filename = ltrim($filename, '/');
+        if (isset(self::$pathCache[$filename])) return self::$pathCache[$filename];
+        $trials = $preferThumb 
+            ? ['thumbnails/' . $filename, 'products/' . $filename, $filename]
+            : ['products/' . $filename, 'thumbnails/' . $filename, $filename];
+        foreach ($trials as $pathPart) {
+            $relPath = 'assets/images/' . $pathPart;
+            if (file_exists(public_path($relPath)) || file_exists(base_path('public/' . $relPath)) || file_exists(base_path($relPath))) {
+                self::$pathCache[$filename] = asset($relPath);
+                return self::$pathCache[$filename];
+            }
+        }
+        self::$pathCache[$filename] = asset('assets/images/noimage.png');
+        return self::$pathCache[$filename];
+    }
+
     public function getPhotoAttribute($value)
     {
-        if (empty($value)) {
-            return asset('assets/images/noimage.png');
-        }
-
-        if (str_starts_with($value, 'http')) {
-            return $value;
-        }
-
-        return asset('assets/images/products/'.$value);
+        return $this->resolveImagePath($value, false);
     }
 
     /**
@@ -131,47 +145,7 @@ class Product extends Model
         if (empty($value)) {
             $value = $this->attributes['photo'] ?? null;
         }
-
-        if (empty($value)) {
-            return asset('assets/images/noimage.png');
-        }
-
-        if (str_starts_with($value, 'http')) {
-            return $value;
-        }
-
-        // We check several paths because this production server's folder structure
-        // is non-standard. We check thumbnails first, then products as a fallback.
-        $thumbnailPath = 'assets/images/thumbnails/' . $value;
-        $productPath = 'assets/images/products/' . $value;
-
-        $checkPaths = [
-            public_path($thumbnailPath),
-            base_path('public/' . $thumbnailPath),
-            base_path($thumbnailPath)
-        ];
-
-        foreach ($checkPaths as $path) {
-            if (file_exists($path)) {
-                return asset($thumbnailPath);
-            }
-        }
-
-        // Fallback to products folder
-        $checkProductPaths = [
-            public_path($productPath),
-            base_path('public/' . $productPath),
-            base_path($productPath)
-        ];
-
-        foreach ($checkProductPaths as $path) {
-            if (file_exists($path)) {
-                return asset($productPath);
-            }
-        }
-
-        // One last "Direct Impact" attempt: just return the asset path and hope the browser can find it
-        return asset($productPath);
+        return $this->resolveImagePath($value, true);
     }
 
     public function category()
