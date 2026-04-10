@@ -1009,6 +1009,18 @@ Route::get('/fix-subscriptions', function () {
             ]);
         }
 
+        // Fix for missing coupons status/used columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('coupons')) {
+            \Illuminate\Support\Facades\Schema::table('coupons', function ($table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'status')) {
+                    $table->integer('status')->default(1);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'used')) {
+                    $table->integer('used')->default(0);
+                }
+            });
+        }
+
         $cats = [
             ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
             ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],

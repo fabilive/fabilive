@@ -77,17 +77,17 @@ class CouponController extends AdminBaseController
         $data = new Coupon();
         $input = $request->all();
         if ($request->coupon_type == 'category') {
-            $input['category'] = !empty($request->category) ? implode(',', $request->category) : null;
+            $input['category'] = is_array($request->category) ? implode(',', $request->category) : $request->category;
             $input['sub_category'] = null;
             $input['child_category'] = null;
         } elseif ($request->coupon_type == 'sub_category') {
             $input['category'] = null;
-            $input['sub_category'] = !empty($request->sub_category) ? implode(',', $request->sub_category) : null;
+            $input['sub_category'] = is_array($request->sub_category) ? implode(',', $request->sub_category) : $request->sub_category;
             $input['child_category'] = null;
         } else {
             $input['category'] = null;
             $input['sub_category'] = null;
-            $input['child_category'] = !empty($request->child_category) ? implode(',', $request->child_category) : null;
+            $input['child_category'] = is_array($request->child_category) ? implode(',', $request->child_category) : $request->child_category;
         }
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');
@@ -131,7 +131,7 @@ class CouponController extends AdminBaseController
         $data = Coupon::findOrFail($id);
         $input = $request->all();
         if ($request->coupon_type == 'category') {
-            $input['category'] = !empty($request->category) ? implode(',', $request->category) : null;
+            $input['category'] = is_array($request->category) ? implode(',', $request->category) : $request->category;
             $input['sub_category'] = null;
             $input['child_category'] = null;
         } elseif ($request->coupon_type == 'sub_category') {
