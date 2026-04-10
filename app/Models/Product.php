@@ -136,18 +136,36 @@ class Product extends Model
             return $value;
         }
 
-        // If the thumbnail filename is the same as the photo filename, 
-        // it means we're using the fallback which is located in the products folder.
-        // Also check if the file physically exists in thumbnails, otherwise fallback to products.
-        if (isset($this->attributes['photo']) && $value == $this->attributes['photo']) {
-            return asset('assets/images/products/'.$value);
+        // Check multiple possible paths for production compatibility
+        $thumbnailPath = 'assets/images/thumbnails/' . $value;
+        $productPath = 'assets/images/products/' . $value;
+
+        $checkPaths = [
+            public_path($thumbnailPath),
+            base_path('public/' . $thumbnailPath),
+            base_path($thumbnailPath)
+        ];
+
+        foreach ($checkPaths as $path) {
+            if (file_exists($path)) {
+                return asset($thumbnailPath);
+            }
         }
 
-        if (!file_exists(public_path('assets/images/thumbnails/'.$value))) {
-            return asset('assets/images/products/'.$value);
+        // Fallback to original product photo if thumbnail is missing
+        $checkProductPaths = [
+            public_path($productPath),
+            base_path('public/' . $productPath),
+            base_path($productPath)
+        ];
+
+        foreach ($checkProductPaths as $path) {
+            if (file_exists($path)) {
+                return asset($productPath);
+            }
         }
 
-        return asset('assets/images/thumbnails/'.$value);
+        return asset('assets/images/noimage.png');
     }
 
     public function category()
