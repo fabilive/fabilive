@@ -23,27 +23,27 @@ class CouponController extends FrontBaseController
             $product = Product::findOrFail($item['item']['id']);
 
             if ($coupon->coupon_type == 'category') {
-
-                if ($product->category_id == $coupon->category) {
+                $coupon_cats = explode(',', $coupon->category);
+                if (in_array('all', $coupon_cats) || in_array($product->category_id, $coupon_cats)) {
                     $coupon_check_type[] = 1;
                 } else {
-
                     $coupon_check_type[] = 0;
                 }
             } elseif ($coupon->coupon_type == 'sub_category') {
-                if ($product->subcategory_id == $coupon->sub_category) {
+                $coupon_subs = explode(',', $coupon->sub_category);
+                if (in_array('all', $coupon_subs) || in_array($product->subcategory_id, $coupon_subs)) {
                     $coupon_check_type[] = 1;
                 } else {
                     $coupon_check_type[] = 0;
                 }
             } elseif ($coupon->coupon_type == 'child_category') {
-                if ($product->childcategory_id == $coupon->child_category) {
+                $coupon_childs = explode(',', $coupon->child_category);
+                if (in_array('all', $coupon_childs) || in_array($product->childcategory_id, $coupon_childs)) {
                     $coupon_check_type[] = 1;
                 } else {
                     $coupon_check_type[] = 0;
                 }
             } else {
-
                 $coupon_check_type[] = 0;
             }
         }
@@ -142,16 +142,18 @@ class CouponController extends FrontBaseController
             $product = Product::findOrFail($item['item']['id']);
 
             if ($coupon->coupon_type == 'category') {
-                if ($product->category_id == $coupon->category) {
+                $coupon_cats = explode(',', $coupon->category);
+                if (in_array('all', $coupon_cats) || in_array($product->category_id, $coupon_cats)) {
                     $discount_items[] = $key;
                 }
             } elseif ($coupon->coupon_type == 'sub_category') {
-                if ($product->sub_category == $coupon->sub_category) {
+                $coupon_subs = explode(',', $coupon->sub_category);
+                if (in_array('all', $coupon_subs) || in_array($product->subcategory_id, $coupon_subs)) {
                     $discount_items[] = $key;
                 }
             } elseif ($coupon->coupon_type == 'child_category') {
-
-                if ($product->child_category == $coupon->child_category) {
+                $coupon_childs = explode(',', $coupon->child_category);
+                if (in_array('all', $coupon_childs) || in_array($product->childcategory_id, $coupon_childs)) {
                     $discount_items[] = $key;
                 }
             }

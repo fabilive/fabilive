@@ -36,7 +36,7 @@ class CouponController extends AdminBaseController
                 $s = $data->status == 1 ? 'selected' : '';
                 $ns = $data->status == 0 ? 'selected' : '';
 
-                return '<div class="action-list"><select class="process select droplinks '.$class.'"><option data-val="1" value="'.route('admin-coupon-status', ['id1' => $data->id, 'id2' => 1]).'" '.$s.'>'.__('Activated').'</option><<option data-val="0" value="'.route('admin-coupon-status', ['id1' => $data->id, 'id2' => 0]).'" '.$ns.'>'.__('Deactivated').'</option>/select></div>';
+                return '<div class="action-list"><select class="process select droplinks '.$class.'"><option data-val="1" value="'.route('admin-coupon-status', ['id1' => $data->id, 'id2' => 1]).'" '.$s.'>'.__('Activated').'</option><option data-val="0" value="'.route('admin-coupon-status', ['id1' => $data->id, 'id2' => 0]).'" '.$ns.'>'.__('Deactivated').'</option></select></div>';
             })
             ->addColumn('action', function (Coupon $data) {
                 return '<div class="action-list"><a href="'.route('admin-coupon-edit', $data->id).'"> <i class="fas fa-edit"></i>'.__('Edit').'</a><a href="javascript:;" data-href="'.route('admin-coupon-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
@@ -77,14 +77,17 @@ class CouponController extends AdminBaseController
         $data = new Coupon();
         $input = $request->all();
         if ($request->coupon_type == 'category') {
+            $input['category'] = !empty($request->category) ? implode(',', $request->category) : null;
             $input['sub_category'] = null;
             $input['child_category'] = null;
         } elseif ($request->coupon_type == 'sub_category') {
             $input['category'] = null;
+            $input['sub_category'] = !empty($request->sub_category) ? implode(',', $request->sub_category) : null;
             $input['child_category'] = null;
         } else {
             $input['category'] = null;
             $input['sub_category'] = null;
+            $input['child_category'] = !empty($request->child_category) ? implode(',', $request->child_category) : null;
         }
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');
@@ -127,14 +130,17 @@ class CouponController extends AdminBaseController
         $data = Coupon::findOrFail($id);
         $input = $request->all();
         if ($request->coupon_type == 'category') {
+            $input['category'] = !empty($request->category) ? implode(',', $request->category) : null;
             $input['sub_category'] = null;
             $input['child_category'] = null;
         } elseif ($request->coupon_type == 'sub_category') {
             $input['category'] = null;
+            $input['sub_category'] = !empty($request->sub_category) ? implode(',', $request->sub_category) : null;
             $input['child_category'] = null;
         } else {
             $input['category'] = null;
             $input['sub_category'] = null;
+            $input['child_category'] = !empty($request->child_category) ? implode(',', $request->child_category) : null;
         }
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');

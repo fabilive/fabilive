@@ -3,6 +3,17 @@
 @section('styles')
 
 <link href="{{asset('assets/admin/css/jquery-ui.css')}}" rel="stylesheet" type="text/css">
+<style>
+    .select2-container--default .select2-selection--multiple {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        min-height: 45.33px;
+    }
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
 
 @endsection
 
@@ -76,8 +87,8 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="category">
-                                  <option value="">{{ __('Select Category') }}</option>
+                              <select  name="category[]" class="select2js-multiple" multiple="multiple">
+                                  <option value="all">{{ __('All Categories') }}</option>
                                     @foreach($categories as $cat)
                                       <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                     @endforeach
@@ -92,8 +103,8 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="sub_category" >
-                                  <option value="">{{ __('Select Subcategory') }}</option>
+                              <select  name="sub_category[]" class="select2js-multiple" multiple="multiple">
+                                  <option value="all">{{ __('All Subcategories') }}</option>
                                     @foreach($sub_categories as $scat)
                                       <option value="{{ $scat->id }}">{{ $scat->name }}</option>
                                     @endforeach
@@ -108,8 +119,8 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="child_category" >
-                                  <option value="">{{ __('Select Child Category') }}</option>
+                              <select  name="child_category[]" class="select2js-multiple" multiple="multiple">
+                                  <option value="all">{{ __('All Child Categories') }}</option>
                                     @foreach($child_categories as $ccat)
                                       <option value="{{ $ccat->id }}">{{ $ccat->name }}</option>
                                     @endforeach
@@ -257,6 +268,10 @@
     }
 });
 
+    $('.select2js-multiple').select2({
+        placeholder: "{{ __('Select Options') }}",
+        allowClear: true
+    });
 </script>
 
 <script type="text/javascript">

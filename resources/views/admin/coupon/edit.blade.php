@@ -3,6 +3,17 @@
 @section('styles')
 
 <link href="{{asset('assets/admin/css/jquery-ui.css')}}" rel="stylesheet" type="text/css">
+<style>
+    .select2-container--default .select2-selection--multiple {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        min-height: 45.33px;
+    }
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
 
 @endsection
 
@@ -68,6 +79,12 @@
                           </div>
                         </div>
 
+                        @php
+                          $cat_ids = explode(',', $data->category);
+                          $sub_ids = explode(',', $data->sub_category);
+                          $child_ids = explode(',', $data->child_category);
+                        @endphp
+
                         <div class="row {{$data->category ? '' :'d-none'}}" id="category">
                           <div class="col-lg-4">
                             <div class="left-area">
@@ -75,10 +92,10 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="category">
-                                  <option value="">{{ __('Select Category') }}</option>
+                              <select  name="category[]" class="select2js-multiple" multiple="multiple">
+                                  <option value="all" {{ in_array('all', $cat_ids) ? 'selected' : '' }}>{{ __('All Categories') }}</option>
                                     @foreach($categories as $cat)
-                                      <option value="{{ $cat->id }}" {{$data->category == $cat->id ? 'selected':''}} >{{ $cat->name }}</option>
+                                      <option value="{{ $cat->id }}" {{ in_array($cat->id, $cat_ids) ? 'selected':''}} >{{ $cat->name }}</option>
                                     @endforeach
                                 </select>
                           </div>
@@ -91,10 +108,10 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="sub_category" >
-                                  <option value="">{{ __('Select Subcategory') }}</option>
+                              <select  name="sub_category[]" class="select2js-multiple" multiple="multiple">
+                                    <option value="all" {{ in_array('all', $sub_ids) ? 'selected' : '' }}>{{ __('All Subcategories') }}</option>
                                     @foreach($sub_categories as $scat)
-                                      <option value="{{ $scat->id }}" {{$data->sub_category == $scat->id ? 'selected':''}}>{{ $scat->name }}</option>
+                                      <option value="{{ $scat->id }}" {{ in_array($scat->id, $sub_ids) ? 'selected':''}}>{{ $scat->name }}</option>
                                     @endforeach
                                 </select>
                           </div>
@@ -107,10 +124,10 @@
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select  name="child_category" >
-                                  <option value="">{{ __('Select Child Category') }}</option>
+                              <select  name="child_category[]" class="select2js-multiple" multiple="multiple">
+                                    <option value="all" {{ in_array('all', $child_ids) ? 'selected' : '' }}>{{ __('All Child Categories') }}</option>
                                     @foreach($child_categories as $ccat)
-                                      <option value="{{ $ccat->id }}" {{$data->child_category == $ccat->id ? 'selected':''}}>{{ $ccat->name }}</option>
+                                      <option value="{{ $ccat->id }}" {{ in_array($ccat->id, $child_ids) ? 'selected':''}}>{{ $ccat->name }}</option>
                                     @endforeach
                                 </select>
                           </div>
@@ -298,8 +315,10 @@
     selector.find('input').val("");
     selector.hide();    
     }
-});
-
+    $('.select2js-multiple').select2({
+        placeholder: "{{ __('Select Options') }}",
+        allowClear: true
+    });
 </script>
 
 <script type="text/javascript">
