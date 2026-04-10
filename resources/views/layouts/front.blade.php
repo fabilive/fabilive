@@ -145,6 +145,20 @@
 
 
   @yield('css')
+  <style>
+    :root {
+      --theme-primary-color: #000000 !important;
+      --theme-primary-color-rgb: 0, 0, 0 !important;
+    }
+    /* Ensure all badges and primary elements stick to black */
+    .header-cart-count, .notification-count, .ui-widget-header, .ui-slider-handle {
+      background-color: #000000 !important;
+      background: #000000 !important;
+    }
+    .active, .nav-link:hover {
+      color: #000000 !important;
+    }
+  </style>
 </head>
 
 <body>

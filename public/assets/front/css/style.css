@@ -933,7 +933,7 @@ button:not(:disabled) {
 
 .sliderText {
 	margin-bottom: 30px;
-	border-bottom: 2px solid #c48272;
+	border-bottom: 2px solid #000000;
 	padding: 10px 0 10px 0px;
 	font-weight: bold;
 }
@@ -947,7 +947,7 @@ button:not(:disabled) {
 }
 
 .ui-widget-header {
-	background: #c48272;
+	background: #000000;
 }
 
 .price-range-search {
@@ -993,7 +993,7 @@ button.filter-btn.btn.btn-primary {
 	z-index: 2;
 	width: 18px;
 	height: 18px;
-	background: #c48272;
+	background: #000000;
 	border-radius: 50%;
 	cursor: default;
 	-ms-touch-action: none;
@@ -9254,7 +9254,7 @@ input[type="checkbox"]:checked:disabled+label:before {
 }
 
 a.btn.login-btn {
-	background: #c48272;
+	background: #000000;
 	color: white;
 }
 
@@ -11262,4 +11262,5 @@ body *::-webkit-scrollbar-thumb {
     background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
     pointer-events: none;
 }
+
 
