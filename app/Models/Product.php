@@ -129,6 +129,10 @@ class Product extends Model
     public function getThumbnailAttribute($value)
     {
         if (empty($value)) {
+            $value = $this->attributes['photo'] ?? null;
+        }
+
+        if (empty($value)) {
             return asset('assets/images/noimage.png');
         }
 
