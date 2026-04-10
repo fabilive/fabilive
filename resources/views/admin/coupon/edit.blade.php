@@ -262,7 +262,7 @@
         }
         else if(val == 1){
           selector.find('.heading').html('{{ __('Amount') }} *');
-          selector.find('input').attr("placeholder", "{{ __('Enter Amount') }}").next().html('$');
+          selector.find('input').attr("placeholder", "{{ __('Enter Amount') }}").next().html('{{ $curr->sign }}');
           selector.css('display','flex');
         }
       }
