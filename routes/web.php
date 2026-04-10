@@ -198,7 +198,18 @@ Route::get('/admin/schema-polish', function () {
         }
 
         // 11. Messaging & Tickets Repair (Fixes Ajax Errors on Ticket/Dispute pages)
-        if (\Illuminate\Support\Facades\Schema::hasTable('admin_user_conversations')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('admin_user_conversations')) {
+            \Illuminate\Support\Facades\Schema::create('admin_user_conversations', function ($table) {
+                $table->id();
+                $table->integer('user_id')->default(0);
+                $table->integer('admin_id')->nullable();
+                $table->string('subject')->nullable();
+                $table->text('message')->nullable();
+                $table->string('order_number')->nullable();
+                $table->string('type')->default('Ticket');
+                $table->timestamps();
+            });
+        } else {
             \Illuminate\Support\Facades\Schema::table('admin_user_conversations', function ($table) {
                 if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'user_id')) {
                     $table->integer('user_id')->default(0);
@@ -218,7 +229,16 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        if (\Illuminate\Support\Facades\Schema::hasTable('admin_user_messages')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('admin_user_messages')) {
+            \Illuminate\Support\Facades\Schema::create('admin_user_messages', function ($table) {
+                $table->id();
+                $table->integer('conversation_id');
+                $table->text('message')->nullable();
+                $table->integer('user_id')->nullable();
+                $table->integer('admin_id')->nullable();
+                $table->timestamps();
+            });
+        } else {
             \Illuminate\Support\Facades\Schema::table('admin_user_messages', function ($table) {
                 if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_messages', 'conversation_id')) {
                     $table->integer('conversation_id')->nullable();
