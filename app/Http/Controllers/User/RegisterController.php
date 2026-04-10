@@ -63,24 +63,7 @@ class RegisterController extends FrontBaseController
         $input['verification_link'] = $token;
         $input['affilate_code'] = md5($request->name.$request->email);
 
-        if (! empty($request->vendor)) {
-            //--- Validation Section
-            $rules = [
-                'shop_name' => 'unique:users',
-                'shop_number' => 'max:10',
-            ];
-            $customs = [
-                'shop_name.unique' => 'This Shop Name has already been taken.',
-                'shop_number.max' => 'Shop Number Must Be Less Then 10 Digit.',
-            ];
 
-            $validator = Validator::make($request->all(), $rules, $customs);
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
-            }
-            $input['is_vendor'] = 1;
-
-        }
 
         $user->fill($input)->save();
 

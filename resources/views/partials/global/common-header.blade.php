@@ -17,7 +17,7 @@
                     <ul class="top-links d-flex ms-auto align-items-center justify-content-end">
                         @if (!Auth::guard('web')->check() && !Auth::guard('rider')->check())
                             <li><a class="border px-3 py-1"
-                                    href="{{ route('user.register', ['source' => 'sell']) }}">{{ __('Sell') }}</a></li>
+                                    href="{{ route('user.register', ['source' => 'seller_application']) }}">{{ __('Sell') }}</a></li>
                             <li><a class="border px-3 py-1"
                                     href="{{ route('rider.register') }}">{{ __('Become a Delivery Agent') }}</a></li>
                         @endif
@@ -112,7 +112,7 @@
                         <div class="d-flex">
                             @if (!Auth::guard('web')->check() && !Auth::guard('rider')->check())
                                 <li><a class="border px-3 py-1"
-                                        href="{{ route('user.register', ['source' => 'sell']) }}">{{ __('Sell') }}</a></li>
+                                        href="{{ route('user.register', ['source' => 'seller_application']) }}">{{ __('Sell') }}</a></li>
                                 <li><a class="border px-3 py-1"
                                         href="{{ route('rider.register') }}">{{ __('Become a Delivery Agent') }}</a>
                                 </li>
