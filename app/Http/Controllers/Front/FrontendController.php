@@ -185,7 +185,7 @@ class FrontendController extends FrontBaseController
             $data['hot_products'] = cache()->remember('homepage_hot_products', now()->addHour(), function() use ($gs) {
                 return Product::whereHot(1)->whereStatus(1)
                     ->take($gs->hot_count ?: 8)
-                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
             });
@@ -195,7 +195,7 @@ class FrontendController extends FrontBaseController
             $data['latest_products'] = cache()->remember('homepage_latest_products', now()->addHour(), function() use ($gs) {
                 return Product::whereStatus(1)
                     ->take($gs->new_count ?: 8)
-                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
             });
@@ -205,7 +205,7 @@ class FrontendController extends FrontBaseController
             $data['sale_products'] = cache()->remember('homepage_sale_products', now()->addHour(), function() use ($gs) {
                 return Product::whereSale(1)->whereStatus(1)
                     ->take($gs->sale_count ?: 8)
-                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
             });
@@ -215,42 +215,50 @@ class FrontendController extends FrontBaseController
             $data['best_products'] = cache()->remember('homepage_best_products', now()->addHour(), function() use ($gs) {
                 return Product::whereStatus(1)->whereBest(1)
                     ->take($gs->best_seller_count > 0 ? $gs->best_seller_count : 8)
-                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
             });
         } catch (\Exception $e) {}
 
         try {
-            $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
-                ->take($gs->popular_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['popular_products'] = cache()->remember('homepage_popular_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)->whereFeatured(1)
+                    ->take($gs->popular_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['top_products'] = Product::whereStatus(1)->whereTop(1)
-                ->take($gs->top_rated_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['top_products'] = cache()->remember('homepage_top_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)->whereTop(1)
+                    ->take($gs->top_rated_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['big_products'] = Product::whereStatus(1)->whereBig(1)
-                ->take($gs->big_save_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['big_products'] = cache()->remember('homepage_big_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)->whereBig(1)
+                    ->take($gs->big_save_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {
-            $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
-                ->take($gs->trending_count ?: 8)
-                ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
-                ->withCount('ratings')->withAvg('ratings', 'rating')
-                ->latest('id')->get();
+            $data['trending_products'] = cache()->remember('homepage_trending_products', now()->addHour(), function() use ($gs) {
+                return Product::whereStatus(1)->whereTrending(1)
+                    ->take($gs->trending_count ?: 8)
+                    ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
+                    ->withCount('ratings')->withAvg('ratings', 'rating')
+                    ->latest('id')->get();
+            });
         } catch (\Exception $e) {}
 
         try {

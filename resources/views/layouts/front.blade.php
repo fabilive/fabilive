@@ -210,9 +210,7 @@
 
 
   <div id="page_wrapper" class="bg-white">
-    <div class="loader">
-      <div class="spinner"></div>
-    </div>
+    <style>.loader { display: none !important; }</style>
 
     @yield('content')
 

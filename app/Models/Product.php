@@ -132,29 +132,32 @@ class Product extends Model
      * Handle Cloudinary or full URLs correctly in the photo attribute.
      */
     protected static $pathCache = [];
+    protected static $pubPath = null;
 
     private function resolveImagePath($filename, $preferThumb = false)
     {
         if (empty($filename)) return asset('assets/images/noimage.png');
         if (str_starts_with($filename, 'http')) return $filename;
         $filename = ltrim($filename, '/');
+        
+        // Request-level cache
         if (isset(self::$pathCache[$filename])) return self::$pathCache[$filename];
+
+        if (!self::$pubPath) self::$pubPath = public_path();
 
         $dirs = ['thumbnails/', 'products/', 'product/', 'galleries/'];
         $trials = $preferThumb ? $dirs : array_reverse($dirs);
-        $trials[] = ''; // Add root search as last trial
+        $trials[] = ''; // Root search
 
         foreach ($trials as $dir) {
             $relPath = 'assets/images/' . $dir . $filename;
-            
-            if (file_exists(public_path($relPath)) || 
-                file_exists(base_path('public/' . $relPath)) || 
-                file_exists(base_path($relPath))) {
-                
+            // Single, prioritized check on the most likely public path
+            if (file_exists(self::$pubPath . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relPath))) {
                 self::$pathCache[$filename] = asset($relPath);
                 return self::$pathCache[$filename];
             }
         }
+
         self::$pathCache[$filename] = asset('assets/images/noimage.png');
         return self::$pathCache[$filename];
     }
