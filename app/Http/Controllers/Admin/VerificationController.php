@@ -198,6 +198,7 @@ class VerificationController extends AdminBaseController
         try {
             $user = Verification::findOrFail($id1);
             $user->status = $id2;
+            $user->admin_warning = 0;
             $user->update();
             //--- Redirect Section
             $msg[0] = __('Status Updated Successfully.');
