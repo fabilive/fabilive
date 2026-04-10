@@ -197,7 +197,42 @@ Route::get('/admin/schema-polish', function () {
             \Illuminate\Support\Facades\DB::table('pagesettings')->where('id', 1)->update(['contact_email' => 'hello@fabilive.com']);
         }
 
-        // 11. Social Link Icon Audit
+        // 11. Messaging & Tickets Repair (Fixes Ajax Errors on Ticket/Dispute pages)
+        if (\Illuminate\Support\Facades\Schema::hasTable('admin_user_conversations')) {
+            \Illuminate\Support\Facades\Schema::table('admin_user_conversations', function ($table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'user_id')) {
+                    $table->integer('user_id')->default(0);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'subject')) {
+                    $table->string('subject')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'message')) {
+                    $table->text('message')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'order_number')) {
+                    $table->string('order_number')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_conversations', 'type')) {
+                    $table->string('type')->default('Ticket');
+                }
+            });
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('admin_user_messages')) {
+            \Illuminate\Support\Facades\Schema::table('admin_user_messages', function ($table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_messages', 'conversation_id')) {
+                    $table->integer('conversation_id')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_messages', 'message')) {
+                    $table->text('message')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('admin_user_messages', 'user_id')) {
+                    $table->integer('user_id')->nullable();
+                }
+            });
+        }
+
+        // 12. Social Link Icon Audit
         if (\Illuminate\Support\Facades\Schema::hasTable('social_links')) {
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%tiktok.com%')->update(['icon' => 'fab fa-tiktok']);
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
@@ -205,9 +240,10 @@ Route::get('/admin/schema-polish', function () {
         }
 
         return "<h1>Schema Repair Complete!</h1>
-                <p><strong>Database Fixes Applied:</strong> Coupons (status, used columns added), Social Link Icons Audit.</p>
+                <p><strong>Database Fixes Applied:</strong> Coupons, Messaging/Tickets (Fixes dashboard errors), Contact Email, Social Icons Audit.</p>
                 <br>
-                <a href='".route('admin-coupon-index')."'>Click here to test Coupons Dashboard</a><br><br>
+                <a href='".route('admin-message-index')."'>Click here to test Tickets Dashboard</a><br>
+                <a href='".route('admin-message-dispute')."'>Click here to test Disputes Dashboard</a><br><br>
                 <a href='".route('vendor.dashboard')."'>Go to Vendor Dashboard</a>";
     } catch (\Exception $e) {
         return "Error polishing schema: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
