@@ -136,36 +136,10 @@ class Product extends Model
             return $value;
         }
 
-        // Check multiple possible paths for production compatibility
-        $thumbnailPath = 'assets/images/thumbnails/' . $value;
-        $productPath = 'assets/images/products/' . $value;
-
-        $checkPaths = [
-            public_path($thumbnailPath),
-            base_path('public/' . $thumbnailPath),
-            base_path($thumbnailPath)
-        ];
-
-        foreach ($checkPaths as $path) {
-            if (file_exists($path)) {
-                return asset($thumbnailPath);
-            }
-        }
-
-        // Fallback to original product photo if thumbnail is missing
-        $checkProductPaths = [
-            public_path($productPath),
-            base_path('public/' . $productPath),
-            base_path($productPath)
-        ];
-
-        foreach ($checkProductPaths as $path) {
-            if (file_exists($path)) {
-                return asset($productPath);
-            }
-        }
-
-        return asset('assets/images/noimage.png');
+        // Direct return to bypass potentially failing file_exists on this server.
+        // If the thumbnail is missing, the browser will still try and we'll see the 404.
+        // But if the server was falsely reporting 'not found', this will fix it.
+        return asset('assets/images/thumbnails/' . $value);
     }
 
     public function category()
