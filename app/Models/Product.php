@@ -24,6 +24,27 @@ class Product extends Model
 
     public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end'];
 
+    public static function boot()
+    {
+        parent::boot();
+        
+        static::saved(function() {
+            cache()->forget('homepage_latest_products');
+            cache()->forget('homepage_hot_products');
+            cache()->forget('homepage_sale_products');
+            cache()->forget('homepage_best_products');
+            cache()->forget('homepage_featured_categories');
+            cache()->forget('homepage_arrivals');
+        });
+
+        static::deleted(function() {
+            cache()->forget('homepage_latest_products');
+            cache()->forget('homepage_hot_products');
+            cache()->forget('homepage_sale_products');
+            cache()->forget('homepage_best_products');
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo('App\Models\User')->withDefault();
