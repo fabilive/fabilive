@@ -191,7 +191,7 @@ class User extends Authenticatable implements JWTSubject
             return false;
         }
 
-        return empty($warning->status) ? true : false;
+        return true;
     }
 
     public function displayWarning()

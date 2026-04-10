@@ -104,7 +104,20 @@ class VendorController extends AdminBaseController
             $reason = $request->details;
         }
 
-        $user->verifies()->create(['admin_warning' => 1, 'warning_reason' => $reason]);
+        $verification = $user->verifies()->latest('id')->first();
+        if ($verification) {
+            $verification->update([
+                'admin_warning' => 1, 
+                'warning_reason' => $reason,
+                'status' => 'Pending'
+            ]);
+        } else {
+            $user->verifies()->create([
+                'admin_warning' => 1, 
+                'warning_reason' => $reason,
+                'status' => 'Pending'
+            ]);
+        }
 
         if ($settings->is_smtp == 1) {
             $data = [
