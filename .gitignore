@@ -8,8 +8,6 @@
 /storage/framework/sessions/*
 /storage/framework/views/*
 /storage/logs/*
-/public/assets/images/*
-!/public/assets/images/.gitkeep
 /vendor
 .env
 .env.backup
