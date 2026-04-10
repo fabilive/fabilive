@@ -118,11 +118,25 @@ class Product extends Model
         if (str_starts_with($filename, 'http')) return $filename;
         $filename = ltrim($filename, '/');
         if (isset(self::$pathCache[$filename])) return self::$pathCache[$filename];
+
+        // Expanded list of possible directories to find images
+        $dirs = ['thumbnails/', 'products/', 'product/', 'galleries/'];
+        
         $trials = $preferThumb 
-            ? ['thumbnails/' . $filename, 'products/' . $filename, $filename]
-            : ['products/' . $filename, 'thumbnails/' . $filename, $filename];
+            ? array_merge($dirs, [$filename])
+            : array_merge(array_reverse($dirs), [$filename]);
+
         foreach ($trials as $pathPart) {
-            $relPath = 'assets/images/' . $pathPart;
+            // If the pathPart is just the filename, don't prefix with a folder
+            $relPath = (str_contains($pathPart, '/')) ? 'assets/images/' . $pathPart : 'assets/images/' . $pathPart;
+            
+            // Re-evaluating relPath logic to be simpler
+            if (str_contains($pathPart, '/')) {
+                $relPath = 'assets/images/' . $pathPart;
+            } else {
+                 $relPath = 'assets/images/' . $filename;
+            }
+
             if (file_exists(public_path($relPath)) || file_exists(base_path('public/' . $relPath)) || file_exists(base_path($relPath))) {
                 self::$pathCache[$filename] = asset($relPath);
                 return self::$pathCache[$filename];
