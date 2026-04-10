@@ -54,7 +54,11 @@
                 <div class="footer-widget media-widget mb-4">
                     @foreach((isset($global_social_links) ? $global_social_links : collect()) as $link)
                         <a href="{{ $link->link }}" target="_blank">
-                            <i class="{{ $link->icon }}"></i>
+                            @if(strpos(strtolower($link->link), 'tiktok.com') !== false || strpos(strtolower($link->icon), 'tiktok') !== false)
+                                <img src="{{ asset('assets/images/tiktok_icon.png') }}" alt="TikTok" style="width: 25px; height: 25px; vertical-align: middle; border-radius: 50%; object-fit: cover; margin-top: -3px;">
+                            @else
+                                <i class="{{ $link->icon }}"></i>
+                            @endif
                         </a>
                     @endforeach
                 </div>
