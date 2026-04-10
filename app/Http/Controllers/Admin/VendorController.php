@@ -90,7 +90,21 @@ class VendorController extends AdminBaseController
     {
         $settings = Generalsetting::find(1);
         $user = User::findOrFail($id);
-        $user->verifies()->create(['admin_warning' => 1, 'warning_reason' => $request->details]);
+
+        $reason = "";
+        if($request->has('reverify_options')){
+            $reason .= __("Please re-upload the following documents:") . "\n";
+            foreach($request->reverify_options as $option){
+                $reason .= "- " . $option . "\n";
+            }
+            if($request->details){
+                $reason .= "\n" . __("Additional Instructions:") . "\n" . $request->details;
+            }
+        } else {
+            $reason = $request->details;
+        }
+
+        $user->verifies()->create(['admin_warning' => 1, 'warning_reason' => $reason]);
 
         if ($settings->is_smtp == 1) {
             $data = [

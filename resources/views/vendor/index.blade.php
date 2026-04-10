@@ -8,7 +8,7 @@
     @endphp
     @if($warningVerify)
     <div class="alert alert-danger validation text-center">
-        <h3>{{ $user->displayWarning() }} </h3> <a
+        <h3>{!! nl2br(e($user->displayWarning())) !!} </h3> <a
             href="{{ route('vendor-warning', $warningVerify->id) }}">
             {{ __('Verify Now') }} </a>
     </div>
