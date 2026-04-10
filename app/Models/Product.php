@@ -136,10 +136,38 @@ class Product extends Model
             return $value;
         }
 
-        // Direct return to bypass potentially failing file_exists on this server.
-        // If the thumbnail is missing, the browser will still try and we'll see the 404.
-        // But if the server was falsely reporting 'not found', this will fix it.
-        return asset('assets/images/thumbnails/' . $value);
+        // We check several paths because this production server's folder structure
+        // is non-standard. We check thumbnails first, then products as a fallback.
+        $thumbnailPath = 'assets/images/thumbnails/' . $value;
+        $productPath = 'assets/images/products/' . $value;
+
+        $checkPaths = [
+            public_path($thumbnailPath),
+            base_path('public/' . $thumbnailPath),
+            base_path($thumbnailPath)
+        ];
+
+        foreach ($checkPaths as $path) {
+            if (file_exists($path)) {
+                return asset($thumbnailPath);
+            }
+        }
+
+        // Fallback to products folder
+        $checkProductPaths = [
+            public_path($productPath),
+            base_path('public/' . $productPath),
+            base_path($productPath)
+        ];
+
+        foreach ($checkProductPaths as $path) {
+            if (file_exists($path)) {
+                return asset($productPath);
+            }
+        }
+
+        // One last "Direct Impact" attempt: just return the asset path and hope the browser can find it
+        return asset($productPath);
     }
 
     public function category()
