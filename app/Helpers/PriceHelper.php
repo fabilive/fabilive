@@ -145,7 +145,7 @@ class PriceHelper
                 $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
                 $type = strtolower($type[1]); // png, jpg, etc.
 
-                if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                if (!in_array($type, ['jpg', 'jpeg', 'png', 'jfif', 'webp'])) {
                     return null;
                 }
 

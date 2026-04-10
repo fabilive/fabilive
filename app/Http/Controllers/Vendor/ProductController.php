@@ -385,17 +385,29 @@ class ProductController extends VendorBaseController
             if (! $package || $package->allowed_products == 0 || $prods < $package->allowed_products) {
                 $rules = [
                     'photo' => 'required',
-                    'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif',
+                    'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif,jfif',
                 ];
                 $validator = Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
                     return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
                 }
+
+                // Pre-validate Gallery extensions to prevent ghost products
+                if ($files = $request->file('gallery')) {
+                    foreach ($files as $file) {
+                        $extensions = ['jpeg', 'jpg', 'png', 'jfif', 'webp', 'svg', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
+                        if (! in_array(strtolower($file->getClientOriginalExtension()), $extensions)) {
+                            return response()->json(['errors' => ['File format not supported: '.$file->getClientOriginalExtension()]]);
+                        }
+                    }
+                }
+
+                DB::beginTransaction();
                 $data = new Product;
                 $sign = $this->curr;
                 $input = $request->all();
                 if ($file = $request->file('file')) {
-                    $extensions = ['zip', 'rar', '7z', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'mp4', 'mov', 'avi', 'webm', 'webp', 'svg', 'gif'];
+                    $extensions = ['zip', 'rar', '7z', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'mp4', 'mov', 'avi', 'webm', 'webp', 'svg', 'gif', 'jfif'];
                     if (! in_array($file->getClientOriginalExtension(), $extensions)) {
                         return response()->json(['errors' => ['File format not supported']]);
                     }
@@ -635,15 +647,17 @@ class ProductController extends VendorBaseController
                 $lastid = $data->id;
                 if ($files = $request->file('gallery')) {
                     foreach ($files as $key => $file) {
-                        $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
+                        $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
                         if (! in_array(strtolower($file->getClientOriginalExtension()), $extensions)) {
+                            // This should already be caught by pre-validation, but added for safety
+                            DB::rollBack();
                             return response()->json(['errors' => ['File format not supported: '.$file->getClientOriginalExtension()]]);
                         }
                         if (in_array($key, $request->galval)) {
                             $gallery = new Gallery;
                             $name = \PriceHelper::ImageCreateName($file);
                             
-                            $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif']);
+                             $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
                             if ($is_image) {
                                 $img = \Image::make($file->getRealPath())->resize(800, 800);
                                 $img->save(public_path().'/assets/images/galleries/'.$name);
@@ -657,6 +671,7 @@ class ProductController extends VendorBaseController
                         }
                     }
                 }
+                DB::commit();
                 $msg = __('New Product Added Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
 
                 return response()->json($msg);
@@ -664,6 +679,7 @@ class ProductController extends VendorBaseController
                 return response()->json(['errors' => [0 => __('You Can\'t Add More Product.')]]);
             }
         } catch (\Throwable $e) {
+            DB::rollBack();
             \Log::error('Vendor Product Store Error: '.$e->getMessage()."\n".$e->getTraceAsString());
 
             return response()->json(['message' => $e->getMessage()], 500);
