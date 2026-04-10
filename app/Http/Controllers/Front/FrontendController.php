@@ -575,24 +575,46 @@ class FrontendController extends FrontBaseController
         }
 
         // Logic Section
-        $subject = 'Email From Of '.$request->name;
-        $to = $request->to;
+        $subject = 'Contact Form: '.$request->name;
+        $to = 'hello@fabilive.com';
         $name = $request->name;
         $phone = $request->phone;
         $from = $request->email;
-        $msg = 'Name: '.$name."\nEmail: ".$from."\nPhone: ".$phone."\nMessage: ".$request->text;
+        $msg_text = $request->text;
+        
+        $msg = "Name: ".$name."\nEmail: ".$from."\nPhone: ".$phone."\n\nMessage:\n".$msg_text;
+        
+        // 1. Send Email
         if ($gs->is_smtp) {
             $data = [
                 'to' => $to,
                 'subject' => $subject,
                 'body' => $msg,
             ];
-
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } else {
             $headers = 'From: '.$gs->from_name.'<'.$gs->from_email.'>';
-            mail($to, $subject, $msg, $headers);
+            @mail($to, $subject, $msg, $headers);
+        }
+
+        // 2. Save to Dashboard (AdminUserConversation as Ticket)
+        try {
+            $conv = new \App\Models\AdminUserConversation();
+            $conv->subject = $subject;
+            $conv->user_id = 0; // 0 for Guest
+            $conv->message = $msg_text;
+            $conv->type = 'Ticket';
+            $conv->save();
+
+            $reply = new \App\Models\AdminUserMessage();
+            $reply->conversation_id = $conv->id;
+            $reply->message = $msg;
+            $reply->user_id = 0;
+            $reply->save();
+        } catch (\Exception $e) {
+            // Log if dashboard save fails but don't stop the success response
+            \Log::error('Contact form dashboard save failed: ' . $e->getMessage());
         }
         // Logic Section Ends
 

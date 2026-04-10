@@ -192,7 +192,12 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        // 10. Social Link Icon Audit
+        // 10. Contact Email Fix
+        if (\Illuminate\Support\Facades\Schema::hasTable('pagesettings')) {
+            \Illuminate\Support\Facades\DB::table('pagesettings')->where('id', 1)->update(['contact_email' => 'hello@fabilive.com']);
+        }
+
+        // 11. Social Link Icon Audit
         if (\Illuminate\Support\Facades\Schema::hasTable('social_links')) {
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%tiktok.com%')->update(['icon' => 'fab fa-tiktok']);
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
