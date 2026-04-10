@@ -160,7 +160,7 @@ class CouponController extends AdminBaseController
     {
         $data = Coupon::findOrFail($id1);
         $data->status = $id2;
-        $data->update();
+        $data->save();
         //--- Redirect Section
         $msg = __('Status Updated Successfully.');
 
