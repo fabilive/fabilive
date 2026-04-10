@@ -104,6 +104,9 @@ class VendorController extends AdminBaseController
             $reason = $request->details;
         }
 
+        // Clear any old verification records to avoid duplicates and ensure the latest is always the warning
+        $user->verifies()->delete();
+
         $verification = $user->verifies()->latest('id')->first();
         if ($verification) {
             $verification->update([

@@ -11,10 +11,13 @@ class VerificationController extends AdminBaseController
     //*** JSON Request
     public function datatables($status)
     {
+        // Select only the latest verification record for each user to avoid duplicates in the list
+        $latestIds = Verification::selectRaw('MAX(id) as id')->groupBy('user_id')->pluck('id');
+
         if ($status == 'Pending') {
-            $datas = Verification::where('status', '=', 'Pending')->get();
+            $datas = Verification::whereIn('id', $latestIds)->where('status', '=', 'Pending')->get();
         } else {
-            $datas = Verification::get();
+            $datas = Verification::whereIn('id', $latestIds)->get();
         }
 
         return Datatables::of($datas)
