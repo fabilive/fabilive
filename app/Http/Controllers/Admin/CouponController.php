@@ -91,6 +91,7 @@ class CouponController extends AdminBaseController
         }
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');
+        $input['status'] = 1;
         $data->fill($input)->save();
         //--- Logic Section Ends
 
