@@ -9,6 +9,7 @@ use App\Models\UserSubscription;
 use App\Models\Verification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends UserBaseController
 {
