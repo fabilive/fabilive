@@ -312,6 +312,11 @@ class Product extends Model
             $curr->value = 1;
         }
 
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
+            $curr->value = 1;
+        }
+
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
         if ($gs->currency_format == 0) {
@@ -376,6 +381,11 @@ class Product extends Model
             $curr->value = 1;
         }
 
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
+            $curr->value = 1;
+        }
+
         $price = $price * $curr->value;
         $price = PriceHelper::showPrice($price);
 
@@ -432,6 +442,11 @@ class Product extends Model
         if (!$curr) {
             $curr = new \stdClass();
             $curr->sign = "CFA";
+            $curr->value = 1;
+        }
+
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
             $curr->value = 1;
         }
 
@@ -501,6 +516,11 @@ class Product extends Model
         if (!$curr) {
             $curr = new \stdClass();
             $curr->sign = "CFA";
+            $curr->value = 1;
+        }
+
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
             $curr->value = 1;
         }
 

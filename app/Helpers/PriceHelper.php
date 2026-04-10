@@ -61,6 +61,11 @@ class PriceHelper
             $curr->value = 1;
         }
 
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
+            $curr->value = 1;
+        }
+
         if ($gs->currency_format == 0) {
             return $curr->sign.$new_price;
         } else {
@@ -86,6 +91,11 @@ class PriceHelper
         if (!$curr) {
             $curr = new \stdClass();
             $curr->sign = "CFA";
+            $curr->value = 1;
+        }
+
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (in_array($curr->sign, ['CFA', 'XFA'])) {
             $curr->value = 1;
         }
 

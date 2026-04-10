@@ -66,6 +66,11 @@ class FrontBaseController extends Controller
                 $this->curr->value = 1;
             }
 
+            // Force value to 1 for CFA/XFA to avoid unintended conversions
+            if (isset($this->curr->sign) && in_array($this->curr->sign, ['CFA', 'XFA'])) {
+                $this->curr->value = 1;
+            }
+
             return $next($request);
         });
     }

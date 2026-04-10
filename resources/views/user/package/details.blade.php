@@ -274,6 +274,11 @@
                                                         Capture
                                                     </button>
 
+                                                    <div id="fileFallback" class="mt-2">
+                                                        <p class="small text-muted mb-1">{{ __('Or upload a selfie file:') }}</p>
+                                                        <input type="file" id="selfieFileInput" class="form-control form-control-sm" name="selfie_image_file">
+                                                    </div>
+
                                                     <script>
                                                     document.addEventListener('DOMContentLoaded', () => {
                                                         const video = document.getElementById('cam');
@@ -319,6 +324,20 @@
                                                                 openBtn.style.display = 'inline-block';
                                                             }, 'image/jpeg', 0.9);
                                                         });
+
+                                                        document.getElementById('selfieFileInput').addEventListener('change', function(e) {
+                                                            if (this.files && this.files[0]) {
+                                                                preview.src = URL.createObjectURL(this.files[0]);
+                                                                preview.style.display = 'block';
+                                                                video.style.display = 'none';
+                                                                if (stream) {
+                                                                    stream.getTracks().forEach(t => t.stop());
+                                                                }
+                                                                openBtn.textContent = 'Retake Selfie';
+                                                                captureBtn.style.display = 'none';
+                                                                openBtn.style.display = 'inline-block';
+                                                            }
+                                                        });
                                                     });
                                                     </script>
 
@@ -360,13 +379,13 @@
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
-                                                        {{ __('Registration Number') }}
+                                                        {{ __('Shop Number') }}
                                                         <small>{{ __('(Optional)') }}</small>
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <input type="text" class="option form-control form-control-sm"
-                                                        name="reg_number" placeholder="{{ __('Registration Number') }}">
+                                                        name="shop_number" placeholder="{{ __('Shop Number') }}">
                                                 </div>
                                             </div>
                                             <br>

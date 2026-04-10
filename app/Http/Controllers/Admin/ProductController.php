@@ -49,9 +49,14 @@ class ProductController extends AdminBaseController
                 return $name.'<br>'.$id.$id3.$data->checkVendor();
             })
             ->editColumn('price', function (Product $data) {
+                $gs = $this->gs;
                 $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
                 $value = $curr ? $curr->value : 1;
-                $price = $data->price * $value;
+                $price = $data->price;
+                if ($data->user_id != 0) {
+                    $price = $price + $gs->fixed_commission + ($price / 100) * $gs->percentage_commission;
+                }
+                $price = $price * $value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })

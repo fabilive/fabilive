@@ -36,9 +36,14 @@ class ProductController extends VendorBaseController
         }
 
             $editColumn_price = function (Product $data) {
+                $gs = $this->gs;
                 $curr = $this->curr;
                 $value = $curr ? $curr->value : 1;
-                $price = round($data->price * $value, 2);
+                $price = $data->price;
+                if ($data->user_id != 0) {
+                    $price = $price + $gs->fixed_commission + ($price / 100) * $gs->percentage_commission;
+                }
+                $price = round($price * $value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             };

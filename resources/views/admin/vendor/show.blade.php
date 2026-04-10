@@ -76,7 +76,7 @@ table#example2 {
                                                             <td>{{ $data->shop_number }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <th>{{ __("Registration Number") }}</th>
+                                                            <th>{{ __("Registration / Tax ID") }}</th>
                                                             <td>{{ $data->reg_number }}</td>
                                                         </tr>
 
@@ -106,6 +106,16 @@ table#example2 {
                                                             <td>{{ $data->created_at->diffForHumans() }}</td>
                                                         </tr>
                                                         
+                                                        <tr>
+                                                            <th>{{ __("Live Selfie") }}</th>
+                                                            <td>
+                                                                @if($data->selfie_image)
+                                                                <a href="{{ asset($data->selfie_image) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
+                                                        </tr>
                                                         <tr>
                                                             <th>{{ __("National ID Front Image") }}</th>
                                                             <td>

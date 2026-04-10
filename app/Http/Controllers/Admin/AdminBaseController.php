@@ -89,6 +89,11 @@ class AdminBaseController extends Controller
             $this->curr->value = 1;
         }
 
+        // Force value to 1 for CFA/XFA to avoid unintended conversions
+        if (isset($this->curr->sign) && in_array($this->curr->sign, ['CFA', 'XFA'])) {
+            $this->curr->value = 1;
+        }
+
         view()->share('gs', $this->gs);
         view()->share('curr', $this->curr);
         view()->share('admin_lang', $this->language);
