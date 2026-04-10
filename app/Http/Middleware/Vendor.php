@@ -22,16 +22,16 @@ class Vendor
                     $warningVerify = $user->verifies()->where('admin_warning', '=', '1')->latest('id')->first();
                     if ($warningVerify) {
                         // Allow access to the verification submission, the warning page itself, and logout
-                        $allowed_routes = [
-                            'vendor-warning',
-                            'vendor-verify',
-                            'vendor-verify-submit',
-                            'user-logout'
-                        ];
-                        
-                        if (!in_array($request->route()->getName(), $allowed_routes)) {
-                            return redirect()->route('vendor-warning', $warningVerify->id);
+                        if ($request->routeIs('vendor-warning') || 
+                            $request->routeIs('vendor-verify') || 
+                            $request->routeIs('vendor-verify-submit') || 
+                            $request->routeIs('user-logout') ||
+                            $request->is('vendor/warning/verify/*') ||
+                            $request->is('vendor/verify*')) {
+                            return $next($request);
                         }
+
+                        return redirect()->route('vendor-warning', $warningVerify->id);
                     }
                 }
                 return $next($request);
