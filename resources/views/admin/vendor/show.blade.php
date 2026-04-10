@@ -108,40 +108,94 @@ table#example2 {
                                                         
                                                         <tr>
                                                             <th>{{ __("National ID Front Image") }}</th>
-                                                            <td><a href="{{asset('assets/images/vendorfront/'. $data->national_id_front_image) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->national_id_front_image)
+                                                                <a href="{{ asset($data->national_id_front_image) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("National ID Back Image") }}</th>
-                                                            <td><a href="{{asset('assets/images/vendorback/'. $data->national_id_back_image) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->national_id_back_image)
+                                                                <a href="{{ asset($data->national_id_back_image) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("License Image") }}</th>
-                                                            <td><a href="{{asset('assets/images/vendorlicense/'. $data->license_image) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->license_image)
+                                                                <a href="{{ asset($data->license_image) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("SubMerchant Agreement Image") }}</th>
-                                                            <td><a href="{{asset('assets/images/submerchantagreement/'. $data->submerchant_agreement) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->submerchant_agreement)
+                                                                <a href="{{ asset($data->submerchant_agreement) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         
                                                         <tr>
                                                             <th>{{ __("Business Registration Certificate") }}</th>
-                                                            <td><a href="{{ asset($data->business_registration_certificate) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->business_registration_certificate)
+                                                                <a href="{{ asset($data->business_registration_certificate) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("Tax Payer Card Copy") }}</th>
-                                                            <td><a href="{{ asset($data->taxpayer_card_copy) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->taxpayer_card_copy)
+                                                                <a href="{{ asset($data->taxpayer_card_copy) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("ID Card Copy") }}</th>
-                                                            <td><a href="{{ asset($data->id_card_copy) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->id_card_copy)
+                                                                <a href="{{ asset($data->id_card_copy) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("Passport Copy") }}</th>
-                                                            <td><a href="{{ asset($data->passport_copy) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->passport_copy)
+                                                                <a href="{{ asset($data->passport_copy) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("Driver License Copy") }}</th>
-                                                            <td><a href="{{ asset($data->driver_license_copy) }}" target="_blank">View</a></td>
+                                                            <td>
+                                                                @if($data->driver_license_copy)
+                                                                <a href="{{ asset($data->driver_license_copy) }}" target="_blank">View</a>
+                                                                @else 
+                                                                {{ __("Not Uploaded") }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>{{ __("Residence Permit For Foreigners") }}</th>
