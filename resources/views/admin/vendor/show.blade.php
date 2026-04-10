@@ -387,8 +387,8 @@ $('#example2').dataTable( {
 							  {
 							$('.selected-image .row').append('<div class="col-sm-6">'+
 											'<div class="img gallery-img">'+
-												'<a class="img-popup" href="'+'{{asset('assets/images/attachments').'/'}}'+arr[k]+'">'+
-												'<img  src="'+'{{asset('assets/images/attachments').'/'}}'+arr[k]+'" alt="gallery image">'+
+												'<a class="img-popup" href="'+arr[k]+'">'+
+												'<img  src="'+arr[k]+'" alt="gallery image">'+
 												'</a>'+
 											'</div>'+
 										  '</div>');

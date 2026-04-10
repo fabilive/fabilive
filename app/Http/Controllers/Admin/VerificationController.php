@@ -200,6 +200,27 @@ class VerificationController extends AdminBaseController
             $user->status = $id2;
             $user->admin_warning = 0;
             $user->update();
+
+            // Sync user's vendor status
+            if ($user->user) {
+                $userAccount = $user->user;
+                if ($id2 == 'Verified') {
+                    $userAccount->is_vendor = 2;
+                    $userAccount->is_verified = 1;
+                    $userAccount->vendor_approved_at = now();
+                    $userAccount->save();
+
+                    // Activate the latest pending subscription if it exists
+                    $subscription = $userAccount->subscribes()->where('status', 0)->latest('id')->first();
+                    if ($subscription) {
+                        $subscription->status = 1;
+                        $subscription->save();
+                    }
+                } elseif ($id2 == 'Declined') {
+                    $userAccount->is_vendor = 0;
+                    $userAccount->save();
+                }
+            }
             //--- Redirect Section
             $msg[0] = __('Status Updated Successfully.');
 
