@@ -180,7 +180,30 @@ Route::get('/admin/schema-polish', function () {
             }
         }
 
-        return "Schema polished successfully! All critical tables, columns, and records have been verified/created. <br><br> <a href='".route('vendor.dashboard')."'>Go to Vendor Dashboard</a>";
+        // 9. Fix for missing coupons status/used columns
+        if (\Illuminate\Support\Facades\Schema::hasTable('coupons')) {
+            \Illuminate\Support\Facades\Schema::table('coupons', function ($table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'status')) {
+                    $table->integer('status')->default(1);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'used')) {
+                    $table->integer('used')->default(0);
+                }
+            });
+        }
+
+        // 10. Social Link Icon Audit
+        if (\Illuminate\Support\Facades\Schema::hasTable('social_links')) {
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%tiktok.com%')->update(['icon' => 'fab fa-tiktok']);
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%facebook.com%')->update(['icon' => 'fab fa-facebook-f']);
+        }
+
+        return "<h1>Schema Repair Complete!</h1>
+                <p><strong>Database Fixes Applied:</strong> Coupons (status, used columns added), Social Link Icons Audit.</p>
+                <br>
+                <a href='".route('admin-coupon-index')."'>Click here to test Coupons Dashboard</a><br><br>
+                <a href='".route('vendor.dashboard')."'>Go to Vendor Dashboard</a>";
     } catch (\Exception $e) {
         return "Error polishing schema: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
     }
@@ -1007,25 +1030,6 @@ Route::get('/fix-subscriptions', function () {
                 ['city_name' => 'Yaounde', 'state_id' => $sid, 'status' => 1],
                 ['city_name' => 'Buea', 'state_id' => $sid, 'status' => 1],
             ]);
-        }
-
-        // Fix for missing coupons status/used columns
-        if (\Illuminate\Support\Facades\Schema::hasTable('coupons')) {
-            \Illuminate\Support\Facades\Schema::table('coupons', function ($table) {
-                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'status')) {
-                    $table->integer('status')->default(1);
-                }
-                if (! \Illuminate\Support\Facades\Schema::hasColumn('coupons', 'used')) {
-                    $table->integer('used')->default(0);
-                }
-            });
-        }
-
-        // Social Link Icon Audit
-        if (\Illuminate\Support\Facades\Schema::hasTable('social_links')) {
-            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%tiktok.com%')->update(['icon' => 'fab fa-tiktok']);
-            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
-            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%facebook.com%')->update(['icon' => 'fab fa-facebook-f']);
         }
 
         $cats = [
