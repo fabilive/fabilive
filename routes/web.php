@@ -1021,6 +1021,13 @@ Route::get('/fix-subscriptions', function () {
             });
         }
 
+        // Social Link Icon Audit
+        if (\Illuminate\Support\Facades\Schema::hasTable('social_links')) {
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%tiktok.com%')->update(['icon' => 'fab fa-tiktok']);
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
+            \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%facebook.com%')->update(['icon' => 'fab fa-facebook-f']);
+        }
+
         $cats = [
             ['name' => 'Electronics', 'slug' => 'electronics', 'status' => 1],
             ['name' => 'Fashion', 'slug' => 'fashion', 'status' => 1],

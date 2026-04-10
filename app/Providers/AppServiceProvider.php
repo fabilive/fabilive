@@ -140,9 +140,7 @@ class AppServiceProvider extends ServiceProvider
                 } catch (\Exception $e) {}
 
                 try {
-                    $social_links = cache()->remember('global_social_links', now()->addDay(), function() {
-                        return DB::table('social_links')->where('user_id', 0)->where('status', 1)->get();
-                    });
+                    $social_links = DB::table('social_links')->where('user_id', 0)->where('status', 1)->get();
                 } catch (\Exception $e) {}
 
                 try {
