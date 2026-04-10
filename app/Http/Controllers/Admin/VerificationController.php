@@ -52,9 +52,21 @@ class VerificationController extends AdminBaseController
             })
             ->addColumn('attachments', function (Verification $data) {
                 if ($data->attachments) {
-                    $firstAttachment = explode(',', $data->attachments)[0];
+                    $firstAttachment = trim(explode(',', $data->attachments)[0]);
+                    
+                    if (str_contains($firstAttachment, '/')) {
+                        $url = asset($firstAttachment);
+                    } else {
+                        // Check if it's in storage
+                        $storagePath = 'storage/uploads/documents/' . $firstAttachment;
+                        if (file_exists(public_path($storagePath)) || file_exists(base_path('public/'.$storagePath))) {
+                            $url = asset($storagePath);
+                        } else {
+                            $url = asset('assets/images/attachments/'.$firstAttachment);
+                        }
+                    }
 
-                    return '<img src="'.asset('assets/images/attachments/'.trim($firstAttachment)).'" style="height: 50px; width: 50px;">';
+                    return '<img src="'.$url.'" style="height: 50px; width: 50px;">';
                 }
 
                 return __('No Attachment');
@@ -124,7 +136,23 @@ class VerificationController extends AdminBaseController
         $prod = explode(',', $prod1->attachments);
         if (count($prod) && ! empty(trim($prod[0]))) {
             $data[0] = 1;
-            $data[1] = $prod;
+            
+            $resolvedUrls = [];
+            foreach($prod as $attachment) {
+                $attachment = trim($attachment);
+                if (str_contains($attachment, '/')) {
+                    $resolvedUrls[] = asset($attachment);
+                } else {
+                    $storagePath = 'storage/uploads/documents/' . $attachment;
+                    if (file_exists(public_path($storagePath)) || file_exists(base_path('public/'.$storagePath))) {
+                        $resolvedUrls[] = asset($storagePath);
+                    } else {
+                        $resolvedUrls[] = asset('assets/images/attachments/'.$attachment);
+                    }
+                }
+            }
+            
+            $data[1] = $resolvedUrls;
             $data[2] = $prod1->text;
             $data[3] = ''.route('admin-vr-st', ['id1' => $prod1->id, 'id2' => 'Verified']).'';
             $data[4] = ''.route('admin-vr-st', ['id1' => $prod1->id, 'id2' => 'Declined']).'';
