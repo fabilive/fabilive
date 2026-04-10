@@ -15,25 +15,31 @@ class MessageController extends AdminBaseController
     //*** JSON Request
     public function datatables($type)
     {
-        $datas = AdminUserConversation::where('type', '=', $type)->get();
+        try {
+            $datas = AdminUserConversation::where('type', '=', $type)->orderBy('id', 'desc')->get();
 
-        //--- Integrating This Collection Into Datatables
-        return Datatables::of($datas)
-            ->editColumn('created_at', function (AdminUserConversation $data) {
-                $date = $data->created_at->diffForHumans();
-
-                return $date;
-            })
-            ->addColumn('name', function (AdminUserConversation $data) {
-                $name = $data->user->name;
-
-                return $name;
-            })
-            ->addColumn('action', function (AdminUserConversation $data) {
-                return '<div class="action-list"><a href="'.route('admin-message-show', $data->id).'"> <i class="fas fa-eye"></i> '.__('Details').'</a><a href="javascript:;" data-href="'.route('admin-message-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
-            })
-            ->rawColumns(['action'])
-            ->toJson(); //--- Returning Json Data To Client Side
+            //--- Integrating This Collection Into Datatables
+            return Datatables::of($datas)
+                ->editColumn('created_at', function (AdminUserConversation $data) {
+                    return $data->created_at ? $data->created_at->diffForHumans() : '';
+                })
+                ->addColumn('name', function (AdminUserConversation $data) {
+                    return $data->user ? $data->user->name : 'Guest';
+                })
+                ->addColumn('action', function (AdminUserConversation $data) {
+                    return '<div class="action-list"><a href="'.route('admin-message-show', $data->id).'"> <i class="fas fa-eye"></i> '.__('Details').'</a><a href="javascript:;" data-href="'.route('admin-message-delete', $data->id).'" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a></div>';
+                })
+                ->rawColumns(['action'])
+                ->toJson();
+        } catch (\Exception $e) {
+            return response()->json([
+                'draw' => 0,
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'error' => $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()
+            ]);
+        }
     }
 
     public function index()
