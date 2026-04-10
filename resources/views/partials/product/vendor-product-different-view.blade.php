@@ -7,7 +7,7 @@
         <div class="product type-product">
             <div class="product-wrapper">
                 <div class="product-image">
-                    <a href="{{ route('front.product', $product->slug) }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->thumbnail ? asset('assets/images/thumbnails/'.$product->thumbnail):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+                    <a href="{{ route('front.product', $product->slug) }}" class="woocommerce-LoopProduct-link"><img src="{{ $product->thumbnail }}" alt="Product Image"></a>
                     <div class="hover-area">
                         @if($product->product_type == "affiliate")
                         <div class="cart-button">

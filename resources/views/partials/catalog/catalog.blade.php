@@ -147,7 +147,7 @@
                                 <div class="product type-product">
                                     <div class="product-wrapper">
                                         <div class="product-image">
-                                            <a href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod['thumbnail'] ? asset('assets/images/thumbnails/'.$prod['thumbnail'] ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+                                            <a href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod->thumbnail }}" alt="Product Image"></a>
                                             <div class="wishlist-view">
                                                 <div class="quickview-button">
                                                     <a class="quickview-btn" href="{{ !empty($prod['slug']) ? route('front.product', $prod['slug']) : '#' }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>

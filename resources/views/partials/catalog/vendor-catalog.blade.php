@@ -133,7 +133,7 @@
             <div class="col-12">
                 <div class="product-style-2 owl-carousel owl-nav-hover-primary nav-top-right single-carousel dot-disable product-list e-bg-white">
 
-                    @foreach (array_chunk($latest_products->toArray(),3) as $item)
+                    @foreach ($latest_products->chunk(3) as $item)
 
                     <div class="item">
                         <div class="row row-cols-1">
@@ -143,10 +143,10 @@
                                 <div class="product type-product">
                                     <div class="product-wrapper">
                                         <div class="product-image">
-                                            <a href="{{ route('front.product', $prod['slug']) }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod['thumbnail'] ? asset('assets/images/thumbnails/'.$prod['thumbnail'] ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+                                            <a href="{{ route('front.product', $prod->slug) }}" class="woocommerce-LoopProduct-link"><img src="{{ $prod->thumbnail }}" alt="Product Image"></a>
                                             <div class="wishlist-view">
                                                 <div class="quickview-button">
-                                                    <a class="quickview-btn" href="{{ route('front.product', $prod['slug']) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
+                                                    <a class="quickview-btn" href="{{ route('front.product', $prod->slug) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
                                                 </div>
                                                 <div class="whishlist-button">
                                                     <a class="add_to_wishlist" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Add to Wishlist" aria-label="Add to Wishlist">{{ __('Wishlist') }}</a>
@@ -154,21 +154,21 @@
                                             </div>
                                         </div>
                                         <div class="product-info">
-                                            <h3 class="product-title"><a href="{{ route('front.product', $prod['slug']) }}">{{ App\Models\Product::whereId($prod['id'])->first()->showName() }}</a></h3>
+                                            <h3 class="product-title"><a href="{{ route('front.product', $prod->slug) }}">{{ $prod->showName() }}</a></h3>
                                             <div class="product-price">
                                                 <div class="price">
-                                                    <ins>{{ App\Models\Product::whereId($prod['id'])->first()->showPrice() }}</ins>
-                                                    <del>{{ App\Models\Product::whereId($prod['id'])->first()->showPreviousPrice() }}</del>
+                                                    <ins>{{ $prod->showPrice() }}</ins>
+                                                    <del>{{ $prod->showPreviousPrice() }}</del>
                                                 </div>
-                                                <div class="on-sale"><span>{{ round(App\Models\Product::whereId($prod['id'])->first()->offPercentage())}}</span><span>% off</span></div>
+                                                <div class="on-sale"><span>{{ round($prod->offPercentage())}}</span><span>% off</span></div>
                                             </div>
                                             <div class="shipping-feed-back">
                                                 <div class="star-rating">
                                                     <div class="rating-wrap">
-                                                        <p><i class="fas fa-star"></i><span> {{ App\Models\Rating::ratings($prod['id']) }}</span></p>
+                                                        <p><i class="fas fa-star"></i><span> {{ number_format($prod->ratings_avg_rating,1) }}</span></p>
                                                     </div>
                                                     <div class="rating-counts-wrap">
-                                                        <p>({{ App\Models\Rating::ratingCount($prod['id']) }})</p>
+                                                        <p>({{ $prod->ratings_count }})</p>
                                                     </div>
                                                 </div>
                                             </div>

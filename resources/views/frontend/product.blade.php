@@ -344,7 +344,7 @@
                            <div class="product-image">
                               <a href="{{ route('front.product', $item->slug ?: 'missing-slug') }}"
                                  class="woocommerce-LoopProduct-link"><img
-                                    src="{{ $item->thumbnail ? (file_exists(public_path('assets/images/thumbnails/'.$item->thumbnail)) ? asset('assets/images/thumbnails/'.$item->thumbnail) : asset('assets/images/products/'.$item->thumbnail)) : asset('assets/images/noimage.png') }}"
+                                    src="{{ $item->thumbnail }}"
                                     alt="Product Image"></a>
                               <div class="on-sale">-{{ round($item->offPercentage(), 2)}}%</div>
                               <div class="hover-area">

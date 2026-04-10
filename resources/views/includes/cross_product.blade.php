@@ -8,7 +8,7 @@
             <div class="product-image">
 
                <a href="{{ route('front.product', $rproduct->slug) }}" class="woocommerce-LoopProduct-link"><img
-                     src="{{ $rproduct->thumbnail ? asset('assets/images/thumbnails/'.$rproduct->thumbnail):asset('assets/images/noimage.png') }}"
+                     src="{{ $rproduct->thumbnail }}"
                      alt="Product Image"></a>
                @if(!empty($rproduct->features))
                <div class="product-variations">

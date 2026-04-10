@@ -1,6 +1,6 @@
 <a href="{{ route('front.product', $prod->slug ?: 'missing-slug') }}" class="single-product-flas">
     <div class="img">
-       <img src="{{ $prod->thumbnail ? asset('assets/images/thumbnails/'.$prod->thumbnail):asset('assets/images/noimage.png') }}" alt="">
+       <img src="{{ $prod->thumbnail }}" alt="">
        @if(!empty($prod->features))
        <div class="sell-area">
           @foreach($prod->features as $key => $data1)

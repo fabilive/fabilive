@@ -36,7 +36,7 @@
   <meta property="og:title" content="{{$productt->name}}" />
   <meta property="og:description"
     content="{{ $productt->meta_description != null ? $productt->meta_description : strip_tags($productt->description) }}" />
-  <meta property="og:image" content="{{asset('assets/images/thumbnails/'.$productt->thumbnail)}}" />
+  <meta property="og:image" content="{{ $productt->thumbnail }}" />
   <meta name="author" content="GeniusOcean">
   <title>{{substr($productt->name, 0,11)."-"}}{{$gs->title}}</title>
 
