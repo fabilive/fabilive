@@ -40,13 +40,13 @@ class GeniusMailer
 
     public function sendAutoMail(array $data)
     {
-        $temp = DB::table('email_templates')->where('email_type', '=', $data['type'])->first();
-        if (!$temp) {
-            Log::warning('Email template missing: ' . $data['type']);
-            return false;
-        }
-
         try {
+            $temp = DB::table('email_templates')->where('email_type', '=', $data['type'])->first();
+            if (!$temp) {
+                Log::warning('Email template missing: ' . $data['type']);
+                return false;
+            }
+
             $body = preg_replace('/{customer_name}/', $data['cname'], $temp->email_body);
             if (isset($data['oamount'])) {
                 $body = preg_replace('/{order_amount}/', $data['oamount'], $body);
@@ -74,8 +74,8 @@ class GeniusMailer
             $this->mail->Subject = $temp->email_subject;
             $this->mail->Body = $html_body;
             $this->mail->send();
-        } catch (Exception $e) {
-            Log::error('Mailer AutoMail Error: ' . $this->mail->ErrorInfo);
+        } catch (\Exception $e) {
+            Log::error('Mailer AutoMail Error: ' . $e->getMessage());
         }
 
         return true;

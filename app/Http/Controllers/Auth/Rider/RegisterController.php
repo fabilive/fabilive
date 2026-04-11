@@ -185,8 +185,12 @@ class RegisterController extends Controller
                 'subject' => $subject,
                 'body' => $msg,
             ];
-            $mailer = new GeniusMailer();
-            $mailer->sendCustomMail($data);
+            try {
+                $mailer = new GeniusMailer();
+                $mailer->sendCustomMail($data);
+            } catch (\Exception $e) {
+                \Log::error('Registration Mailer Error (Custom): ' . $e->getMessage());
+            }
 
             return response()->json('We need to verify your email address. We have sent an email to '.$to.' to verify your email address. Please click link in that email to continue.');
         } else {
@@ -201,13 +205,13 @@ class RegisterController extends Controller
                 'aemail' => '',
                 'onumber' => '',
             ];
-            $mailer = new GeniusMailer();
-            $mailer->sendAutoMail($data);
+            try {
+                $mailer = new GeniusMailer();
+                $mailer->sendAutoMail($data);
+            } catch (\Exception $e) {
+                \Log::error('Registration Mailer Error (Auto): ' . $e->getMessage());
+            }
 
-            // 			Auth::guard('rider')->login($rider);
-            //     return redirect('/')
-            // ->with('success',
-            //     'Your request has been sent to admin. Please wait for approval.');
             return response()->json(1);
         }
     }
