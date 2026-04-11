@@ -100,62 +100,62 @@ class RegisterController extends Controller
             }
         }
         if ($imageFront = $request->file('company_registration_document')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/companyregistrationdocument', $image_name_front);
             $input['company_registration_document'] = $image_name_front;
         }
         if ($imageFront = $request->file('id_company_owner')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/companyownerid', $image_name_front);
             $input['id_company_owner'] = $image_name_front;
         }
         if ($imageFront = $request->file('transport_license')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/transportlicense', $image_name_front);
             $input['transport_license'] = $image_name_front;
         }
         if ($imageFront = $request->file('insurance_certificate_company')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/insurancecertificatecompany', $image_name_front);
             $input['insurance_certificate_company'] = $image_name_front;
         }
         if ($imageFront = $request->file('driver_license_individual')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/driverlicenseindividual', $image_name_front);
             $input['driver_license_individual'] = $image_name_front;
         }
         if ($imageFront = $request->file('vehicle_registration_certificate')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/vehicleregistrationcertificate', $image_name_front);
             $input['vehicle_registration_certificate'] = $image_name_front;
         }
         if ($imageFront = $request->file('insurance_certificate_individual')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/insurancecertificateindividual', $image_name_front);
             $input['insurance_certificate_individual'] = $image_name_front;
         }
         if ($imageFront = $request->file('criminal_records')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/criminalrecords', $image_name_front);
             $input['criminal_records'] = $image_name_front;
         }
         if ($imageFront = $request->file('national_id_front_image')) {
-            $image_name_front = \PriceHelper::ImageCreateName($imageFront);
+            $image_name_front = PriceHelper::ImageCreateName($imageFront);
             $imageFront->move('assets/images/rideridfront', $image_name_front);
             $input['national_id_front_image'] = $image_name_front;
         }
         if ($imageBack = $request->file('national_id_back_image')) {
-            $image_name_back = \PriceHelper::ImageCreateName($imageBack);
+            $image_name_back = PriceHelper::ImageCreateName($imageBack);
             $imageBack->move('assets/images/rideridback', $image_name_back);
             $input['national_id_back_image'] = $image_name_back;
         }
         if ($licenseImage = $request->file('license_image')) {
-            $image_name_license = \PriceHelper::ImageCreateName($licenseImage);
+            $image_name_license = PriceHelper::ImageCreateName($licenseImage);
             $licenseImage->move('assets/images/riderlicense', $image_name_license);
             $input['license_image'] = $image_name_license;
         }
         if ($submerchant_agreement = $request->file('submerchant_agreement')) {
-            $agreement_name_license = \PriceHelper::ImageCreateName($submerchant_agreement);
+            $agreement_name_license = PriceHelper::ImageCreateName($submerchant_agreement);
             $submerchant_agreement->move('assets/images/submerchantagreementrider', $agreement_name_license);
             $input['submerchant_agreement'] = $agreement_name_license;
         }
