@@ -47,7 +47,7 @@ class RegisterController extends Controller
             $v1 = Validator::make($request->all(), [
                 'company_registration_document' => 'required|file|max:30720',
                 'id_company_owner' => 'required|file|max:30720',
-                'live_selfie_company' => 'required|file|max:30720',
+                'live_selfie_company' => 'required',
                 'transport_license' => 'required|file|max:30720',
                 'insurance_certificate_company' => 'required|file|max:30720',
                 'tin_company' => 'required|string',
@@ -62,7 +62,7 @@ class RegisterController extends Controller
                 'vehicle_type_individual' => 'required|string',
                 'tin_individual' => 'required|string',
                 'driver_license_individual' => 'required|file|max:30720',
-                'live_selfie_individual' => 'required|file|max:30720',
+                'live_selfie_individual' => 'required',
                 'vehicle_registration_certificate' => 'required|file|max:30720',
                 'insurance_certificate_individual' => 'required|file|max:30720',
                 'criminal_records' => 'required|file|max:30720',

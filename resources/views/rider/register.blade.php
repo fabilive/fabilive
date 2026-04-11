@@ -77,7 +77,7 @@
 
                                                 <p>
                                                     <label for="selfieFile1">{{ __('Live Selfie (Required - Use Camera)') }}</label>
-                                                    <input type="hidden" id="selfieFile1" name="live_selfie_company">
+                                                    <input type="file" id="selfieFile1" name="live_selfie_company" style="display:none;">
                                                 </p>
                                                 <video id="cam_company" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_company" class="w-100 rounded mb-2" style="display:none;">
@@ -136,7 +136,7 @@
                                                 </p>
                                                 <p>
                                                     <label for="selfieFile">{{ __('Live Selfie (Required - Use Camera)') }}</label>
-                                                    <input type="hidden" id="selfieFile" name="live_selfie_individual">
+                                                    <input type="file" id="selfieFile" name="live_selfie_individual" style="display:none;">
                                                 </p>
                                                 <video id="cam_individual" class="w-100 rounded mb-2" style="display:none;"></video>
                                                 <img id="preview_individual" class="w-100 rounded mb-2" style="display:none;">
