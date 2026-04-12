@@ -378,15 +378,7 @@
 
                                     </div>
                                     @else
-                                    <div class="p-4 border">
-                                       <p style="line-height: 50%"><strong>@lang('Shop Name')</strong> : <strong>{{
-                                             $vendor->shop_name }}</strong></p>
-                                       <p style="line-height: 50%"><strong>@lang('Shop Phone')</strong> : <strong>{{
-                                             $vendor->phone }}</strong></p>
-                                       <p style="line-height: 50%"><strong>@lang('Shop Address')</strong> :
-                                          <strong>{{ $vendor->address }}</strong>
-                                       </p>
-                                    </div>
+                                     {{-- Seller Details Hidden --}}
                                     @endif
 
                                  </div>
@@ -688,7 +680,7 @@
                      <div class="radio-design">
                         <input type="radio" class="shipping" data-price="{{ round($data->price * $curr->value,2) }}"
                            data-form="{{$data->title}}" id="free-shepping{{ $data->id }}" name="shipping_id"
-                           value="{{ $data->id }}" {{ ($loop->first) ? 'checked' : '' }}>
+                           value="{{ $data->id }}">
                         <span class="checkmark"></span>
                         <label for="free-shepping{{ $data->id }}">
                            {{ $data->title }}
@@ -706,7 +698,7 @@
                      <div class="radio-design">
                         <input type="radio" class="packing" data-price="0"
                            data-form="{{ __('None') }}" id="free-package-none" name="packeging_id"
-                           value="0" checked>
+                           value="0">
                         <span class="checkmark"></span>
                         <label for="free-package-none">
                            {{ __('None') }}

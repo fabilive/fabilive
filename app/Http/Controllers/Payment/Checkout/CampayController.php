@@ -77,7 +77,7 @@ class CampayController extends CheckoutBaseControlller
         // Initialize Campay Collection
         $campay = new Campay();
         try {
-            $phoneNumber = $request->phone; // Assuming phone is provided in checkout
+            $phoneNumber = preg_replace('/[^0-9]/', '', $request->phone); // Sanitize to digits only
             $response = $campay->collect(round($order->pay_amount), $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
 
             if (isset($response['reference'])) {
