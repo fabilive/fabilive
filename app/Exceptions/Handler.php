@@ -44,4 +44,4 @@ class Handler extends ExceptionHandler
         return redirect()->guest('/');
     }
 }
-// Recovery commit to ensure file presence
+// Emergency recovery commit to ensure file presence on production
