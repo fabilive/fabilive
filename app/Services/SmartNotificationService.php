@@ -61,6 +61,14 @@ class SmartNotificationService
             return false;
         }
 
+        // Verify user exists to avoid FK violation (especially for Riders who aren't in 'users' table)
+        $userExists = User::where('id', $userId)->exists();
+        if (!$userExists) {
+            // Log for debugging but pass through to prevent system crash
+            Log::info("Notification suppressed for non-existent user/rider ID: $userId");
+            return false;
+        }
+
         // Create in-app notification
         if ($channel === 'in_app') {
             Notification::create(array_merge([

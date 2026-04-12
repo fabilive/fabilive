@@ -27,12 +27,17 @@ class DeliveryDispatchService
             ->get();
 
         foreach ($riders as $rider) {
-            $this->notificationService->send($rider->id, 'new_delivery_job', [
-                'title' => __('New Delivery Job Available'),
-                'text' => __('Order #').$job->order->order_number.__(' is ready for pickup in your area.'),
-                'link' => route('rider-delivery-details', $job->id),
-                'type' => 'delivery',
-            ], 'in_app');
+            try {
+                $this->notificationService->send($rider->id, 'new_delivery_job', [
+                    'title' => __('New Delivery Job Available'),
+                    'text' => __('Order #').$job->order->order_number.__(' is ready for pickup in your area.'),
+                    'link' => route('rider-delivery-details', $job->id),
+                    'type' => 'delivery',
+                ], 'in_app');
+            } catch (\Exception $e) {
+                // Fail silently but log for admin - individual rider notification failure shouldn't crash the vendor dashboard
+                \Log::warning("Could not notify rider ID: {$rider->id} for job {$job->id}. Error: " . $e->getMessage());
+            }
         }
     }
 
