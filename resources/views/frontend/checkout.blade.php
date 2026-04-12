@@ -424,17 +424,17 @@
                                      {{ __('Payment Info') }}
                                   </h4>
 
-                                  {{-- EMERGENCY CAMPAY BOX - RELOCATED TO TOP FOR TOTAL VISIBILITY --}}
-                                  <div id="campay-box-emergency" style="display: none; border: 5px solid red !important; padding: 25px; border-radius: 15px; margin-bottom: 30px; background: #fff1f1; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                  {{-- PREMIUM CAMPAY BOX - Clean & Professional --}}
+                                  <div id="campay-box-emergency" style="display: none; border: 1px solid #e5e5e5; padding: 25px; border-radius: 12px; margin-bottom: 30px; background: #ffffff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                                       <div class="row">
                                           <div class="col-lg-12">
-                                              <h3 style="color: red; font-weight: 800; margin-bottom: 15px; text-transform: uppercase;">{{ __('PLEASE ENTER MOBILE MONEY NUMBER BELOW') }}</h3>
-                                              <label style="font-weight: 700; font-size: 18px; color: #000;">{{ __('Campay / Mobile Money Number') }} *</label>
+                                              <h4 style="font-weight: 700; color: #1a1a1a; margin-bottom: 20px; text-transform: none;">{{ __('Mobile Money Payment Details') }}</h4>
+                                              <label style="font-weight: 600; font-size: 15px; color: #444;">{{ __('Mobile Money Number') }} *</label>
                                               <input class="form-control" name="phone" id="campay_phone" type="text"
                                                      placeholder="{{ __('+237xxxxxxxx') }}" 
-                                                     style="height: 60px; font-size: 24px; border: 3px solid #000; font-weight: bold; padding: 10px 20px;"
+                                                     style="height: 55px; font-size: 18px; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 500; padding: 0 15px; margin-top: 8px;"
                                                      value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
-                                              <p style="font-weight: 600; color: #333; margin-top: 10px; font-size: 14px;">{{ __('Format: +237 followed by 9 digits (Example: +2376xxxxxxxx)') }}</p>
+                                              <p style="font-weight: 400; color: #6b7280; margin-top: 12px; font-size: 13px;">{{ __('Format: +237 followed by 9 digits (Example: +2376xxxxxxxx)') }}</p>
                                           </div>
                                       </div>
                                       <input type="hidden" name="method" value="Campay" id="campay_method_input" disabled>
@@ -1490,11 +1490,11 @@ $('.payment').on('click', function () {
     $('#campay-box-emergency').hide();
     $('#campay_method_input').prop('disabled', true);
 
-    // NEW: If Campay is selected, show the EMERGENCY box and exit
+    // NEW: If Campay is selected, show the PREMIUM box and exit
     if (paymentVal === 'campay') {
-        console.log('FORCED VISIBILITY: Showing Campay Emergency Box (RE-LOCATED)');
+        console.log('PREMIUM UI: Showing Campay Professional Box');
         $('#v-pills-tabContent .tab-pane').removeClass('active show').html('');
-        $('#campay-box-emergency').attr('style', 'display: block !important; border: 5px solid red !important; padding: 25px; border-radius: 15px; margin-bottom: 30px; background: #fff1f1; box-shadow: 0 10px 30px rgba(0,0,0,0.1);'); 
+        $('#campay-box-emergency').attr('style', 'display: block !important; border: 1px solid #e5e5e5; padding: 25px; border-radius: 12px; margin-bottom: 30px; background: #ffffff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);'); 
         $('#campay_method_input').prop('disabled', false);
         
         // Scroll to the box so the user sees it at the top
