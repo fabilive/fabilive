@@ -474,8 +474,8 @@
                                              data-show="{{$gt->showForm()}}" data-form="{{ $gt->showCheckoutLink() }}"
                                              data-href="{{ route('front.load.payment',['slug1' => $gt->showKeyword(),'slug2' => $gt->id]) }}"
                                              id="v-pills-tab{{ $gt->id }}-tab" data-toggle="pill"
-                                             href="#v-pills-tab{{ $gt->id }}" role="tab"
-                                             aria-controls="v-pills-tab{{ $gt->id }}" aria-selected="false">
+                                             href="#{{ $gt->keyword == 'campay' ? 'v-pills-tab-campay' : 'v-pills-tab'.$gt->id }}" role="tab"
+                                             aria-controls="{{ $gt->keyword == 'campay' ? 'v-pills-tab-campay' : 'v-pills-tab'.$gt->id }}" aria-selected="false">
                                              <div class="icon">
                                                 <span class="radio"></span>
                                              </div>
