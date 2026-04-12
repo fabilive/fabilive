@@ -164,7 +164,7 @@
                                        </select>
                                     </div>
                                     <div class="col-lg-6 my-2">
-                                       <select class="form-control" name="service_area_id" id="service_area_id" required>
+                                       <select class="form-control" name="service_area_id" id="service_area_id">
                                             <option  value="">Select Location</option>
                                             @foreach($service_areas as $service_area)
                                                 <option value="{{ $service_area->id }}">{{ $service_area->location }}</option>
@@ -1305,14 +1305,25 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     $('#continue-step1').on('click', function(e){
         // Manual form validation check
         var form = $('.checkoutform')[0];
+        
+        // Manual check for service area since we removed 'required' to avoid Select2 blocking
+        var serviceArea = $('#service_area_id').val();
+        if(!serviceArea || serviceArea == "") {
+            toastr.error('Please select a Service Area / Location');
+            return false;
+        }
+
         if (form.checkValidity()) {
-            $('#pills-step1').removeClass('active');
-            $('#pills-step1').removeClass('show');
-            $('#pills-step2-tab').removeClass('disabled').click();
-            $('#pills-step2').addClass('active');
-            $('#pills-step2').addClass('show');
+            $('.nav-item a[href="#pills-step2"]').removeClass('disabled').click();
+            
+            $('#pills-step1').removeClass('active show');
+            $('#pills-step2').addClass('active show');
+            
+            // Sync tabs explicitly
+            $('#pills-step1-tab').removeClass('active');
+            $('#pills-step2-tab').addClass('active').removeClass('disabled');
         } else {
-            // Trigger browser validation UI
+            // Trigger browser validation UI for other fields
             form.reportValidity();
         }
     });
