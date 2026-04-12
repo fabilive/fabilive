@@ -1465,8 +1465,13 @@ $('.payment').on('click', function () {
             let country = $('#select_country').val();
             let phoneInput = $('#campay_phone');
             if (country === 'Cameroon') {
-                if (!phoneInput.val().startsWith('237')) {
-                    phoneInput.val('237' + phoneInput.val());
+                let currentVal = phoneInput.val();
+                if (!currentVal.startsWith('+237')) {
+                    if (currentVal.startsWith('237')) {
+                        phoneInput.val('+' + currentVal);
+                    } else {
+                        phoneInput.val('+237' + currentVal);
+                    }
                 }
             }
         }

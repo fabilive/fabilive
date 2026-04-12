@@ -21,10 +21,10 @@ $pay_data = $gateway->convertAutoData();
         <div class="col-lg-12">
             <label style="color: #000 !important; font-weight: 600; display: block; margin-bottom: 5px;">{{ __('Mobile Money Number') }} *</label>
             <input class="form-control" name="phone" id="campay_phone" type="text" required="" 
-                   placeholder="{{ __('237xxxxxxxx') }}" 
+                   placeholder="{{ __('+237xxxxxxxx') }}" 
                    value="{{ Auth::check() ? Auth::user()->phone : '' }}" 
-                   style="color: #000 !important; background-color: #fff !important; border: 1px solid #777 !important; padding: 10px !important; display: block !important;" />
-            <small style="color: #666 !important; display: block; margin-top: 5px;">{{ __('Please enter your 9-digit phone number (e.g., 6xxxxxxxx)') }}</small>
+                   style="color: #000 !important; background-color: #fff !important; border: 1px solid #777 !important; padding: 10px !important; display: block !important; position: relative !important; z-index: 100 !important;" />
+            <small style="color: #666 !important; display: block; margin-top: 5px;">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
         </div>
     </div>
     <input type="hidden" name="method" value="Campay">

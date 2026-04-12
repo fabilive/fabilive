@@ -77,13 +77,16 @@ class CampayController extends CheckoutBaseControlller
         // Initialize Campay Collection
         $campay = new Campay();
         try {
-            $phoneNumber = preg_replace('/[^0-9]/', '', $request->phone); // Sanitize to digits only
+            $phoneNumber = preg_replace('/[^0-9]/', '', $request->phone); // Convert to digits only (e.g., +237... -> 237...)
             
             if (empty($phoneNumber)) {
-                return back()->with('unsuccess', 'Please enter your mobile money number.');
+                return back()->with('unsuccess', 'Please enter a valid mobile money number.');
             }
             
             $response = $campay->collect(round($order->pay_amount), $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
+            
+            // Log response for debugging
+            \Log::info('Campay Response for Order #'.$order_number.': '.json_encode($response));
 
             if (isset($response['reference'])) {
                 $order->txnid = $response['reference'];
@@ -92,9 +95,11 @@ class CampayController extends CheckoutBaseControlller
                 // Redirect to a waiting page or status check page
                 return redirect()->route('front.campay.check', $order->order_number);
             } else {
-                return redirect()->back()->with('unsuccess', 'Campay initialization failed: '.json_encode($response));
+                $errorMessage = isset($response['detail']) ? $response['detail'] : (isset($response['message']) ? $response['message'] : 'Campay initialization failed.');
+                return redirect()->back()->with('unsuccess', 'Error: '.$errorMessage);
             }
         } catch (\Exception $e) {
+            \Log::error('Campay Exception for Order #'.$order_number.': '.$e->getMessage());
             return redirect()->back()->with('unsuccess', $e->getMessage());
         }
     }
