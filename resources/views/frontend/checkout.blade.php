@@ -420,9 +420,25 @@
                                  </ul>
                               </div>
                               <div class="payment-information">
-                                 <h4 class="title">
-                                    {{ __('Payment Info') }}
-                                 </h4>
+                                  <h4 class="title">
+                                     {{ __('Payment Info') }}
+                                  </h4>
+
+                                  {{-- EMERGENCY CAMPAY BOX - RELOCATED TO TOP FOR TOTAL VISIBILITY --}}
+                                  <div id="campay-box-emergency" style="display: none; border: 5px solid red !important; padding: 25px; border-radius: 15px; margin-bottom: 30px; background: #fff1f1; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                      <div class="row">
+                                          <div class="col-lg-12">
+                                              <h3 style="color: red; font-weight: 800; margin-bottom: 15px; text-transform: uppercase;">{{ __('PLEASE ENTER MOBILE MONEY NUMBER BELOW') }}</h3>
+                                              <label style="font-weight: 700; font-size: 18px; color: #000;">{{ __('Campay / Mobile Money Number') }} *</label>
+                                              <input class="form-control" name="phone" id="campay_phone" type="text"
+                                                     placeholder="{{ __('+237xxxxxxxx') }}" 
+                                                     style="height: 60px; font-size: 24px; border: 3px solid #000; font-weight: bold; padding: 10px 20px;"
+                                                     value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
+                                              <p style="font-weight: 600; color: #333; margin-top: 10px; font-size: 14px;">{{ __('Format: +237 followed by 9 digits (Example: +2376xxxxxxxx)') }}</p>
+                                          </div>
+                                      </div>
+                                      <input type="hidden" name="method" value="Campay" id="campay_method_input" disabled>
+                                  </div>
                                  <div class="row">
                                     <div class="col-lg-12">
                                        <div class="nav flex-column" role="tablist" aria-orientation="vertical">
@@ -512,22 +528,8 @@
                                               @endforeach
                                               <div class="tab-pane fade" id="v-pills-tab-wallet" role="tabpanel"></div>
                                               
-                                           </div>
-
-                                            {{-- EMERGENCY CAMPAY BOX - Outside Tab Content to bypass all CSS hiding --}}
-                                            <div id="campay-box-emergency" style="display: none; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-top: 20px; background: #f9f9f9;">
-                                                <div class="row">
-                                                    <div class="col-lg-12">
-                                                        <label style="font-weight: 600; font-size: 16px;">{{ __('Mobile Money Number') }} *</label>
-                                                        <input class="form-control" name="phone" id="campay_phone" type="text"
-                                                               placeholder="{{ __('+237xxxxxxxx') }}" 
-                                                               style="height: 50px; font-size: 18px; border: 2px solid #000;"
-                                                               value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
-                                                        <small class="text-muted" style="display: block; margin-top: 5px;">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" name="method" value="Campay" id="campay_method_input" disabled>
                                             </div>
+                                        </div>
                                        </div>
                                     </div>
                                  </div>
@@ -1490,11 +1492,16 @@ $('.payment').on('click', function () {
 
     // NEW: If Campay is selected, show the EMERGENCY box and exit
     if (paymentVal === 'campay') {
-        console.log('FORCED VISIBILITY: Showing Campay Emergency Box');
+        console.log('FORCED VISIBILITY: Showing Campay Emergency Box (RE-LOCATED)');
         $('#v-pills-tabContent .tab-pane').removeClass('active show').html('');
-        $('#campay-box-emergency').attr('style', 'display: block !important; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-top: 20px; background: #f9f9f9;'); 
+        $('#campay-box-emergency').attr('style', 'display: block !important; border: 5px solid red !important; padding: 25px; border-radius: 15px; margin-bottom: 30px; background: #fff1f1; box-shadow: 0 10px 30px rgba(0,0,0,0.1);'); 
         $('#campay_method_input').prop('disabled', false);
         
+        // Scroll to the box so the user sees it at the top
+        $('html, body').animate({
+            scrollTop: $("#campay-box-emergency").offset().top - 100
+        }, 500);
+
         // Instant prefix logic
         let country = $('#select_country').val();
         let phoneInput = $('#campay_phone');
