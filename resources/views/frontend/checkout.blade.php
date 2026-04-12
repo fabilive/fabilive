@@ -111,7 +111,7 @@
                                  </h5>
                                  <div class="row">
                                     <div class="col-lg-6 my-2 {{ $digital == 1 ? 'd-none' : '' }}">
-                                       <select class="form-control" id="shipop" name="shipping" required="">
+                                       <select class="form-control" id="shipop" name="shipping">
                                           <option value="shipto">{{ __('Ship To Address') }}</option>
                                           {{-- <option value="pickup">{{ __('Pick Up') }}</option> --}}
                                        </select>
@@ -126,17 +126,17 @@
                                     </div>
                                     <div class="col-lg-6 my-2">
                                        <input class="form-control" type="text" name="customer_name"
-                                          placeholder="{{ __('Full Name') }}" required=""
+                                          placeholder="{{ __('Full Name') }}"
                                           value="{{ Auth::check() ? Auth::user()->name : '' }}">
                                     </div>
                                     <div class="col-lg-6 my-2">
                                        <input class="form-control" type="text" name="customer_email"
-                                          placeholder="{{ __('Email') }}" required=""
+                                          placeholder="{{ __('Email') }}"
                                           value="{{ Auth::check() ? Auth::user()->email : '' }}">
                                     </div>
                                     <div class="col-lg-6 my-2">
                                        <input class="form-control" type="text" name="customer_phone"
-                                          placeholder="{{ __('Phone Number') }}" required=""
+                                          placeholder="{{ __('Phone Number') }}"
                                           value="{{ Auth::check() ? Auth::user()->phone : '' }}">
                                     </div>
                                     <div class="col-lg-6 my-2">
@@ -146,12 +146,11 @@
                                     </div>
                                     <div class="col-lg-6 my-2">
                                        <input class="form-control" type="text" name="customer_address"
-                                          placeholder="{{ __('Address') }}" required=""
+                                          placeholder="{{ __('Address') }}"
                                           value="{{ Auth::check() ? Auth::user()->address : '' }}">
                                     </div>
                                     <div class="col-lg-6 my-2">
-                                       <select class="form-control" id="select_country" name="customer_country"
-                                          required="">
+                                       <select class="form-control" id="select_country" name="customer_country">
                                           @include('includes.countries')
                                        </select>
                                     </div>
@@ -1303,29 +1302,46 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     // Step 1 form submission
     // Step 1 button click
     $('#continue-step1').on('click', function(e){
-        // Manual form validation check
-        var form = $('.checkoutform')[0];
+        console.log('Continue Step 1 Clicked');
         
-        // Manual check for service area since we removed 'required' to avoid Select2 blocking
+        // Manual validation to bypass browser "silent" blocks
+        var errors = [];
+        var name = $('input[name="customer_name"]').val();
+        var email = $('input[name="customer_email"]').val();
+        var phone = $('input[name="customer_phone"]').val();
+        var address = $('input[name="customer_address"]').val();
+        var country = $('#select_country').val();
         var serviceArea = $('#service_area_id').val();
-        if(!serviceArea || serviceArea == "") {
-            toastr.error('Please select a Service Area / Location');
+
+        if(!name || name.trim() == "") errors.push("Full Name");
+        if(!email || email.trim() == "") errors.push("Email");
+        if(!phone || phone.trim() == "") errors.push("Phone Number");
+        if(!address || address.trim() == "") errors.push("Address");
+        if(!country || country == "") errors.push("Country");
+        if(!serviceArea || serviceArea == "") errors.push("Service Area / Location");
+
+        if(errors.length > 0) {
+            toastr.error("Please fill in: " + errors.join(", "));
+            console.warn('Validation failed:', errors);
             return false;
         }
 
-        if (form.checkValidity()) {
-            $('.nav-item a[href="#pills-step2"]').removeClass('disabled').click();
-            
-            $('#pills-step1').removeClass('active show');
-            $('#pills-step2').addClass('active show');
-            
-            // Sync tabs explicitly
-            $('#pills-step1-tab').removeClass('active');
-            $('#pills-step2-tab').addClass('active').removeClass('disabled');
-        } else {
-            // Trigger browser validation UI for other fields
-            form.reportValidity();
-        }
+        console.log('Validation passed. Moving to Step 2.');
+
+        // Hard-Force Transition
+        $('.nav-item a[href="#pills-step2"]').removeClass('disabled').tab('show');
+        
+        $('#pills-step1').removeClass('active show');
+        $('#pills-step2').addClass('active show');
+        
+        // Sync tabs explicitly
+        $('#pills-step1-tab').removeClass('active');
+        $('#pills-step2-tab').addClass('active').removeClass('disabled');
+        
+        // Smooth scroll to top of checkout area
+        $('html, body').animate({
+            scrollTop: $(".checkout-process").offset().top - 100
+        }, 300);
     });
 
     $('.checkoutform').on('submit', function(e){
