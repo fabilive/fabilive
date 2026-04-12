@@ -78,6 +78,11 @@ class CampayController extends CheckoutBaseControlller
         $campay = new Campay();
         try {
             $phoneNumber = preg_replace('/[^0-9]/', '', $request->phone); // Sanitize to digits only
+            
+            if (empty($phoneNumber)) {
+                return back()->with('unsuccess', 'Please enter your mobile money number.');
+            }
+            
             $response = $campay->collect(round($order->pay_amount), $phoneNumber, 'Payment for Order #'.$order_number, $order_number);
 
             if (isset($response['reference'])) {
