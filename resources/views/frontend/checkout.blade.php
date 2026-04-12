@@ -1163,41 +1163,63 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
             }
       });
    }
+   $(document).on('mousedown', '.shipping', function() {
+      $(this).data('wasChecked', $(this).is(':checked'));
+   });
+
    $('.shipping').on('click',function(){
-      getShipping();
-      let ref = $(this).attr('ref');
-      let view = $(this).attr('view');
-      let title = $(this).attr('data-form');
-      $('#shipping_text'+ref).html(title +'+'+ view);
-      var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
-      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
-      ttotal = parseFloat(ttotal).toFixed(2);
-   	if(pos == 0){
-   			$('#final-cost').html('{{ $curr->sign }}'+ttotal);
-   		}
-   		else{
-   			$('#final-cost').html(ttotal+'{{ $curr->sign }}');
-   		}
-      $('#grandtotal').val(ttotal);
-      $('#multi_shipping_id').val($(this).val());
-   })
-   $('.packing').on('click',function(){
-      getPacking();
-      let ref = $(this).attr('ref');
-      let view = $(this).attr('view');
-      let title = $(this).attr('data-form');
-      $('#packing_text'+ref).html(title +'+'+ view);
+      if ($(this).data('wasChecked')) {
+         $(this).prop('checked', false);
+         $(this).data('wasChecked', false);
+         mship = 0;
+         $('#multi_shipping_id').val('');
+      } else {
+         getShipping();
+         let ref = $(this).attr('ref');
+         let view = $(this).attr('view');
+         let title = $(this).attr('data-form');
+         $('#shipping_text'+ref).html(title +'+'+ view);
+         $('#multi_shipping_id').val($(this).val());
+      }
       var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
       var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
       ttotal = parseFloat(ttotal).toFixed(2);
       if(pos == 0){
-   			$('#final-cost').html('{{ $curr->sign }}'+ttotal);
-   		}
-   		else{
-   			$('#final-cost').html(ttotal+'{{ $curr->sign }}');
-   		}
+            $('#final-cost').html('{{ $curr->sign }}'+ttotal);
+         }
+         else{
+            $('#final-cost').html(ttotal+'{{ $curr->sign }}');
+         }
       $('#grandtotal').val(ttotal);
-      $('#multi_packaging_id').val($(this).val());
+   })
+   $(document).on('mousedown', '.packing', function() {
+      $(this).data('wasChecked', $(this).is(':checked'));
+   });
+
+   $('.packing').on('click',function(){
+      if ($(this).data('wasChecked')) {
+         $(this).prop('checked', false);
+         $(this).data('wasChecked', false);
+         mpack = 0;
+         $('#multi_packaging_id').val('');
+      } else {
+         getPacking();
+         let ref = $(this).attr('ref');
+         let view = $(this).attr('view');
+         let title = $(this).attr('data-form');
+         $('#packing_text'+ref).html(title +'+'+ view);
+         $('#multi_packaging_id').val($(this).val());
+      }
+      var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
+      var ttotal = parseFloat($('#tgrandtotal').val()) + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
+      ttotal = parseFloat(ttotal).toFixed(2);
+      if(pos == 0){
+            $('#final-cost').html('{{ $curr->sign }}'+ttotal);
+         }
+         else{
+            $('#final-cost').html(ttotal+'{{ $curr->sign }}');
+         }
+      $('#grandtotal').val(ttotal);
    })
    $("#check-coupon-form").on('submit', function () {
       var val = $("#code").val();
@@ -1343,6 +1365,10 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
 
     // Step 3 button
     $('#step3-btn').on('click', function(){
+        if ($('.shipping:checked').length == 0) {
+            toastr.error('Please select a delivery method before proceeding.');
+            return false;
+        }
         ck = 1; // allow submit for all users
 
         // Set form ID based on payment
