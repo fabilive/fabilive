@@ -512,20 +512,22 @@
                                               @endforeach
                                               <div class="tab-pane fade" id="v-pills-tab-wallet" role="tabpanel"></div>
                                               
-                                              {{-- Hardcoded Campay Pane - Zero AJAX --}}
-                                              <div class="tab-pane fade" id="v-pills-tab-campay" role="tabpanel">
-                                                  <div class="row" style="margin-top: 15px;">
-                                                      <div class="col-lg-12">
-                                                          <label style="font-weight: 600;">{{ __('Mobile Money Number') }} *</label>
-                                                          <input class="form-control" name="phone" id="campay_phone" type="text"
-                                                                 placeholder="{{ __('+237xxxxxxxx') }}" 
-                                                                 value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
-                                                          <small class="text-muted">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
-                                                      </div>
-                                                  </div>
-                                                  <input type="hidden" name="method" value="Campay">
-                                              </div>
                                            </div>
+
+                                            {{-- EMERGENCY CAMPAY BOX - Outside Tab Content to bypass all CSS hiding --}}
+                                            <div id="campay-box-emergency" style="display: none; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-top: 20px; background: #f9f9f9;">
+                                                <div class="row">
+                                                    <div class="col-lg-12">
+                                                        <label style="font-weight: 600; font-size: 16px;">{{ __('Mobile Money Number') }} *</label>
+                                                        <input class="form-control" name="phone" id="campay_phone" type="text"
+                                                               placeholder="{{ __('+237xxxxxxxx') }}" 
+                                                               style="height: 50px; font-size: 18px; border: 2px solid #000;"
+                                                               value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
+                                                        <small class="text-muted" style="display: block; margin-top: 5px;">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="method" value="Campay" id="campay_method_input" disabled>
+                                            </div>
                                        </div>
                                     </div>
                                  </div>
@@ -1482,13 +1484,18 @@ $('.payment').on('click', function () {
     var tabId = $(this).attr('aria-controls');
     var $tabPane = $('#v-pills-tabContent #' + tabId);
     
-    // NEW: If Campay is selected, skip AJAX and show the hardcoded pane
+    // EMERGENCY FORCE: Always hide the emergency box first
+    $('#campay-box-emergency').hide();
+    $('#campay_method_input').prop('disabled', true);
+
+    // NEW: If Campay is selected, show the EMERGENCY box and exit
     if (paymentVal === 'campay') {
-        console.log('Campay selected (Fixed Pane)');
-        $('#v-pills-tabContent .tab-pane').not('#v-pills-tab-campay').removeClass('active show').html('');
-        $('#v-pills-tab-campay').addClass('active show');
+        console.log('FORCED VISIBILITY: Showing Campay Emergency Box');
+        $('#v-pills-tabContent .tab-pane').removeClass('active show').html('');
+        $('#campay-box-emergency').attr('style', 'display: block !important; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-top: 20px; background: #f9f9f9;'); 
+        $('#campay_method_input').prop('disabled', false);
         
-        // Instant prefix logic for the fixed field
+        // Instant prefix logic
         let country = $('#select_country').val();
         let phoneInput = $('#campay_phone');
         if (country === 'Cameroon') {
@@ -1497,7 +1504,7 @@ $('.payment').on('click', function () {
                 phoneInput.val('+237');
             }
         }
-        return; // Exit since we are not using AJAX for Campay
+        return;
     }
 
     // Safety check: Only load if we have a valid URL
