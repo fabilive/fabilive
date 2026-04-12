@@ -14,9 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Omnipay\Omnipay;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
+use Session;
 
 class PaypalController extends CheckoutBaseControlller
 {

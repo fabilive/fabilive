@@ -13,9 +13,8 @@ use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
+use Session;
 
 class CashOnDeliveryController extends CheckoutBaseControlller
 {
