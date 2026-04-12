@@ -429,7 +429,7 @@
 
                                           @if (Auth::check())
                                           {{-- wallet checkout start --}}
-                                          <a class="nav-link payment" href="javascript:;" data-show="no"
+                                          <a class="nav-link payment" href="#v-pills-tab-wallet" data-show="no"
                                              data-val="wallet" data-toggle="pill" role="tab"
                                              data-form="{{ route('front.wallet.submit') }}"
                                              aria-controls="v-pills-tab-wallet" aria-selected="false">
@@ -1468,32 +1468,43 @@ $('.payment').on('click', function () {
     var ajaxLoadUrl = $(this).data('href');        // front.load.payment GET route
     var tabId = $(this).attr('aria-controls');
     var $tabPane = $('#v-pills-tabContent #' + tabId);
-    $tabPane.addClass('active show').load(ajaxLoadUrl, function() {
-        if (paymentVal === 'campay') {
-            let country = $('#select_country').val();
-            let phoneInput = $('#campay_phone');
-            if (country === 'Cameroon') {
-                $(document).on('focus', '#campay_phone', function() {
-                    let phoneInput = $(this);
+    
+    // Safety check: Only load if we have a valid URL
+    if (ajaxLoadUrl && ajaxLoadUrl.trim() !== "") {
+        $tabPane.addClass('active show').load(ajaxLoadUrl, function(response, status, xhr) {
+            if (status == "error") {
+                console.error("Payment load failed: " + xhr.status + " " + xhr.statusText);
+            }
+            
+            if (paymentVal === 'campay') {
+                let country = $('#select_country').val();
+                let phoneInput = $('#campay_phone');
+                if (country === 'Cameroon') {
+                    $(document).on('focus', '#campay_phone', function() {
+                        let phoneInput = $(this);
+                        let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
+                        if (currentVal === '') {
+                            phoneInput.val('+237');
+                        } else if (!currentVal.startsWith('+237')) {
+                            if (currentVal.startsWith('237')) {
+                                phoneInput.val('+' + currentVal);
+                            } else {
+                                phoneInput.val('+237' + currentVal);
+                            }
+                        }
+                    });
+                    // Also trigger immediately once loaded
                     let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
                     if (currentVal === '') {
                         phoneInput.val('+237');
-                    } else if (!currentVal.startsWith('+237')) {
-                        if (currentVal.startsWith('237')) {
-                            phoneInput.val('+' + currentVal);
-                        } else {
-                            phoneInput.val('+237' + currentVal);
-                        }
                     }
-                });
-                // Also trigger immediately once loaded
-                let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
-                if (currentVal === '') {
-                    phoneInput.val('+237');
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Just show the tab if no loading needed (like Wallet)
+        $tabPane.addClass('active show');
+    }
 
     // Remove active/show from other tabs
     $('#v-pills-tabContent .tab-pane').not($tabPane).removeClass('active show').html('');
