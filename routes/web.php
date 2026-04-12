@@ -273,8 +273,6 @@ Route::get('/admin/schema-polish', function () {
 // CAMPAY PAYMENT GATEWAY DB REPAIR ROUTE
 Route::get('/fix-campay-db', function () {
     try {
-        $campay = DB::table('payment_gateways')->where('keyword', 'campay')->first();
-
         $information = json_encode([
             'username' => 'xaIMiuua3afoJs6-KjBf7eaaI15lVhZ2IDEUk0SazL45EWfhRcLJd-7Dey39w5VTRyQnOZFN4y1JnjOmtNQYQw',
             'password' => 'm318T-MdK7sJokNwsBFyvLGmuSxwOhEWiQoIAffSNX3QXuqSVZvWpNSk0QbrdY1MDtMR1egPPHJmjLI6O7uGpA',
@@ -283,14 +281,21 @@ Route::get('/fix-campay-db', function () {
             'text' => 'Pay via Campay',
         ]);
 
+        // Search for any existing Campay record more broadly
+        $campay = DB::table('payment_gateways')
+            ->where('keyword', 'LIKE', '%campay%')
+            ->orWhere('title', 'LIKE', '%Campay%')
+            ->first();
+
         if ($campay) {
-            DB::table('payment_gateways')->where('keyword', 'campay')->update([
+            DB::table('payment_gateways')->where('id', $campay->id)->update([
                 'type' => 'automatic',
                 'name' => 'Campay',
                 'title' => 'Campay',
                 'subtitle' => 'Pay via mobile money (MTN/Orange)',
+                'keyword' => 'campay', // Standardize keyword
                 'information' => $information,
-                'currency_id' => '["*"]',
+                'currency_id' => '*',  // Use literal * for global availability
                 'checkout' => 1,
             ]);
             $action = 'updated';
@@ -317,7 +322,7 @@ Route::get('/fix-campay-db', function () {
         return response()->json([
             'status' => 'success',
             'action' => $action,
-            'message' => 'Campay and missing gateways restored. Go to Admin > Payment Gateways to verify.',
+            'message' => 'Campay and missing gateways restored with universal wildcard (*).',
         ], 200, [], JSON_PRETTY_PRINT);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
