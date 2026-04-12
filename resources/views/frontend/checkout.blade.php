@@ -53,7 +53,7 @@
             </div>
          </div>
          <div class="col-lg-8">
-            <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : '') }}" method="POST" class="checkoutform">
+            <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
                {{ csrf_field() }}

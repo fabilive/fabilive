@@ -302,7 +302,7 @@ Route::get('/fix-campay-db', function () {
                 'keyword' => 'campay',
                 'type' => 'automatic',
                 'information' => $information,
-                'currency_id' => '["*"]',
+                'currency_id' => '*',
                 'checkout' => 1,
             ]);
             $action = 'created';
@@ -310,7 +310,7 @@ Route::get('/fix-campay-db', function () {
 
         // Also ensure Cash on Delivery and other gateways are enabled for all currencies
         DB::table('payment_gateways')->whereIn('keyword', ['cod', 'manual'])->update([
-            'currency_id' => '["*"]',
+            'currency_id' => '*',
             'checkout' => 1
         ]);
 
