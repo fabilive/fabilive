@@ -473,7 +473,7 @@
                                           @endif
                                           @endforeach
 
-                                          @if (auth()->check())
+                                          @if (Auth::guard('web')->check())
                                           {{-- wallet checkout start --}}
                                           <a class="nav-link payment" href="javascript:;" data-show="no"
                                              data-val="wallet" data-toggle="pill" role="tab"
@@ -1465,8 +1465,10 @@ $('.payment').on('click', function () {
             let country = $('#select_country').val();
             let phoneInput = $('#campay_phone');
             if (country === 'Cameroon') {
-                let currentVal = phoneInput.val();
-                if (!currentVal.startsWith('+237')) {
+                let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
+                if (currentVal === '') {
+                    phoneInput.val('+237');
+                } else if (!currentVal.startsWith('+237')) {
                     if (currentVal.startsWith('237')) {
                         phoneInput.val('+' + currentVal);
                     } else {
