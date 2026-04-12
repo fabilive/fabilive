@@ -35,7 +35,7 @@
                     {!! $body !!}
                     
                     <div class="hr"></div>
-                    <p style="font-size: 14px; color: #888;">If you have any questions, please contact our support team at <a href="mailto:{{ $gs->email_from }}" style="color: #000; text-decoration: none;">{{ $gs->from_email }}</a></p>
+                    <p style="font-size: 14px; color: #888;">If you have any questions, please contact our support team at <a href="mailto:{{ !empty($gs->from_email) ? $gs->from_email : 'support@fabilive.com' }}" style="color: #000; text-decoration: none;">{{ !empty($gs->from_email) ? $gs->from_email : 'support@fabilive.com' }}</a></p>
                 </td>
             </tr>
             <tr>

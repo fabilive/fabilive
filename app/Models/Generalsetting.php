@@ -89,6 +89,8 @@ class Generalsetting extends Model
         $gs->admin_loader = 'loader.gif';
         $gs->decimal_separator = '.';
         $gs->thousand_separator = ',';
+        $gs->from_email = 'support@fabilive.com';
+        $gs->from_name = 'Fabilive';
 
         return $gs;
     }
