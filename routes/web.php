@@ -308,10 +308,16 @@ Route::get('/fix-campay-db', function () {
             $action = 'created';
         }
 
+        // Also ensure Cash on Delivery and other gateways are enabled for all currencies
+        DB::table('payment_gateways')->whereIn('keyword', ['cod', 'manual'])->update([
+            'currency_id' => '["*"]',
+            'checkout' => 1
+        ]);
+
         return response()->json([
             'status' => 'success',
             'action' => $action,
-            'message' => 'Campay row '.$action.' with type=automatic and all API credentials. Go to Admin > Payment Gateways > Edit Campay to verify.',
+            'message' => 'Campay and missing gateways restored. Go to Admin > Payment Gateways to verify.',
         ], 200, [], JSON_PRETTY_PRINT);
     } catch (\Exception $e) {
         return response()->json(['status' => 'error', 'message' => $e->getMessage()]);

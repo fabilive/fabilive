@@ -22,8 +22,9 @@ $pay_data = $gateway->convertAutoData();
             <label style="color: #000 !important; font-weight: 600; display: block; margin-bottom: 5px;">{{ __('Mobile Money Number') }} *</label>
             <input class="form-control" name="phone" id="campay_phone" type="text" required="" 
                    placeholder="{{ __('+237xxxxxxxx') }}" 
-                   value="{{ Auth::guard('web')->check() ? Auth::guard('web')->user()->phone : '' }}" 
-                   style="color: #000 !important; background-color: #fff !important; border: 1px solid #777 !important; padding: 12px !important; min-height: 45px !important;" />
+                   value="{{ Auth::check() ? Auth::user()->phone : '' }}" 
+                   onclick="this.focus()"
+                   style="color: #000 !important; background-color: #fff !important; border: 1px solid #999 !important; padding: 12px !important; min-height: 50px !important; display: block !important; position: relative !important; z-index: 99999 !important; cursor: text !important;" />
             <small style="color: #666 !important; display: block; margin-top: 5px;">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
         </div>
     </div>

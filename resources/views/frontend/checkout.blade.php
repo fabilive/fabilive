@@ -427,6 +427,44 @@
                                  <div class="row">
                                     <div class="col-lg-12">
                                        <div class="nav flex-column" role="tablist" aria-orientation="vertical">
+
+                                          @if (Auth::check())
+                                          {{-- wallet checkout start --}}
+                                          <a class="nav-link payment" href="javascript:;" data-show="no"
+                                             data-val="wallet" data-toggle="pill" role="tab"
+                                             data-form="{{ route('front.wallet.submit') }}"
+                                             aria-controls="v-pills-tab-wallet" aria-selected="false">
+                                             <div class="icon">
+                                                <span class="radio"></span>
+                                             </div>
+                                             <p>
+                                                {{ __('Wallet') }}
+                                                <small>
+                                                   {{ __('Pay from your wallet') }}
+                                                </small>
+                                             </p>
+                                          </a>
+                                          {{-- wallet checkout end --}}
+                                          @endif
+
+                                          {{-- campay checkout start --}}
+                                          <a class="nav-link payment" href="javascript:;" data-show="yes"
+                                             data-val="campay" data-toggle="pill" role="tab"
+                                             data-form="{{ route('front.payment.campay') }}"
+                                             data-href="{{ route('front.load.payment', ['slug1' => 'campay', 'slug2' => $gateways->where('keyword', 'campay')->first()->id ?? 0]) }}"
+                                             aria-controls="v-pills-tab-campay" aria-selected="false">
+                                             <div class="icon">
+                                                <span class="radio"></span>
+                                             </div>
+                                             <p>
+                                                {{ __('Campay (Mobile Money/Card)') }}
+                                                <small>
+                                                   {{ __('Fast & Secure local payment') }}
+                                                </small>
+                                             </p>
+                                          </a>
+                                          {{-- campay checkout end --}}
+
                                           @foreach($gateways as $gt)
                                           @if ($gt->checkout == 1)
                                           @if($gt->type == 'manual')
@@ -1465,15 +1503,23 @@ $('.payment').on('click', function () {
             let country = $('#select_country').val();
             let phoneInput = $('#campay_phone');
             if (country === 'Cameroon') {
+                $(document).on('focus', '#campay_phone', function() {
+                    let phoneInput = $(this);
+                    let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
+                    if (currentVal === '') {
+                        phoneInput.val('+237');
+                    } else if (!currentVal.startsWith('+237')) {
+                        if (currentVal.startsWith('237')) {
+                            phoneInput.val('+' + currentVal);
+                        } else {
+                            phoneInput.val('+237' + currentVal);
+                        }
+                    }
+                });
+                // Also trigger immediately once loaded
                 let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
                 if (currentVal === '') {
                     phoneInput.val('+237');
-                } else if (!currentVal.startsWith('+237')) {
-                    if (currentVal.startsWith('237')) {
-                        phoneInput.val('+' + currentVal);
-                    } else {
-                        phoneInput.val('+237' + currentVal);
-                    }
                 }
             }
         }
