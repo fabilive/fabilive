@@ -496,7 +496,7 @@
                                           <a class="nav-link payment" href="javascript:;" data-show="yes"
                                              data-val="campay" data-toggle="pill" role="tab"
                                              data-form="{{ route('front.payment.campay') }}"
-                                             data-href="{{ route('front.load.payment', ['slug1' => 'campay', 'slug2' => 0]) }}"
+                                             data-href="{{ route('front.load.payment', ['slug1' => 'campay', 'slug2' => $gateways->where('keyword', 'campay')->first()->id ?? 0]) }}"
                                              aria-controls="v-pills-tab-campay" aria-selected="false">
                                              <div class="icon">
                                                 <span class="radio"></span>
@@ -1460,7 +1460,17 @@ $('.payment').on('click', function () {
     var ajaxLoadUrl = $(this).data('href');        // front.load.payment GET route
     var tabId = $(this).attr('aria-controls');
     var $tabPane = $('#v-pills-tabContent #' + tabId);
-    $tabPane.addClass('active show').load(ajaxLoadUrl);
+    $tabPane.addClass('active show').load(ajaxLoadUrl, function() {
+        if (paymentVal === 'campay') {
+            let country = $('#select_country').val();
+            let phoneInput = $('#campay_phone');
+            if (country === 'Cameroon') {
+                if (!phoneInput.val().startsWith('237')) {
+                    phoneInput.val('237' + phoneInput.val());
+                }
+            }
+        }
+    });
 
     // Remove active/show from other tabs
     $('#v-pills-tabContent .tab-pane').not($tabPane).removeClass('active show').html('');
