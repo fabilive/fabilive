@@ -511,7 +511,20 @@
                                              @endif
                                               @endforeach
                                               <div class="tab-pane fade" id="v-pills-tab-wallet" role="tabpanel"></div>
-                                              <div class="tab-pane fade" id="v-pills-tab-campay" role="tabpanel"></div>
+                                              
+                                              {{-- Hardcoded Campay Pane - Zero AJAX --}}
+                                              <div class="tab-pane fade" id="v-pills-tab-campay" role="tabpanel">
+                                                  <div class="row" style="margin-top: 15px;">
+                                                      <div class="col-lg-12">
+                                                          <label style="font-weight: 600;">{{ __('Mobile Money Number') }} *</label>
+                                                          <input class="form-control" name="phone" id="campay_phone" type="text"
+                                                                 placeholder="{{ __('+237xxxxxxxx') }}" 
+                                                                 value="{{ Auth::user() ? Auth::user()->phone : '' }}" />
+                                                          <small class="text-muted">{{ __('Please enter your phone number starting with +237 (e.g., +2376xxxxxxxx)') }}</small>
+                                                      </div>
+                                                  </div>
+                                                  <input type="hidden" name="method" value="Campay">
+                                              </div>
                                            </div>
                                        </div>
                                     </div>
@@ -1469,36 +1482,29 @@ $('.payment').on('click', function () {
     var tabId = $(this).attr('aria-controls');
     var $tabPane = $('#v-pills-tabContent #' + tabId);
     
+    // NEW: If Campay is selected, skip AJAX and show the hardcoded pane
+    if (paymentVal === 'campay') {
+        console.log('Campay selected (Fixed Pane)');
+        $('#v-pills-tabContent .tab-pane').not('#v-pills-tab-campay').removeClass('active show').html('');
+        $('#v-pills-tab-campay').addClass('active show');
+        
+        // Instant prefix logic for the fixed field
+        let country = $('#select_country').val();
+        let phoneInput = $('#campay_phone');
+        if (country === 'Cameroon') {
+            let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
+            if (currentVal === '' || currentVal === '+237') {
+                phoneInput.val('+237');
+            }
+        }
+        return; // Exit since we are not using AJAX for Campay
+    }
+
     // Safety check: Only load if we have a valid URL
     if (ajaxLoadUrl && ajaxLoadUrl.trim() !== "") {
         $tabPane.addClass('active show').load(ajaxLoadUrl, function(response, status, xhr) {
             if (status == "error") {
                 console.error("Payment load failed: " + xhr.status + " " + xhr.statusText);
-            }
-            
-            if (paymentVal === 'campay') {
-                let country = $('#select_country').val();
-                let phoneInput = $('#campay_phone');
-                if (country === 'Cameroon') {
-                    $(document).on('focus', '#campay_phone', function() {
-                        let phoneInput = $(this);
-                        let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
-                        if (currentVal === '') {
-                            phoneInput.val('+237');
-                        } else if (!currentVal.startsWith('+237')) {
-                            if (currentVal.startsWith('237')) {
-                                phoneInput.val('+' + currentVal);
-                            } else {
-                                phoneInput.val('+237' + currentVal);
-                            }
-                        }
-                    });
-                    // Also trigger immediately once loaded
-                    let currentVal = phoneInput.val() ? phoneInput.val().trim() : '';
-                    if (currentVal === '') {
-                        phoneInput.val('+237');
-                    }
-                }
             }
         });
     } else {
