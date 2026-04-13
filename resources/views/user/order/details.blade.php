@@ -23,280 +23,120 @@
       </div>
    </div>
 </div>
-<!-- breadcrumb -->
 
-<!--==================== Blog Section Start ====================-->
-<div class="full-row">
+<div class="full-row bg-light">
    <div class="container">
       <div class="mb-4 d-xl-none">
          <button class="dashboard-sidebar-btn btn bg-primary rounded">
             <i class="fas fa-bars"></i>
          </button>
       </div>
+      
       <div class="row">
-         <div class="col-xl-4">
+         <div class="col-xl-3">
             @include('partials.user.dashboard-sidebar')
          </div>
-         <div class="col-xl-8">
+         
+         <div class="col-xl-9">
             <div class="row">
-               <div class="col-lg-12">
-                  <div class="widget border-0 p-40 widget_categories bg-light account-info">
-                     <div class="process-steps-area">
+               
+               <!-- LEFT COLUMN: Addresses & Progress -->
+               <div class="col-lg-8">
+                  <div class="widget border-0 p-4 widget_categories bg-white rounded shadow-sm mb-4">
+                     <div class="process-steps-area mb-4">
                         @include('partials.user.order-process')
                      </div>
-                     <h4 class="widget-title down-line mb-30">{{ __('Purchased Items') }}</h4>
-                     <div class="view-order-page">
-                        <h3 class="order-code">{{ __('Order#') }} {{$order->order_number}} [{{$order->status}}]
-                        </h3>
-                        <div class="print-order text-right">
-                           <a href="{{route('user-order-print',$order->id)}}" target="_blank" class="print-order-btn">
-                              <i class="fa fa-print"></i> {{ __('Print Order') }}
-                           </a>
-                        </div>
-                        <p class="order-date">{{ __('Order Date') }} {{date('d-M-Y',strtotime($order->created_at))}}
-                        </p>
-                        @if($order->dp == 1)
-                        <div class="billing-add-area">
-                           <div class="row">
-                              <div class="col-md-6">
-                                 <h5>{{ __('Shipping Address') }}</h5>
-                                 <address>
-                                    {{ __('Name:') }} {{$order->customer_name}}<br>
-                                    {{ __('Email:') }} {{$order->customer_email}}<br>
-                                    {{ __('Phone:') }} {{$order->customer_phone}}<br>
-                                    {{ __('Address:') }} {{$order->customer_address}}<br>
-                                    {{$order->customer_city}}-{{$order->customer_zip}}
-                                 </address>
-                              </div>
-                              <div class="col-md-6">
-                                 <h5>{{ __('Shipping Method') }}</h5>
-                                 <p>{{ __('Payment Status:') }}
-                                    @if($order->payment_status == 'Pending')
-                                    <strong>{{ __('Unpaid') }}</strong>
-                                    @else
-                                    <strong>{{ __('Paid') }}</strong>
-                                    @endif
-                                 </p>
-                                 <p>{{ __('Tax :') }}
-                                    {{ PriceHelper::showOrderCurrencyPrice((($order->tax) /
-                                    $order->currency_value),$order->currency_sign) }}
-                                 </p>
-                                 <p>{{ __('Paid Amount:') }}
-                                    {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
-                                    $order->currency_value),$order->currency_sign) }}
-                                 </p>
-                                 <p>{{ __('Payment Method:') }} {{$order->method}}</p>
-                                 @if($order->method != "Cash On Delivery")
-                                 @if($order->method=="Stripe")
-                                 {{ $order->method }} {{ __('Charge ID:') }}
-                                 <p>{{$order->charge_id}}</p>
-                                 @endif
-                                 {{ $order->method }} {{ __('Transaction ID:') }}
-                                 <p id="ttn">{{ $order->txnid }}</p>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                        @else
-                        <div class="shipping-add-area">
-                           <div class="row">
-                              <div class="col-md-6">
-                                 @if($order->shipping == "shipto")
-                                 <h5>{{ __('Shipping Address') }}</h5>
-                                 <address>
-                                    {{ __('Name:') }}
-                                    {{$order->shipping_name == null ? $order->customer_name :
-                                    $order->shipping_name}}<br>
-                                    {{ __('Email:') }}
-                                    {{$order->shipping_email == null ? $order->customer_email :
-                                    $order->shipping_email}}<br>
-                                    {{ __('Phone:') }}
-                                    {{$order->shipping_phone == null ? $order->customer_phone :
-                                    $order->shipping_phone}}<br>
-                                    {{ __('Address:') }}
-                                    {{$order->shipping_address == null ? $order->customer_address :
-                                    $order->shipping_address}}<br>
-                                    {{$order->shipping_city == null ? $order->customer_city :
-                                    $order->shipping_city}}-{{$order->shipping_zip == null ? $order->customer_zip :
-                                    $order->shipping_zip}}
-                                 </address>
-                                 @else
-                                 <h5>{{ __('PickUp Location') }}</h5>
-                                 <address>
-                                    {{ __('Address:') }} {{$order->pickup_location}}<br>
-                                 </address>
-                                 @endif
-                              </div>
-                              <div class="col-md-6">
-                                 <h5>{{ __('Shipping Method') }}</h5>
-                                 @if($order->shipping == "shipto")
-                                 <p>{{ __('Ship To Address') }}</p>
-                                 @else
-                                 <p>{{ __('Pick Up') }}</p>
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                        <div class="billing-add-area">
-                           <div class="row">
-                              <div class="col-md-6">
-                                 <h5>{{ __('Billing Address') }}</h5>
-                                 <address>
-                                    {{ __('Name:') }} {{$order->customer_name}}<br>
-                                    {{ __('Email:') }} {{$order->customer_email}}<br>
-                                    {{ __('Phone:') }} {{$order->customer_phone}}<br>
-                                    {{ __('Address:') }} {{$order->customer_address}}<br>
-                                    {{$order->customer_city}}-{{$order->customer_zip}}
-                                 </address>
-                              </div>
-                              <div class="col-md-6">
-                                 <h5>{{ __('Payment Information') }}</h5>
-                                 <p>{{ __('Payment Status :') }}
-                                    @if($order->payment_status == 'Pending')
-                                    <strong class="text-danger">{{ __('Unpaid') }}</strong>
-                                    @else
-                                    <strong class="text-success">{{ __('Paid') }}</strong>
-                                    @endif
-                                 </p>
-                                 <p>{{ __('Tax :') }}
-                                    {{ PriceHelper::showOrderCurrencyPrice((($order->tax) /
-                                    $order->currency_value),$order->currency_sign) }}
-                                 </p>
-                                 <p>{{ __('Paid Amount:') }}
-                                    {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount *
-                                    $order->currency_value),$order->currency_sign) }}
-                                 </p>
-                                 <p>{{ __('Payment Method:') }} {{$order->method}}</p>
-                                 @if($order->method != "Cash On Delivery")
-                                 @if($order->method=="Stripe")
-                                 {{$order->method}} {{ __('Charge ID:') }}
-                                 <p>{{$order->charge_id}}</p>
-                                 @endif
-                                 {{$order->method}} {{ __('Transaction ID:') }}
-                                 <p id="ttn"> {{$order->txnid}}</p>
 
-                                 @endif
-                              </div>
-                           </div>
-                        </div>
-                        @if($order->deliveryRider)
-                        <div class="billing-add-area">
-                           <div class="row">
-                              <div class="col-md-12">
-                                 <h5>{{ __('Delivery Agent Information') }}</h5>
-                                 <address>
-                                    {{ __('Name:') }} {{$order->deliveryRider->rider->name}}<br>
-                                    {{ __('Phone:') }} {{$order->deliveryRider->phone_number}}<br>
-                                    @if($order->deliveryRider->rider->is_verified == 1)
-                                    <span class="text-primary"><i class="fas fa-check-circle"></i> {{ __('Verified Rider') }}</span>
+                     <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="widget-title down-line mb-0">{{ __('Order#') }} {{$order->order_number}}</h4>
+                        <span class="badge badge-primary px-3 py-2">{{$order->status}}</span>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-6 mb-4">
+                           <div class="card border-0 bg-light rounded-lg h-100">
+                              <div class="card-body">
+                                 <h6 class="font-weight-bold mb-3 text-uppercase small text-secondary"><i class="fas fa-map-marker-alt mr-2"></i>{{ __('Shipping Address') }}</h6>
+                                 <address class="mb-0 text-dark">
+                                    @if($order->shipping == "shipto")
+                                       <strong>{{$order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</strong><br>
+                                       {{$order->shipping_email == null ? $order->customer_email : $order->shipping_email}}<br>
+                                       {{$order->shipping_phone == null ? $order->customer_phone : $order->shipping_phone}}<br>
+                                       {{$order->shipping_address == null ? $order->customer_address : $order->shipping_address}}<br>
+                                       {{$order->shipping_city == null ? $order->customer_city : $order->shipping_city}}-{{$order->shipping_zip == null ? $order->customer_zip : $order->shipping_zip}}
+                                    @else
+                                       <strong>{{ __('PickUp Location') }}</strong><br>
+                                       {{$order->pickup_location}}
                                     @endif
                                  </address>
                               </div>
                            </div>
                         </div>
-                        @endif
-                        @endif
-                        <br>
+
+                        <div class="col-md-6 mb-4">
+                           <div class="card border-0 bg-light rounded-lg h-100">
+                              <div class="card-body">
+                                 <h6 class="font-weight-bold mb-3 text-uppercase small text-secondary"><i class="fas fa-file-invoice mr-2"></i>{{ __('Billing Address') }}</h6>
+                                 <address class="mb-0 text-dark">
+                                    <strong>{{$order->customer_name}}</strong><br>
+                                    {{$order->customer_email}}<br>
+                                    {{$order->customer_phone}}<br>
+                                    {{$order->customer_address}}<br>
+                                    {{$order->customer_city}}-{{$order->customer_zip}}
+                                 </address>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     @if($order->deliveryRider)
+                     <div class="alert alert-info border-0 rounded-lg d-flex align-items-center mb-4">
+                        <div class="mr-3 h3 mb-0 text-info"><i class="fas fa-motorcycle"></i></div>
+                        <div>
+                           <h6 class="font-weight-bold mb-1">{{ __('Delivery Agent Assigned') }}</h6>
+                           <p class="mb-0 small text-dark">
+                              <strong>{{$order->deliveryRider->rider->name}}</strong> 
+                              (<a href="tel:{{$order->deliveryRider->phone_number}}" class="text-primary">{{$order->deliveryRider->phone_number}}</a>)
+                              @if($order->deliveryRider->rider->is_verified == 1)
+                                 <span class="ml-2 text-success"><i class="fas fa-check-circle"></i> {{ __('Verified') }}</span>
+                              @endif
+                           </p>
+                        </div>
+                     </div>
+                     @endif
+
+                     <div class="mt-4">
+                        <h5 class="font-weight-bold mb-3">{{ __('Ordered Products') }}</h5>
                         <div class="table-responsive">
-                           <h5>{{ __('Ordered Products:') }}</h5>
-                           <table class="table veiw-details-table">
-                              <thead>
+                           <table class="table table-hover border-0">
+                              <thead class="bg-light">
                                  <tr>
-                                    <th>{{ __('ID#') }}</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Details') }}</th>
-                                    <th>{{ __('Price') }}</th>
-                                    <th>{{ __('Total') }}</th>
+                                    <th class="border-0">{{ __('Product') }}</th>
+                                    <th class="border-0 text-center">{{ __('Qty') }}</th>
+                                    <th class="border-0 text-right">{{ __('Total') }}</th>
                                  </tr>
                               </thead>
                               <tbody>
                                  @foreach($cart['items'] as $product)
                                  <tr>
-                                    <td data-label="{{ __('ID#') }}">
-                                       <div>
-                                          {{ $product['item']['id'] }}
-                                       </div>
-                                    </td>
-                                    <td data-label="{{ __('Name') }}">
-                                       <div>
-                                          <input type="hidden" value="{{ $product['license'] ?? '' }}">
-                                          @if($product['item']['user_id'] != 0)
-                                          @php
-                                          $user = App\Models\User::find($product['item']['user_id']);
-                                          @endphp
-                                          @if(isset($user))
-                                          <a target="_blank"
-                                             href="{{ route('front.product', $product['item']['slug']) }}">{{mb_strlen($product['item']['name'],'UTF-8')
-                                             > 50 ? mb_substr($product['item']['name'],0,50,'UTF-8').'...' :
-                                             $product['item']['name']}}</a>
-                                          @else
-                                          <a target="_blank"
-                                             href="{{ route('front.product', $product['item']['slug']) }}">
-                                             {{mb_strlen($product['item']['name'],'UTF-8') > 50 ?
-                                             mb_substr($product['item']['name'],0,50,'UTF-8').'...' :
-                                             $product['item']['name']}}
-                                          </a>
-                                          @endif
-                                          @else
-                                          <a target="_blank"
-                                             href="{{ route('front.product', $product['item']['slug']) }}">
-                                             {{mb_strlen($product['item']['name'],'UTF-8') > 50 ?
-                                             mb_substr($product['item']['name'],0,50,'UTF-8').'...' :
-                                             $product['item']['name']}}
-                                          </a>
-                                          @endif
-                                          @if($product['item']['type'] != 'Physical')
-                                          @if($order->payment_status == 'Completed')
-                                          @if($product['item']['file'] != null)
-                                          <a href="{{ route('user-order-download',['slug' => $order->order_number , 'id' => $product['item']['id']]) }}"
-                                             class="btn btn-sm btn-primary">
-                                             <i class="fa fa-download"></i> {{ __('Download') }}
-                                          </a>
-                                          @else
-                                          <a target="_blank" href="{{ $product['item']['link'] }}"
-                                             class="btn btn-sm btn-primary">
-                                             <i class="fa fa-download"></i> {{ __('Download') }}
-                                          </a>
-                                          @endif
-                                          @if(($product['license'] ?? '') != '')
-                                          <a href="javascript:;" data-toggle="modal" data-target="#confirm-delete"
-                                             class="btn btn-sm btn-info product-btn" id="license"><i
-                                                class="fa fa-eye"></i> {{ __('View License') }}</a>
-                                          @endif
-                                          @endif
-                                          @endif
-                                       </div>
-                                    </td>
-                                    <td data-label="{{ __('Details') }}">
-                                       <div>
-                                          <b>{{ __('Quantity') }}</b>: {{$product['qty']}} <br>
-                                          @if(!empty($product['size']))
-                                          <b>{{ __('Size') }}</b>: {{ ($product['item']['measure'] ?? '') }}{{str_replace('-','
-                                          ',$product['size'])}} <br>
-                                          @endif
-                                          @if(!empty($product['color']))
-                                          <div class="d-flex mt-2">
-                                             <b>{{ __('Color') }}</b>: <span id="color-bar"
-                                                style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; border-radius: 50%; background: #{{$product['color']}};"></span>
+                                    <td class="border-bottom py-3">
+                                       <div class="d-flex align-items-center">
+                                          <div class="name">
+                                             <a target="_blank" href="{{ route('front.product', $product['item']['slug']) }}" class="text-dark font-weight-bold">
+                                                {{mb_strlen($product['item']['name'],'UTF-8') > 40 ? mb_substr($product['item']['name'],0,40,'UTF-8').'...' : $product['item']['name']}}
+                                             </a>
+                                             @if(!empty($product['size']) || !empty($product['color']))
+                                                <div class="small text-muted mt-1">
+                                                   @if(!empty($product['size'])) <span>{{ __('Size') }}: {{ $product['size'] }}</span> @endif
+                                                   @if(!empty($product['color'])) <span class="ml-2">{{ __('Color') }}: <i class="fas fa-circle" style="color:#{{$product['color']}}"></i></span> @endif
+                                                </div>
+                                             @endif
                                           </div>
-                                          @endif
-                                          @if(!empty($product['keys']))
-                                          @foreach( array_combine(explode(',', $product['keys']), explode(',',
-                                          $product['values'])) as $key => $value)
-                                          <b>{{ ucwords(str_replace('_', ' ', $key)) }} : </b> {{ $value }} <br>
-                                          @endforeach
-                                          @endif
                                        </div>
                                     </td>
-                                    <td data-label="{{ __('Price') }}">
-                                       <div>
-                                          {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $order->currency_value) }}
-                                       </div>
-                                    </td>
-                                    <td data-label="{{ __('Total') }}">
-                                       <div>
-                                          {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }} <small>{{ ($product['discount'] ?? 0) == 0 ? '' : '('.$product['discount'].'% '.__('Off').')' }}</small>
-                                       </div>
+                                    <td class="border-bottom text-center py-3">{{$product['qty']}}</td>
+                                    <td class="border-bottom text-right py-3 font-weight-bold">
+                                       {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }}
                                     </td>
                                  </tr>
                                  @endforeach
@@ -304,56 +144,97 @@
                            </table>
                         </div>
                      </div>
-                     <a class="back-btn theme-bg" href="{{ route('user-orders') }}"> {{ __('Back') }}</a>
+                     
+                     <div class="mt-4 text-center">
+                        <a class="btn btn-outline-primary px-4 rounded-pill" href="{{ route('user-orders') }}"> <i class="fas fa-arrow-left mr-2"></i>{{ __('Back to Orders') }}</a>
+                     </div>
                   </div>
                </div>
+
+               <!-- RIGHT COLUMN: Price Details card -->
+               <div class="col-lg-4">
+                  <div class="price-details-card bg-white rounded shadow-sm mb-4 overflow-hidden border">
+                     <div class="card-header bg-dark text-white p-3 border-0">
+                        <h5 class="mb-0 font-weight-bold text-uppercase small" style="letter-spacing: 1px;"><i class="fas fa-receipt mr-2"></i>{{ __('Price Details') }}</h5>
+                     </div>
+                     <div class="card-body p-4">
+                        <ul class="list-unstyled mb-0">
+                           <li class="d-flex justify-content-between mb-3">
+                              <span class="text-secondary">{{ __('Subtotal') }}</span>
+                              <span class="text-dark">
+                                 {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount - $order->shipping_cost - $order->packing_cost - ($order->tax / $order->currency_value)) * $order->currency_value, $order->currency_sign) }}
+                              </span>
+                           </li>
+                           <li class="d-flex justify-content-between mb-3">
+                              <span class="text-secondary">{{ __('Delivery Fee') }}</span>
+                              <span class="text-dark">+ {{ PriceHelper::showOrderCurrencyPrice($order->shipping_cost * $order->currency_value, $order->currency_sign) }}</span>
+                           </li>
+                           <li class="d-flex justify-content-between mb-3">
+                              <span class="text-secondary">{{ __('Packaging') }}</span>
+                              <span class="text-dark">+ {{ PriceHelper::showOrderCurrencyPrice($order->packing_cost * $order->currency_value, $order->currency_sign) }}</span>
+                           </li>
+                           <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                              <span class="text-secondary">{{ __('Tax') }}</span>
+                              <span class="text-dark">+ {{ PriceHelper::showOrderCurrencyPrice($order->tax, $order->currency_sign) }}</span>
+                           </li>
+                           <li class="d-flex justify-content-between mt-3 pt-2">
+                              <h5 class="font-weight-bold text-dark">{{ __('Total Paid') }}</h5>
+                              <h5 class="font-weight-bold text-primary">
+                                 {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value),$order->currency_sign) }}
+                              </h5>
+                           </li>
+                        </ul>
+                     </div>
+                     <div class="card-footer bg-light p-4 border-0">
+                        <h6 class="font-weight-bold text-uppercase small text-secondary mb-3">{{ __('Payment Information') }}</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                           <span class="text-secondary small">{{ __('Method') }}</span>
+                           <span class="text-dark font-weight-bold small">{{$order->method}}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                           <span class="text-secondary small">{{ __('Status') }}</span>
+                           @if($order->payment_status == 'Pending')
+                              <span class="badge badge-warning text-dark px-2 py-1 small">{{ __('Unpaid') }}</span>
+                           @else
+                              <span class="badge badge-success px-2 py-1 small">{{ __('Paid') }}</span>
+                           @endif
+                        </div>
+                        
+                        <div class="mt-4">
+                           <a href="{{route('user-order-print',$order->id)}}" target="_blank" class="btn btn-outline-dark btn-block btn-sm rounded-pill font-weight-bold">
+                              <i class="fa fa-print mr-1"></i> {{ __('Print Invoice') }}
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="card border-0 rounded shadow-sm bg-white p-3">
+                     <p class="text-muted small text-center mb-0">
+                        {{ __('Order Date') }}: <strong>{{date('d M, Y',strtotime($order->created_at))}}</strong>
+                     </p>
+                  </div>
+               </div>
+
             </div>
          </div>
       </div>
    </div>
 </div>
-<!--==================== Blog Section End ====================-->
-{{-- Modal --}}
-<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="modal1" aria-hidden="true">
-   <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header d-block text-center">
-            <h4 class="modal-title d-inline-block">{{ __('License Key') }}</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
-         </div>
-         <div class="modal-body">
-            <p class="text-center">{{ __('The Licenes Key is :') }} <span id="key"></span></p>
-         </div>
-         <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-danger" data-dismiss="modal">{{ __('Close') }}</button>
-         </div>
-      </div>
-   </div>
-</div>
+
+<style>
+   .widget {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+   }
+   .card-header {
+      background: #1a1a1a;
+   }
+   .font-weight-bold {
+      font-weight: 700 !important;
+   }
+   .rounded-lg {
+      border-radius: 1rem !important;
+   }
+</style>
 
 @includeIf('partials.global.common-footer')
-
-@endsection
-@section('script')
-<script type="text/javascript">
-   (function($) {
-            "use strict";
-
-        $('#example').dataTable({
-            "ordering": false,
-            'paging': false,
-            'lengthChange': false,
-            'searching': false,
-            'ordering': false,
-            'info': false,
-            'autoWidth': false,
-            'responsive': true
-        });
-
-    })(jQuery);
-
-</script>
-
 @endsection

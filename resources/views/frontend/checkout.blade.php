@@ -67,9 +67,9 @@
                                  <img src="//geniusocean.com/demo/geniuscart/default/assets/images/loading_large.gif"
                                     alt="">
                               </div>
-                              <div class="personal-info">
-                                 <h5 class="title">
-                                    {{ __('Personal Information') }} :
+                              <div class="personal-info bg-white p-4 rounded-lg shadow-sm border mb-4">
+                                 <h5 class="title font-weight-bold mb-4">
+                                    <i class="fas fa-user-circle mr-2 text-primary"></i>{{ __('Personal Information') }}
                                  </h5>
                                  <div class="row">
                                     <div class="col-lg-6">
@@ -105,9 +105,9 @@
                                  </div>
                                  @endif
                               </div>
-                              <div class="billing-address">
-                                 <h5 class="title">
-                                    {{ __('Billing Details') }}
+                              <div class="billing-address bg-white p-4 rounded-lg shadow-sm border mb-4">
+                                 <h5 class="title font-weight-bold mb-4">
+                                    <i class="fas fa-map-marked-alt mr-2 text-primary"></i>{{ __('Billing Details') }}
                                  </h5>
                                  <div class="row">
                                     <div class="col-lg-6 my-2 {{ $digital == 1 ? 'd-none' : '' }}">
@@ -598,8 +598,8 @@
          </div>
          @if(Session::has('cart'))
          <div class="col-lg-4">
-            <div class="right-area">
-               <div class="order-box">
+            <div class="right-area sticky-top" style="top: 100px; z-index: 10;">
+               <div class="order-box shadow-sm border-0 rounded-lg">
                   <h4 class="title">{{ __('PRICE DETAILS') }}</h4>
                   <ul class="order-list">
                      <li>
