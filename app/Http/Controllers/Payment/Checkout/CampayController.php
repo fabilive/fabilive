@@ -107,7 +107,7 @@ class CampayController extends CheckoutBaseControlller
     /**
      * Check payment status (Can be polled from frontend or used as callback)
      */
-    public function checkStatus($order_number)
+    public function checkStatus(Request $request, $order_number)
     {
         $order = Order::where('order_number', $order_number)->firstOrFail();
 
@@ -119,6 +119,13 @@ class CampayController extends CheckoutBaseControlller
             Session::put('temporder', $order);
             Session::put('tempcart', $cartObject);
             Session::forget('cart');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'successful',
+                    'redirect_url' => route('front.payment.return')
+                ]);
+            }
 
             return redirect()->route('front.payment.return')->with('success', 'Payment successful!');
         }
@@ -140,11 +147,25 @@ class CampayController extends CheckoutBaseControlller
                 Session::put('tempcart', $cartObject);
                 Session::forget('cart');
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'status' => 'successful',
+                        'redirect_url' => route('front.payment.return')
+                    ]);
+                }
+
                 return redirect()->route('front.payment.return')->with('success', 'Payment successful!');
             }
         } catch (\Exception $e) {
             \Log::error('Campay Polling Exception for Order #' . $order_number . ': ' . $e->getMessage());
             $status = ['status' => 'ERROR', 'message' => $e->getMessage()];
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => 'pending',
+                'payment_status' => $status
+            ]);
         }
 
         return view('frontend.campay_waiting', compact('order', 'status'));
