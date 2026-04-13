@@ -52,6 +52,8 @@
                </div>
             </div>
          </div>
+      </div>
+      <div class="row mt-4">
          <div class="col-lg-8">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
