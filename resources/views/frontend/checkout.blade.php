@@ -53,8 +53,8 @@
             </div>
          </div>
       </div>
-      <div class="row mt-4 px-3">
-         <div class="col-md-6">
+      <div class="row mt-4 px-3" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: start !important;">
+         <div class="col-lg-7" style="flex: 0 0 58% !important; max-width: 58% !important;">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
@@ -599,7 +599,7 @@
             </form>
          </div>
          @if(Session::has('cart'))
-         <div class="col-md-6">
+         <div class="col-lg-5" style="flex: 0 0 40% !important; max-width: 40% !important; margin-left: 2% !important;">
             <div class="right-area">
                <div class="order-box shadow-sm border-0 rounded-lg">
                   <h4 class="title">{{ __('PRICE DETAILS') }}</h4>

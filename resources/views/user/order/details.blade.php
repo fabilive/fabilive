@@ -38,10 +38,9 @@
          </div>
          
          <div class="col-xl-9">
-            <div class="row">
-               
-               <!-- LEFT COLUMN: Addresses & Progress -->
-               <div class="col-md-6">
+               <div class="row" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: start !important;">
+                  <!-- LEFT COLUMN: Addresses & Progress -->
+                  <div class="col-lg-7" style="flex: 0 0 58% !important; max-width: 58% !important;">
                   <div class="widget border-0 p-4 widget_categories bg-white rounded shadow-sm mb-4">
                      <div class="process-steps-area mb-4">
                         @include('partials.user.order-process')
@@ -151,8 +150,8 @@
                   </div>
                </div>
 
-               <!-- RIGHT COLUMN: Price Details card -->
-               <div class="col-md-6">
+                  <!-- RIGHT COLUMN: Price Details card -->
+                  <div class="col-lg-5" style="flex: 0 0 40% !important; max-width: 40% !important; margin-left: 2% !important;">
                   <div class="price-details-card bg-white rounded shadow-sm mb-4 overflow-hidden border">
                      <div class="card-header bg-dark text-white p-3 border-0">
                         <h5 class="mb-0 font-weight-bold text-uppercase small" style="letter-spacing: 1px;"><i class="fas fa-receipt mr-2"></i>{{ __('Price Details') }}</h5>
