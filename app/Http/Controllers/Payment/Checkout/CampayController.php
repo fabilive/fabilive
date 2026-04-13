@@ -110,15 +110,41 @@ class CampayController extends CheckoutBaseControlller
     public function checkStatus($order_number)
     {
         $order = Order::where('order_number', $order_number)->firstOrFail();
-        $campay = new Campay();
-        $status = $campay->getStatus($order->txnid);
 
-        if (isset($status['status']) && $status['status'] == 'SUCCESSFUL') {
-            if ($order->payment_status != 'Completed') {
-                $this->finalizeOrder($order);
-            }
+        // 1. If webhook or manual update already completed the order, handle it immediately
+        if ($order->payment_status === 'Completed') {
+            $cart = json_decode($order->cart, true);
+            $cartObject = new Cart($cart);
+            
+            Session::put('temporder', $order);
+            Session::put('tempcart', $cartObject);
+            Session::forget('cart');
 
             return redirect()->route('front.payment.return')->with('success', 'Payment successful!');
+        }
+
+        $campay = new Campay();
+        try {
+            $status = $campay->getStatus($order->txnid);
+
+            // 2. Case-insensitive status check
+            if (isset($status['status']) && strtolower($status['status']) === 'successful') {
+                if ($order->payment_status != 'Completed') {
+                    $this->finalizeOrder($order);
+                }
+
+                $cart = json_decode($order->cart, true);
+                $cartObject = new Cart($cart);
+                
+                Session::put('temporder', $order);
+                Session::put('tempcart', $cartObject);
+                Session::forget('cart');
+
+                return redirect()->route('front.payment.return')->with('success', 'Payment successful!');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Campay Polling Exception for Order #' . $order_number . ': ' . $e->getMessage());
+            $status = ['status' => 'ERROR', 'message' => $e->getMessage()];
         }
 
         return view('frontend.campay_waiting', compact('order', 'status'));

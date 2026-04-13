@@ -85,7 +85,19 @@ class CampayWebhookController extends Controller
             'details' => 'Payment held in escrow via Campay Webhook',
         ]);
 
-        $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
+        // Stock and vendor logic
+        $cart = json_decode($order->cart, true);
+        \App\Helpers\OrderHelper::size_qty_check($cart);
+        \App\Helpers\OrderHelper::stock_check($cart);
+        \App\Helpers\OrderHelper::vendor_order_check($cart, $order);
+
+        // Notifications
+        try {
+            $order->tracks()->create(['title' => 'Paid', 'text' => 'Payment confirmed via Campay.']);
+            $order->notifications()->create();
+        } catch (\Exception $e) {
+            Log::error('Webhook tracks error: ' . $e->getMessage());
+        }
     }
 
     protected function processDepositPayment($deposit, $payload)

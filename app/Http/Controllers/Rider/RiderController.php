@@ -426,28 +426,38 @@ class RiderController extends RiderBaseController
         if ($newStatus === 'picked_up' && $allPickups->every(fn ($s) => $s->status === 'picked_up')) {
             // All pickups done → move to delivering
             $job->update(['status' => 'delivering']);
-            $job->order->update(['status' => 'on delivery']);
+            if ($job->order) {
+                $job->order->update(['status' => 'on delivery']);
+            }
         } elseif ($newStatus === 'picked_up') {
             // At least one pickup done
             $job->update(['status' => 'picking_up']);
-            $job->order->update(['status' => 'picked up']);
+            if ($job->order) {
+                $job->order->update(['status' => 'picked up']);
+            }
         } elseif ($newStatus === 'delivered') {
             // Final delivery done
             $job->update(['status' => 'delivered', 'delivered_at' => now()]);
 
-            $updateData = ['status' => 'delivered'];
-            if ($job->order->method === 'Cash On Delivery') {
-                $updateData['payment_status'] = 'Completed';
+            if ($job->order) {
+                $updateData = ['status' => 'delivered'];
+                if ($job->order->method === 'Cash On Delivery') {
+                    $updateData['payment_status'] = 'Completed';
+                }
+                $job->order->update($updateData);
             }
-            $job->order->update($updateData);
         } elseif ($newStatus === 'failed') {
             // Delivery failed
             $job->update(['status' => 'failed']);
-            $job->order->update(['status' => 'failed delivery']);
+            if ($job->order) {
+                $job->order->update(['status' => 'failed delivery']);
+            }
         } elseif ($newStatus === 'returned') {
             // Return to seller done
             $job->update(['status' => 'returned', 'returned_at' => now()]);
-            $job->order->update(['status' => 'cancelled']); // As requested: "mark order canceled once they return"
+            if ($job->order) {
+                $job->order->update(['status' => 'cancelled']); // As requested: "mark order canceled once they return"
+            }
         }
 
         return redirect()->route('rider-delivery-details', $job->id)
@@ -470,21 +480,29 @@ class RiderController extends RiderBaseController
 
         if ($newStatus === 'picked_up') {
             $job->update(['status' => 'picking_up', 'picked_up_at' => now()]);
-            $job->order->update(['status' => 'picked up']);
+            if ($job->order) {
+                $job->order->update(['status' => 'picked up']);
+            }
         } elseif ($newStatus === 'on_delivery') {
             $job->update(['status' => 'delivering']);
-            $job->order->update(['status' => 'on delivery']);
+            if ($job->order) {
+                $job->order->update(['status' => 'on delivery']);
+            }
         } elseif ($newStatus === 'delivered') {
             $job->update(['status' => 'delivered', 'delivered_at' => now()]);
 
-            $updateData = ['status' => 'delivered'];
-            if ($job->order->method === 'Cash On Delivery') {
-                $updateData['payment_status'] = 'Completed';
+            if ($job->order) {
+                $updateData = ['status' => 'delivered'];
+                if ($job->order->method === 'Cash On Delivery') {
+                    $updateData['payment_status'] = 'Completed';
+                }
+                $job->order->update($updateData);
             }
-            $job->order->update($updateData);
         } elseif ($newStatus === 'returning') {
             $job->update(['status' => 'returning']);
-            $job->order->update(['status' => 'returning']);
+            if ($job->order) {
+                $job->order->update(['status' => 'returning']);
+            }
         }
 
         return redirect()->back()
