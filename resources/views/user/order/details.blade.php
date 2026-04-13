@@ -41,7 +41,7 @@
             <div class="row">
                
                <!-- LEFT COLUMN: Addresses & Progress -->
-               <div class="col-lg-8">
+               <div class="col-md-6">
                   <div class="widget border-0 p-4 widget_categories bg-white rounded shadow-sm mb-4">
                      <div class="process-steps-area mb-4">
                         @include('partials.user.order-process')
@@ -152,7 +152,7 @@
                </div>
 
                <!-- RIGHT COLUMN: Price Details card -->
-               <div class="col-lg-4">
+               <div class="col-md-6">
                   <div class="price-details-card bg-white rounded shadow-sm mb-4 overflow-hidden border">
                      <div class="card-header bg-dark text-white p-3 border-0">
                         <h5 class="mb-0 font-weight-bold text-uppercase small" style="letter-spacing: 1px;"><i class="fas fa-receipt mr-2"></i>{{ __('Price Details') }}</h5>

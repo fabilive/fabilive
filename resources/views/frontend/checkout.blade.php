@@ -53,8 +53,8 @@
             </div>
          </div>
       </div>
-      <div class="row mt-4">
-         <div class="col-lg-8">
+      <div class="row mt-4 px-3">
+         <div class="col-md-6">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
@@ -599,8 +599,8 @@
             </form>
          </div>
          @if(Session::has('cart'))
-         <div class="col-lg-4">
-            <div class="right-area sticky-top" style="top: 100px; z-index: 10;">
+         <div class="col-md-6">
+            <div class="right-area">
                <div class="order-box shadow-sm border-0 rounded-lg">
                   <h4 class="title">{{ __('PRICE DETAILS') }}</h4>
                   <ul class="order-list">
