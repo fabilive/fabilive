@@ -53,8 +53,9 @@
             </div>
          </div>
       </div>
-      <div class="row mt-4 px-3" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: start !important;">
-         <div class="col-lg-7" style="flex: 0 0 58% !important; max-width: 58% !important;">
+      <div class="row mt-4 px-3">
+         {{-- Left Column: Address & Form --}}
+         <div class="col-lg-5 col-md-12">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
@@ -599,10 +600,11 @@
             </form>
          </div>
          @if(Session::has('cart'))
-         <div class="col-lg-5" style="flex: 0 0 40% !important; max-width: 40% !important; margin-left: 2% !important;">
+         {{-- Middle Column: Price Summary --}}
+         <div class="col-lg-3 col-md-6 mb-4">
             <div class="right-area">
-               <div class="order-box shadow-sm border-0 rounded-lg">
-                  <h4 class="title">{{ __('PRICE DETAILS') }}</h4>
+               <div class="order-box shadow-sm border-0 rounded-lg p-4 bg-white">
+                  <h4 class="title text-primary font-weight-bold mb-3" style="font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">{{ __('PRICE DETAILS') }}</h4>
                   <ul class="order-list">
                      <li>
                         <p>
@@ -670,77 +672,84 @@
                         <button type="submit">{{ __('Apply') }}</button>
                      </form>
                   </div>
+                  <div class="final-price mt-4 p-3 bg-light rounded shadow-sm">
+                     <span class="font-weight-bold text-dark">{{ __('Final Price') }} :</span>
+                     @if(Session::has('coupon_total'))
+                     @if($gs->currency_format == 0)
+                     <span id="final-cost" class="text-primary font-weight-bold h5 mb-0">{{ $curr->sign }}{{ $totalPrice }}</span>
+                     @else
+                     <span id="final-cost" class="text-primary font-weight-bold h5 mb-0">{{ $totalPrice }}{{ $curr->sign }}</span>
+                     @endif
+                     @elseif(Session::has('coupon_total1'))
+                     <span id="final-cost" class="text-primary font-weight-bold h5 mb-0"> {{ Session::get('coupon_total1') }}</span>
+                     @else
+                     <span id="final-cost" class="text-primary font-weight-bold h5 mb-0">{{ App\Models\Product::convertPrice($totalPrice) }}</span>
+                     @endif
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {{-- Right Column: Shipping & Packaging --}}
+         <div class="col-lg-4 col-md-6 mb-4">
+            <div class="right-area">
+               <div class="order-box shadow-sm border-0 rounded-lg p-4 bg-white h-100">
+                  <h4 class="title text-primary font-weight-bold mb-3" style="font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">{{ __('DELIVERY OPTIONS') }}</h4>
                   @if($digital == 0)
                   @if ($gs->multiple_shipping == 0)
-                  <div class="packeging-area">
-                     <h4 class="title">{{ __('Shipping Method') }}</h4>
+                  <div class="packeging-area mb-4">
+                     <h5 class="font-weight-bold small text-uppercase mb-3" style="letter-spacing: 1px; color: #666;">{{ __('Shipping Method') }}</h5>
 
                      @foreach($shipping_data as $data)
-                     <div class="radio-design">
+                     <div class="radio-design mb-2">
                         <input type="radio" class="shipping" data-price="{{ round($data->price * $curr->value,2) }}"
                            data-form="{{$data->title}}" id="free-shepping{{ $data->id }}" name="shipping_id"
                            value="{{ $data->id }}">
                         <span class="checkmark"></span>
-                        <label for="free-shepping{{ $data->id }}">
-                           {{ $data->title }}
+                        <label for="free-shepping{{ $data->id }}" class="pl-2">
+                           <span class="d-block font-weight-bold">{{ $data->title }}</span>
                            @if($data->price != 0)
-                           + {{ $curr->sign }}{{ round($data->price * $curr->value,2) }}
+                           <span class="text-success small">+ {{ $curr->sign }}{{ round($data->price * $curr->value,2) }}</span>
                            @endif
-                           <small>{{ $data->subtitle }}</small>
+                           <small class="d-block text-muted">{{ $data->subtitle }}</small>
                         </label>
                      </div>
                      @endforeach
                   </div>
 
                   <div class="packeging-area">
-                     <h4 class="title">{{ __('Packaging') }}</h4>
-                     <div class="radio-design">
+                     <h5 class="font-weight-bold small text-uppercase mb-3" style="letter-spacing: 1px; color: #666;">{{ __('Packaging') }}</h5>
+                     <div class="radio-design mb-2">
                         <input type="radio" class="packing" data-price="0"
                            data-form="{{ __('None') }}" id="free-package-none" name="packeging_id"
                            value="0">
                         <span class="checkmark"></span>
-                        <label for="free-package-none">
+                        <label for="free-package-none" class="pl-2">
                            {{ __('None') }}
                         </label>
                      </div>
                      @foreach($package_data as $data)
-                     <div class="radio-design">
+                     <div class="radio-design mb-2">
                         <input type="radio" class="packing" data-price="{{ round($data->price * $curr->value,2) }}"
                            data-form="{{$data->title}}" id="free-package{{ $data->id }}" name="packeging_id"
                            value="{{ $data->id }}">
                         <span class="checkmark"></span>
-                        <label for="free-package{{ $data->id }}">
-                           {{ $data->title }}
+                        <label for="free-package{{ $data->id }}" class="pl-2">
+                           <span class="d-block font-weight-bold">{{ $data->title }}</span>
                            @if($data->price != 0)
-                           + {{ $curr->sign }}{{ round($data->price * $curr->value,2) }}
+                           <span class="text-success small">+ {{ $curr->sign }}{{ round($data->price * $curr->value,2) }}</span>
                            @endif
-                           <small>{{ $data->subtitle }}</small>
+                           <small class="d-block text-muted">{{ $data->subtitle }}</small>
                         </label>
                      </div>
                      @endforeach
                   </div>
                   @endif
                   @endif
-
-                  <div class="final-price">
-                     <span>{{ __('Final Price') }} :</span>
-                     @if(Session::has('coupon_total'))
-                     @if($gs->currency_format == 0)
-                     <span id="final-cost">{{ $curr->sign }}{{ $totalPrice }}</span>
-                     @else
-                     <span id="final-cost">{{ $totalPrice }}{{ $curr->sign }}</span>
-                     @endif
-                     @elseif(Session::has('coupon_total1'))
-                     <span id="final-cost"> {{ Session::get('coupon_total1') }}</span>
-                     @else
-                     <span id="final-cost">{{ App\Models\Product::convertPrice($totalPrice) }}</span>
-                     @endif
-                  </div>
-                  {{-- Final Price Area End --}}
-                  @endif
                </div>
             </div>
          </div>
+         @endif
 
       </div>
    </div>
