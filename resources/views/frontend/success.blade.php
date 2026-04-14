@@ -4,18 +4,51 @@
 @section('content')
 @include('partials.global.common-header')
 @php
-    // Robust cart data retrieval
+    // --- Paranoid Cart Data Retrieval ---
     $order_items = [];
-    $cartData = json_decode($order->cart, true);
-
-    // 1. Try session-based cart
-    if (!empty($tempcart) && !empty($tempcart->items) && count($tempcart->items) > 0) {
-        $order_items = $tempcart->items;
+    
+    // 1. Try session-based cart FIRST (if it exists and is an object/array with items)
+    if (!empty($tempcart) && !is_string($tempcart)) {
+        if (is_object($tempcart) && !empty($tempcart->items)) {
+            $order_items = $tempcart->items;
+        } elseif (is_array($tempcart) && !empty($tempcart['items'])) {
+            $order_items = $tempcart['items'];
+        }
     }
-
-    // 2. Fallback to database-stored cart if session is empty
-    if (empty($order_items) && !empty($cartData['items'])) {
-        $order_items = $cartData['items'];
+    
+    // 2. If session fails, deep-dive into the database record
+    if (empty($order_items) || count($order_items) == 0) {
+        $cartData = $order->cart;
+        
+        // Handle potential double JSON encoding (recursive decoding)
+        for ($i = 0; $i < 3; $i++) {
+            if (is_string($cartData)) {
+                $decoded = json_decode($cartData, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $cartData = $decoded;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        
+        // Search for items in known locations
+        if (isset($cartData['items']) && !empty($cartData['items'])) {
+            $order_items = $cartData['items'];
+        } elseif (is_array($cartData) && !empty($cartData)) {
+            // Check if $cartData itself is the items array
+            $firstItem = reset($cartData);
+            if (is_array($firstItem) && (isset($firstItem['qty']) || isset($firstItem['item']))) {
+                $order_items = $cartData;
+            }
+        }
+    }
+    
+    // Final safety check
+    if (!is_array($order_items)) {
+        $order_items = [];
     }
 @endphp
 
