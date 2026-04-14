@@ -139,6 +139,17 @@ class CashOnDeliveryController extends CheckoutBaseControlller
             }
         }
 
+        // Populate city fields with Service Area location name if available
+        if (!empty($request->service_area_id)) {
+            $serviceArea = \App\Models\ServiceArea::find($request->service_area_id);
+            if ($serviceArea) {
+                $input['customer_city'] = $serviceArea->location;
+                if (empty($input['shipping_city']) || is_numeric($input['shipping_city'])) {
+                    $input['shipping_city'] = $serviceArea->location;
+                }
+            }
+        }
+
         $order->fill($input)->save();
         try {
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);

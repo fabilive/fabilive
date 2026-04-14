@@ -264,6 +264,17 @@ class WalletPaymentController extends CheckoutBaseControlller
             $input['customer_whatsapp'] = $request->customer_whatsapp;
 
             $input['service_area_id'] = $request->service_area_id;
+            
+            // Populate city fields with Service Area location name if available
+            if (!empty($request->service_area_id)) {
+                $serviceArea = \App\Models\ServiceArea::find($request->service_area_id);
+                if ($serviceArea) {
+                    $input['customer_city'] = $serviceArea->location;
+                    if (empty($input['shipping_city']) || is_numeric($input['shipping_city'])) {
+                        $input['shipping_city'] = $serviceArea->location;
+                    }
+                }
+            }
             $order = new Order;
             $success_url = route('front.payment.return');
             $input['user_id'] = Auth::check() ? Auth::user()->id : null;

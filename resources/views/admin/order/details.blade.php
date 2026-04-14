@@ -253,8 +253,11 @@
                                     <th width="45%">{{ __('City') }}</th>
                                     <th width="10%">:</th>
                                     <td width="45%">
-                                        {{ $order->customerCity ? $order->customerCity->city_name : 'N/A' }}
-                                        <!--{{$order->customer_city}}-->
+                                        @if($order->service_area_id)
+                                            {{ optional($order->servicearea)->location }}
+                                        @else
+                                            {{ $order->customerCity ? $order->customerCity->city_name : (is_numeric($order->customer_city) ? 'N/A' : $order->customer_city) }}
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
@@ -380,9 +383,13 @@
                                     <th width="45%">{{ __('City') }}</th>
                                     <th width="10%">:</th>
                                     <td width="45%">
-                                        {{ $order->shippingCity
-                                            ? $order->shippingCity->city_name
-                                            : ($order->customerCity ? $order->customerCity->city_name : 'N/A') }}
+                                        @if($order->service_area_id)
+                                            {{ optional($order->servicearea)->location }}
+                                        @else
+                                            {{ $order->shippingCity
+                                                ? $order->shippingCity->city_name
+                                                : ($order->customerCity ? $order->customerCity->city_name : (is_numeric($order->shipping_city) ? 'N/A' : $order->shipping_city)) }}
+                                        @endif
                                     </td>
                                 </tr>
 

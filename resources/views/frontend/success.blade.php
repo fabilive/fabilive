@@ -3,6 +3,11 @@
 
 @section('content')
 @include('partials.global.common-header')
+@php
+    if(empty($tempcart) || empty($tempcart->items)) {
+        $tempcart = new App\Models\Cart(json_decode($order->cart, true));
+    }
+@endphp
 
 <!-- breadcrumb -->
 <div class="full-row bg-light overlay-dark py-5"
@@ -78,7 +83,11 @@
                                                                 {{ __('WhatsApp:') }} {{$order->customer_whatsapp}}<br>
                                                                 @endif
                                                                 {{ __('Address:') }} {{$order->customer_address}}<br>
-                                                                {{$order->customer_city}}-{{$order->customer_zip}}
+                                                                @if($order->service_area_id)
+                                                                {{ optional($order->servicearea)->location }}
+                                                                @else
+                                                                {{$order->customer_city}}@if($order->customer_zip)-{{$order->customer_zip}}@endif
+                                                                @endif
                                                             </address>
                                                         </div>
                                                         <div class="col-md-6">
@@ -143,9 +152,11 @@
                                                                 {{$order->shipping_address == null ?
                                                                 $order->customer_address :
                                                                 $order->shipping_address}}<br>
-                                                                {{$order->shipping_city == null ? $order->customer_city
-                                                                : $order->shipping_city}}-{{$order->shipping_zip == null
-                                                                ? $order->customer_zip : $order->shipping_zip}}
+                                                                @if($order->service_area_id)
+                                                                {{ optional($order->servicearea)->location }}
+                                                                @else
+                                                                {{$order->shipping_city == null ? $order->customer_city : $order->shipping_city}}@if($order->shipping_zip || $order->customer_zip)-{{$order->shipping_zip == null ? $order->customer_zip : $order->shipping_zip}}@endif
+                                                                @endif
                                                             </address>
                                                             @if($order->service_area_id)
                                                             <div class="mt-3">
@@ -186,7 +197,11 @@
                                                                 {{ __('WhatsApp:') }} {{$order->customer_whatsapp}}<br>
                                                                 @endif
                                                                 {{ __('Address:') }} {{$order->customer_address}}<br>
-                                                                {{$order->customer_city}}-{{$order->customer_zip}}
+                                                                @if($order->service_area_id)
+                                                                {{ optional($order->servicearea)->location }}
+                                                                @else
+                                                                {{$order->customer_city}}@if($order->customer_zip)-{{$order->customer_zip}}@endif
+                                                                @endif
                                                             </address>
                                                         </div>
                                                         <div class="col-md-6">
