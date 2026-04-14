@@ -17,9 +17,15 @@ class Cart extends Model
     public function __construct($oldCart = null)
     {
         if ($oldCart) {
-            $this->items = $oldCart->items;
-            $this->totalQty = $oldCart->totalQty;
-            $this->totalPrice = $oldCart->totalPrice;
+            if (is_array($oldCart)) {
+                $this->items = $oldCart['items'] ?? null;
+                $this->totalQty = $oldCart['totalQty'] ?? 0;
+                $this->totalPrice = $oldCart['totalPrice'] ?? 0;
+            } else {
+                $this->items = $oldCart->items;
+                $this->totalQty = $oldCart->totalQty;
+                $this->totalPrice = $oldCart->totalPrice;
+            }
         }
     }
 
