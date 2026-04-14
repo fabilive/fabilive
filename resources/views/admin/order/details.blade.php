@@ -461,14 +461,17 @@
         @endif
 
         @php
-        foreach ($cart['items'] as $key => $item) {
-        $userId = $item["user_id"];
-        if (!isset($resultArray[$userId])) {
-        $resultArray[$userId] = [];
+        $cart = json_decode($order->cart, true);
+        $resultArray = [];
+        if (isset($cart['items']) && is_array($cart['items'])) {
+            foreach ($cart['items'] as $key => $item) {
+                $userId = $item["user_id"];
+                if (!isset($resultArray[$userId])) {
+                    $resultArray[$userId] = [];
+                }
+                $resultArray[$userId][$key] = $item;
+            }
         }
-        $resultArray[$userId][$key] = $item;
-        }
-
         @endphp
 
         <div class="row">
