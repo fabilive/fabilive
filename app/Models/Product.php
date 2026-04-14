@@ -244,9 +244,6 @@ class Product extends Model
     {
         $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
-        if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
-        }
 
         return $price;
     }
@@ -333,9 +330,6 @@ class Product extends Model
         // getPriceAttribute already handles the Regular vs Sale logic
         $price = $this->price;
 
-        if ($this->user_id != 0) {
-            $price = $price + $gs->fixed_commission + ($price / 100) * $gs->percentage_commission;
-        }
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
@@ -401,9 +395,6 @@ class Product extends Model
         $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
 
-        if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
-        }
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
@@ -471,9 +462,6 @@ class Product extends Model
 
         $price = $this->previous_price;
 
-        if ($this->user_id != 0) {
-            $price = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
-        }
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
@@ -747,8 +735,8 @@ class Product extends Model
         $preprice = $this->previous_price;
 
         if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
-            $preprice = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
+            $price = $this->price;
+            $preprice = $this->previous_price;
         }
 
         if (! empty($this->size)) {

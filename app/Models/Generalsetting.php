@@ -36,9 +36,17 @@ class Generalsetting extends Model
         try {
             if (self::isDbValid()) {
                 $gs = cache()->remember('generalsettings', now()->addDay(), function () {
-                    return \DB::table('generalsettings')->first();
+                    $gs = \DB::table('generalsettings')->first();
+                    if ($gs) {
+                        $gs->fixed_commission = 0;
+                        $gs->percentage_commission = 0;
+                    }
+
+                    return $gs;
                 });
-                if ($gs) return $gs;
+                if ($gs) {
+                    return $gs;
+                }
             }
         } catch (\Exception $e) {
             // Silently fail to in-memory defaults

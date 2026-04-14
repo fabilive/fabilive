@@ -452,6 +452,10 @@
 
                                           @if (Auth::check())
                                           {{-- wallet checkout start --}}
+                                          @php
+                                             $user_balance = Auth::user()->balance;
+                                             $is_insufficient = $user_balance < $totalPrice;
+                                          @endphp
                                           <a class="nav-link payment" href="#v-pills-tab-wallet" data-show="no"
                                              data-val="wallet" data-toggle="pill" role="tab"
                                              data-form="{{ route('front.wallet.submit') }}"
@@ -460,9 +464,13 @@
                                                 <span class="radio"></span>
                                              </div>
                                              <p>
-                                                {{ __('Wallet') }}
+                                                {{ __('Wallet') }} 
+                                                <span style="font-weight: 600; color: #4a5568;">({{ App\Models\Product::convertPrice($user_balance) }})</span>
                                                 <small>
                                                    {{ __('Pay from your wallet') }}
+                                                   @if($is_insufficient)
+                                                   <span class="text-danger ml-2" style="font-weight: 700;"> - {{ __('Insufficient Balance') }}</span>
+                                                   @endif
                                                 </small>
                                              </p>
                                           </a>
@@ -471,6 +479,7 @@
 
                                           @foreach($gateways as $gt)
                                           @if ($gt->checkout == 1)
+                                          @if($gt->keyword == 'cod') @continue @endif
                                           @if($gt->type == 'manual')
                                           @if($digital == 0)
                                           <a class="nav-link payment" data-val="" data-show="{{$gt->showForm()}}"
