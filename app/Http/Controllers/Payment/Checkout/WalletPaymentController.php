@@ -249,9 +249,19 @@ class WalletPaymentController extends CheckoutBaseControlller
                 $input['vendor_shipping_ids'] = $vendor_shipping_ids;
                 $input['vendor_packing_ids'] = $vendor_packing_ids;
                 $input['vendor_ids'] = $vendor_ids;
-                unset($input['shipping']);
                 unset($input['packeging']);
             }
+
+            // Robust Address Fallback: Ensure shipping details are filled from customer details if missing
+            if(empty($input['shipping_name'])) $input['shipping_name'] = @$input['customer_name'];
+            if(empty($input['shipping_email'])) $input['shipping_email'] = @$input['customer_email'];
+            if(empty($input['shipping_phone'])) $input['shipping_phone'] = @$input['customer_phone'];
+            if(empty($input['shipping_address'])) $input['shipping_address'] = @$input['customer_address'];
+            if(empty($input['shipping_city'])) $input['shipping_city'] = @$input['customer_city'];
+            if(empty($input['shipping_zip'])) $input['shipping_zip'] = @$input['customer_zip'];
+            if(empty($input['shipping_country'])) $input['shipping_country'] = @$input['customer_country'];
+            if(empty($input['shipping_state'])) $input['shipping_state'] = @$input['customer_state'];
+
             $input['service_area_id'] = $request->service_area_id;
             $order = new Order;
             $success_url = route('front.payment.return');
@@ -325,8 +335,9 @@ class WalletPaymentController extends CheckoutBaseControlller
             Session::forget('coupon_total');
             Session::forget('coupon_total1');
             Session::forget('coupon_percentage');
-            $user->balance = $user->balance - $orderTotal;
-            $user->save();
+            // Balance deduction is handled atomicaly inside OrderHelper::add_to_transaction
+            // to avoid double charging.
+
             \Illuminate\Support\Facades\DB::commit();
             if ($order->user_id != 0 && $order->wallet_price != 0) {
                 OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions

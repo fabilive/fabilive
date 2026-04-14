@@ -136,6 +136,7 @@ class OrderHelper
 
             return $user;
         } catch (\Exception $e) {
+            \Log::error('Affiliate Check Error: '.$e->getMessage());
         }
     }
 
@@ -151,6 +152,7 @@ class OrderHelper
             }
             $coupon->update();
         } catch (\Exception $e) {
+            \Log::error('Coupon Check Error: '.$e->getMessage());
         }
     }
 
@@ -171,6 +173,8 @@ class OrderHelper
                 }
             }
         } catch (\Exception $e) {
+            \Log::error('Size Qty Check Error: '.$e->getMessage());
+            throw $e;
         }
     }
 
@@ -192,6 +196,8 @@ class OrderHelper
                 }
             }
         } catch (\Exception $e) {
+            \Log::error('Stock Check Error: '.$e->getMessage());
+            throw $e;
         }
     }
 
@@ -224,6 +230,8 @@ class OrderHelper
                 }
             }
         } catch (\Exception $e) {
+            \Log::error('Vendor Order Check Error: '.$e->getMessage());
+            throw $e;
         }
     }
 
@@ -245,6 +253,8 @@ class OrderHelper
             $user->balance = $user->balance - $balance;
             $user->update();
         } catch (\Exception $e) {
+            \Log::error('Add to Transaction Error: '.$e->getMessage());
+            throw $e;
         }
     }
 
