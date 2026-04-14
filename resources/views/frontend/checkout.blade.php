@@ -21,7 +21,7 @@
    </div>
 </div>
 <section class="checkout" style="background: #f8f9fa; padding-bottom: 50px;">
-   <div class="container-fluid px-lg-5">
+   <div class="container">
       <div class="row">
          <div class="col-lg-12">
             <div class="checkout-area mb-0 pb-0">
@@ -53,11 +53,13 @@
             </div>
          </div>
       </div>
-      {{-- FORCED GRID LAYOUT --}}
-      <!-- v-grid-v1 -->
-      <div style="display: grid !important; grid-template-columns: 62% 38% !important; gap: 20px !important; align-items: start !important; width: 100% !important;">
-         {{-- Left Column: Address & Form --}}
-         <div class="left-column-grid" style="width: 100% !important;">
+      {{-- BULLETPROOF TABLE LAYOUT --}}
+      <!-- v-table-v1 -->
+      <table style="width: 100% !important; table-layout: fixed !important; border: none !important; border-collapse: collapse !important; margin-top: 20px;">
+         <tr>
+            <td style="width: 62% !important; vertical-align: top !important; padding-right: 20px !important;">
+               {{-- Left Column: Address & Form --}}
+               <div style="width: 100% !important;">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
@@ -600,10 +602,11 @@
                <input type="hidden" name="user_id" id="user_id"
                   value="{{ Auth::guard('web')->check() ? Auth::guard('web')->user()->id : '' }}">
             </form>
-         </div>
-         @if(Session::has('cart'))
-         {{-- Right Column: Combined Sidebar (Price + Delivery stacked) --}}
-         <div class="right-column-grid" style="width: 100% !important;">
+            </td>
+            @if(Session::has('cart'))
+            <td style="width: 38% !important; vertical-align: top !important;">
+               {{-- Right Column: Combined Sidebar (Price + Delivery stacked) --}}
+               <div style="width: 100% !important;">
             <div class="right-area">
                <div class="order-box shadow-sm border-0 rounded-lg p-4 bg-white">
                   {{-- Price Summary --}}
@@ -707,9 +710,12 @@
                </div>
             </div>
          </div>
-         @endif
+               </div>
+            </td>
+            @endif
+         </tr>
+      </table>
 
-      </div>
    </div>
 </section>
 <!-- Check Out Area End-->
