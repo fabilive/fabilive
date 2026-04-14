@@ -70,6 +70,12 @@ class CampayController extends CheckoutBaseControlller
         }
 
         $order->fill($input)->save();
+
+        // Vendor and Stock Logic (Consistent with COD/Wallet flow)
+        OrderHelper::size_qty_check($cart);
+        OrderHelper::stock_check($cart);
+        OrderHelper::vendor_order_check($cart, $order);
+
         try {
             $order->tracks()->create(['title' => 'Pending', 'text' => 'Order placed. Waiting for payment.']);
             $order->notifications()->create();
@@ -189,11 +195,7 @@ class CampayController extends CheckoutBaseControlller
             'details' => 'Payment held in escrow via Campay',
         ]);
 
-        // Stock and vendor logic
-        $cart = json_decode($order->cart, true);
-        OrderHelper::size_qty_check($cart);
-        OrderHelper::stock_check($cart);
-        OrderHelper::vendor_order_check($cart, $order);
+        // Stock and vendor logic already handled in store() to ensure visibility
 
         // Add to Transaction Logs (for Admin/Financial visibility)
         try {
