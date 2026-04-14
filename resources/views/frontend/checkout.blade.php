@@ -20,8 +20,8 @@
       </div>
    </div>
 </div>
-<section class="checkout">
-   <div class="container">
+<section class="checkout" style="background: #f8f9fa; padding-bottom: 50px;">
+   <div class="container-fluid px-lg-5">
       <div class="row">
          <div class="col-lg-12">
             <div class="checkout-area mb-0 pb-0">
@@ -53,9 +53,11 @@
             </div>
          </div>
       </div>
-      <div class="row mt-4 px-3" style="display: flex !important; flex-wrap: nowrap !important; align-items: flex-start !important;">
+      {{-- FORCED GRID LAYOUT --}}
+      <!-- v-grid-v1 -->
+      <div style="display: grid !important; grid-template-columns: 62% 38% !important; gap: 20px !important; align-items: start !important; width: 100% !important;">
          {{-- Left Column: Address & Form --}}
-         <div class="col-lg-7 col-md-7 col-12" style="flex: 0 0 60% !important; max-width: 60% !important;">
+         <div class="left-column-grid" style="width: 100% !important;">
             <form id="" action="{{ Auth::check() ? route('front.wallet.submit') : ($gateways->first() ? $gateways->first()->showCheckoutLink() : route('front.payment.campay')) }}" method="POST" class="checkoutform">
                @include('includes.form-success')
                @include('includes.form-error')
@@ -601,7 +603,7 @@
          </div>
          @if(Session::has('cart'))
          {{-- Right Column: Combined Sidebar (Price + Delivery stacked) --}}
-         <div class="col-lg-5 col-md-5 col-12 mb-4" style="flex: 0 0 38% !important; max-width: 38% !important; margin-left: 2% !important;">
+         <div class="right-column-grid" style="width: 100% !important;">
             <div class="right-area">
                <div class="order-box shadow-sm border-0 rounded-lg p-4 bg-white">
                   {{-- Price Summary --}}
