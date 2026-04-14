@@ -8,6 +8,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
+// TEMPORARY TEST USER CREATION ROUTE
+Route::get('/create-test-user', function () {
+    try {
+        $user = \App\Models\User::updateOrCreate(
+            ['email' => 'test@test.com'],
+            [
+                'name' => 'Fabilive Tester',
+                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'balance' => 50000,
+                'email_verified' => 'Yes',
+                'status' => 1
+            ]
+        );
+        return "<h1>Test User Ready!</h1>
+                <p><strong>Email:</strong> test@test.com</p>
+                <p><strong>Password:</strong> password123</p>
+                <p><strong>Wallet Balance:</strong> 50,000 CFA</p>
+                <br>
+                <a href='".route('user-login')."'>Go to Login Page</a>";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
+
 // =================================== Admin Section Routes ===================================\\
 
 // ************************************ ADMIN SECTION **********************************************
