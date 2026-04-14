@@ -5,12 +5,18 @@
 @include('partials.global.common-header')
 @php
     // Robust cart data retrieval
+    $order_items = [];
     $cartData = json_decode($order->cart, true);
-    if(empty($tempcart) || empty($tempcart->items)) {
-        $tempcart = new App\Models\Cart($cartData);
+
+    // 1. Try session-based cart
+    if (!empty($tempcart) && !empty($tempcart->items) && count($tempcart->items) > 0) {
+        $order_items = $tempcart->items;
     }
-    // Final check to ensure we have an array for the loop
-    $order_items = is_array($tempcart->items) ? $tempcart->items : (isset($cartData['items']) ? $cartData['items'] : []);
+
+    // 2. Fallback to database-stored cart if session is empty
+    if (empty($order_items) && !empty($cartData['items'])) {
+        $order_items = $cartData['items'];
+    }
 @endphp
 
 <!-- breadcrumb -->
