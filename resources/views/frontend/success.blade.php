@@ -36,8 +36,6 @@
 <!-- breadcrumb -->
 <section class="tempcart">
 
-    @if(!empty($order_items))
-
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -387,7 +385,7 @@
                 <!-- Ending of Dashboard data-table area -->
             </div>
 
-            @endif
+
 
 </section>
 
