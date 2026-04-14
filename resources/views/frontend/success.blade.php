@@ -303,7 +303,7 @@
                                                         </thead>
                                                         <tbody>
 
-                                                            @foreach($tempcart->items as $product)
+                                                            @foreach($tempcart->items ?? [] as $product)
                                                             <tr>
 
                                                                 <td>{{ $product['item']['name'] }}</td>
@@ -327,7 +327,7 @@
                                                                     @if(!empty($product['keys']))
 
                                                                     @foreach( array_combine(explode(',',
-                                                                    $product['keys']), explode(',', $product['values']))
+                                                                    $product['keys'] ?? ''), explode(',', $product['values'] ?? ''))
                                                                     as $key => $value)
 
                                                                     <b>{{ ucwords(str_replace('_', ' ', $key)) }} :
