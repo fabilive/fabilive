@@ -47,6 +47,7 @@ class CampayController extends CheckoutBaseControlller
         $order_number = Str::random(4).time();
 
         $input['user_id'] = Auth::check() ? Auth::user()->id : null;
+        $input['customer_whatsapp'] = $request->customer_whatsapp;
         $input['cart'] = json_encode($cart);
         $input['pay_amount'] = $orderTotal / $this->curr->value;
         $input['order_number'] = $order_number;
@@ -71,6 +72,7 @@ class CampayController extends CheckoutBaseControlller
         $order->fill($input)->save();
         try {
             $order->tracks()->create(['title' => 'Pending', 'text' => 'Order placed. Waiting for payment.']);
+            $order->notifications()->create();
         } catch (\Exception $e) {
         }
 
@@ -192,6 +194,22 @@ class CampayController extends CheckoutBaseControlller
         OrderHelper::size_qty_check($cart);
         OrderHelper::stock_check($cart);
         OrderHelper::vendor_order_check($cart, $order);
+
+        // Add to Transaction Logs (for Admin/Financial visibility)
+        try {
+            $transaction = new \App\Models\Transaction;
+            $transaction->txn_number = \Illuminate\Support\Str::random(3).substr(time(), 6, 8).\Illuminate\Support\Str::random(3);
+            $transaction->user_id = $order->user_id;
+            $transaction->amount = $order->pay_amount;
+            $transaction->currency_sign = $order->currency_sign;
+            $transaction->currency_code = $order->currency_name;
+            $transaction->currency_value = $order->currency_value;
+            $transaction->details = 'Payment Via Campay';
+            $transaction->type = 'plus'; // 'plus' because it's an external payment coming into the system/merchant log
+            $transaction->save();
+        } catch (\Exception $e) {
+            \Log::error('Campay Transaction Error: '.$e->getMessage());
+        }
 
         // Notifications and Mail
         try {

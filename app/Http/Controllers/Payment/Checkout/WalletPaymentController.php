@@ -261,6 +261,7 @@ class WalletPaymentController extends CheckoutBaseControlller
             if(empty($input['shipping_zip'])) $input['shipping_zip'] = @$input['customer_zip'];
             if(empty($input['shipping_country'])) $input['shipping_country'] = @$input['customer_country'];
             if(empty($input['shipping_state'])) $input['shipping_state'] = @$input['customer_state'];
+            $input['customer_whatsapp'] = $request->customer_whatsapp;
 
             $input['service_area_id'] = $request->service_area_id;
             $order = new Order;

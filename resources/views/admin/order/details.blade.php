@@ -60,6 +60,14 @@
                                     <td width="10%">:</td>
                                     <td class="45%" width="45%">{{$order->total_delivery_fee}}</td>
                                 </tr>
+
+                                @if($order->service_area_id)
+                                <tr>
+                                    <th width="45%">{{ __('Service Area') }}</th>
+                                    <td width="10%">:</td>
+                                    <td width="45%">{{ optional($order->servicearea)->location }}</td>
+                                </tr>
+                                @endif
                                 
                                 <tr>
                                     <th width="45%">{{ __('Total Product') }}</th>
@@ -217,6 +225,13 @@
                                     <th width="10%">:</th>
                                     <td width="45%">{{$order->customer_phone}}</td>
                                 </tr>
+                                @if($order->customer_whatsapp)
+                                <tr>
+                                    <th width="45%">{{ __('WhatsApp') }}</th>
+                                    <th width="10%">:</th>
+                                    <td width="45%">{{$order->customer_whatsapp}}</td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <th width="45%">{{ __('Address') }}</th>
                                     <th width="10%">:</th>
@@ -333,6 +348,13 @@
                                     <td width="45%">{{$order->shipping_phone == null ? $order->customer_phone :
                                         $order->shipping_phone}}</td>
                                 </tr>
+                                @if($order->customer_whatsapp)
+                                <tr>
+                                    <th width="45%"><strong>{{ __('WhatsApp') }}:</strong></th>
+                                    <th width="10%">:</th>
+                                    <td width="45%">{{$order->customer_whatsapp}}</td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <th width="45%"><strong>{{ __('Address') }}:</strong></th>
                                     <th width="10%">:</th>

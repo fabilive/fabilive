@@ -70,6 +70,8 @@ html {
                             {{ __('Ship To Address') }}
                             @endif
                         </span><br>
+                        @if($order->service_area_id)
+                        <span> <strong>{{ __('Service Area') }} :</strong> {{ optional($order->servicearea)->location }}</span><br>
                         @endif
                         <span> <strong>{{ __('Payment Method') }} :</strong> {{$order->method}}</span>
                     </div>
@@ -84,7 +86,11 @@ html {
                            <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</span><br>
                            <span><strong>{{ __('Address') }}</strong>: {{ $order->shipping_address == null ? $order->customer_address : $order->shipping_address }}</span><br>
                            <span><strong>{{ __('City') }}</strong>: {{ $order->shipping_city == null ? $order->customer_city : $order->shipping_city }}</span><br>
-                           <span><strong>{{ __('Country') }}</strong>: {{ $order->shipping_country == null ? $order->customer_country : $order->shipping_country }}</span>
+                           <span><strong>{{ __('Country') }}</strong>: {{ $order->shipping_country == null ? $order->customer_country : $order->shipping_country }}</span><br>
+                           <span><strong>{{ __('Phone') }}</strong>: {{ $order->shipping_phone == null ? $order->customer_phone : $order->shipping_phone }}</span>
+                           @if($order->customer_whatsapp)
+                           <br><span><strong>{{ __('WhatsApp') }}</strong>: {{ $order->customer_whatsapp }}</span>
+                           @endif
                         </div>
                 </div>
                 @endif
@@ -94,7 +100,11 @@ html {
                             <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->customer_name}}</span><br>
                             <span><strong>{{ __('Address') }}</strong>: {{ $order->customer_address }}</span><br>
                             <span><strong>{{ __('City') }}</strong>: {{ $order->customer_city }}</span><br>
-                            <span><strong>{{ __('Country') }}</strong>: {{ $order->customer_country }}</span>
+                            <span><strong>{{ __('Country') }}</strong>: {{ $order->customer_country }}</span><br>
+                            <span><strong>{{ __('Phone') }}</strong>: {{ $order->customer_phone }}</span>
+                            @if($order->customer_whatsapp)
+                            <br><span><strong>{{ __('WhatsApp') }}</strong>: {{ $order->customer_whatsapp }}</span>
+                            @endif
                         </div>
                 </div>
             </div>

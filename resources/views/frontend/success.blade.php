@@ -74,6 +74,9 @@
                                                                 {{ __('Name:') }} {{$order->customer_name}}<br>
                                                                 {{ __('Email:') }} {{$order->customer_email}}<br>
                                                                 {{ __('Phone:') }} {{$order->customer_phone}}<br>
+                                                                @if($order->customer_whatsapp)
+                                                                {{ __('WhatsApp:') }} {{$order->customer_whatsapp}}<br>
+                                                                @endif
                                                                 {{ __('Address:') }} {{$order->customer_address}}<br>
                                                                 {{$order->customer_city}}-{{$order->customer_zip}}
                                                             </address>
@@ -133,6 +136,9 @@
                                                                 {{ __('Phone:') }}
                                                                 {{$order->shipping_phone == null ?
                                                                 $order->customer_phone : $order->shipping_phone}}<br>
+                                                                @if($order->customer_whatsapp)
+                                                                {{ __('WhatsApp:') }} {{$order->customer_whatsapp}}<br>
+                                                                @endif
                                                                 {{ __('Address:') }}
                                                                 {{$order->shipping_address == null ?
                                                                 $order->customer_address :
@@ -141,6 +147,14 @@
                                                                 : $order->shipping_city}}-{{$order->shipping_zip == null
                                                                 ? $order->customer_zip : $order->shipping_zip}}
                                                             </address>
+                                                            @if($order->service_area_id)
+                                                            <div class="mt-3">
+                                                                <h5 class="text-primary"><i class="fas fa-map-marker-alt mr-2"></i>{{ __('Service Area / Delivery Location') }}</h5>
+                                                                <p class="font-weight-bold" style="font-size: 1.1rem; color: #333;">
+                                                                    {{ optional($order->servicearea)->location }}
+                                                                </p>
+                                                            </div>
+                                                            @endif
                                                             @else
                                                             <h5>{{ __('PickUp Location') }}</h5>
                                                             <address>
@@ -168,6 +182,9 @@
                                                                 {{ __('Name:') }} {{$order->customer_name}}<br>
                                                                 {{ __('Email:') }} {{$order->customer_email}}<br>
                                                                 {{ __('Phone:') }} {{$order->customer_phone}}<br>
+                                                                @if($order->customer_whatsapp)
+                                                                {{ __('WhatsApp:') }} {{$order->customer_whatsapp}}<br>
+                                                                @endif
                                                                 {{ __('Address:') }} {{$order->customer_address}}<br>
                                                                 {{$order->customer_city}}-{{$order->customer_zip}}
                                                             </address>

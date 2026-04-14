@@ -147,7 +147,7 @@
                                           value="{{ Auth::check() ? Auth::user()->phone : '' }}">
                                     </div>
                                     <div class="col-lg-6 my-2">
-                                       <input class="form-control" type="text" id="customer_whatsapp"
+                                       <input class="form-control" type="text" id="customer_whatsapp" name="customer_whatsapp"
                                           placeholder="{{ __('WhatsApp Number (Optional)') }}"
                                           value="">
                                     </div>
