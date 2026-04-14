@@ -74,6 +74,7 @@ html {
                         <span> <strong>{{ __('Service Area') }} :</strong> {{ optional($order->servicearea)->location }}</span><br>
                         @endif
                         <span> <strong>{{ __('Payment Method') }} :</strong> {{$order->method}}</span>
+                        @endif
                     </div>
                 </div>
             </div>
