@@ -4,9 +4,13 @@
 @section('content')
 @include('partials.global.common-header')
 @php
+    // Robust cart data retrieval
+    $cartData = json_decode($order->cart, true);
     if(empty($tempcart) || empty($tempcart->items)) {
-        $tempcart = new App\Models\Cart(json_decode($order->cart, true));
+        $tempcart = new App\Models\Cart($cartData);
     }
+    // Final check to ensure we have an array for the loop
+    $order_items = is_array($tempcart->items) ? $tempcart->items : (isset($cartData['items']) ? $cartData['items'] : []);
 @endphp
 
 <!-- breadcrumb -->
@@ -32,7 +36,7 @@
 <!-- breadcrumb -->
 <section class="tempcart">
 
-    @if(!empty($tempcart))
+    @if(!empty($order_items))
 
     <div class="container">
         <div class="row justify-content-center">
@@ -318,7 +322,7 @@
                                                         </thead>
                                                         <tbody>
 
-                                                            @foreach($tempcart->items ?? [] as $product)
+                                                            @foreach($order_items as $product)
                                                             <tr>
 
                                                                 <td>{{ $product['item']['name'] }}</td>
