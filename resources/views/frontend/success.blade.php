@@ -4,49 +4,43 @@
 @section('content')
 @include('partials.global.common-header')
 @php
-    // --- Paranoid Cart Data Retrieval ---
+    // --- Bulletproof Cart Data Retrieval ---
     $order_items = [];
-    
-    // 1. Try session-based cart FIRST (if it exists and is an object/array with items)
-    if (!empty($tempcart) && !is_string($tempcart)) {
-        if (is_object($tempcart) && !empty($tempcart->items)) {
-            $order_items = $tempcart->items;
-        } elseif (is_array($tempcart) && !empty($tempcart['items'])) {
-            $order_items = $tempcart['items'];
+    $raw_cart = $order->cart;
+
+    // 1. Recursive Decoding (Handle double-encoding)
+    $max_depth = 5;
+    while (is_string($raw_cart) && $max_depth > 0) {
+        $decoded = json_decode($raw_cart, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $raw_cart = $decoded;
+        } else {
+            break;
+        }
+        $max_depth--;
+    }
+
+    // 2. Deep Item Extraction
+    if (isset($raw_cart['items']) && !empty($raw_cart['items'])) {
+        $order_items = $raw_cart['items'];
+    } elseif (is_array($raw_cart) && !empty($raw_cart)) {
+        // Check if the array itself contains product-like items
+        $first = reset($raw_cart);
+        if (is_array($first) && (isset($first['qty']) || isset($first['item']))) {
+            $order_items = $raw_cart;
         }
     }
-    
-    // 2. If session fails, deep-dive into the database record
-    if (empty($order_items) || count($order_items) == 0) {
-        $cartData = $order->cart;
-        
-        // Handle potential double JSON encoding (recursive decoding)
-        for ($i = 0; $i < 3; $i++) {
-            if (is_string($cartData)) {
-                $decoded = json_decode($cartData, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $cartData = $decoded;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        
-        // Search for items in known locations
-        if (isset($cartData['items']) && !empty($cartData['items'])) {
-            $order_items = $cartData['items'];
-        } elseif (is_array($cartData) && !empty($cartData)) {
-            // Check if $cartData itself is the items array
-            $firstItem = reset($cartData);
-            if (is_array($firstItem) && (isset($firstItem['qty']) || isset($firstItem['item']))) {
-                $order_items = $cartData;
-            }
+
+    // 3. Last Resort Fallback to Session
+    if (empty($order_items) && !empty($tempcart)) {
+        if (is_object($tempcart)) {
+            $order_items = $tempcart->items ?? [];
+        } elseif (is_array($tempcart)) {
+            $order_items = $tempcart['items'] ?? [];
         }
     }
-    
-    // Final safety check
+
+    // 4. Ensure iterable
     if (!is_array($order_items)) {
         $order_items = [];
     }
@@ -362,21 +356,21 @@
                                                             @foreach($order_items as $product)
                                                             <tr>
 
-                                                                <td>{{ $product['item']['name'] }}</td>
+                                                                <td>{{ $product['item']['name'] ?? 'Product' }}</td>
                                                                 <td>
-                                                                    <b>{{ __('Quantity') }}</b>: {{$product['qty']}}
+                                                                    <b>{{ __('Quantity') }}</b>: {{ $product['qty'] ?? 1 }}
                                                                     <br>
                                                                     @if(!empty($product['size']))
                                                                     <b>{{ __('Size') }}</b>:
-                                                                    {{ $product['item']['measure'] }}{{str_replace('-','
-                                                                    ',$product['size'])}}
+                                                                    {{ $product['item']['measure'] ?? '' }}{{str_replace('-','
+                                                                    ',$product['size'] ?? '')}}
                                                                     <br>
                                                                     @endif
                                                                     @if(!empty($product['color']))
                                                                     <div class="d-flex mt-2">
                                                                         <b>{{ __('Color') }}</b>: <span id="color-bar"
-                                                                            style="border: 10px solid #{{$product['color'] == "" ? "
-                                                                            white" : $product['color']}};"></span>
+                                                                            style="border: 10px solid #{{ ($product['color'] ?? '') == "" ? "
+                                                                            white" : ($product['color'] ?? '') }};"></span>
                                                                     </div>
                                                                     @endif
 
@@ -386,8 +380,8 @@
                                                                     $product['keys'] ?? ''), explode(',', $product['values'] ?? ''))
                                                                     as $key => $value)
 
-                                                                    <b>{{ ucwords(str_replace('_', ' ', $key)) }} :
-                                                                    </b> {{ $value }} <br>
+                                                                    <b>{{ ucwords(str_replace('_', ' ', $key ?? '')) }} :
+                                                                    </b> {{ $value ?? '' }} <br>
                                                                     @endforeach
 
                                                                     @endif
@@ -395,14 +389,14 @@
                                                                 </td>
 
                                                                 <td>{{
-                                                                    PriceHelper::showCurrencyPrice(($product['item_price']
-                                                                    ) * $order->currency_value) }}
+                                                                    PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0
+                                                                    ) * ($order->currency_value ?? 1)) }}
                                                                 </td>
 
-                                                                <td>{{ PriceHelper::showCurrencyPrice($product['price']
-                                                                    * $order->currency_value) }} <small>{{
-                                                                        $product['discount'] == 0 ? '' :
-                                                                        '('.$product['discount'].'% '.__('Off').')'
+                                                                <td>{{ PriceHelper::showCurrencyPrice(($product['price'] ?? 0)
+                                                                    * ($order->currency_value ?? 1)) }} <small>{{
+                                                                        ($product['discount'] ?? 0) == 0 ? '' :
+                                                                        '('.$product['discount'].' % '.__('Off').')'
                                                                         }}</small>
                                                                 </td>
 
