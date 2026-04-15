@@ -220,12 +220,12 @@ class WalletPaymentController extends CheckoutBaseControlller
                 $vendor_shipping_ids = $orderCalculate['vendor_shipping_ids'];
                 $vendor_packing_ids = $orderCalculate['vendor_packing_ids'];
                 $vendor_ids = $orderCalculate['vendor_ids'];
-                $input['shipping_title'] = $shipping->title;
-                $input['vendor_shipping_id'] = $shipping->id;
-                $input['packing_title'] = $packeing->title;
-                $input['vendor_packing_id'] = $packeing->id;
-                // $input['shipping_cost'] = $packeing->price;
-                $input['packing_cost'] = $packeing->price;
+                $input['shipping_title'] = $shipping ? $shipping->title : 'Free Shipping';
+                $input['vendor_shipping_id'] = $shipping ? $shipping->id : 0;
+                $input['packing_title'] = $packeing ? $packeing->title : 'None';
+                $input['vendor_packing_id'] = $packeing ? $packeing->id : 0;
+                // $input['shipping_cost'] = $packeing ? $packeing->price : 0;
+                $input['packing_cost'] = $packeing ? $packeing->price : 0;
                 $input['is_shipping'] = $is_shipping;
                 $input['vendor_shipping_ids'] = $vendor_shipping_ids;
                 $input['vendor_packing_ids'] = $vendor_packing_ids;
@@ -249,7 +249,8 @@ class WalletPaymentController extends CheckoutBaseControlller
                 $input['vendor_shipping_ids'] = $vendor_shipping_ids;
                 $input['vendor_packing_ids'] = $vendor_packing_ids;
                 $input['vendor_ids'] = $vendor_ids;
-                unset($input['packeging']);
+                // Safely handle unset if needed - although $input['packeging'] might not exist
+                if(isset($input['packeging'])) unset($input['packeging']);
             }
 
             // Robust Address Fallback: Ensure shipping details are filled from customer details if missing

@@ -43,6 +43,39 @@ class CampayController extends CheckoutBaseControlller
         // Total including delivery fee is now calculated inside PriceHelper::getOrderTotal
         $orderTotal = $orderCalculate['total_amount'] ?? 0;
 
+        if ($this->gs->multiple_shipping == 0) {
+            $shipping = $orderCalculate['shipping'];
+            $packeing = $orderCalculate['packeing'];
+            $is_shipping = $orderCalculate['is_shipping'];
+            $vendor_shipping_ids = $orderCalculate['vendor_shipping_ids'];
+            $vendor_packing_ids = $orderCalculate['vendor_packing_ids'];
+            $vendor_ids = $orderCalculate['vendor_ids'];
+
+            $input['shipping_title'] = $shipping ? $shipping->title : 'Free Shipping';
+            $input['vendor_shipping_id'] = $shipping ? $shipping->id : 0;
+            $input['packing_title'] = $packeing ? $packeing->title : 'None';
+            $input['vendor_packing_id'] = $packeing ? $packeing->id : 0;
+            $input['shipping_cost'] = $shipping ? $shipping->price : 0;
+            $input['packing_cost'] = $packeing ? $packeing->price : 0;
+            $input['is_shipping'] = $is_shipping;
+            $input['vendor_shipping_ids'] = $vendor_shipping_ids;
+            $input['vendor_packing_ids'] = $vendor_packing_ids;
+            $input['vendor_ids'] = $vendor_ids;
+        } else {
+            $shipping_cost = $orderCalculate['shipping_cost'];
+            $packing_cost = $orderCalculate['packing_cost'];
+            $input['shipping_title'] = $orderCalculate['vendor_shipping_ids'];
+            $input['vendor_shipping_id'] = $orderCalculate['vendor_shipping_ids'];
+            $input['packing_title'] = $orderCalculate['vendor_packing_ids'];
+            $input['vendor_packing_id'] = $orderCalculate['vendor_packing_ids'];
+            $input['shipping_cost'] = $shipping_cost;
+            $input['packing_cost'] = $packing_cost;
+            $input['is_shipping'] = 1;
+            $input['vendor_shipping_ids'] = $orderCalculate['vendor_shipping_ids'];
+            $input['vendor_packing_ids'] = $orderCalculate['vendor_packing_ids'];
+            $input['vendor_ids'] = $orderCalculate['vendor_ids'];
+        }
+
         $order = new Order;
         $order_number = Str::random(4).time();
 
