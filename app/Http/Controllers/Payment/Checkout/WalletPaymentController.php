@@ -283,7 +283,14 @@ class WalletPaymentController extends CheckoutBaseControlller
             $input['cart'] = $new_cart;
             $input['pay_amount'] = $orderTotal / $this->curr->value;
             $input['order_number'] = Str::random(4).time();
-            $input['wallet_price'] = $request->wallet_price / $this->curr->value;
+            
+            // Safety Fallback: If wallet_price is missing or 0 in request but method is Wallet, use orderTotal
+            $wallet_pay_amount = $request->wallet_price;
+            if(empty($wallet_pay_amount) || $wallet_pay_amount == 0) {
+                $wallet_pay_amount = $orderTotal;
+            }
+            $input['wallet_price'] = $wallet_pay_amount / $this->curr->value;
+            
             $input['method'] = 'Wallet';
             $input['payment_status'] = 'Completed';
             if ($input['tax_type'] == 'state_tax') {
@@ -291,7 +298,6 @@ class WalletPaymentController extends CheckoutBaseControlller
             } else {
                 $input['tax_location'] = Country::findOrFail($input['tax'])->country_name;
             }
-            $input['tax'] = Session::get('current_tax');
             $input['tax'] = Session::get('current_tax');
             if ($input['dp'] == 1) {
                 $input['status'] = 'completed';
@@ -340,21 +346,26 @@ class WalletPaymentController extends CheckoutBaseControlller
             OrderHelper::size_qty_check($cart); // For Size Quantiy Checking
             OrderHelper::stock_check($cart); // For Stock Checking
             OrderHelper::vendor_order_check($cart, $order); // For Vendor Order Checking
+            
+            // Deduct from wallet balance BEFORE commit
+            if ($order->user_id != 0 && $order->wallet_price != 0) {
+                OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions
+            }
+
             Session::put('temporder', $order);
             Session::put('tempcart', $cart);
+            
+            // Commit database changes
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Clear session data AFTER successful commit
             Session::forget('cart');
             Session::forget('already');
             Session::forget('coupon');
             Session::forget('coupon_total');
             Session::forget('coupon_total1');
             Session::forget('coupon_percentage');
-            // Balance deduction is handled atomicaly inside OrderHelper::add_to_transaction
-            // to avoid double charging.
 
-            \Illuminate\Support\Facades\DB::commit();
-            if ($order->user_id != 0 && $order->wallet_price != 0) {
-                OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions
-            }
             $data = [
                 'to' => $order->customer_email,
                 'type' => 'new_order',

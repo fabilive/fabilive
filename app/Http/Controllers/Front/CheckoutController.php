@@ -403,18 +403,23 @@ class CheckoutController extends FrontBaseController
 
     public function payreturn()
     {
-
-        if (Session::has('tempcart')) {
+        if (Session::has('tempcart') || Session::has('temporder')) {
             $oldCart = Session::get('tempcart');
-            $tempcart = new Cart($oldCart);
+            $tempcart = $oldCart ? new Cart($oldCart) : null;
             $order = Session::get('temporder');
-            // dd($order);
+
+            // Fallback: If order is missing from session but user is logged in
+            if (!$order && Auth::check()) {
+                $order = Order::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->first();
+            }
+
+            if (!$order) {
+                return redirect()->route('front.cart')->with('unsuccess', __('Order not found.'));
+            }
+
+            return view('frontend.success', compact('tempcart', 'order'));
         } else {
-            $tempcart = '';
-
-            return redirect()->back();
+            return redirect()->route('front.index');
         }
-
-        return view('frontend.success', compact('tempcart', 'order'));
     }
 }

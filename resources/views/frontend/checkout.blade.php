@@ -1055,6 +1055,11 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         $(this).append('<input type="hidden" name="total_delivery_fee" id="total_delivery_fee" />');
     }
     $('#total_delivery_fee').val((cartDeliveryFee || 0).toFixed(2));
+
+    // NEW: Double check wallet_price on submit
+    if($('.payment.active').data('val') == 'wallet'){
+        $('#wallet-price').val($('#grandtotal').val());
+    }
 });
    	function hide_state(){
    		$('.select_state').addClass('d-none');
@@ -1440,6 +1445,13 @@ $('.payment').on('click', function () {
 
     // Set the form action to the correct POST route
     $('.checkoutform').attr('action', paymentFormAction);
+
+    // NEW: Populate wallet_price if wallet is selected
+    if(paymentVal === 'wallet') {
+        $('#wallet-price').val($('#grandtotal').val());
+    } else {
+        $('#wallet-price').val(0);
+    }
 
     // Set form ID if needed for specific payment JS
     if(paymentVal === 'paystack') {
