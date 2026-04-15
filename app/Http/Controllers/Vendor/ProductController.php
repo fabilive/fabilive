@@ -640,6 +640,7 @@ class ProductController extends VendorBaseController
                         $input['license_qty'] = $input['license_qty'];
                     }
                 }
+                $data->fill($input)->save();
                 \Log::debug('Vendor Product Store: Product model saved. ID: ' . $data->id);
                 $prod = Product::find($data->id);
                 if ($prod->type != 'Physical') {
