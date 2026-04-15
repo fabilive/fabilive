@@ -370,6 +370,7 @@ class ProductController extends VendorBaseController
     //*** POST Request
     public function store(Request $request)
     {
+        \Log::info('Vendor Product Store Entry. Size: ' . $request->server('CONTENT_LENGTH') . ' bytes');
         if (! function_exists('imagecreatefromjpeg')) {
             return response()->json(['errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']]);
         }

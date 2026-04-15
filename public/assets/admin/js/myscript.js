@@ -842,7 +842,13 @@
         $("button.addProductSubmit-btn").prop("disabled", false);
         var msg = "Upload failed (HTTP " + xhr.status + "). ";
         if (xhr.status === 419) msg = "Session expired. Please refresh the page and try again.";
-        else if (xhr.status === 500) msg = "Server error during upload. Please check file type and try again.";
+        else if (xhr.status === 500) {
+          if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors[0]) {
+            msg = xhr.responseJSON.errors[0];
+          } else {
+            msg = "Server error during upload. Please check file type and try again.";
+          }
+        }
         else if (xhr.status === 413) msg = "File too large. Please choose a smaller image.";
         geniusform.parent().find(".alert-danger").show();
         geniusform.parent().find(".alert-danger ul").html("<li>" + msg + "</li>");
