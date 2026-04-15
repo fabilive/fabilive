@@ -371,7 +371,7 @@
 												</div>
 											</div>
 
-												<input type="hidden" name="type" value="Physical">
+												<input type="hidden" name="type" value="License">
 												
 										</div>
 									</div>

@@ -179,7 +179,7 @@ class ProductController extends AdminBaseController
             ->orderBy('city_name')
             ->pluck('city_name', 'id');
 
-        $cats = Category::all();
+        $cats = Category::where('category_type', $slug)->get();
         $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
         if ($slug == 'physical') {
             return view('admin.product.create.physical', compact('cats', 'sign', 'cities', 'countries'));

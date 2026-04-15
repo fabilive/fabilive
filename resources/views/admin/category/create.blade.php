@@ -31,6 +31,22 @@
                               <input type="text" class="input-field" name="slug" placeholder="{{ __('Enter Slug') }}" required="" value="">
                             </div>
                           </div>
+
+                          <div class="row">
+                            <div class="col-lg-4">
+                              <div class="left-area">
+                                  <h4 class="heading">{{ __('Category Type') }} *</h4>
+                              </div>
+                            </div>
+                            <div class="col-lg-7">
+                              <select class="input-field" name="category_type" required="">
+                                <option value="physical">{{ __('Physical') }}</option>
+                                <option value="digital">{{ __('Digital') }}</option>
+                                <option value="license">{{ __('License') }}</option>
+                                <option value="listing">{{ __('Listing') }}</option>
+                              </select>
+                            </div>
+                          </div>
                           
                             <div class="row">
                               <div class="col-lg-4">

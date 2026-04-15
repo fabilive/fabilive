@@ -137,7 +137,7 @@ class ProductController extends VendorBaseController
                 return redirect()->route('vendor-verify');
             }
         }
-        $cats = Category::all();
+        $cats = Category::where('category_type', $slug)->get();
         $countries = Country::where('status', 1)->get();
         $sign = $this->curr;
 

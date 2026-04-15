@@ -36,6 +36,22 @@
                             <input type="text" class="input-field" name="slug" placeholder="{{ __('Enter Slug') }}" required="" value="{{$data->slug}}">
                           </div>
                         </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Category Type') }} *</h4>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <select class="input-field" name="category_type" required="">
+                              <option value="physical" {{ $data->category_type == 'physical' ? 'selected' : '' }}>{{ __('Physical') }}</option>
+                              <option value="digital" {{ $data->category_type == 'digital' ? 'selected' : '' }}>{{ __('Digital') }}</option>
+                              <option value="license" {{ $data->category_type == 'license' ? 'selected' : '' }}>{{ __('License') }}</option>
+                              <option value="listing" {{ $data->category_type == 'listing' ? 'selected' : '' }}>{{ __('Listing') }}</option>
+                            </select>
+                          </div>
+                        </div>
 						
 						<div class="row">
 													<div class="col-lg-4">
