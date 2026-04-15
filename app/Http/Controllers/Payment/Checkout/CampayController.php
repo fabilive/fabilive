@@ -192,12 +192,8 @@ class CampayController extends CheckoutBaseControlller
                     $this->finalizeOrder($order);
                 }
 
-                $cart = json_decode($order->cart, true);
-                $cartObject = new Cart($cart);
-                
-                Session::put('temporder', $order);
-                Session::put('tempcart', $cartObject);
-                Session::forget('cart');
+                // Unified Finalization (Sessions, Coupons, Rewards, etc.)
+                OrderHelper::finalizeOrder($order, $cartObject);
 
                 if ($request->expectsJson()) {
                     return response()->json([

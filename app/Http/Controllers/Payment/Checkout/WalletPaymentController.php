@@ -321,32 +321,11 @@ class WalletPaymentController extends CheckoutBaseControlller
             }
             $cartTotal = $cart->totalPrice; // Get total cart price
             $input['rider_percentage_commission'] = $totalCommission;
-            $input['commission'] = $totalCommission;
             $order->fill($input)->save();
-            $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
-            $order->notifications()->create();
-            if ($input['coupon_id'] != '') {
-                OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking
-            }
-            if (Auth::check()) {
-                if ($this->gs->is_reward == 1) {
-                    $num = $order->pay_amount;
-                    $rewards = Reward::get();
-                    foreach ($rewards as $i) {
-                        $smallest[$i->order_amount] = abs($i->order_amount - $num);
-                    }
 
-                    if (isset($smallest)) {
-                        asort($smallest);
-                        $final_reword = Reward::where('order_amount', key($smallest))->first();
-                        Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
-                    }
-                }
-            }
-            OrderHelper::size_qty_check($cart); // For Size Quantiy Checking
-            OrderHelper::stock_check($cart); // For Stock Checking
-            OrderHelper::vendor_order_check($cart, $order); // For Vendor Order Checking
-            
+            // 1. Unified Order Finalization (Tracks, Coupons, Rewards, Stock, Session Clear)
+            OrderHelper::finalizeOrder($order, $cart);
+
             // Deduct from wallet balance BEFORE commit
             if ($order->user_id != 0 && $order->wallet_price != 0) {
                 OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions
@@ -384,14 +363,6 @@ class WalletPaymentController extends CheckoutBaseControlller
                 // Log the error but allow the user to see the success page
                 \Log::warning('Wallet Checkout Mail Error: '.$e->getMessage());
             }
-
-            // Clear session data as the ABSOLUTE FINAL STEP before redirect
-            Session::forget('cart');
-            Session::forget('already');
-            Session::forget('coupon');
-            Session::forget('coupon_total');
-            Session::forget('coupon_total1');
-            Session::forget('coupon_percentage');
 
             return redirect($success_url);
         } catch (\Exception $e) {

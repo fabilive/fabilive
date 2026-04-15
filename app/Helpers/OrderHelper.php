@@ -143,16 +143,80 @@ class OrderHelper
     public static function coupon_check($id)
     {
         try {
+            if (empty($id)) {
+                return;
+            }
             $coupon = Coupon::find($id);
+            if (!$coupon) {
+                return;
+            }
             $coupon->used++;
-            if ($coupon->times != null) {
+            if ($coupon->times !== null) {
                 $i = (int) $coupon->times;
-                $i--;
+                if ($i > 0) {
+                    $i--;
+                }
                 $coupon->times = (string) $i;
             }
             $coupon->update();
         } catch (\Exception $e) {
             \Log::error('Coupon Check Error: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Unified order finalization logic to handle coupons, rewards, stock, and session clearing.
+     */
+    public static function finalizeOrder($order, $cart)
+    {
+        try {
+            // 1. Order Tracks & Notifications
+            $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
+            $order->notifications()->create();
+
+            // 2. Coupon Tracking
+            if (! empty($order->coupon_id)) {
+                self::coupon_check($order->coupon_id);
+            }
+
+            // 3. Reward Points
+            if (Auth::check()) {
+                $gs = Generalsetting::safeFirst();
+                if ($gs->is_reward == 1) {
+                    $num = $order->pay_amount;
+                    $rewards = \App\Models\Reward::get();
+                    $smallest = [];
+                    foreach ($rewards as $i) {
+                        $smallest[$i->order_amount] = abs($i->order_amount - $num);
+                    }
+
+                    if (! empty($smallest)) {
+                        asort($smallest);
+                        $final_reword = \App\Models\Reward::where('order_amount', key($smallest))->first();
+                        Auth::user()->update(['reward' => (Auth::user()->reward + $final_reword->reward)]);
+                    }
+                }
+            }
+
+            // 4. Stock & Qty Checks
+            self::size_qty_check($cart);
+            self::stock_check($cart);
+            self::vendor_order_check($cart, $order);
+
+            // 5. Clear All Related Sessions (Prevents "Ghost Coupons")
+            Session::put('temporder', $order);
+            Session::put('tempcart', $cart);
+            Session::forget('cart');
+            Session::forget('already');
+            Session::forget('coupon');
+            Session::forget('coupon_code');
+            Session::forget('coupon_id');
+            Session::forget('coupon_total');
+            Session::forget('coupon_total1');
+            Session::forget('coupon_percentage');
+            Session::forget('current_tax');
+        } catch (\Exception $e) {
+            \Log::error('Order Finalization Error: '.$e->getMessage());
         }
     }
 
