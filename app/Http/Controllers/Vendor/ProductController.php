@@ -416,14 +416,23 @@ class ProductController extends VendorBaseController
 
                     $input['file'] = $name;
                 }
-                $image = $request->photo;
-                [$type, $image] = explode(';', $image);
-                [, $image] = explode(',', $image);
-                $image = base64_decode($image);
-                $image_name = time().Str::random(8).'.png';
-                $path = 'assets/images/products/'.$image_name;
-                file_put_contents(public_path($path), $image);
-                $input['photo'] = $image_name;
+                if (! empty($request->photo)) {
+                    $image = $request->photo;
+                    if (strpos($image, ';') !== false && strpos($image, ',') !== false) {
+                        [$type, $image] = explode(';', $image);
+                        [, $image] = explode(',', $image);
+                        $image = base64_decode($image);
+                        $image_name = time().Str::random(8).'.png';
+                        $path = 'assets/images/products/'.$image_name;
+                        file_put_contents(public_path($path), $image);
+                        $input['photo'] = $image_name;
+                    }
+                }
+
+                // Check if post_max_size or upload_max_filesize was exceeded (resulting in missing data)
+                if (empty($input['name']) && $request->isMethod('post')) {
+                    return response()->json(['errors' => [0 => 'The server received an empty request. This usually happens if the upload size exceeds server limits (currently 2MB/8MB). Please try a smaller file.']]);
+                }
                 $input['thumbnail'] = $image_name; // Fallback
                 if ($request->type == 'Physical' || $request->type == 'Listing') {
                     $rules = ['sku' => 'min:8|unique:products'];
@@ -679,10 +688,10 @@ class ProductController extends VendorBaseController
                 return response()->json(['errors' => [0 => __('You Can\'t Add More Product.')]]);
             }
         } catch (\Throwable $e) {
-            DB::rollBack();
+            \Illuminate\Support\Facades\DB::rollBack();
             \Log::error('Vendor Product Store Error: '.$e->getMessage()."\n".$e->getTraceAsString());
 
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['errors' => [0 => 'Server Error: '.$e->getMessage()]], 500);
         }
     }
 

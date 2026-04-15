@@ -113,6 +113,11 @@ class GeniusMailer
         return true;
     }
 
+    public function sendAutoOrderMail(array $data, $order_id)
+    {
+        return $this->sendAutoMail($data);
+    }
+
     private function addRecipients($to)
     {
         // Support | or , separated emails
