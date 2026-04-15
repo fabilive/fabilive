@@ -374,6 +374,7 @@ class ProductController extends VendorBaseController
             return response()->json(['errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']]);
         }
         try {
+            $image_name = null;
             $user = $this->user;
             $package = $user->subscribes()->latest('id')->first();
             $prods = $user->products()->latest('id')->get()->count();
@@ -433,7 +434,7 @@ class ProductController extends VendorBaseController
                 if (empty($input['name']) && $request->isMethod('post')) {
                     return response()->json(['errors' => [0 => 'The server received an empty request. This usually happens if the upload size exceeds server limits (currently 2MB/8MB). Please try a smaller file.']]);
                 }
-                $input['thumbnail'] = $image_name; // Fallback
+                $input['thumbnail'] = $image_name ?? 'noimage.png'; // Fallback
                 if ($request->type == 'Physical' || $request->type == 'Listing') {
                     $rules = ['sku' => 'min:8|unique:products'];
                     $validator = Validator::make($request->all(), $rules);
@@ -467,9 +468,9 @@ class ProductController extends VendorBaseController
                             $input['color'] = null;
                         } else {
                             $input['stock_check'] = 1;
-                            $input['color'] = implode(',', $request->colors);
-                            $input['size'] = implode(',', $request->size);
-                            $input['size_qty'] = implode(',', $request->size_qty);
+                            $input['color'] = implode(',', (array)$request->colors);
+                            $input['size'] = implode(',', (array)$request->size);
+                            $input['size_qty'] = implode(',', (array)$request->size_qty);
                             $size_prices = $request->size_price;
                             $s_price = [];
                             foreach ($size_prices as $key => $sPrice) {
@@ -481,7 +482,7 @@ class ProductController extends VendorBaseController
                     if (empty($request->color_check)) {
                         $input['color_all'] = null;
                     } else {
-                        $input['color_all'] = implode(',', $request->color_all);
+                        $input['color_all'] = implode(',', (array)$request->color_all);
                     }
                     if (empty($request->size_check)) {
                         $input['size_all'] = null;
@@ -507,7 +508,7 @@ class ProductController extends VendorBaseController
                     if (empty($request->color_check)) {
                         $input['color'] = null;
                     } else {
-                        $input['color'] = implode(',', $request->colors);
+                        $input['color'] = implode(',', (array)$request->colors);
                     }
                     if ($request->mesasure_check == '') {
                         $input['measure'] = null;
@@ -530,12 +531,12 @@ class ProductController extends VendorBaseController
                         $input['license_qty'] = implode(',', $request->license_qty);
                     }
                 }
-                if (in_array(null, $request->features) || in_array(null, $request->colors)) {
+                if (in_array(null, (array)$request->features) || in_array(null, (array)$request->colors)) {
                     $input['features'] = null;
                     $input['colors'] = null;
                 } else {
-                    $input['features'] = implode(',', str_replace(',', ' ', $request->features));
-                    $input['colors'] = implode(',', str_replace(',', ' ', $request->colors));
+                    $input['features'] = implode(',', str_replace(',', ' ', (array)$request->features));
+                    $input['colors'] = implode(',', str_replace(',', ' ', (array)$request->colors));
                 }
                 if (! empty($request->tags)) {
                     $input['tags'] = implode(',', $request->tags);
@@ -551,8 +552,8 @@ class ProductController extends VendorBaseController
                             $in_name = $catAttr->input_name;
                             if ($request->has("$in_name")) {
                                 $attrArr["$in_name"]['values'] = $request["$in_name"];
-                                foreach ($request["$in_name".'_price'] as $aprice) {
-                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                foreach ((array)$request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = (float)$aprice / $sign->value;
                                 }
                                 $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                                 if ($catAttr->details_status) {
@@ -571,8 +572,8 @@ class ProductController extends VendorBaseController
                             $in_name = $subAttr->input_name;
                             if ($request->has("$in_name")) {
                                 $attrArr["$in_name"]['values'] = $request["$in_name"];
-                                foreach ($request["$in_name".'_price'] as $aprice) {
-                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                foreach ((array)$request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = (float)$aprice / $sign->value;
                                 }
                                 $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                                 if ($subAttr->details_status) {
@@ -591,8 +592,8 @@ class ProductController extends VendorBaseController
                             $in_name = $childAttr->input_name;
                             if ($request->has("$in_name")) {
                                 $attrArr["$in_name"]['values'] = $request["$in_name"];
-                                foreach ($request["$in_name".'_price'] as $aprice) {
-                                    $ttt["$in_name".'_price'][] = $aprice / $sign->value;
+                                foreach ((array)$request["$in_name".'_price'] as $aprice) {
+                                    $ttt["$in_name".'_price'][] = (float)$aprice / $sign->value;
                                 }
                                 $attrArr["$in_name"]['prices'] = $ttt["$in_name".'_price'];
                                 if ($childAttr->details_status) {
@@ -662,7 +663,7 @@ class ProductController extends VendorBaseController
                             DB::rollBack();
                             return response()->json(['errors' => ['File format not supported: '.$file->getClientOriginalExtension()]]);
                         }
-                        if (in_array($key, $request->galval)) {
+                        if (is_array($request->galval) && in_array($key, $request->galval)) {
                             $gallery = new Gallery;
                             $name = \PriceHelper::ImageCreateName($file);
                             
