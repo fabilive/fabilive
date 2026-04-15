@@ -374,6 +374,10 @@ class ProductController extends VendorBaseController
             return response()->json(['errors' => [0 => 'The server is missing the GD PHP extension with JPEG support. Please contact support or enable php-gd in your hosting panel.']]);
         }
         try {
+            @ini_set('memory_limit', '512M');
+            @set_time_limit(300);
+            \Log::debug('Vendor Product Store: Starting process for user ID: ' . (Auth::user()->id ?? 'unknown'));
+            
             $image_name = null;
             $user = $this->user;
             $package = $user->subscribes()->latest('id')->first();
@@ -403,6 +407,7 @@ class ProductController extends VendorBaseController
                     }
                 }
 
+                \Log::debug('Vendor Product Store: Basic validation passed. Starting transaction.');
                 DB::beginTransaction();
                 $data = new Product;
                 $sign = $this->curr;
@@ -629,7 +634,7 @@ class ProductController extends VendorBaseController
                         $input['license_qty'] = $input['license_qty'];
                     }
                 }
-                $data->fill($input)->save();
+                \Log::debug('Vendor Product Store: Product model saved. ID: ' . $data->id);
                 $prod = Product::find($data->id);
                 if ($prod->type != 'Physical') {
                     $prod->slug = Str::slug($data->name, '-').'-'.strtolower(Str::random(3).$data->id.Str::random(3));
@@ -644,10 +649,15 @@ class ProductController extends VendorBaseController
                     finfo_close($finfo);
 
                     if (strpos($mime, 'image/') === 0) {
-                        $img = \Image::make($main_photo_path)->resize(285, 285);
-                        $thumbnail = time().Str::random(8).'.jpg';
-                        $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
-                        $prod->thumbnail = $thumbnail;
+                        try {
+                            $img = \Image::make($main_photo_path)->resize(285, 285);
+                            $thumbnail = time().Str::random(8).'.jpg';
+                            $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
+                            $prod->thumbnail = $thumbnail;
+                        } catch (\Exception $e) {
+                            \Log::warning('Vendor Product Store: Thumbnail generation failed: ' . $e->getMessage());
+                            $prod->thumbnail = 'noimage.png';
+                        }
                     } else {
                         $prod->thumbnail = 'noimage.png'; // Or some default
                     }
@@ -667,10 +677,15 @@ class ProductController extends VendorBaseController
                             $gallery = new Gallery;
                             $name = \PriceHelper::ImageCreateName($file);
                             
-                             $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
+                            $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
                             if ($is_image) {
-                                $img = \Image::make($file->getRealPath())->resize(800, 800);
-                                $img->save(public_path().'/assets/images/galleries/'.$name);
+                                try {
+                                    $img = \Image::make($file->getRealPath())->resize(800, 800);
+                                    $img->save(public_path().'/assets/images/galleries/'.$name);
+                                } catch (\Exception $e) {
+                                    \Log::warning('Vendor Product Store: Gallery image processing failed: ' . $e->getMessage());
+                                    $file->move(public_path().'/assets/images/galleries/', $name);
+                                }
                             } else {
                                 $file->move(public_path().'/assets/images/galleries/', $name);
                             }
@@ -681,6 +696,7 @@ class ProductController extends VendorBaseController
                         }
                     }
                 }
+                \Log::debug('Vendor Product Store: All processing complete. Committing transaction.');
                 DB::commit();
                 $msg = __('New Product Added Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
 
@@ -690,9 +706,10 @@ class ProductController extends VendorBaseController
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            \Log::error('Vendor Product Store Error: '.$e->getMessage()."\n".$e->getTraceAsString());
+            \Log::error('Vendor Product Store Error: '.$e->getMessage().' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            \Log::error('Stack Trace: ' . $e->getTraceAsString());
 
-            return response()->json(['errors' => [0 => 'Server Error: '.$e->getMessage()]], 500);
+            return response()->json(['errors' => [0 => 'Server Error: '.$e->getMessage() . ' (Line: ' . $e->getLine() . ')']], 500);
         }
     }
 
