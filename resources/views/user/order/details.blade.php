@@ -161,12 +161,12 @@
                            <li class="d-flex justify-content-between mb-3">
                               <span class="text-secondary">{{ __('Subtotal') }}</span>
                               <span class="text-dark">
-                                 {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount - $order->shipping_cost - $order->packing_cost - ($order->tax / $order->currency_value)) * $order->currency_value, $order->currency_sign) }}
+                                 {{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount - $order->shipping_cost - (float)$order->total_delivery_fee - $order->packing_cost - ($order->tax / $order->currency_value)) * $order->currency_value, $order->currency_sign) }}
                               </span>
                            </li>
                            <li class="d-flex justify-content-between mb-3">
                               <span class="text-secondary">{{ __('Delivery Fee') }}</span>
-                              <span class="text-dark">+ {{ PriceHelper::showOrderCurrencyPrice($order->shipping_cost * $order->currency_value, $order->currency_sign) }}</span>
+                              <span class="text-dark">+ {{ PriceHelper::showOrderCurrencyPrice(($order->shipping_cost + (float)$order->total_delivery_fee) * $order->currency_value, $order->currency_sign) }}</span>
                            </li>
                            <li class="d-flex justify-content-between mb-3">
                               <span class="text-secondary">{{ __('Packaging') }}</span>

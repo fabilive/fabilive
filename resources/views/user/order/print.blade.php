@@ -195,7 +195,38 @@ html {
                                           @endforeach
                                        </tbody>
                                     </table>
-                                 </div>
+                                  </div>
+                                  <div class="row">
+                                      <div class="col-md-6"></div>
+                                      <div class="col-md-6">
+                                          <div class="invoice-summary" style="margin-top: 20px;">
+                                              <table class="table text-right">
+                                                  <tr>
+                                                      <th class="text-right" style="border-top: none;">{{ __('Subtotal') }}:</th>
+                                                      <td style="border-top: none;">{{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount - $order->shipping_cost - (float)$order->total_delivery_fee - $order->packing_cost - ($order->tax / $order->currency_value)) * $order->currency_value, $order->currency_sign) }}</td>
+                                                  </tr>
+                                                  <tr>
+                                                      <th class="text-right">{{ __('Delivery Fee') }}:</th>
+                                                      <td>+ {{ PriceHelper::showOrderCurrencyPrice(($order->shipping_cost + (float)$order->total_delivery_fee) * $order->currency_value, $order->currency_sign) }}</td>
+                                                  </tr>
+                                                  @if($order->packing_cost > 0)
+                                                  <tr>
+                                                      <th class="text-right">{{ __('Packaging') }}:</th>
+                                                      <td>+ {{ PriceHelper::showOrderCurrencyPrice($order->packing_cost * $order->currency_value, $order->currency_sign) }}</td>
+                                                  </tr>
+                                                  @endif
+                                                  <tr>
+                                                      <th class="text-right">{{ __('Tax') }}:</th>
+                                                      <td>+ {{ PriceHelper::showOrderCurrencyPrice($order->tax, $order->currency_sign) }}</td>
+                                                  </tr>
+                                                  <tr style="font-size: 1.2em; font-weight: bold;">
+                                                      <th class="text-right" style="border-top: 2px solid #333;">{{ __('Total Paid') }}:</th>
+                                                      <td style="border-top: 2px solid #333;">{{ PriceHelper::showOrderCurrencyPrice(($order->pay_amount * $order->currency_value), $order->currency_sign) }}</td>
+                                                  </tr>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </div>
                               </div>
                            </div>
                         </div>
