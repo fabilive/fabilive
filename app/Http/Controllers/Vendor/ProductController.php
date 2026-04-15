@@ -432,6 +432,10 @@ class ProductController extends VendorBaseController
                         $image = base64_decode($image);
                         $image_name = time().Str::random(8).'.png';
                         $path = 'assets/images/products/'.$image_name;
+                        $directory = public_path('assets/images/products');
+                        if (!file_exists($directory)) {
+                            mkdir($directory, 0755, true);
+                        }
                         file_put_contents(public_path($path), $image);
                         $input['photo'] = $image_name;
                     }
@@ -645,6 +649,10 @@ class ProductController extends VendorBaseController
                 }
                 // Safeguard main photo resizing
                 $main_photo_path = public_path().'/assets/images/products/'.$prod->photo;
+                $thumb_dir = public_path().'/assets/images/thumbnails';
+                if (!file_exists($thumb_dir)) {
+                    mkdir($thumb_dir, 0755, true);
+                }
                 if (file_exists($main_photo_path)) {
                     $finfo = finfo_open(FILEINFO_MIME_TYPE);
                     $mime = finfo_file($finfo, $main_photo_path);
@@ -667,6 +675,10 @@ class ProductController extends VendorBaseController
                 $prod->update();
 
                 $lastid = $data->id;
+                $gallery_dir = public_path().'/assets/images/galleries';
+                if (!file_exists($gallery_dir)) {
+                    mkdir($gallery_dir, 0755, true);
+                }
                 if ($files = $request->file('gallery')) {
                     foreach ($files as $key => $file) {
                         $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'docx', 'xlsx', 'zip'];
