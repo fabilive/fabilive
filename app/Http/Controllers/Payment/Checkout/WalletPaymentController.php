@@ -358,33 +358,40 @@ class WalletPaymentController extends CheckoutBaseControlller
             // Commit database changes
             \Illuminate\Support\Facades\DB::commit();
 
-            // Clear session data AFTER successful commit
+            // GRACEFUL MAILERS: If mail fails, don't break the success redirect
+            try {
+                $data = [
+                    'to' => $order->customer_email,
+                    'type' => 'new_order',
+                    'cname' => $order->customer_name,
+                    'oamount' => '',
+                    'aname' => '',
+                    'aemail' => '',
+                    'wtitle' => '',
+                    'onumber' => $order->order_number,
+                ];
+                $mailer = new GeniusMailer();
+                $mailer->sendAutoOrderMail($data, $order->id);
+
+                $data = [
+                    'to' => $this->ps->contact_email,
+                    'subject' => 'New Order Recieved!!',
+                    'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
+                ];
+                $mailer = new GeniusMailer();
+                $mailer->sendCustomMail($data);
+            } catch (\Exception $e) {
+                // Log the error but allow the user to see the success page
+                \Log::warning('Wallet Checkout Mail Error: '.$e->getMessage());
+            }
+
+            // Clear session data as the ABSOLUTE FINAL STEP before redirect
             Session::forget('cart');
             Session::forget('already');
             Session::forget('coupon');
             Session::forget('coupon_total');
             Session::forget('coupon_total1');
             Session::forget('coupon_percentage');
-
-            $data = [
-                'to' => $order->customer_email,
-                'type' => 'new_order',
-                'cname' => $order->customer_name,
-                'oamount' => '',
-                'aname' => '',
-                'aemail' => '',
-                'wtitle' => '',
-                'onumber' => $order->order_number,
-            ];
-            $mailer = new GeniusMailer();
-            $mailer->sendAutoOrderMail($data, $order->id);
-            $data = [
-                'to' => $this->ps->contact_email,
-                'subject' => 'New Order Recieved!!',
-                'body' => 'Hello Admin!<br>Your store has received a new order.<br>Order Number is '.$order->order_number.'.Please login to your panel to check. <br>Thank you.',
-            ];
-            $mailer = new GeniusMailer();
-            $mailer->sendCustomMail($data);
 
             return redirect($success_url);
         } catch (\Exception $e) {
