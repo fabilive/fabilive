@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Image;
 use Validator;
+use Auth;
 use App\Helpers\PriceHelper;
 
 class ProductController extends VendorBaseController
