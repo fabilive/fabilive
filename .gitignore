@@ -20,7 +20,7 @@
 /public/assets/images/rideridfront/*
 /public/assets/images/rideridback/*
 /storage/app/public/uploads/*
-!/public/assets/images/.gitkeep
+!/public/assets/images/**/.gitkeep
 /vendor
 .env
 .env.backup
