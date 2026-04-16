@@ -76,6 +76,13 @@ class CampayController extends CheckoutBaseControlller
             $input['vendor_ids'] = $orderCalculate['vendor_ids'];
         }
 
+        // Digital orders: zero out delivery/shipping fees
+        if (($input['dp'] ?? 0) == 1) {
+            $input['shipping_cost'] = 0;
+            $input['total_delivery_fee'] = 0;
+            $input['packing_cost'] = 0;
+        }
+
         $order = new Order;
         $order_number = Str::random(4).time();
 
@@ -222,6 +229,10 @@ class CampayController extends CheckoutBaseControlller
     protected function finalizeOrder($order)
     {
         $order->payment_status = 'Completed';
+        // Auto-complete digital orders (no delivery needed)
+        if ($order->dp == 1) {
+            $order->status = 'completed';
+        }
         $order->update();
 
         // Add to Wallet Ledger (Escrow Hold)

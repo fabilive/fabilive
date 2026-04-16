@@ -406,6 +406,54 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+
+                                                {{-- Digital Product Download Section --}}
+                                                @php
+                                                    $hasDigital = false;
+                                                    foreach ($order_items as $p) {
+                                                        if (isset($p['dp']) && $p['dp'] == 1) {
+                                                            $hasDigital = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                @endphp
+                                                @if($hasDigital && $order->payment_status == 'Completed')
+                                                <div class="digital-downloads-section mt-5 p-4" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-radius: 16px; border: 1px solid #c8e6c9;">
+                                                    <div class="text-center mb-4">
+                                                        <i class="fas fa-cloud-download-alt" style="font-size: 2.5rem; color: #2e7d32;"></i>
+                                                        <h4 class="font-weight-bold mt-2" style="color: #2e7d32;">{{ __('Your Digital Downloads') }}</h4>
+                                                        <p class="text-muted mb-0">{{ __('Your files are ready! Download them now or access them anytime from your dashboard.') }}</p>
+                                                    </div>
+                                                    <div class="row justify-content-center">
+                                                        @foreach($order_items as $product)
+                                                            @if(isset($product['dp']) && $product['dp'] == 1 && !empty($product['item']['id']))
+                                                            <div class="col-md-6 col-lg-4 mb-3">
+                                                                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                                                                    <div class="card-body text-center py-4">
+                                                                        <div class="mb-3">
+                                                                            <i class="fas fa-file-download" style="font-size: 2rem; color: #43a047;"></i>
+                                                                        </div>
+                                                                        <h6 class="font-weight-bold mb-2">{{ $product['item']['name'] ?? 'Digital Product' }}</h6>
+                                                                        <a href="{{ route('user-order-download', [$order->order_number, $product['item']['id']]) }}"
+                                                                           class="btn btn-success btn-sm rounded-pill px-4 mt-2"
+                                                                           style="font-weight: 600;">
+                                                                            <i class="fas fa-download mr-1"></i> {{ __('Download Now') }}
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                    @if(Auth::check())
+                                                    <div class="text-center mt-3">
+                                                        <a href="{{ route('user-orders') }}" class="text-success font-weight-bold">
+                                                            <i class="fas fa-external-link-alt mr-1"></i> {{ __('View all downloads in your dashboard') }}
+                                                        </a>
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

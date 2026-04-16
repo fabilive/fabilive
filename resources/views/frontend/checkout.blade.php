@@ -626,7 +626,7 @@
                            <p>{{ __('Total MRP') }}</p>
                            <P><b class="cart-total">{{ Session::has('cart') ? App\Models\Product::convertPrice(Session::get('cart')->totalPrice) : '0.00' }}</b></P>
                         </li>
-                        <li id="total-fee-row" style="display:none;">
+                        <li id="total-fee-row" style="display:none;" class="{{ $digital == 1 ? 'd-none' : '' }}">
                            <p>{{ __('Total Delivery Fee') }}</p>
                            <p><b id="total-fee">0.00</b></p>
                         </li>
@@ -661,7 +661,14 @@
                   {{-- Delivery Options (Stacked) --}}
                   <div class="delivery-options-area border-top pt-4">
                      <h4 class="title text-primary font-weight-bold mb-3" style="font-size: 1.1rem; border-bottom: 2px solid #edeff2; padding-bottom: 10px;">{{ __('DELIVERY OPTIONS') }}</h4>
-                     @if($digital == 0)
+                     @if($digital == 1)
+                     {{-- Digital Product: No delivery needed --}}
+                     <div class="digital-no-delivery text-center py-4">
+                        <div class="mb-3"><i class="fas fa-cloud-download-alt" style="font-size: 3rem; color: #28a745;"></i></div>
+                        <h5 class="font-weight-bold text-success">{{ __('Digital Product') }}</h5>
+                        <p class="text-muted mb-0">{{ __('No delivery required. Your file will be available for download after payment.') }}</p>
+                     </div>
+                     @else
                      @if ($gs->multiple_shipping == 0)
                      <div class="packeging-area mb-4">
                         <h5 class="font-weight-bold small text-uppercase mb-2" style="color: #666;">{{ __('Shipping Method') }}</h5>
@@ -1011,6 +1018,13 @@ var cartDeliveryFee = 0;
 $(document).on('change', '#service_area_select, #service_area_id', function () {
     var $sel = $(this);
     var serviceAreaId = $sel.val();
+    // Skip delivery fee calculation for digital-only orders
+    if ({{ $digital }} == 1) {
+        $('#total-fee-row').hide();
+        cartDeliveryFee = 0;
+        $('#total_delivery_fee').val('0.00');
+        return;
+    }
     if (!serviceAreaId) {
         $('#total-fee-row').hide();
         return;
@@ -1378,8 +1392,9 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     });
 
     // Step 3 button
+    var isDigitalOrder = {{ $digital }};
     $('#step3-btn').on('click', function(){
-        if ($('.shipping:checked').length == 0) {
+        if (isDigitalOrder == 0 && $('.shipping:checked').length == 0) {
             toastr.error('Please select a delivery method before proceeding.');
             return false;
         }

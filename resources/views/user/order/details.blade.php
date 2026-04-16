@@ -113,6 +113,9 @@
                                     <th class="border-0">{{ __('Product') }}</th>
                                     <th class="border-0 text-center">{{ __('Qty') }}</th>
                                     <th class="border-0 text-right">{{ __('Total') }}</th>
+                                    @if($order->dp == 1)
+                                    <th class="border-0 text-center">{{ __('Download') }}</th>
+                                    @endif
                                  </tr>
                               </thead>
                               <tbody>
@@ -137,6 +140,24 @@
                                     <td class="border-bottom text-right py-3 font-weight-bold">
                                        {{ PriceHelper::showCurrencyPrice(($product['item_price'] ?? 0) * $product['qty'] * $order->currency_value) }}
                                     </td>
+                                    @if($order->dp == 1)
+                                    <td class="border-bottom text-center py-3">
+                                       @php
+                                          $prodModel = \App\Models\Product::find($product['item']['id'] ?? 0);
+                                       @endphp
+                                       @if($prodModel && $prodModel->type != 'Physical' && $prodModel->file && $order->payment_status == 'Completed')
+                                       <a href="{{ route('user-order-download', [$order->order_number, $prodModel->id]) }}"
+                                          class="btn btn-success btn-sm rounded-pill px-3"
+                                          style="font-weight: 600; font-size: 0.8rem;">
+                                          <i class="fas fa-download mr-1"></i> {{ __('Download') }}
+                                       </a>
+                                       @elseif($order->payment_status != 'Completed')
+                                       <span class="badge badge-warning px-2 py-1">{{ __('Awaiting Payment') }}</span>
+                                       @else
+                                       <span class="text-muted">&mdash;</span>
+                                       @endif
+                                    </td>
+                                    @endif
                                  </tr>
                                  @endforeach
                               </tbody>

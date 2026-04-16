@@ -69,6 +69,11 @@
                                       <div class="order-status {{ $order->status }}">
                                           {{ucwords($order->status)}}
                                       </div>
+                                      @if($order->dp == 1)
+                                      <span class="badge badge-success mt-1" style="font-size: 0.7rem;">
+                                         <i class="fas fa-cloud-download-alt mr-1"></i>{{ __('Digital') }}
+                                      </span>
+                                      @endif
                                     </td>
 
 

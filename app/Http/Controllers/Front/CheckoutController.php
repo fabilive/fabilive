@@ -26,6 +26,26 @@ class CheckoutController extends FrontBaseController
             return response()->json(['error' => 'Cart is empty']);
         }
 
+        // Skip delivery fee entirely for all-digital carts
+        $allDigital = true;
+        foreach ($cart->items as $item) {
+            if (($item['item']['type'] ?? '') === 'Physical') {
+                $allDigital = false;
+                break;
+            }
+        }
+        if ($allDigital) {
+            Session::put('cart_delivery_fee', 0);
+            return response()->json([
+                'total_fee' => 0, 'distance_km' => 0,
+                'weight_gram' => 0, 'weight_kg' => 0, 'weight_ton' => 0,
+                'distance_fee' => 0, 'gram_fee' => 0, 'kg_fee' => 0, 'ton_fee' => 0,
+                'same_area_count' => 0, 'same_area_unit_fee' => 0, 'same_area_fee' => 0,
+                'vendor_count' => 0, 'vendor_distances' => [],
+                'digital' => true,
+            ]);
+        }
+
         // User ka selected service area
         $userArea = ServiceArea::find($request->service_area_id);
         if (! $userArea) {

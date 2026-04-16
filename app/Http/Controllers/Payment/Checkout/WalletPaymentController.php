@@ -58,7 +58,15 @@ class WalletPaymentController extends CheckoutBaseControlller
             $new_cart['totalQty'] = $t_cart->totalQty;
             $new_cart['totalPrice'] = $t_cart->totalPrice;
             $new_cart['items'] = $t_cart->items;
+
+            // Skip delivery fee calculations entirely for digital orders
+            $isDigitalOrder = ($input['dp'] ?? 0) == 1;
+
             foreach ($new_cart['items'] as $key => $item) {
+                if ($isDigitalOrder) {
+                    $new_cart['items'][$key]['delivery_fee'] = 0;
+                    continue;
+                }
                 $product = \App\Models\Product::find($item['item']['id']);
                 if (! $product) {
                     continue;
@@ -116,6 +124,12 @@ class WalletPaymentController extends CheckoutBaseControlller
                 $new_cart['items'][$key]['delivery_fee'] = $perProductFee;
             }
             $gs = Generalsetting::findOrFail(1);
+
+            if ($isDigitalOrder) {
+                // Digital order: zero out all delivery fees
+                $new_cart['grand_total_fee'] = 0;
+                $input['total_delivery_fee'] = 0;
+            } else {
             $sameAreaUnitFee = $gs ? (float) $gs->same_servicearea_delivery_fee : 0;
             $vendorDistances = [];
             $totalGram = 0;
@@ -194,6 +208,7 @@ class WalletPaymentController extends CheckoutBaseControlller
             $new_cart['grand_total_fee'] = $grandTotalDelivery;
             $riderPercentageComission = $gs->rider_percentage_commission;
             $input['total_delivery_fee'] = $new_cart['grand_total_fee'];
+            } // end !isDigitalOrder
             foreach ($new_cart['items'] as $key => $cartItem) {
                 $itemPriceWithCommission = $cartItem['item_price'];
                 $product = $cartItem['item'];
