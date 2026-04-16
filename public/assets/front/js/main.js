@@ -605,6 +605,9 @@
     // COMMENT FORM ENDS
     $(document).on("click", "#addcrt", function () {
       var qty = $(".qttotal").val() ? $(".qttotal").val() : 1;
+      if (qty == undefined || qty == "") {
+        qty = 1;
+      }
       var pid = $("#product_id").val();
 
       if ($(".product-attr").length > 0) {
@@ -670,7 +673,10 @@
     });
 
     $(document).on("click", "#qaddcrt", function () {
-      var qty = $(".qttotal").val();
+      var qty = $(".qttotal").val() ? $(".qttotal").val() : 1;
+      if (qty == undefined || qty == "") {
+        qty = 1;
+      }
       var pid = $("#product_id").val();
 
       if ($(".product-attr").length > 0) {
@@ -701,14 +707,13 @@
         qty +
         "&size=" +
         sizes +
-        "&color=" +
-        colors.substring(1, colors.length) +
+        "&color=" + (colors ? colors.substring(1, colors.length) : "") +
         "&size_qty=" +
-        size_qty +
+        (size_qty ? size_qty : "") +
         "&size_price=" +
-        size_price +
+        (size_price ? size_price : "0") +
         "&size_key=" +
-        size_key +
+        (size_key ? size_key : "") +
         "&keys=" +
         keys +
         "&values=" +

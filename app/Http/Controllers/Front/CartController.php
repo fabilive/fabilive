@@ -364,13 +364,13 @@ class CartController extends FrontBaseController
     public function addnumcart(Request $request)
     {
 
-        $id = $_GET['id'];
-        $qty = $_GET['qty'];
+        $id = (int)$_GET['id'];
+        $qty = (int)$_GET['qty'];
         $size = str_replace(' ', '-', $_GET['size']);
         $color = $_GET['color'];
         $size_qty = $_GET['size_qty'];
         $size_price = (float) $_GET['size_price'];
-        $size_key = $_GET['size_key'];
+        $size_key = (int)$_GET['size_key'];
         $keys = $_GET['keys'];
         $values = $_GET['values'];
         $prices = $_GET['prices'];
@@ -524,13 +524,13 @@ class CartController extends FrontBaseController
     public function addtonumcart(Request $request)
     {
 
-        $id = $_GET['id'];
-        $qty = $_GET['qty'];
+        $id = (int)$_GET['id'];
+        $qty = (int)$_GET['qty'];
         $size = str_replace(' ', '-', $_GET['size']);
         $color = $_GET['color'];
         $size_qty = $_GET['size_qty'];
         $size_price = (float) $_GET['size_price'];
-        $size_key = $_GET['size_key'];
+        $size_key = (int)$_GET['size_key'];
         $affilate_user = isset($_GET['affilate_user']) ? $_GET['affilate_user'] : '0';
         $keys = $_GET['keys'];
         $keys = explode(',', $keys);

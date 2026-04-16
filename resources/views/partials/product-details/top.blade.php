@@ -246,6 +246,8 @@
                                      </ul>
                                   </div>
                                </div>
+                          @else
+                             <input class="qttotal" type="hidden" value="1">
                           @endif
 
 
