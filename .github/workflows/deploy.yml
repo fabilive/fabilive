@@ -53,7 +53,7 @@ jobs:
           echo "--- Tarball Size ---"
           ls -lh fabilive_deploy.tar.gz
 
-      - name: Pre-deployment Cleanup
+      - name: Pre-deployment Cleanup & Migration
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DO_HOST }}
@@ -62,32 +62,32 @@ jobs:
           port: 22
           debug: true
           script: |
-            echo "--- Backing Up User Uploads Before Deployment ---"
-            BACKUP_DIR="/tmp/fabilive_uploads_backup"
-            rm -rf $BACKUP_DIR
-            mkdir -p $BACKUP_DIR
+            echo "--- Preparing Shared Persistent Storage ---"
+            SHARED_DIR="/var/www/fabilive_shared"
+            mkdir -p $SHARED_DIR/assets/images
+            mkdir -p $SHARED_DIR/assets/files
+            mkdir -p $SHARED_DIR/storage/app/public
 
-            # Back up all user-uploaded image/file directories
-            for dir in products galleries thumbnails blogs users categories services attachments vendorselfie rideridfront rideridback; do
-              if [ -d "/var/www/fabilive/public/assets/images/$dir" ]; then
-                cp -a "/var/www/fabilive/public/assets/images/$dir" "$BACKUP_DIR/$dir"
-                echo "  Backed up: images/$dir ($(find /var/www/fabilive/public/assets/images/$dir -type f | wc -l) files)"
-              fi
-            done
-
-            # Back up digital product files
-            if [ -d "/var/www/fabilive/public/assets/files" ]; then
-              cp -a "/var/www/fabilive/public/assets/files" "$BACKUP_DIR/files"
-              echo "  Backed up: assets/files"
+            # --- ONE-TIME MIGRATION ---
+            # Migration logic: if a standard directory is found where a symlink should be, move it to shared.
+            # Images
+            if [ -d "/var/www/fabilive/public/assets/images" ] && [ ! -L "/var/www/fabilive/public/assets/images" ]; then
+              echo "  Migrating legacy assets/images to shared storage..."
+              cp -an /var/www/fabilive/public/assets/images/. $SHARED_DIR/assets/images/
             fi
-
-            # Back up .env so it survives
+            # Files
+            if [ -d "/var/www/fabilive/public/assets/files" ] && [ ! -L "/var/www/fabilive/public/assets/files" ]; then
+              echo "  Migrating legacy assets/files to shared storage..."
+              cp -an /var/www/fabilive/public/assets/files/. $SHARED_DIR/assets/files/
+            fi
+            # .env preservation
             if [ -f "/var/www/fabilive/.env" ]; then
-              cp -a "/var/www/fabilive/.env" "$BACKUP_DIR/.env"
-              echo "  Backed up: .env"
+              cp -an /var/www/fabilive/.env $SHARED_DIR/.env
+              echo "  Preserved .env in shared storage"
             fi
 
-            echo "--- Clearing Host Target Directory ---"
+            echo "--- Clearing Host Target Directory (Protected) ---"
+            # We clear the app directory, but the shared storage is outside and safe.
             rm -rf /var/www/fabilive/*
             df -h
 
@@ -102,7 +102,7 @@ jobs:
           source: "fabilive_deploy.tar.gz"
           target: "/var/www/fabilive"
 
-      - name: Run Post-deployment Tasks
+      - name: Run Post-deployment Tasks (Persistence)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DO_HOST }}
@@ -111,9 +111,10 @@ jobs:
           port: 22
           debug: true
           script: |
-            # Ensure public directory exists before log assignment
+            # Ensure public directory exists
             mkdir -p /var/www/fabilive/public
             LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
+            SHARED_DIR="/var/www/fabilive_shared"
             
             echo "--- Unpacking Tarball ---"
             cd /var/www/fabilive
@@ -124,33 +125,26 @@ jobs:
                 echo "ERROR: fabilive_deploy.tar.gz NOT FOUND!" >&2
             fi
             
-            # --- RESTORE BACKED-UP UPLOADS ---
-            BACKUP_DIR="/tmp/fabilive_uploads_backup"
-            echo "--- Restoring User Uploads After Deployment ---" >> $LOG_FILE 2>&1
+            # --- ESTABLISH PERSISTENT SYMLINKS ---
+            echo "--- Linking Persistent Shared Assets ---" >> $LOG_FILE 2>&1
             
-            # Restore image directories
-            for dir in products galleries thumbnails blogs users categories services attachments vendorselfie rideridfront rideridback; do
-              if [ -d "$BACKUP_DIR/$dir" ]; then
-                mkdir -p "/var/www/fabilive/public/assets/images/$dir"
-                cp -av "$BACKUP_DIR/$dir/." "/var/www/fabilive/public/assets/images/$dir/" >> $LOG_FILE 2>&1
-                echo "  Restored: images/$dir" >> $LOG_FILE
-              fi
-            done
-            
-            # Restore digital product files
-            if [ -d "$BACKUP_DIR/files" ]; then
-              mkdir -p "/var/www/fabilive/public/assets/files"
-              cp -av "$BACKUP_DIR/files/." "/var/www/fabilive/public/assets/files/" >> $LOG_FILE 2>&1
+            # .env linkage
+            if [ -f "$SHARED_DIR/.env" ]; then
+              ln -sf "$SHARED_DIR/.env" "/var/www/fabilive/.env"
+              echo "  Linked: .env" >> $LOG_FILE
             fi
+
+            # Assets linkage
+            # First remove placeholder empty directories from the deployment
+            rm -rf /var/www/fabilive/public/assets/images
+            rm -rf /var/www/fabilive/public/assets/files
+            mkdir -p /var/www/fabilive/public/assets
+
+            ln -sfn "$SHARED_DIR/assets/images" "/var/www/fabilive/public/assets/images"
+            ln -sfn "$SHARED_DIR/assets/files" "/var/www/fabilive/public/assets/files"
+            echo "  Linked: Shared assets" >> $LOG_FILE
             
-            # Restore .env
-            if [ -f "$BACKUP_DIR/.env" ]; then
-              cp -v "$BACKUP_DIR/.env" "/var/www/fabilive/.env" >> $LOG_FILE 2>&1
-            fi
-            
-            # Cleanup backup
-            rm -rf $BACKUP_DIR
-            echo "--- Upload Restoration Complete ---" >> $LOG_FILE
+            echo "--- Persistence Setup Complete ---" >> $LOG_FILE
             
             echo "--- DEPLOYMENT DIAGNOSTICS V43 ---" >> $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE

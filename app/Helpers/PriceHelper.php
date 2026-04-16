@@ -125,7 +125,8 @@ class PriceHelper
 
     public static function ImageCreateName($image)
     {
-        $name = time().preg_replace('/[^A-Za-z0-9\-]/', '', $image->getClientOriginalName()).'.'.$image->getClientOriginalExtension();
+        $filename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+        $name = time() . preg_replace('/[^A-Za-z0-9\-]/', '', $filename) . '.' . $image->getClientOriginalExtension();
 
         return $name;
     }
