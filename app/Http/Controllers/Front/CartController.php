@@ -379,7 +379,6 @@ class CartController extends FrontBaseController
         $values = $values == '' ? '' : implode(',', $values);
         $curr = $this->curr;
 
-        $size_price = ($size_price / $curr->value);
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'minimum_qty', 'stock_check', 'size_all', 'color_all']);
         if ($prod->type != 'Physical') {
             $qty = 1;
@@ -485,8 +484,10 @@ class CartController extends FrontBaseController
             }
         }
 
-        if ($cart->items != null && $cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
-            return 'digital';
+        if ($cart->items != null && isset($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)])) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+                return 'digital';
+            }
         }
 
         $cart->addnum($prod, $prod->id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user);
@@ -541,7 +542,6 @@ class CartController extends FrontBaseController
         $keys = $keys == '' ? '' : implode(',', $keys);
         $values = $values == '' ? '' : implode(',', $values);
         $curr = $this->curr;
-        $size_price = ($size_price / $curr->value);
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'minimum_qty', 'stock_check', 'size_all', 'color_all']);
         if ($prod->type != 'Physical') {
             $qty = 1;
@@ -633,11 +633,14 @@ class CartController extends FrontBaseController
             }
         }
 
+        if ($cart->items != null && isset($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)])) {
+            if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
+                return redirect()->route('front.cart')->with('unsuccess', __('This item is already in the cart.'));
+            }
+        }
+
         $cart->addnum($prod, $prod->id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user);
 
-        if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['dp'] == 1) {
-            return redirect()->route('front.cart')->with('unsuccess', __('This item is already in the cart.'));
-        }
         if ($cart->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)]['stock'] < 0) {
             return redirect()->route('front.cart')->with('unsuccess', __('Out Of Stock.'));
         }
