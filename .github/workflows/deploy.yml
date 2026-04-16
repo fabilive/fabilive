@@ -111,45 +111,48 @@ jobs:
           port: 22
           debug: true
           script: |
+            # Ensure public directory exists before log assignment
+            mkdir -p /var/www/fabilive/public
             LOG_FILE="/var/www/fabilive/public/deploy_log.txt"
             
             echo "--- Unpacking Tarball ---"
             cd /var/www/fabilive
-            tar -xzf fabilive_deploy.tar.gz
-            rm fabilive_deploy.tar.gz
+            if [ -f "fabilive_deploy.tar.gz" ]; then
+                tar -xzf fabilive_deploy.tar.gz
+                rm fabilive_deploy.tar.gz
+            else
+                echo "ERROR: fabilive_deploy.tar.gz NOT FOUND!" >&2
+            fi
             
             # --- RESTORE BACKED-UP UPLOADS ---
             BACKUP_DIR="/tmp/fabilive_uploads_backup"
-            echo "--- Restoring User Uploads After Deployment ---" >> $LOG_FILE
+            echo "--- Restoring User Uploads After Deployment ---" >> $LOG_FILE 2>&1
             
             # Restore image directories
             for dir in products galleries thumbnails blogs users categories services attachments vendorselfie rideridfront rideridback; do
               if [ -d "$BACKUP_DIR/$dir" ]; then
                 mkdir -p "/var/www/fabilive/public/assets/images/$dir"
-                cp -a "$BACKUP_DIR/$dir/." "/var/www/fabilive/public/assets/images/$dir/"
-                echo "  Restored: images/$dir ($(find /var/www/fabilive/public/assets/images/$dir -type f | wc -l) files)" >> $LOG_FILE
+                cp -av "$BACKUP_DIR/$dir/." "/var/www/fabilive/public/assets/images/$dir/" >> $LOG_FILE 2>&1
+                echo "  Restored: images/$dir" >> $LOG_FILE
               fi
             done
             
             # Restore digital product files
             if [ -d "$BACKUP_DIR/files" ]; then
               mkdir -p "/var/www/fabilive/public/assets/files"
-              cp -a "$BACKUP_DIR/files/." "/var/www/fabilive/public/assets/files/"
-              echo "  Restored: assets/files" >> $LOG_FILE
+              cp -av "$BACKUP_DIR/files/." "/var/www/fabilive/public/assets/files/" >> $LOG_FILE 2>&1
             fi
             
             # Restore .env
             if [ -f "$BACKUP_DIR/.env" ]; then
-              cp -a "$BACKUP_DIR/.env" "/var/www/fabilive/.env"
-              echo "  Restored: .env" >> $LOG_FILE
+              cp -v "$BACKUP_DIR/.env" "/var/www/fabilive/.env" >> $LOG_FILE 2>&1
             fi
             
             # Cleanup backup
             rm -rf $BACKUP_DIR
             echo "--- Upload Restoration Complete ---" >> $LOG_FILE
             
-            # Now we can write to the log file since 'public' exists
-            echo "--- DEPLOYMENT DIAGNOSTICS V42 ---" > $LOG_FILE
+            echo "--- DEPLOYMENT DIAGNOSTICS V43 ---" >> $LOG_FILE
             echo "Time: $(date)" >> $LOG_FILE
             
             echo "--- Droplet Resources ---" >> $LOG_FILE
