@@ -1230,9 +1230,10 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                   url:mainurl+"/carts/coupon/check",
                   data:{code:val, total:total, shipping_cost:ship},
                   success:function(data){
-                     if(data == 0)
+                     if(data == 0 || data.status == 0)
                      {
-                        toastr.error('{{__('Coupon not found')}}');
+                        let msg = data.message ? data.message : '{{__('Coupon not found')}}';
+                        toastr.error(msg);
                            $("#code").val("");
                      }
                      else if(data == 2)

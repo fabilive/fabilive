@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Front;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\Product;
+use Auth;
 use Session;
 use App\Helpers\PriceHelper;
+use App\Services\ReferralService;
+
 
 class CouponController extends FrontBaseController
 {
@@ -15,8 +18,38 @@ class CouponController extends FrontBaseController
         $gs = $this->gs;
         $code = $_GET['code'];
         $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
-        $fnd = Coupon::where('code', '=', $code)->get()->count();
-        $coupon = Coupon::where('code', '=', $code)->first();
+        $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+
+        if (!$coupon) {
+            // Check if it's a Referral Code
+            try {
+                $referralService = app(\App\Services\ReferralService::class);
+                $user = Auth::user();
+                $referralCode = $referralService->validateReferralForCoupon($code, $user);
+
+                $curr = $this->curr;
+                $discount = 200 * $curr->value;
+                if ($discount >= $total) {
+                    return response()->json(3); // Discount more than total
+                }
+
+                $total = $total - $discount;
+                $data[0] = \PriceHelper::showCurrencyPrice($total);
+                $data[1] = $code;
+                $data[2] = $discount;
+                Session::put('coupon', $data[2]);
+                Session::put('coupon_code', $code);
+                Session::put('coupon_is_referral', true);
+                Session::put('coupon_total', $data[0]);
+                $data[3] = 'referral';
+                $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
+                $data[5] = 1;
+
+                return response()->json($data);
+            } catch (\Throwable $e) {
+                return response()->json(['status' => 0, 'message' => $e->getMessage()]);
+            }
+        }
 
         $cart = Session::get('cart');
         foreach ($cart->items as $item) {
@@ -130,7 +163,44 @@ class CouponController extends FrontBaseController
     {
         $gs = $this->gs;
         $code = $_GET['code'];
-        $coupon = Coupon::where('code', '=', $code)->first();
+        $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+
+        if (!$coupon) {
+            // Check if it's a Referral Code
+            try {
+                $referralService = app(\App\Services\ReferralService::class);
+                $user = Auth::user();
+                $referralCode = $referralService->validateReferralForCoupon($code, $user);
+
+                // Global discount of 200
+                $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
+                $curr = $this->curr;
+                $discount = 200 * $curr->value;
+
+                if ($discount >= $total) {
+                    return response()->json(3);
+                }
+
+                $total = $total - $discount;
+                $data[0] = \PriceHelper::showCurrencyPrice($total);
+                $data[1] = $code;
+                $data[2] = $discount;
+                Session::put('coupon', $data[2]);
+                Session::put('coupon_code', $code);
+                Session::put('coupon_is_referral', true);
+                Session::put('coupon_total1', round($total, 2));
+                Session::forget('coupon_total');
+
+                $data[3] = 'referral';
+                $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
+                $data[5] = 1;
+                $data[6] = round($total, 2);
+
+                return response()->json($data);
+            } catch (\Throwable $e) {
+                return response()->json(['status' => 0, 'message' => $e->getMessage()]);
+            }
+        }
 
         if (! $coupon) {
             return response()->json(0);

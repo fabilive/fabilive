@@ -37,11 +37,6 @@ class Generalsetting extends Model
             if (self::isDbValid()) {
                 $gs = cache()->remember('generalsettings', now()->addDay(), function () {
                     $gs = \DB::table('generalsettings')->first();
-                    if ($gs) {
-                        $gs->fixed_commission = 0;
-                        $gs->percentage_commission = 0;
-                    }
-
                     return $gs;
                 });
                 if ($gs) {

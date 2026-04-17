@@ -18,7 +18,7 @@ class User extends Authenticatable implements JWTSubject
         'id_card_copy', 'passport_copy', 'driver_license_copy', 'residence_permit', 'is_vendor', 'shop_details',
         'shop_image', 'shipping_cost', 'date', 'mail_sent', 'email_verified', 'current_balance', 'email_token', 'reward',
         'national_id_front_image', 'national_id_back_image', 'submerchant_agreement', 'license_image', 'is_verified',
-        'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at'];
+        'vendor_status', 'vendor_rejection_reason', 'vendor_approved_at', 'referral_locked_balance'];
 
     protected $hidden = [
         'password', 'remember_token',

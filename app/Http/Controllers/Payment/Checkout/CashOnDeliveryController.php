@@ -150,7 +150,13 @@ class CashOnDeliveryController extends CheckoutBaseControlller
             }
         }
 
+        // Persist coupon details from session
+        $input['coupon_code'] = Session::get('coupon_code');
+        $input['coupon_id'] = Session::get('coupon_id');
+        $input['coupon_discount'] = Session::get('coupon');
+
         $order->fill($input)->save();
+
         
         // Unified Finalization (Tracks, Coupons, Rewards, Stock, Session Clear)
         OrderHelper::finalizeOrder($order, $cart);

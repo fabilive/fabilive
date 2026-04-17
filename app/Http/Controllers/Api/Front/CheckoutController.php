@@ -173,9 +173,21 @@ class CheckoutController extends Controller
             }
             $service_areas = \App\Models\ServiceArea::all();
             $input['service_area_id'] = $request->service_area_id;
+            
+            // Ensure coupon details are captured if passed (Standard for mobile checkouts)
+            $input['coupon_code'] = $request->coupon_code;
+            $input['coupon_id'] = $request->coupon_id;
+            $input['coupon_discount'] = $request->coupon_discount;
+
             $order->fill($input)->save();
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
+
+            // Trigger Referral Rewards if applicable
+            if ($order->coupon_id === 'referral' || !empty($order->coupon_code)) {
+                app(\App\Services\ReferralService::class)->applyReferralReward($order);
+            }
+
             if (Auth::guard('api')->check()) {
                 if ($gs->is_reward == 1) {
                     $num = $order->pay_amount;
@@ -481,15 +493,12 @@ class CheckoutController extends Controller
 
     public function getCoupon(Request $request)
     {
-
         $code = $request->coupon;
         $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
 
         if ($coupon) {
-
             $today = date('Y-m-d');
             $from = date('Y-m-d', strtotime($coupon->start_date));
-
             $to = date('Y-m-d', strtotime($coupon->end_date));
 
             if ($from <= $today && $to >= $today) {
@@ -498,7 +507,26 @@ class CheckoutController extends Controller
                 return response()->json(['status' => false, 'data' => [], 'error' => 'Invalid Coupon']);
             }
         } else {
-            return response()->json(['status' => false, 'data' => [], 'error' => 'Coupon Not Found']);
+            // Check if it's a Referral Code
+            try {
+                $referralService = app(\App\Services\ReferralService::class);
+                $user = Auth::guard('api')->user();
+                $referralCode = $referralService->validateReferralForCoupon($code, $user);
+
+                // Return a "virtual" coupon object for the frontend
+                return response()->json([
+                    'status' => true,
+                    'is_referral' => true,
+                    'data' => [
+                        'code' => $referralCode->code,
+                        'type' => 0, // Fixed amount
+                        'price' => 200, // 200 XFA discount
+                    ],
+                    'error' => []
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['status' => false, 'data' => [], 'error' => $e->getMessage()]);
+            }
         }
     }
 

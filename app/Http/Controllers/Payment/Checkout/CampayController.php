@@ -120,7 +120,13 @@ class CampayController extends CheckoutBaseControlller
             $input['tax'] = 0;
         }
 
+        // Persist coupon details from session
+        $input['coupon_code'] = Session::get('coupon_code');
+        $input['coupon_id'] = Session::get('coupon_id');
+        $input['coupon_discount'] = Session::get('coupon');
+
         $order->fill($input)->save();
+
 
         // Vendor and Stock Logic (Consistent with COD/Wallet flow)
         OrderHelper::size_qty_check($cart);

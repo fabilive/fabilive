@@ -210,18 +210,8 @@ class RegisterController extends Controller
                 $referralService = app(ReferralService::class);
                 $role = ! empty($request->vendor) ? 'seller' : 'buyer';
 
-                // Generate a referral code for the new user
+                // Generate a referral code for the new user (so they can share it)
                 $referralService->generateCode($user, $role);
-
-                // Apply referral code if provided
-                if ($request->filled('referral_code')) {
-                    try {
-                        $referralService->applyReferral($request->referral_code, $user, $role);
-                    } catch (\Exception $e) {
-                        // Log but don't block registration for referral failures
-                        Log::warning('Referral apply failed: '.$e->getMessage());
-                    }
-                }
 
                 DB::commit();
 

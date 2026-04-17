@@ -97,6 +97,7 @@ class Cart extends Model
         $storedItem['price'] = $item->price * $storedItem['qty'];
         $this->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)] = $storedItem;
         $this->totalQty++;
+        $this->totalPrice += $item->price;
     }
 
     public function addnum($item, $id, $qty, $size, $color, $size_qty, $size_price, $size_key, $keys, $values, $affilate_user)
@@ -192,7 +193,8 @@ class Cart extends Model
         }
         $storedItem['price'] = $item->price * $storedItem['qty'];
         $this->items[$id.$size.$color.str_replace(str_split(' ,'), '', $values)] = $storedItem;
-        $this->totalQty += $storedItem['qty'];
+        $this->totalQty += $qty;
+        $this->totalPrice += ($item->price * $qty);
     }
 
     public function adding($item, $id, $size_qty, $size_price)
@@ -227,7 +229,8 @@ class Cart extends Model
         }
         $storedItem['price'] = $item->price * $storedItem['qty'];
         $this->items[$id] = $storedItem;
-        $this->totalQty += $storedItem['qty'];
+        $this->totalQty++;
+        $this->totalPrice += $item->price;
     }
 
     public function reducing($item, $id, $size_qty, $size_price)
@@ -269,6 +272,7 @@ class Cart extends Model
         $storedItem['price'] = $item->price * $storedItem['qty'];
         $this->items[$id] = $storedItem;
         $this->totalQty--;
+        $this->totalPrice -= $item->price;
     }
 
     public function MobileupdateLicense($id, $license)

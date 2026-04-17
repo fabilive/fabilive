@@ -67,8 +67,14 @@
                         <h5 class="title">{{ __('Unlocked Referral Bonus') }}:</h5>
                         <h5 class="title w-price">CFA{{ number_format($user->affilate_income, 0) }}</h5>
                         
-                        <h5 class="title mt-3">{{ __('Locked Referral Bonus') }}:</h5>
-                        <h5 class="title w-price text-warning">CFA{{ number_format($user->customReferralsSent()->where('status', 'locked')->sum('amount'), 0) }}</h5>
+                        <h5 class="title mt-3">{{ __('Locked Referral Rewards') }}:</h5>
+                        <h5 class="title w-price text-warning">CFA {{ number_format($user->referral_locked_balance, 0) }}</h5>
+                        <p class="text-muted small">{{ __('Threshold to unlock: 25,000 CFA') }}</p>
+                        @if($user->referral_locked_balance > 0)
+                           <div class="progress mb-3" style="height: 10px;">
+                              <div class="progress-bar bg-warning" role="progressbar" style="width: {{ min(($user->referral_locked_balance / 25000) * 100, 100) }}%" aria-valuenow="{{ $user->referral_locked_balance }}" aria-valuemin="0" aria-valuemax="25000"></div>
+                           </div>
+                        @endif
                         <hr>
 
                         <h5 class="title w-title">{{ __('Wallet Balance') }}</h5>

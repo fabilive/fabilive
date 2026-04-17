@@ -51,106 +51,108 @@ class ReferralService
      *
      * @throws Exception
      */
-    public function applyReferral(string $code, $newUser, string $role = 'buyer'): ReferralUsage
+    public function applyReferral(string $code, $newUser, string $role = 'buyer'): ?ReferralUsage
     {
-        $gs = Generalsetting::safeFirst();
+        // Sign-up rewards are disabled as per new referral program requirements.
+        // Referral codes are now used as coupons during checkout.
+        return null;
+    }
 
-        if (! $gs || ! ($gs->referral_system_active ?? true)) {
+    /**
+     * Validate a referral code for use as a coupon.
+     * 
+     * @throws Exception
+     */
+    public function validateReferralForCoupon(string $code, $user): ReferralCode
+    {
+        $gs = \App\Models\Generalsetting::safeFirst();
+
+        if (!$gs || !($gs->referral_system_active ?? true)) {
             throw new Exception('Referral system is currently disabled.');
         }
 
         $referralCode = ReferralCode::where('code', $code)->first();
 
-        if (! $referralCode) {
+        if (!$referralCode) {
             throw new Exception('Invalid referral code.');
         }
 
-        if (! $referralCode->isActive()) {
+        if (!$referralCode->isActive()) {
             throw new Exception('This referral code is no longer active.');
         }
 
-        // Anti-abuse: no self-referral
-        if ($newUser instanceof User && $referralCode->user_id === $newUser->id) {
-            throw new Exception('You cannot use your own referral code.');
-        }
-        if ($newUser instanceof Rider && $referralCode->rider_id === $newUser->id) {
-            throw new Exception('You cannot use your own referral code.');
-        }
-
-        // Anti-abuse: check duplicate phone/email
-        $phoneHash = $this->hashValue($newUser->phone ?? '');
-        $emailHash = $this->hashValue($newUser->email ?? '');
-
-        if ($phoneHash && ReferralUsage::where('phone_hash', $phoneHash)->where('status', 'awarded')->exists()) {
-            throw new Exception('A referral bonus has already been claimed with this phone number.');
-        }
-
-        if ($emailHash && ReferralUsage::where('email_hash', $emailHash)->where('status', 'awarded')->exists()) {
-            throw new Exception('A referral bonus has already been claimed with this email.');
-        }
-
-        $referrerBonus = $gs->referral_bonus_referrer ?? 500;
-        $referredBonus = $gs->referral_bonus_referred ?? 250;
-
-        return DB::transaction(function () use ($referralCode, $newUser, $role, $referrerBonus, $referredBonus, $phoneHash, $emailHash) {
-
-            // Create usage record
-            $usageData = [
-                'referral_code_id' => $referralCode->id,
-                'referred_role' => $role,
-                'referrer_bonus' => $referrerBonus,
-                'referred_bonus' => $referredBonus,
-                'status' => 'awarded',
-                'phone_hash' => $phoneHash,
-                'email_hash' => $emailHash,
-            ];
-
-            if ($newUser instanceof Rider) {
-                $usageData['referred_rider_id'] = $newUser->id;
-            } else {
-                $usageData['referred_user_id'] = $newUser->id;
+        if ($user) {
+            // Anti-abuse: no self-referral
+            if ($referralCode->user_id === $user->id) {
+                throw new Exception('You cannot use your own referral code.');
             }
 
-            $usage = ReferralUsage::create($usageData);
+            // Global constraint: Only one referral code usage allowed in a lifetime
+            $hasUsedReferral = ReferralUsage::where('referred_user_id', $user->id)
+                ->where('status', 'awarded')
+                ->exists();
+            if ($hasUsedReferral) {
+                throw new Exception('You have already used a referral code before.');
+            }
 
-            // Award referrer via WalletLedger
-            $referrerId = $referralCode->user_id;
-            if ($referrerId) {
-                $referrer = User::find($referrerId);
-                if ($referrer) {
-                    $referrer->current_balance = ($referrer->current_balance ?? 0) + $referrerBonus;
-                    $referrer->save();
+            // First purchase check
+            $orderCount = \App\Models\Order::where('user_id', $user->id)->count();
+            if ($orderCount > 0) {
+                throw new Exception('Referral discounts are only available for your first purchase.');
+            }
+        }
+
+        return $referralCode;
+    }
+
+    /**
+     * Award referral rewards after a successful purchase.
+     */
+    public function applyReferralReward($order)
+    {
+        if (empty($order->coupon_code)) return;
+
+        $referralCode = ReferralCode::where('code', $order->coupon_code)->first();
+        if (!$referralCode) return;
+
+        // Rewards are fixed in this version
+        $referrerReward = 100;
+
+        DB::transaction(function () use ($referralCode, $order, $referrerReward) {
+            // Create usage record
+            ReferralUsage::create([
+                'referral_code_id' => $referralCode->id,
+                'referred_user_id' => $order->user_id,
+                'referrer_bonus' => $referrerReward,
+                'referred_bonus' => 0, // Buyer got 200 off immediate discount
+                'status' => 'awarded',
+            ]);
+
+            // Award referrer to LOCKED balance
+            $referrer = User::lockForUpdate()->find($referralCode->user_id);
+            if ($referrer) {
+                $referrer->referral_locked_balance = ($referrer->referral_locked_balance ?? 0) + $referrerReward;
+                
+                // Threshold Check: 25,000 XFA
+                if ($referrer->referral_locked_balance >= 25000) {
+                    $amountToUnlock = $referrer->referral_locked_balance;
+                    $referrer->current_balance += $amountToUnlock;
+                    $referrer->referral_locked_balance = 0;
 
                     WalletLedger::create([
                         'user_id' => $referrer->id,
-                        'amount' => $referrerBonus,
+                        'amount' => $amountToUnlock,
                         'type' => 'referral_bonus',
                         'status' => 'completed',
-                        'reference' => 'REF-'.$referralCode->code,
-                        'details' => "Referral bonus for inviting user via code {$referralCode->code}",
+                        'reference' => 'UNLOCK-REF-' . $referralCode->code,
+                        'details' => "Unlocked referral rewards (Threshold 25,000 reached)",
                     ]);
                 }
+                
+                $referrer->save();
             }
 
-            // Award referred user
-            if ($newUser instanceof User) {
-                $newUser->current_balance = ($newUser->current_balance ?? 0) + $referredBonus;
-                $newUser->save();
-
-                WalletLedger::create([
-                    'user_id' => $newUser->id,
-                    'amount' => $referredBonus,
-                    'type' => 'referral_bonus',
-                    'status' => 'completed',
-                    'reference' => 'RREF-'.$referralCode->code,
-                    'details' => "Welcome bonus from referral code {$referralCode->code}",
-                ]);
-            }
-
-            // Increment usage count
             $referralCode->increment('usages_count');
-
-            return $usage;
         });
     }
 

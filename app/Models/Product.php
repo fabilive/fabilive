@@ -119,13 +119,19 @@ class Product extends Model
 
     public function getPriceAttribute($value)
     {
-        // If discount is not active and we have a previous price (Regular Price),
-        // use it as the main price.
+        // 1. Handle Discount/Previous Price Logic
+        $price = $value;
         if (! $this->isDiscountActive() && ! empty($this->previous_price) && $this->previous_price > 0) {
-            return $this->previous_price;
+            $price = $this->previous_price;
         }
 
-        return $value;
+        // 2. Add Marketplace Commission for Vendor Products
+        if ($this->user_id != 0) {
+            $gs = Generalsetting::safeFirst();
+            $price = $price + ($gs->fixed_commission ?? 0) + ($price / 100) * ($gs->percentage_commission ?? 0);
+        }
+
+        return $price;
     }
 
     /**

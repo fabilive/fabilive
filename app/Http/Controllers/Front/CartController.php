@@ -196,10 +196,6 @@ class CartController extends FrontBaseController
                 return 0;
             }
         }
-        $cart->totalPrice = 0;
-        foreach ($cart->items as $data) {
-            $cart->totalPrice += $data['price'];
-        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
@@ -265,12 +261,6 @@ class CartController extends FrontBaseController
                     $color = str_replace('#', '', explode(',', $prod->color_all)[0]);
                 }
             }
-        }
-
-        if ($prod->user_id != 0) {
-
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = $prc;
         }
 
         // Set Attribute
@@ -346,10 +336,6 @@ class CartController extends FrontBaseController
             }
         }
 
-        $cart->totalPrice = 0;
-        foreach ($cart->items as $data) {
-            $cart->totalPrice += $data['price'];
-        }
         Session::put('cart', $cart);
         $notifications = session()->get('notifications', []);
         $notifications[] = [
@@ -384,10 +370,6 @@ class CartController extends FrontBaseController
             $qty = 1;
         }
 
-        if ($prod->user_id != 0) {
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = $prc;
-        }
         if (! empty($prices)) {
             foreach ($prices as $data) {
                 $prod->price += ($data / $curr->value);

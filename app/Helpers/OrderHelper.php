@@ -174,9 +174,15 @@ class OrderHelper
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            // 2. Coupon Tracking
+            // 2. Coupon & Referral Tracking
             if (! empty($order->coupon_id)) {
-                self::coupon_check($order->coupon_id);
+                if ($order->coupon_id === 'referral' || Session::get('coupon_is_referral') === true) {
+                    // Trigger new referral reward logic
+                    app(\App\Services\ReferralService::class)->applyReferralReward($order);
+                } else {
+                    // Standard coupon tracking
+                    self::coupon_check($order->coupon_id);
+                }
             }
 
             // 3. Reward Points
@@ -214,6 +220,7 @@ class OrderHelper
             Session::forget('coupon_total');
             Session::forget('coupon_total1');
             Session::forget('coupon_percentage');
+            Session::forget('coupon_is_referral');
             Session::forget('current_tax');
         } catch (\Exception $e) {
             \Log::error('Order Finalization Error: '.$e->getMessage());
