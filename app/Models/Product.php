@@ -248,19 +248,13 @@ class Product extends Model
 
     public function vendorPrice()
     {
-        $gs = \App\Models\Generalsetting::safeFirst();
-        $price = $this->price;
-
-        return $price;
+        return $this->price;
     }
 
     public function vendorSizePrice()
     {
-        $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
-        if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
-        }
+
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
             if (is_array($size_prices) && isset($size_prices[0])) {
@@ -399,37 +393,8 @@ class Product extends Model
     public function adminShowPrice()
     {
         $gs = \App\Models\Generalsetting::safeFirst();
-        $price = $this->price;
+        $price = $this->price; // Accessor handles vendor commission already
 
-
-        if (! empty($this->size)) {
-            $size_prices = $this->size_price;
-            if (is_array($size_prices) && isset($size_prices[0])) {
-                $price += $size_prices[0];
-            }
-        }
-
-        // Attribute Section
-
-        $attributes = $this->attributes['attributes'];
-        if (! empty($attributes)) {
-            $attrArr = json_decode($attributes, true);
-        }
-
-        if (! empty($attrArr)) {
-            foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
-
-                    foreach ($attrVal['values'] as $optionKey => $optionVal) {
-                        $price += $attrVal['prices'][$optionKey];
-                        // only the first price counts
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Attribute Section Ends
 
         $curr = null;
         try {

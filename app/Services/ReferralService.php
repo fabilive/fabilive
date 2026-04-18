@@ -71,6 +71,8 @@ class ReferralService
             throw new Exception('Referral system is currently disabled.');
         }
 
+        // Normalize code input
+        $code = strtoupper(trim($code));
         $referralCode = ReferralCode::where('code', $code)->first();
 
         if (!$referralCode) {

@@ -435,11 +435,7 @@ class CheckoutController extends Controller
             $size_price = ($size_price / $curr->value);
             $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes']);
 
-            if ($prod->user_id != 0) {
-                $gs = Generalsetting::find(1);
-                $prc = $prod->price + $gs->fixed_commission + ($prod->price / 100) * $gs->percentage_commission;
-                $prod->price = round($prc, 2);
-            }
+
 
             if (! empty($prices)) {
                 if (! empty($prices[0])) {
