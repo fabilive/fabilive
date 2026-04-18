@@ -39,6 +39,18 @@
                             <h4 class="widget-title down-line mb-30">{{ __('Affiliate Program') }}
                                 <a class="mybtn1" href="{{route('user-affilate-history')}}"> <i class="fas fa-history"></i> {{ __('Referral History') }}</a>
                             </h4>
+                            
+                            <div class="alert alert-info border-primary mb-4" style="border-left: 5px solid;">
+                                <h5 class="alert-heading text-primary"><i class="fas fa-gift mr-2"></i> {{ __('New: Share as a Discount Coupon!') }}</h5>
+                                <p class="mb-0 text-dark">
+                                    {{ __('Your referral code can now be used as a coupon during checkout.') }} 
+                                    <br>
+                                    <strong>{{ __('Your Friends Get') }}:</strong> <span class="badge badge-success px-3">200 CFA {{ __('Discount') }}</span>
+                                    <br>
+                                    <strong>{{ __('You Get') }}:</strong> <span class="badge badge-primary px-3">100 CFA {{ __('Locked Reward') }}</span> {{ __('per first-time purchaser!') }}
+                                </p>
+                            </div>
+
                             <div class="edit-info-area">
                                 <div class="body">
                                         <div class="edit-info-area-form">

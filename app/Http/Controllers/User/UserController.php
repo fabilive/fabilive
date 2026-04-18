@@ -146,6 +146,13 @@ class UserController extends UserBaseController
     public function affilate_code()
     {
         $user = $this->user;
+        
+        // --- Provisioning for existing users ---
+        $referralService = app(\App\Services\ReferralService::class);
+        $exists = \App\Models\ReferralCode::where('user_id', $user->id)->exists();
+        if (!$exists) {
+            $referralService->generateCode($user, 'buyer');
+        }
 
         return view('user.affilate.affilate-program', compact('user'));
     }
