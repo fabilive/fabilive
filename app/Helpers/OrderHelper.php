@@ -170,7 +170,27 @@ class OrderHelper
     public static function finalizeOrder($order, $cart)
     {
         try {
-            // 1. Order Tracks & Notifications
+            // 1. Calculate and Save Total Marketplace Commission
+            // This ensures the platform keeps its cut (e.g., 500 CFA) and vendors are paid correctly.
+            $totalCommission = 0;
+            $gs = Generalsetting::safeFirst();
+            $fixed = (float)($gs->fixed_commission ?? 0);
+            $percentage = (float)($gs->percentage_commission ?? 0);
+
+            foreach ($cart->items as $item) {
+                $product = Product::find($item['item']['id']);
+                if ($product && $product->user_id != 0) {
+                    $priceWithCommission = (float)$item['item_price'];
+                    // Reverse the commission formula to find the marketplace cut
+                    $originalPrice = ($priceWithCommission - $fixed) / (1 + $percentage / 100);
+                    $commissionPerUnit = $priceWithCommission - $originalPrice;
+                    $totalCommission += $commissionPerUnit * $item['qty'];
+                }
+            }
+            $order->commission = round($totalCommission, 2);
+            $order->update();
+
+            // 2. Order Tracks & Notifications
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
