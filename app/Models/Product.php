@@ -131,7 +131,7 @@ class Product extends Model
             $price = $price + ($gs->fixed_commission ?? 0) + ($price / 100) * ($gs->percentage_commission ?? 0);
         }
 
-        return $price;
+        return (float) $price;
     }
 
     /**
@@ -327,14 +327,14 @@ class Product extends Model
     {
         $gs = \App\Models\Generalsetting::safeFirst();
 
-        // getPriceAttribute already handles the Regular vs Sale logic
-        $price = $this->price;
-
+        // The 'price' attribute (via getPriceAttribute accessor) already includes 
+        // the marketplace commission and discount logic.
+        $price = $this->price; 
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
             if (is_array($size_prices) && isset($size_prices[0])) {
-                $price += $size_prices[0];
+                $price += (float)$size_prices[0];
             }
         }
 
@@ -346,7 +346,7 @@ class Product extends Model
             foreach ($attrArr as $attrKey => $attrVal) {
                 if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
                     foreach ($attrVal['values'] as $optionKey => $optionVal) {
-                        $price += $attrVal['prices'][$optionKey];
+                        $price += (float)$attrVal['prices'][$optionKey];
                         break;
                     }
                 }

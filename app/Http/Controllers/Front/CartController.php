@@ -523,10 +523,6 @@ class CartController extends FrontBaseController
             $qty = 1;
         }
 
-        if ($prod->user_id != 0) {
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = $prc;
-        }
         if (! empty($prices)) {
             if (! empty($prices[0])) {
                 foreach ($prices as $data) {
@@ -654,12 +650,7 @@ class CartController extends FrontBaseController
         $size_qty = $_GET['size_qty'];
         $size_price = $_GET['size_price'];
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'stock_check']);
-
-        if ($prod->user_id != 0) {
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = $prc;
-        }
-
+        
         if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
             $count = count($attrArr);
@@ -739,10 +730,6 @@ class CartController extends FrontBaseController
         $size_qty = $_GET['size_qty'];
         $size_price = $_GET['size_price'];
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes']);
-        if ($prod->user_id != 0) {
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = $prc;
-        }
 
         if (! empty($prod->attributes)) {
             $attrArr = json_decode($prod->attributes, true);
