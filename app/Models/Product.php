@@ -120,18 +120,23 @@ class Product extends Model
     public function getPriceAttribute($value)
     {
         // 1. Handle Discount/Previous Price Logic
-        $price = $value;
-        if (! $this->isDiscountActive() && ! empty($this->previous_price) && $this->previous_price > 0) {
-            $price = $this->previous_price;
+        $price = (float)$value;
+        if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
+            $price = (float)$this->previous_price;
         }
 
-        // 2. Add Marketplace Commission for Vendor Products
+        // 2. Add Marketplace Commission for Vendor Products 
+        // This is the SINGLE PLACE where marketplace fees are added.
         if ($this->user_id != 0) {
             $gs = Generalsetting::safeFirst();
-            $price = $price + ($gs->fixed_commission ?? 0) + ($price / 100) * ($gs->percentage_commission ?? 0);
+            $fixed = (float)($gs->fixed_commission ?? 0);
+            $percentage = (float)($gs->percentage_commission ?? 0);
+            
+            // Standard Formula: Base + Fixed + (Base * Percentage / 100)
+            $price = $price + $fixed + ($price / 100) * $percentage;
         }
 
-        return (float) $price;
+        return round($price, 2);
     }
 
     /**

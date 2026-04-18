@@ -161,10 +161,6 @@ class OrderCreateController extends AdminBaseController
             $qty = 1;
         }
 
-        if ($prod->user_id != 0) {
-            $prc = $prod->price + $this->gs->fixed_commission + ($prod->price / 100) * $this->gs->percentage_commission;
-            $prod->price = round($prc, 2);
-        }
         if (! empty($prices)) {
             foreach (explode(',', $prices) as $data) {
                 $prod->price += ($data / $curr->value);
