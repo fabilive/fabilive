@@ -15,14 +15,14 @@ class CouponController extends FrontBaseController
 {
     public function coupon()
     {
-        $gs = $this->gs;
-        $code = $_GET['code'];
-        $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
-        $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+        try {
+            $gs = $this->gs;
+            $code = request()->get('code');
+            $total = (float) preg_replace('/[^0-9\.]/ui', '', request()->get('total', 0));
+            $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
 
-        if (!$coupon) {
-            // Check if it's a Referral Code
-            try {
+            if (!$coupon) {
+                // Check if it's a Referral Code
                 $referralService = app(\App\Services\ReferralService::class);
                 $user = Auth::user();
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
@@ -46,10 +46,11 @@ class CouponController extends FrontBaseController
                 $data[5] = 1;
 
                 return response()->json($data);
-            } catch (\Throwable $e) {
-                return response()->json(['status' => 0, 'message' => $e->getMessage()]);
             }
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 0, 'message' => $e->getMessage()]);
         }
+
 
         $cart = Session::get('cart');
         foreach ($cart->items as $item) {
@@ -161,19 +162,19 @@ class CouponController extends FrontBaseController
 
     public function couponcheck()
     {
-        $gs = $this->gs;
-        $code = $_GET['code'];
-        $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+        try {
+            $gs = $this->gs;
+            $code = request()->get('code');
+            $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
 
-        if (!$coupon) {
-            // Check if it's a Referral Code
-            try {
+            if (!$coupon) {
+                // Check if it's a Referral Code
                 $referralService = app(\App\Services\ReferralService::class);
                 $user = Auth::user();
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
 
                 // Global discount of 200
-                $total = (float) preg_replace('/[^0-9\.]/ui', '', $_GET['total']);
+                $total = (float) preg_replace('/[^0-9\.]/ui', '', request()->get('total', 0));
                 $curr = $this->curr;
                 $discount = 200 * $curr->value;
 
@@ -197,10 +198,11 @@ class CouponController extends FrontBaseController
                 $data[6] = round($total, 2);
 
                 return response()->json($data);
-            } catch (\Throwable $e) {
-                return response()->json(['status' => 0, 'message' => $e->getMessage()]);
             }
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 0, 'message' => $e->getMessage()]);
         }
+
 
         if (! $coupon) {
             return response()->json(0);
