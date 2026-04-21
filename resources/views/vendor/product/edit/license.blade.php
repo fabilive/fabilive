@@ -466,28 +466,52 @@
 											<div class="row">
 												<div class="col-lg-12">
 													<div class="left-area">
+															<h4 class="heading">{{ __('Product Regular Price') }}*</h4>
+															<p class="sub-heading">{{ __('(Price to be crossed out - Optional)') }}</p>
+													</div>
+												</div>
+												<div class="col-lg-12">
+													<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="{{ __('e.g 200') }}" value="{{round($data->previous_price * $sign->value , 2)}}" min="0">
+												</div>
+											</div>
+
+											<div class="row">
+												<div class="col-lg-12">
+													<div class="left-area">
 														<h4 class="heading">
-															{{ __('Product Current Price') }}*
+															{{ __('Product Sale Price') }}*
 														</h4>
 														<p class="sub-heading">
-															({{ __('In') }} {{$sign->name}})
+															({{ __('Active Price') }} in {{$sign->name}})
 														</p>
 													</div>
 												</div>
 												<div class="col-lg-12">
-													<input name="price" type="number" class="input-field" placeholder="e.g 20" step="0.1" min="0" value="{{round($data->price * $sign->value , 2)}}" required="">
+													<input name="price" type="number" class="input-field" placeholder="{{ __('e.g 190') }}" step="0.1" min="0" value="{{round($data->price * $sign->value , 2)}}" required="">
 												</div>
 											</div>
-	
+
 											<div class="row">
 												<div class="col-lg-12">
 													<div class="left-area">
-															<h4 class="heading">{{ __('Product Discount Price') }}*</h4>
-															<p class="sub-heading">{{ __('(Optional)') }}</p>
+														<h4 class="heading">{{ __('Discount Start Date') }}*</h4>
+														<p class="sub-heading">{{ __('(When the sale starts - Compulsory)') }}</p>
 													</div>
 												</div>
 												<div class="col-lg-12">
-													<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="e.g 20" value="{{round($data->previous_price * $sign->value , 2)}}" min="0">
+													<input name="discount_date_start" type="date" class="input-field" value="{{ $data->discount_date_start }}" required="" min="{{ date('Y-m-d') }}">
+												</div>
+											</div>
+
+											<div class="row">
+												<div class="col-lg-12">
+													<div class="left-area">
+														<h4 class="heading">{{ __('Discount End Date') }}</h4>
+														<p class="sub-heading">{{ __('(When the sale ends - Optional)') }}</p>
+													</div>
+												</div>
+												<div class="col-lg-12">
+													<input name="discount_date_end" type="date" class="input-field" value="{{ $data->discount_date_end }}">
 												</div>
 											</div>
 	

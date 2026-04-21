@@ -389,10 +389,24 @@ class ProductController extends VendorBaseController
                 $rules = [
                     'photo' => 'required',
                     'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif,jfif',
+                    'discount_date_start' => 'required|date|after_or_equal:today',
+                    'discount_date_end' => 'nullable|date|after:discount_date_start',
                 ];
-                $validator = Validator::make($request->all(), $rules);
+
+                $customMessages = [
+                    'discount_date_start.required' => __('Discount Start Date is compulsory.'),
+                    'discount_date_start.after_or_equal' => __('Discount Start Date cannot be in the past.'),
+                    'discount_date_end.after' => __('Discount End Date must be after the Start Date.'),
+                ];
+
+                $validator = Validator::make($request->all(), $rules, $customMessages);
                 if ($validator->fails()) {
                     return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+                }
+
+                // Price Validation: Sale Price < Regular Price
+                if ($request->previous_price && $request->price >= $request->previous_price) {
+                    return response()->json(['errors' => [0 => __('Sale Price must be lower than the Regular Price.')]]);
                 }
 
                 // Pre-validate Gallery extensions to prevent ghost products
@@ -773,10 +787,24 @@ class ProductController extends VendorBaseController
     {
         $rules = [
             'file' => 'mimes:zip',
+            'discount_date_start' => 'required|date|after_or_equal:today',
+            'discount_date_end' => 'nullable|date|after:discount_date_start',
         ];
-        $validator = Validator::make($request->all(), $rules);
+
+        $customMessages = [
+            'discount_date_start.required' => __('Discount Start Date is compulsory.'),
+            'discount_date_start.after_or_equal' => __('Discount Start Date cannot be in the past.'),
+            'discount_date_end.after' => __('Discount End Date must be after the Start Date.'),
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $customMessages);
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+        }
+
+        // Price Validation: Sale Price < Regular Price
+        if ($request->previous_price && $request->price >= $request->previous_price) {
+            return response()->json(['errors' => [0 => __('Sale Price must be lower than the Regular Price.')]]);
         }
         $data = Product::findOrFail($id);
         $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();

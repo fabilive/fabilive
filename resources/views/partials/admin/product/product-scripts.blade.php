@@ -66,6 +66,40 @@
             });
     
             // Product Measure Ends :)
+
+            // Price Validation Logic
+            function validatePrices() {
+                var regularPrice = parseFloat($('input[name="previous_price"]').val());
+                var salePrice = parseFloat($('input[name="price"]').val());
+
+                if (!isNaN(regularPrice) && !isNaN(salePrice)) {
+                    if (salePrice >= regularPrice) {
+                        alert('{{ __("Sale Price must be lower than the Regular Price.") }}');
+                        $('input[name="price"]').val('');
+                    }
+                }
+            }
+
+            $(document).on('change', 'input[name="price"], input[name="previous_price"]', function() {
+                validatePrices();
+            });
+
+            // Date Validation Logic
+            function validateDates() {
+                var startDate = $('input[name="discount_date_start"]').val();
+                var endDate = $('input[name="discount_date_end"]').val();
+
+                if (startDate && endDate) {
+                    if (new Date(endDate) <= new Date(startDate)) {
+                        alert('{{ __("Discount End Date must be after the Start Date.") }}');
+                        $('input[name="discount_date_end"]').val('');
+                    }
+                }
+            }
+
+            $(document).on('change', 'input[name="discount_date_start"], input[name="discount_date_end"]', function() {
+                validateDates();
+            });
     
         });
     

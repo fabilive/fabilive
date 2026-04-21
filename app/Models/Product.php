@@ -138,10 +138,34 @@ class Product extends Model
 
     public function getPriceAttribute($value)
     {
-        // 1. Sale Price is used immediately as the base
         $price = (float)$value;
 
-        // 2. Add Tiered Marketplace Commission
+        // If a discount was set but is not currently active, and we have a regular price (previous_price)
+        if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
+            $now = \Carbon\Carbon::now();
+            
+            $parseDate = function ($dateStr) {
+                if (empty($dateStr)) return null;
+                try {
+                    if (str_contains($dateStr, '/')) {
+                        return \Carbon\Carbon::createFromFormat('d/m/Y', $dateStr);
+                    }
+                    return \Carbon\Carbon::parse($dateStr);
+                } catch (\Exception $e) {
+                    return null;
+                }
+            };
+
+            $start = $parseDate($this->discount_date_start);
+            $end = $parseDate($this->discount_date_end);
+
+            // Revert to previous_price if we are outside the discount window
+            if (($start && $now->lt($start)) || ($end && $now->gt($end))) {
+                $price = (float)$this->previous_price;
+            }
+        }
+
+        // Add Tiered Marketplace Commission
         $price += self::getTieredCommission($price);
 
         return round($price, 2);
@@ -437,8 +461,8 @@ class Product extends Model
 
     public function showPreviousPrice()
     {
-        // Show previous price if it exists and is greater than 0
-        if (empty($this->previous_price) || $this->previous_price <= 0) {
+        // Show previous price ONLY if discount is currently active
+        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= 0) {
             return '';
         }
 
