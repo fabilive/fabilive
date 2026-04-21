@@ -194,8 +194,11 @@ class CatalogController extends FrontBaseController
         $prods = $prods->where('status', 1)->paginate(isset($pageby) && $pageby > 0 ? $pageby : ($this->gs->page_count > 0 ? $this->gs->page_count : 12));
 
         $prods->getCollection()->transform(function ($item) {
-            $item->price = $item->vendorSizePrice();
-
+            // IMPORTANT: Overriding $item->price triggers the Eloquent accessor 
+            // logic when displayed in view. Since vendorSizePrice() already 
+            // calculates the full price including commission, setting it back 
+            // to the price attribute causes a second markup. We remove this 
+            // override to allow the model accessor to handle it correctly once.
             return $item;
         });
         $data['prods'] = $prods;

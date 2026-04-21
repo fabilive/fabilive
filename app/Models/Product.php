@@ -138,9 +138,16 @@ class Product extends Model
 
     public function getPriceAttribute($value)
     {
+        $gs = Generalsetting::first();
         $price = (float)$value;
 
-        // If a discount was set but is not currently active, and we have a regular price (previous_price)
+        // Force active price to be the lower of 'price' or 'previous_price' if both exist.
+        // This ensures the site never shows a sale price higher than the regular price.
+        if (!empty($this->previous_price) && $this->previous_price > 0 && $price > $this->previous_price) {
+            $price = (float)$this->previous_price;
+        }
+
+        // If a discount was set but is not currently active, revert to the regular price.
         if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
             $now = \Carbon\Carbon::now();
             
@@ -159,14 +166,15 @@ class Product extends Model
             $start = $parseDate($this->discount_date_start);
             $end = $parseDate($this->discount_date_end);
 
-            // Revert to previous_price if we are outside the discount window
             if (($start && $now->lt($start)) || ($end && $now->gt($end))) {
                 $price = (float)$this->previous_price;
             }
         }
 
-        // Add Tiered Marketplace Commission
-        $price += self::getTieredCommission($price);
+        // Add Tiered Marketplace Commission ONLY if enabled in settings
+        if ($gs->is_commission == 1) {
+            $price += self::getTieredCommission($price);
+        }
 
         return round($price, 2);
     }
@@ -799,6 +807,7 @@ class Product extends Model
             if ($data->user_id != 0) {
                 if ($data->user->is_vendor != 2) {
                     unset($collection[$key]);
+                    continue;
                 }
             }
             if (isset($_GET['max'])) {
@@ -806,7 +815,12 @@ class Product extends Model
                     unset($collection[$key]);
                 }
             }
-            $data->price = $data->vendorSizePrice();
+            
+            // IMPORTANT: Setting $data->price triggers the Eloquent accessor logic 
+            // when it's accessed later. Since vendorSizePrice() already calculates 
+            // the full price INCLUDING the first commission, setting it here would 
+            // cause a SECOND commission markup in views. We avoid double-markup by 
+            // not overriding the attribute if it's already computed.
         }
 
         return $collection;
