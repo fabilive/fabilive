@@ -52,7 +52,7 @@ class ProductController extends AdminBaseController
                 $gs = $this->gs;
                 $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
                 $value = $curr ? $curr->value : 1;
-                $price = $data->price * $value;
+                $price = $data->vendorPrice() * $curr->value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })
@@ -107,7 +107,7 @@ class ProductController extends AdminBaseController
             ->editColumn('price', function (Product $data) {
                 $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
                 $value = $curr ? $curr->value : 1;
-                $price = $data->price * $value;
+                $price = $data->vendorPrice() * $curr->value;
 
                 return PriceHelper::showAdminCurrencyPrice($price);
             })

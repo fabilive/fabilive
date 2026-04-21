@@ -117,6 +117,25 @@ class Product extends Model
         return true;
     }
 
+    public static function getTieredCommission($price)
+    {
+        if ($price <= 5000) {
+            return 700;
+        } elseif ($price <= 10000) {
+            return 800;
+        } elseif ($price <= 20000) {
+            return 999;
+        } elseif ($price <= 30000) {
+            return 1000;
+        } elseif ($price <= 50000) {
+            return 1200;
+        } elseif ($price <= 100000) {
+            return 1500;
+        } else {
+            return 2000;
+        }
+    }
+
     public function getPriceAttribute($value)
     {
         // 1. Handle Discount/Previous Price Logic
@@ -125,9 +144,8 @@ class Product extends Model
             $price = (float)$this->previous_price;
         }
 
-        // 2. Marketplace Commission Markup Removed
-        // Buyers now see the exact price set by the seller.
-
+        // 2. Add Tiered Marketplace Commission
+        $price += self::getTieredCommission($price);
 
         return round($price, 2);
     }
@@ -246,7 +264,7 @@ class Product extends Model
 
     public function vendorPrice()
     {
-        return $this->price;
+        return (float)($this->attributes['price'] ?? 0);
     }
 
     public function vendorSizePrice()
@@ -834,7 +852,7 @@ class Product extends Model
         $price = $this->price;
 
         if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
+            $price = $this->price; // Now includes tiered commission via accessor
         }
 
         // Attribute Section
@@ -895,7 +913,7 @@ class Product extends Model
             return '';
         }
         if ($this->user_id != 0) {
-            $price = $this->previous_price + $gs->fixed_commission + ($this->previous_price / 100) * $gs->percentage_commission;
+            $price = $this->previous_price + self::getTieredCommission($this->previous_price);
         }
 
         if (! empty($this->size)) {

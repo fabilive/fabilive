@@ -169,9 +169,22 @@ class OrderHelper
      */
     public static function finalizeOrder($order, $cart)
     {
-        try {
-            // 1. Marketplace Commission Calculation Removed
-            $order->commission = 0;
+            // 1. Marketplace Commission Calculation
+            $orderCommission = 0;
+            if ($cart->items) {
+                foreach ($cart->items as $item) {
+                    $product = Product::find($item['item']['id']);
+                    if ($product) {
+                        $basePrice = (float)$product->getAttributes()['price'];
+                        if (!$product->isDiscountActive() && !empty($product->previous_price) && $product->previous_price > 0) {
+                            $basePrice = (float)$product->previous_price;
+                        }
+                        $commission = Product::getTieredCommission($basePrice);
+                        $orderCommission += ($commission * $item['qty']);
+                    }
+                }
+            }
+            $order->commission = $orderCommission;
             $order->update();
 
             // 2. Order Tracks & Notifications
@@ -288,7 +301,17 @@ class OrderHelper
                     $vorder->order_id = $order->id;
                     $vorder->user_id = $prod['item']['user_id'];
                     $vorder->qty = $prod['qty'];
-                    $vorder->price = $prod['price'];
+                    $product = Product::find($prod['item']['id']);
+                    if ($product) {
+                        $basePrice = (float)$product->getAttributes()['price'];
+                        if (!$product->isDiscountActive() && !empty($product->previous_price) && $product->previous_price > 0) {
+                            $basePrice = (float)$product->previous_price;
+                        }
+                        $commission = Product::getTieredCommission($basePrice);
+                        $vorder->price = $prod['price'] - ($commission * $prod['qty']);
+                    } else {
+                        $vorder->price = $prod['price'];
+                    }
                     $vorder->order_number = $order->order_number;
                     $vorder->save();
                     $notf[] = $prod['item']['user_id'];

@@ -40,7 +40,7 @@ class ProductController extends VendorBaseController
                 $gs = $this->gs;
                 $curr = $this->curr;
                 $value = $curr ? $curr->value : 1;
-                $price = round($data->price * $value, 2);
+                $price = round($data->vendorPrice() * $value, 2);
 
                 return \PriceHelper::showAdminCurrencyPrice($price);
             };
