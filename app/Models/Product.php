@@ -138,11 +138,8 @@ class Product extends Model
 
     public function getPriceAttribute($value)
     {
-        // 1. Handle Discount/Previous Price Logic
+        // 1. Sale Price is used immediately as the base
         $price = (float)$value;
-        if (!$this->isDiscountActive() && !empty($this->previous_price) && $this->previous_price > 0) {
-            $price = (float)$this->previous_price;
-        }
 
         // 2. Add Tiered Marketplace Commission
         $price += self::getTieredCommission($price);
@@ -440,14 +437,14 @@ class Product extends Model
 
     public function showPreviousPrice()
     {
-        // Only show previous price if a discount is active AND previous_price exists
-        if (! $this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= $this->price) {
+        // Show previous price if it exists and is greater than 0
+        if (empty($this->previous_price) || $this->previous_price <= 0) {
             return '';
         }
 
         $gs = \App\Models\Generalsetting::safeFirst();
 
-        $price = $this->previous_price;
+        $price = (float)$this->previous_price + self::getTieredCommission((float)$this->previous_price);
 
 
         if (! empty($this->size)) {
