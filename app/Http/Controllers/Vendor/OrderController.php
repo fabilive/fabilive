@@ -8,6 +8,7 @@ use App\Models\Package;
 use App\Models\Shipping;
 use App\Models\VendorOrder;
 use App\Models\Generalsetting;
+use App\Models\User;
 use App\Services\DeliveryJobService;
 use Datatables;
 use Illuminate\Http\Request;
@@ -42,24 +43,8 @@ class OrderController extends VendorBaseController
                 $price = $order->vendororders()->where('user_id', '=', $user->id)->sum('price');
                 $order_curr_value = ($order->currency_value > 0) ? $order->currency_value : 1;
                 $price = round($price * $order_curr_value, 2);
-                if ($order->is_shipping == 1 && 0) {
-                    $vendor_shipping = json_decode($order->vendor_shipping_id);
-                    $user_id = auth()->id();
-                    $shipping_id = $vendor_shipping->$user_id;
-                    $shipping = Shipping::findOrFail($shipping_id);
-                    if ($shipping) {
-                        $price = $price + round($shipping->price * $order->currency_value, 2);
-                    }
-                    $vendor_packing_id = json_decode($order->vendor_packing_id);
-                    $packing_id = $vendor_packing_id->$user_id;
-                    $packaging = Package::findOrFail($packing_id);
-                    if ($packaging) {
-                        $price = $price + round($packaging->price * $order->currency_value, 2);
-                    }
-                }
-                $commission = round($order->commission * $order->currency_value, 2);
-
-                return \PriceHelper::showOrderCurrencyPrice(($price - $commission), $data->currency_sign);
+                
+                return \PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
                 $pending = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'pending')->count() > 0 ? 'selected' : '';
@@ -90,13 +75,6 @@ class OrderController extends VendorBaseController
         return view('vendor.order.index');
     }
 
-    // public function show($slug)
-    // {
-    //     $user = $this->user;
-    //     $order = Order::where('order_number', '=', $slug)->first();
-    //     $cart = json_decode($order->cart, true);
-    //     return view('vendor.order.details', compact('user', 'order', 'cart'));
-    // }
     public function show($slug)
     {
         $user = $this->user;
@@ -262,69 +240,6 @@ class OrderController extends VendorBaseController
             return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
         }
     }
-
-    //     public function status($slug, $status)
-    //     {
-    //     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
-    //     if ($mainorder->status == "completed") {
-    //         return redirect()->back()->with('success', __('This Order is Already Completed'));
-    //     }
-    //     $user = $this->user;
-    //     VendorOrder::where('order_number', '=', $slug)
-    //         ->where('user_id', '=', $user->id)
-    //         ->update(['status' => $status]);
-    //     if ($status == 'completed') {
-    //         $order = \App\Models\Order::where('order_number', $slug)->first();
-    //         if ($order) {
-    //             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
-    //                 ->where('status', 'delivered')
-    //                 ->first();
-    //             if ($riderDelivery) {
-    //                 $shipping = \App\Models\Shipping::find($order->shipping_id);
-    //                 if ($shipping) {
-    //                     $rider = \App\Models\Rider::find($riderDelivery->rider_id);
-    //                     if ($rider) {
-    //                         $rider->balance += $shipping->price;
-    //                         $rider->save();
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
-    // }
-
-    //     public function status($slug, $status)
-    //     {
-    //     $mainorder = VendorOrder::where('order_number', '=', $slug)->first();
-    //     if (!$mainorder) {
-    //         return redirect()->back()->with('error', __('Order not found.'));
-    //     }
-    //     if ($mainorder->status == "completed") {
-    //         return redirect()->back()->with('success', __('This Order is Already Completed'));
-    //     }
-    //     $user = $this->user;
-    //     VendorOrder::where('order_number', '=', $slug)
-    //         ->where('user_id', '=', $user->id)
-    //         ->update(['status' => $status]);
-    //     if ($status === 'completed') {
-    //         $order = \App\Models\Order::where('id', $mainorder->order_id)->first();
-    //         if ($order) {
-    //             $riderDelivery = \App\Models\DeliveryRider::where('order_id', $order->id)
-    //                 ->where('status', 'delivered')
-    //                 ->first();
-    //             if ($riderDelivery) {
-    //                 $rider = \App\Models\Rider::find($riderDelivery->rider_id);
-
-    //                 if ($rider) {
-    //                     $rider->balance += $order->shipping_cost;
-    //                     $rider->save();
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return redirect()->route('vendor-order-index')->with('success', __('Order Status Updated Successfully'));
-    // }
 
     public function emailsub(Request $request)
     {

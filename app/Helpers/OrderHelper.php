@@ -170,31 +170,15 @@ class OrderHelper
     public static function finalizeOrder($order, $cart)
     {
         try {
-            // 1. Calculate and Save Total Marketplace Commission
-            // This ensures the platform keeps its cut (e.g., 500 CFA) and vendors are paid correctly.
-            $totalCommission = 0;
-            $gs = Generalsetting::safeFirst();
-            $fixed = (float)($gs->fixed_commission ?? 0);
-            $percentage = (float)($gs->percentage_commission ?? 0);
-
-            foreach ($cart->items as $item) {
-                $product = Product::find($item['item']['id']);
-                if ($product && $product->user_id != 0) {
-                    $priceWithCommission = (float)$item['item_price'];
-                    // Reverse the commission formula to find the marketplace cut
-                    $originalPrice = ($priceWithCommission - $fixed) / (1 + $percentage / 100);
-                    $commissionPerUnit = $priceWithCommission - $originalPrice;
-                    $totalCommission += $commissionPerUnit * $item['qty'];
-                }
-            }
-            $order->commission = round($totalCommission, 2);
+            // 1. Marketplace Commission Calculation Removed
+            $order->commission = 0;
             $order->update();
 
             // 2. Order Tracks & Notifications
             $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.']);
             $order->notifications()->create();
 
-            // 2. Coupon & Referral Tracking
+            // 3. Coupon & Referral Tracking
             if (! empty($order->coupon_id)) {
                 if ($order->coupon_id === 'referral' || Session::get('coupon_is_referral') === true) {
                     // Trigger new referral reward logic
@@ -205,7 +189,7 @@ class OrderHelper
                 }
             }
 
-            // 3. Reward Points
+            // 4. Reward Points
             if (Auth::check()) {
                 $gs = Generalsetting::safeFirst();
                 if ($gs->is_reward == 1) {
@@ -224,12 +208,12 @@ class OrderHelper
                 }
             }
 
-            // 4. Stock & Qty Checks
+            // 5. Stock & Qty Checks
             self::size_qty_check($cart);
             self::stock_check($cart);
             self::vendor_order_check($cart, $order);
 
-            // 5. Clear All Related Sessions (Prevents "Ghost Coupons")
+            // 6. Clear All Related Sessions (Prevents "Ghost Coupons")
             Session::put('temporder', $order);
             Session::put('tempcart', $cart);
             Session::forget('cart');

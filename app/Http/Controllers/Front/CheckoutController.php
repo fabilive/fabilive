@@ -277,7 +277,9 @@ class CheckoutController extends FrontBaseController
                 $total = $total + 0;
             } else {
                 $total = Session::get('coupon_total');
-                $total = str_replace(',', '', str_replace($curr->sign, '', $total));
+                if (is_string($total)) {
+                    $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                }
             }
             $service_areas = ServiceArea::all();
 
@@ -311,7 +313,9 @@ class CheckoutController extends FrontBaseController
                     $total = $total + 0;
                 } else {
                     $total = Session::get('coupon_total');
-                    $total = str_replace($curr->sign, '', $total) + round(0 * $curr->value, 2);
+                    if (is_string($total)) {
+                        $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                    }
                 }
                 foreach ($products as $prod) {
                     if ($prod['item']['type'] != 'Physical') {
@@ -346,7 +350,9 @@ class CheckoutController extends FrontBaseController
                     $total = $total + 0;
                 } else {
                     $total = Session::get('coupon_total');
-                    $total = $total;
+                    if (is_string($total)) {
+                        $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                    }
                 }
                 $ck = 1;
 

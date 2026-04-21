@@ -40,15 +40,10 @@ class EscrowReleaseService
                 $sellerAmount = $order->pay_amount; // Contains product cost.
                 $riderFee = $order->total_delivery_fee ?? 0;
 
-                // 1. Calculate Seller Commission (Admin take)
+                // 1. Marketplace Commission Deduction Removed
                 $adminSellerCommission = 0;
-                if ($gs->percentage_commission > 0) {
-                    $adminSellerCommission += ($sellerAmount * $gs->percentage_commission) / 100;
-                }
-                if ($gs->fixed_commission > 0) {
-                    $adminSellerCommission += $gs->fixed_commission;
-                }
-                $finalSellerPayout = max(0, $sellerAmount - $adminSellerCommission);
+                $finalSellerPayout = $sellerAmount;
+
 
                 // 2. Calculate Rider Commission (Admin take)
                 $adminRiderCommission = 0;
@@ -68,15 +63,8 @@ class EscrowReleaseService
                                 $vendorAmount = $vOrder->price;
 
                                 $adminSellerCommission = 0;
-                                if ($gs->percentage_commission > 0) {
-                                    $adminSellerCommission += ($vendorAmount * $gs->percentage_commission) / 100;
-                                }
-                                if ($gs->fixed_commission > 0) {
-                                    // Assuming fixed commission applies per vendor order
-                                    $adminSellerCommission += $gs->fixed_commission;
-                                }
+                                $finalSellerPayout = $vendorAmount;
 
-                                $finalSellerPayout = max(0, $vendorAmount - $adminSellerCommission);
 
                                 $vendor->balance += $finalSellerPayout;
                                 $vendor->save();

@@ -39,6 +39,7 @@ class CouponController extends FrontBaseController
                 $data[2] = $discount;
                 Session::put('coupon', $data[2]);
                 Session::put('coupon_code', $code);
+                Session::put('coupon_id', 'referral');
                 Session::put('coupon_is_referral', true);
                 Session::put('coupon_total', $data[0]);
                 $data[3] = 'referral';
@@ -86,6 +87,7 @@ class CouponController extends FrontBaseController
             return response()->json(0);
         }
 
+        $fnd = Coupon::where('code', '=', $code)->get()->count();
         if ($fnd < 1) {
             return response()->json(0);
         } else {
@@ -188,10 +190,10 @@ class CouponController extends FrontBaseController
                 $data[2] = $discount;
                 Session::put('coupon', $data[2]);
                 Session::put('coupon_code', $code);
+                Session::put('coupon_id', 'referral');
                 Session::put('coupon_is_referral', true);
-                Session::put('coupon_total1', round($total, 2));
-                Session::forget('coupon_total');
-
+                Session::put('coupon_total', $data[0]);
+                
                 $data[3] = 'referral';
                 $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
                 $data[5] = 1;
@@ -295,8 +297,7 @@ class CouponController extends FrontBaseController
                         Session::put('coupon', $data[2]);
                         Session::put('coupon_code', $code);
                         Session::put('coupon_id', $coupon->id);
-                        Session::put('coupon_total1', round($total, 2));
-                        Session::forget('coupon_total');
+                        Session::put('coupon_total', $data[0]);
 
                         $data[3] = $coupon->id;
                         $data[4] = $coupon->price.'%';
@@ -321,8 +322,7 @@ class CouponController extends FrontBaseController
                         Session::put('coupon', $data[2]);
                         Session::put('coupon_code', $code);
                         Session::put('coupon_id', $coupon->id);
-                        Session::put('coupon_total1', round($total, 2));
-                        Session::forget('coupon_total');
+                        Session::put('coupon_total', $data[0]);
                         $data[1] = $code;
                         $data[2] = round($coupon->price * $curr->value, 2);
                         $data[3] = $coupon->id;

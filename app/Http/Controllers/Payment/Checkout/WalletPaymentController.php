@@ -209,16 +209,7 @@ class WalletPaymentController extends CheckoutBaseControlller
             $riderPercentageComission = $gs->rider_percentage_commission;
             $input['total_delivery_fee'] = $new_cart['grand_total_fee'];
             } // end !isDigitalOrder
-            foreach ($new_cart['items'] as $key => $cartItem) {
-                $itemPriceWithCommission = $cartItem['item_price'];
-                $product = $cartItem['item'];
-                $priceWithCommission = $product->price;
-                $fixed = $gs->fixed_commission;
-                $percentage = $gs->percentage_commission;
-                $originalPrice = ($priceWithCommission - $fixed) / (1 + $percentage / 100);
-                $commission = $priceWithCommission - $originalPrice;
-                $totalCommission += $commission * $cartItem['qty'];
-            }
+
             $new_cart = json_encode($new_cart);
             $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);

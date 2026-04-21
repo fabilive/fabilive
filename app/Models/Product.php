@@ -125,16 +125,9 @@ class Product extends Model
             $price = (float)$this->previous_price;
         }
 
-        // 2. Add Marketplace Commission for Vendor Products 
-        // This is the SINGLE PLACE where marketplace fees are added.
-        if ($this->user_id != 0) {
-            $gs = Generalsetting::safeFirst();
-            $fixed = (float)($gs->fixed_commission ?? 0);
-            $percentage = (float)($gs->percentage_commission ?? 0);
-            
-            // Standard Formula: Base + Fixed + (Base * Percentage / 100)
-            $price = $price + $fixed + ($price / 100) * $percentage;
-        }
+        // 2. Marketplace Commission Markup Removed
+        // Buyers now see the exact price set by the seller.
+
 
         return round($price, 2);
     }
@@ -787,9 +780,8 @@ class Product extends Model
         $gs = \App\Models\Generalsetting::safeFirst();
         $price = $this->price;
 
-        if ($this->user_id != 0) {
-            $price = $this->price + $gs->fixed_commission + ($this->price / 100) * $gs->percentage_commission;
-        }
+        // Marketplace Commission Markup Removed
+
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
