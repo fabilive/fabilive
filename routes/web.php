@@ -304,15 +304,32 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
+        // 13. Filesystem Permission Repair for Blogs
+        $blog_path = public_path('assets/images/blogs');
+        $permission_msg = "";
+        try {
+            if (!file_exists($blog_path)) {
+                mkdir($blog_path, 0777, true);
+                $permission_msg .= "Created directory: " . $blog_path . " with 0777 permissions. ";
+            } else {
+                chmod($blog_path, 0777);
+                $permission_msg .= "Updated existing directory permissions to 0777. ";
+            }
+        } catch (\Exception $e) {
+            $permission_msg = "Warning: Permission repair failed: " . $e->getMessage();
+        }
+
         // Diagnostic Check
         $blogCols = \Illuminate\Support\Facades\Schema::getColumnListing('blogs');
         $blogColList = implode(', ', $blogCols);
 
-        return "<h1>Schema Repair Complete!</h1>
+        return "<h1>Schema & Permission Repair Complete!</h1>
                 <p><strong>Database Fixes Applied:</strong> Blogs (SEO & Tags Repair Run), Coupons, Messaging/Tickets, Contact Email, Social Icons Audit.</p>
+                <p><strong>Filesystem Fixes:</strong> " . $permission_msg . "</p>
                 <hr>
                 <h3>Diagnostic Info (Table: blogs)</h3>
                 <p><strong>Current Columns:</strong> " . $blogColList . "</p>
+                <p><strong>Write Status:</strong> " . (is_writable($blog_path) ? '<span style="color:green">Writable ✅</span>' : '<span style="color:red">Not Writable ❌</span>') . "</p>
                 <hr>
                 <br>
                 <a href='".route('admin-blog-index')."'>Click here to go to Blogs</a><br>
