@@ -10,16 +10,8 @@ class Blog extends Model
 
     protected $dates = ['created_at'];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->created_at = $model->freshTimestamp();
-        });
-    }
 
     public function category()
     {

@@ -283,9 +283,31 @@ Route::get('/admin/schema-polish', function () {
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%facebook.com%')->update(['icon' => 'fab fa-facebook-f']);
         }
 
+        // 12. Fix Blogs Table (Ensure all fields from Model exist)
+        if (\Illuminate\Support\Facades\Schema::hasTable('blogs')) {
+            \Illuminate\Support\Facades\Schema::table('blogs', function ($table) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('blogs', 'status')) {
+                    $table->integer('status')->default(1);
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('blogs', 'meta_tag')) {
+                    $table->text('meta_tag')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('blogs', 'meta_description')) {
+                    $table->text('meta_description')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('blogs', 'tags')) {
+                    $table->text('tags')->nullable();
+                }
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('blogs', 'updated_at')) {
+                    $table->timestamp('updated_at')->nullable();
+                }
+            });
+        }
+
         return "<h1>Schema Repair Complete!</h1>
-                <p><strong>Database Fixes Applied:</strong> Coupons, Messaging/Tickets (Fixes dashboard errors), Contact Email, Social Icons Audit.</p>
+                <p><strong>Database Fixes Applied:</strong> Blogs (SEO & Tags), Coupons, Messaging/Tickets, Contact Email, Social Icons Audit.</p>
                 <br>
+                <a href='".route('admin-blog-index')."'>Click here to go to Blogs</a><br>
                 <a href='".route('admin-message-index')."'>Click here to test Tickets Dashboard</a><br>
                 <a href='".route('admin-message-dispute')."'>Click here to test Disputes Dashboard</a><br><br>
                 <a href='".route('vendor.dashboard')."'>Go to Vendor Dashboard</a>";
