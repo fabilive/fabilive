@@ -142,7 +142,13 @@ jobs:
 
             ln -sfn "$SHARED_DIR/assets/images" "/var/www/fabilive/public/assets/images"
             ln -sfn "$SHARED_DIR/assets/files" "/var/www/fabilive/public/assets/files"
-            echo "  Linked: Shared assets" >> $LOG_FILE
+            
+            # Ensure Blogs folder exists within shared storage and is writable
+            mkdir -p "$SHARED_DIR/assets/images/blogs"
+            sudo chown -R www-data:www-data "$SHARED_DIR/assets/images"
+            sudo chmod -R 775 "$SHARED_DIR/assets/images"
+            
+            echo "  Linked: Shared assets with hardened permissions" >> $LOG_FILE
             
             echo "--- Persistence Setup Complete ---" >> $LOG_FILE
             

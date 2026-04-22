@@ -67,35 +67,6 @@ class RegisterController extends FrontBaseController
 
         $user->fill($input)->save();
 
-        //--- Referral Logic
-        $referral_code = $request->referral_code;
-        $referrer = null;
-
-        // Try finding referrer by affilate_code from form input
-        if (! empty($referral_code)) {
-            $referrer = User::where('affilate_code', $referral_code)->first();
-        }
-
-        // Fallback: use session-stored referrer ID (from referral link)
-        if (! $referrer && Session::has('custom_referral')) {
-            $referrer = User::find(Session::get('custom_referral'));
-            Session::forget('custom_referral');
-            Session::forget('custom_referral_code');
-        }
-
-        if ($referrer) {
-            $user->reff = $referrer->id;
-            $user->update();
-
-            // Create Custom Referral Record
-            $referral = new \App\Models\CustomReferral();
-            $referral->referrer_id = $referrer->id;
-            $referral->referred_id = $user->id;
-            $referral->amount = 500; // Default amount from migration
-            $referral->status = 'locked';
-            $referral->save();
-        }
-        //--- Referral Logic Ends
 
         if ($gs->is_verification_email == 1) {
             $to = $request->email;

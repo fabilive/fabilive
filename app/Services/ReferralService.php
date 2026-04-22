@@ -102,6 +102,12 @@ class ReferralService
             if ($orderCount > 0) {
                 throw new Exception('Referral discounts are only available for your first purchase.');
             }
+
+            // 30-day registration limit check
+            $daysSinceRegistration = $user->created_at->diffInDays(now());
+            if ($daysSinceRegistration > 30) {
+                throw new Exception('Referral discounts are only valid for the first 30 days of registration.');
+            }
         }
 
         return $referralCode;

@@ -16,7 +16,7 @@
 
             <!--<li class=""><a class="{{ Request::url() == route('user-reward-index') ? 'active':'' }}" href="{{route('user-reward-index')}}">{{ __('Rewards') }}</a></li>-->
 
-            <li class=""><a class="{{ Request::url() == route('user-affilate-program') ? 'active':'' }}" href="{{ route('user-affilate-program') }}">{{ __('Referral Program') }}</a></li>
+            <li class=""><a class="{{ Request::url() == route('user-affilate-program') ? 'active':'' }}" href="{{ route('user-affilate-program') }}">{{ __('Ambassador Program') }} @if(Auth::user()->referralCodes->count() == 0) <span class="badge badge-primary px-2 ml-1" style="font-size: 10px;">{{ __('Apply') }}</span> @endif</a></li>
 
     <li class=""><a class="{{ Request::url() == route('user-wwt-index') ? 'active':'' }}" href="{{route('user-wwt-index')}}">{{ __('Withdraw') }}</a></li>
 

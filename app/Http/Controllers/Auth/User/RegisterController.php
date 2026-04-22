@@ -178,20 +178,6 @@ class RegisterController extends Controller
                     Session::forget('custom_referral_name');
                 }
 
-                // Fallback: if user manually typed an affilate_code and no CustomReferral was created yet
-                if (! $customReferralCreated && $request->filled('referral_code')) {
-                    $referrerByCode = User::where('affilate_code', $request->referral_code)->first();
-                    if ($referrerByCode && $referrerByCode->id !== $user->id) {
-                        $bonusAmount = $bonusAmount ?? (int) ($gs->custom_referral_bonus ?? 500);
-                        \App\Models\CustomReferral::create([
-                            'referrer_id' => $referrerByCode->id,
-                            'referred_id' => $user->id,
-                            'amount' => $bonusAmount,
-                            'status' => 'locked',
-                            'expires_at' => now()->addDays(30),
-                        ]);
-                    }
-                }
 
                 // Handle vendor uploads if vendor
                 if (! empty($request->vendor)) {
@@ -211,7 +197,8 @@ class RegisterController extends Controller
                 $role = ! empty($request->vendor) ? 'seller' : 'buyer';
 
                 // Generate a referral code for the new user (so they can share it)
-                $referralService->generateCode($user, $role);
+                // DISABLED: Users must now apply for the Ambassador Program in their dashboard.
+                // $referralService->generateCode($user, $role);
 
                 DB::commit();
 

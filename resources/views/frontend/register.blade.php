@@ -32,7 +32,7 @@
                             <div class="row">
                                 <div class="col-lg-6 col-md-8 col-12 mx-auto">
                                     <div class="registration-form border">
-                                        <h3>{{ __('Signup Now') }}</h3>
+                                    <h3>{{ __('Signup Now') }}</h3>
                                         <form id="registerform" action="{{route('user-register-submit')}}" method="POST">
                                             @csrf
                                             <input type="hidden" name="source" value="{{ request()->source }}">
@@ -54,14 +54,8 @@
                                             <p>
                                                 <input type="password" name="password_confirmation" class="form-control" required=""  placeholder="{{ __('Confirm Password') }}" >
                                             </p>
-                                            <p>
-                                                <input type="text" name="referral_code" class="form-control" placeholder="{{ __('Referral Code (Optional)') }}" value="{{ Session::has('affilate_code') ? Session::get('affilate_code') : (Session::has('custom_referral_code') ? Session::get('custom_referral_code') : '') }}">
-                                            </p>
-
-
                                             <input id="processdata" type="hidden" value="{{ __('Processing...') }}">
-                                                <button class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
-                                            </p>
+                                            <button class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
                                         </form>
                                         <p>
                                                 {{ __("Do have any account?") }}<a href="{{ route('user.login') }}"  class="text-secondary">{{__(' Login')}}</a>
