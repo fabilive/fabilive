@@ -66,37 +66,43 @@ class BlogController extends AdminBaseController
         }
         //--- Validation Section Ends
 
-        //--- Logic Section
-        $data = new Blog();
-        $input = $request->all();
+        try {
+            //--- Logic Section
+            $data = new Blog();
+            $input = $request->all();
 
-        $slug = Str::slug($request->title).Str::random(4);
+            $slug = Str::slug($request->title).Str::random(4);
 
-        if ($file = $request->file('photo')) {
-            $name = PriceHelper::ImageCreateName($file);
-            $file->move(public_path('assets/images/blogs'), $name);
-            $input['photo'] = $name;
+            if ($file = $request->file('photo')) {
+                $name = PriceHelper::ImageCreateName($file);
+                $file->move(public_path('assets/images/blogs'), $name);
+                $input['photo'] = $name;
+            }
+
+            if (! empty($request->meta_tag) && is_array($request->meta_tag)) {
+                $input['meta_tag'] = implode(',', $request->meta_tag);
+            }
+            if (! empty($request->tags) && is_array($request->tags)) {
+                $input['tags'] = implode(',', $request->tags);
+            }
+
+            if ($request->secheck == '') {
+                $input['meta_tag'] = null;
+                $input['meta_description'] = null;
+            }
+            $input['slug'] = $slug;
+
+            Session::forget('footer_blogs');
+            $data->fill($input)->save();
+            //--- Logic Section Ends
+
+            //--- Redirect Section
+            $msg = __('New Data Added Successfully.').'<a href="'.route('admin-blog-index').'">'.__('View Post Lists').'</a>';
+
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [$e->getMessage()]]);
         }
-        if (! empty($request->meta_tag)) {
-            $input['meta_tag'] = implode(',', $request->meta_tag);
-        }
-        if (! empty($request->tags)) {
-            $input['tags'] = implode(',', $request->tags);
-        }
-        if ($request->secheck == '') {
-            $input['meta_tag'] = null;
-            $input['meta_description'] = null;
-        }
-        $input['slug'] = $slug;
-
-        Session::forget('footer_blogs');
-        $data->fill($input)->save();
-        //--- Logic Section Ends
-
-        //--- Redirect Section
-        $msg = __('New Data Added Successfully.').'<a href="'.route('admin-blog-index').'">'.__('View Post Lists').'</a>';
-
-        return response()->json($msg);
         //--- Redirect Section Ends
     }
 
@@ -124,41 +130,46 @@ class BlogController extends AdminBaseController
         }
         //--- Validation Section Ends
 
-        //--- Logic Section
-        $data = Blog::findOrFail($id);
-        $input = $request->all();
-        if ($file = $request->file('photo')) {
-            $name = PriceHelper::ImageCreateName($file);
-            $file->move(public_path('assets/images/blogs'), $name);
-            if ($data->photo != null) {
+        try {
+            //--- Logic Section
+            $data = Blog::findOrFail($id);
+            $input = $request->all();
+            if ($file = $request->file('photo')) {
+                $name = PriceHelper::ImageCreateName($file);
+                $file->move(public_path('assets/images/blogs'), $name);
                 if (file_exists(public_path('assets/images/blogs/'.$data->photo))) {
                     unlink(public_path('assets/images/blogs/'.$data->photo));
                 }
+                $input['photo'] = $name;
             }
-            $input['photo'] = $name;
-        }
-        if (! empty($request->meta_tag)) {
-            $input['meta_tag'] = implode(',', $request->meta_tag);
-        } else {
-            $input['meta_tag'] = null;
-        }
-        if (! empty($request->tags)) {
-            $input['tags'] = implode(',', $request->tags);
-        } else {
-            $input['tags'] = null;
-        }
-        if ($request->secheck == '') {
-            $input['meta_tag'] = null;
-            $input['meta_description'] = null;
-        }
-        $input['slug'] = Str::slug($request->title).Str::random(4);
-        $data->update($input);
-        //--- Logic Section Ends
-        Session::forget('footer_blogs');
-        //--- Redirect Section
-        $msg = __('Data Updated Successfully.').'<a href="'.route('admin-blog-index').'">'.__('View Post Lists').'</a>';
 
-        return response()->json($msg);
+            if (! empty($request->meta_tag) && is_array($request->meta_tag)) {
+                $input['meta_tag'] = implode(',', $request->meta_tag);
+            } else {
+                $input['meta_tag'] = null;
+            }
+            if (! empty($request->tags) && is_array($request->tags)) {
+                $input['tags'] = implode(',', $request->tags);
+            } else {
+                $input['tags'] = null;
+            }
+
+            if ($request->secheck == '') {
+                $input['meta_tag'] = null;
+                $input['meta_description'] = null;
+            }
+
+            Session::forget('footer_blogs');
+            $data->update($input);
+            //--- Logic Section Ends
+
+            //--- Redirect Section
+            $msg = __('Data Updated Successfully.').'<a href="'.route('admin-blog-index').'">'.__('View Post Lists').'</a>';
+
+            return response()->json($msg);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => [$e->getMessage()]]);
+        }
         //--- Redirect Section Ends
     }
 

@@ -304,8 +304,16 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
+        // Diagnostic Check
+        $blogCols = \Illuminate\Support\Facades\Schema::getColumnListing('blogs');
+        $blogColList = implode(', ', $blogCols);
+
         return "<h1>Schema Repair Complete!</h1>
-                <p><strong>Database Fixes Applied:</strong> Blogs (SEO & Tags), Coupons, Messaging/Tickets, Contact Email, Social Icons Audit.</p>
+                <p><strong>Database Fixes Applied:</strong> Blogs (SEO & Tags Repair Run), Coupons, Messaging/Tickets, Contact Email, Social Icons Audit.</p>
+                <hr>
+                <h3>Diagnostic Info (Table: blogs)</h3>
+                <p><strong>Current Columns:</strong> " . $blogColList . "</p>
+                <hr>
                 <br>
                 <a href='".route('admin-blog-index')."'>Click here to go to Blogs</a><br>
                 <a href='".route('admin-message-index')."'>Click here to test Tickets Dashboard</a><br>
