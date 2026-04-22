@@ -171,10 +171,9 @@ class Product extends Model
             }
         }
 
-        // Add Tiered Marketplace Commission ONLY if enabled in settings
-        if ($gs->is_commission == 1) {
-            $price += self::getTieredCommission($price);
-        }
+        // Add Tiered Marketplace Commission
+        // We ensure both sale and regular prices are marked up consistently.
+        $price += self::getTieredCommission($price);
 
         return round($price, 2);
     }
@@ -298,7 +297,8 @@ class Product extends Model
 
     public function vendorSizePrice()
     {
-        $price = $this->price;
+        // Use getRawOriginal to avoid triggering the getPriceAttribute accessor prematurely
+        $price = (float)$this->getRawOriginal('price');
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
@@ -469,36 +469,18 @@ class Product extends Model
 
     public function showPreviousPrice()
     {
-        // Show previous price ONLY if discount is currently active
-        if (!$this->isDiscountActive() || empty($this->previous_price) || $this->previous_price <= 0) {
+        // Use consistent tiered commission logic for regular price
+        if (empty($this->previous_price) || $this->previous_price <= 0) {
             return '';
         }
 
         $gs = \App\Models\Generalsetting::safeFirst();
+        $price = (float)$this->previous_price;
+        $price += self::getTieredCommission($price);
 
-        $price = (float)$this->previous_price + self::getTieredCommission((float)$this->previous_price);
-
-
-        if (! empty($this->size)) {
-            $size_prices = $this->size_price;
-            if (is_array($size_prices) && isset($size_prices[0])) {
-                $price += $size_prices[0];
-            }
-        }
-
-        // Attribute Section
-        $attributes = $this->attributes;
-        $attrArr = is_array($attributes) ? $attributes : json_decode($attributes, true);
-
-        if (! empty($attrArr)) {
-            foreach ($attrArr as $attrKey => $attrVal) {
-                if (is_array($attrVal) && array_key_exists('details_status', $attrVal) && $attrVal['details_status'] == 1) {
-                    foreach ($attrVal['values'] as $optionKey => $optionVal) {
-                        $price += $attrVal['prices'][$optionKey];
-                        break;
-                    }
-                }
-            }
+        // Sanity check: If regular price is not higher than sale price after markups, don't show it
+        if ($price <= $this->price) {
+            return '';
         }
 
         if (Session::has('currency')) {
@@ -523,7 +505,6 @@ class Product extends Model
             $curr->value = 1;
         }
 
-        // Force value to 1 for CFA/XFA to avoid unintended conversions
         if (in_array($curr->sign, ['CFA', 'XFA'])) {
             $curr->value = 1;
         }
@@ -884,11 +865,11 @@ class Product extends Model
     public function ApishowDetailsPrice()
     {
         $gs = \App\Models\Generalsetting::safeFirst();
-        $price = $this->price;
+        // Use getRawOriginal to avoid triggered accessor
+        $price = (float)$this->getRawOriginal('price');
 
-        if ($this->user_id != 0) {
-            $price = $this->price; // Now includes tiered commission via accessor
-        }
+        // Add Tiered Marketplace Commission
+        $price += self::getTieredCommission($price);
 
         // Attribute Section
 
@@ -943,13 +924,13 @@ class Product extends Model
     public function ApishowPreviousPrice()
     {
         $gs = \App\Models\Generalsetting::safeFirst();
-        $price = $this->previous_price;
-        if (! $price) {
+        $price = (float)$this->previous_price;
+        if (! $price || $price <= 0) {
             return '';
         }
-        if ($this->user_id != 0) {
-            $price = $this->previous_price + self::getTieredCommission($this->previous_price);
-        }
+        
+        // Consistent tiered commission
+        $price += self::getTieredCommission($price);
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
