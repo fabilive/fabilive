@@ -74,7 +74,7 @@ class BlogController extends AdminBaseController
 
         if ($file = $request->file('photo')) {
             $name = PriceHelper::ImageCreateName($file);
-            $file->move('assets/images/blogs', $name);
+            $file->move(public_path('assets/images/blogs'), $name);
             $input['photo'] = $name;
         }
         if (! empty($request->meta_tag)) {
@@ -129,10 +129,10 @@ class BlogController extends AdminBaseController
         $input = $request->all();
         if ($file = $request->file('photo')) {
             $name = PriceHelper::ImageCreateName($file);
-            $file->move('assets/images/blogs', $name);
+            $file->move(public_path('assets/images/blogs'), $name);
             if ($data->photo != null) {
-                if (file_exists(public_path().'/assets/images/blogs/'.$data->photo)) {
-                    unlink(public_path().'/assets/images/blogs/'.$data->photo);
+                if (file_exists(public_path('assets/images/blogs/'.$data->photo))) {
+                    unlink(public_path('assets/images/blogs/'.$data->photo));
                 }
             }
             $input['photo'] = $name;
@@ -176,8 +176,8 @@ class BlogController extends AdminBaseController
             //--- Redirect Section Ends
         }
         //If Photo Exist
-        if (file_exists(public_path().'/assets/images/blogs/'.$data->photo)) {
-            unlink(public_path().'/assets/images/blogs/'.$data->photo);
+        if (file_exists(public_path('assets/images/blogs/'.$data->photo))) {
+            unlink(public_path('assets/images/blogs/'.$data->photo));
         }
         $data->delete();
         Session::forget('footer_blogs');
