@@ -304,19 +304,33 @@ Route::get('/admin/schema-polish', function () {
             });
         }
 
-        // 13. Filesystem Permission Repair for Blogs
+        // 13. Filesystem Permission Repair for Blogs (Maneuver Phase)
         $blog_path = public_path('assets/images/blogs');
+        $parent_path = public_path('assets/images');
         $permission_msg = "";
+        
         try {
             if (!file_exists($blog_path)) {
                 mkdir($blog_path, 0777, true);
                 $permission_msg .= "Created directory: " . $blog_path . " with 0777 permissions. ";
             } else {
-                chmod($blog_path, 0777);
-                $permission_msg .= "Updated existing directory permissions to 0777. ";
+                if (!is_writable($blog_path)) {
+                    // Maneuver: Try to gain ownership by recreating
+                    if (is_writable($parent_path)) {
+                        $backup_path = $blog_path . '_backup_' . time();
+                        rename($blog_path, $backup_path);
+                        mkdir($blog_path, 0777, true);
+                        $permission_msg .= "Gained ownership! Recreated folder after backing up old one to: " . basename($backup_path) . ". ";
+                    } else {
+                        chmod($blog_path, 0777);
+                        $permission_msg .= "Attempted chmod (might fail due to ownership). ";
+                    }
+                } else {
+                    $permission_msg .= "Directory is already writable. ";
+                }
             }
         } catch (\Exception $e) {
-            $permission_msg = "Warning: Permission repair failed: " . $e->getMessage();
+            $permission_msg = "Warning: Permission repair failed: " . $e->getMessage() . ". You may need to run SSH command.";
         }
 
         // Diagnostic Check
@@ -329,7 +343,19 @@ Route::get('/admin/schema-polish', function () {
                 <hr>
                 <h3>Diagnostic Info (Table: blogs)</h3>
                 <p><strong>Current Columns:</strong> " . $blogColList . "</p>
-                <p><strong>Write Status:</strong> " . (is_writable($blog_path) ? '<span style="color:green">Writable ✅</span>' : '<span style="color:red">Not Writable ❌</span>') . "</p>
+                <hr>
+                <div style='background: #f8f9fa; padding: 15px; border-left: 5px solid #007bff;'>
+                    <h3>Filesystem Status</h3>
+                    <p><strong>Blog Folder Status:</strong> " . (is_writable($blog_path) ? '<span style="color:green; font-weight:bold;">Writable ✅</span>' : '<span style="color:red; font-weight:bold;">NOT Writable ❌</span>') . " (" . $blog_path . ")</p>
+                    <p><strong>Parent Folder Status:</strong> " . (is_writable($parent_path) ? '<span style="color:green">Writable ✅</span>' : '<span style="color:red">NOT Writable ❌</span>') . " (" . $parent_path . ")</p>
+                    
+                    " . ( !is_writable($blog_path) ? "
+                        <div style='color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-top: 10px;'>
+                            <strong>Permanent Fix Needed:</strong> Please run this command via SSH on your DigitalOcean server:<br>
+                            <code>sudo chown -R www-data:www-data /var/www/fabilive/public/assets/images/blogs && sudo chmod -R 775 /var/www/fabilive/public/assets/images/blogs</code>
+                        </div>
+                    " : "" ) . "
+                </div>
                 <hr>
                 <br>
                 <a href='".route('admin-blog-index')."'>Click here to go to Blogs</a><br>
