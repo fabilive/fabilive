@@ -235,6 +235,39 @@ class CheckoutController extends FrontBaseController
         if (! Session::has('cart')) {
             return redirect()->route('front.cart')->with('success', __("You don't have any product to checkout."));
         }
+
+        // Auto-apply referral code if present in session and no other coupon is applied
+        if (Session::has('applied_referral_code') && !Session::has('coupon')) {
+            try {
+                $code = Session::get('applied_referral_code');
+                $referralService = app(\App\Services\ReferralService::class);
+                $user = Auth::user();
+                $referralCode = $referralService->validateReferralForCoupon($code, $user);
+
+                if ($referralCode) {
+                    $oldCart = Session::get('cart');
+                    $cart = new Cart($oldCart);
+                    $curr = $this->curr;
+                    $discount = 200 * $curr->value;
+
+                    if ($discount < $cart->totalPrice) {
+                        Session::put('coupon', $discount);
+                        Session::put('coupon_code', $code);
+                        Session::put('coupon_id', 'referral');
+                        Session::put('coupon_is_referral', true);
+                        Session::put('coupon_total', \PriceHelper::showCurrencyPrice($cart->totalPrice - $discount));
+                        Session::put('coupon_percentage', \PriceHelper::showCurrencyPrice($discount));
+                        
+                        // Mark as already applied to avoid repeat messages if we had any
+                        Session::put('already', $code);
+                    }
+                }
+            } catch (\Exception $e) {
+                // If it fails (e.g. self-referral, already used), just ignore it and let user checkout normally
+                \Log::info('Auto-apply referral failed: ' . $e->getMessage());
+            }
+        }
+
         $dp = 1;
         $vendor_shipping_id = 0;
         $vendor_packing_id = 0;

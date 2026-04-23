@@ -65,15 +65,27 @@ class FrontendController extends FrontBaseController
 
         if (! empty($request->reff)) {
             try {
-                $affilate_user = DB::table('users')
-                    ->where('affilate_code', '=', $request->reff)
-                    ->first();
+                $code = strtoupper(trim($request->reff));
+                
+                // 1. Check new referral_codes table first
+                $referralCode = \App\Models\ReferralCode::where('code', $code)->first();
+                if ($referralCode) {
+                    $owner = $referralCode->user_id ? \App\Models\User::find($referralCode->user_id) : null;
+                    if ($owner) {
+                        Session::put('affilate', $owner->id);
+                        Session::put('affilate_code', $referralCode->code);
+                        Session::put('applied_referral_code', $referralCode->code);
+                        return redirect()->route('front.index');
+                    }
+                }
+
+                // 2. Fallback to legacy users table affilate_code
+                $affilate_user = \App\Models\User::where('affilate_code', '=', $request->reff)->first();
                 if (! empty($affilate_user)) {
                     Session::put('affilate', $affilate_user->id);
                     Session::put('affilate_code', $affilate_user->affilate_code);
-                    Session::put('custom_referral', $affilate_user->id);
-                    Session::put('custom_referral_code', $affilate_user->affilate_code);
-                    return redirect()->route('user.register');
+                    Session::put('applied_referral_code', $affilate_user->affilate_code);
+                    return redirect()->route('front.index');
                 }
             } catch (\Exception $e) {}
         }
