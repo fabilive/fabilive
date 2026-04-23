@@ -575,3 +575,170 @@ input[type="button"],
 @media print {
     .no-print, .sidebar, .navbar, footer { display: none !important; }
 }
+
+/* =========================================================
+   LOGO OVERLAP FIX — Header & Footer
+   ========================================================= */
+
+/* ------- FOOTER LOGO ------- */
+/* Stop the logo image from being oversized and pushing into text */
+.footer-logo {
+    display: block;
+    margin-bottom: 16px;
+}
+
+.footer-logo img {
+    max-height: 70px !important;
+    width: auto !important;
+    max-width: 200px !important;
+    object-fit: contain;
+    display: block;
+}
+
+.footer-logo + .widget-ecommerce-contact,
+.footer-logo ~ .widget-ecommerce-contact {
+    clear: both;
+}
+
+.footer-widget .widget-ecommerce-contact {
+    margin-top: 8px;
+}
+
+/* ------- HEADER MOBILE LOGO + HAMBURGER ------- */
+/* The sticky header col-6 contains hamburger + logo. Fix flex layout. */
+@media (max-width: 991.98px) {
+
+    /* Ensure the top-header bars (Contact/Sell/Account) don't show on mobile
+       — they create the clutter seen in the screenshot */
+    .ecommerce-header .top-header,
+    .ecommerce-header .top-linksMob {
+        display: none !important;
+    }
+
+    /* Sticky header row: 3-column layout [hamburger+logo | (center) | icons] */
+    .header-sticky .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        min-height: 60px;
+        padding: 4px 0;
+    }
+
+    /* LEFT col: hamburger button + logo side by side */
+    .header-sticky .col-xxl-2.col-xl-2.col-lg-3 {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        max-width: 50% !important;
+        padding-right: 8px;
+    }
+
+    .header-sticky .col-xxl-2.col-xl-2.col-lg-3 .d-flex {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    /* Hamburger button — compact */
+    .header-sticky .push-nav-toggle {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px;
+        min-height: 40px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #f5f5f7 !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Logo in the sticky header */
+    .header-sticky a.navbar-brand {
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    .header-sticky a.navbar-brand .nav-logo,
+    .header-sticky img.nav-logo {
+        max-height: 38px !important;
+        width: auto !important;
+        max-width: 120px !important;
+        object-fit: contain !important;
+        display: block !important;
+    }
+
+    /* RIGHT col: icons row — prevent overflow */
+    .header-sticky .col-xxl-3.col-xl-4.col-lg-3 {
+        flex: 1 1 auto !important;
+        width: auto !important;
+        max-width: unset !important;
+    }
+
+    .header-sticky .margin-right-1 {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 2px !important;
+    }
+
+    /* Individual icon containers in the header */
+    .header-sticky .sign-in,
+    .header-sticky .wishlist-view,
+    .header-sticky .refresh-view,
+    .header-sticky .header-cart-1,
+    .header-sticky .header-user {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0;
+    }
+
+    /* Hide cart text label on mobile */
+    .header-sticky .cart-wrap,
+    .header-sticky .cart-text {
+        display: none !important;
+    }
+
+    /* Hide translate widget on very small screens to save space */
+    .header-sticky .mobile-screen-api {
+        display: none !important;
+    }
+
+    /* Hide compare icon on mobile (rarely used) */
+    .header-sticky .refresh-view {
+        display: none !important;
+    }
+
+    /* Middle search col — hidden on mobile (we use mobile-search-bar instead) */
+    .header-sticky .col-xxl-7,
+    .header-sticky .col-xl-6.col-lg-6.col-12 {
+        display: none !important;
+    }
+}
+
+/* Extra small phones — tighten further */
+@media (max-width: 400px) {
+    .header-sticky a.navbar-brand .nav-logo,
+    .header-sticky img.nav-logo {
+        max-width: 90px !important;
+        max-height: 32px !important;
+    }
+
+    .header-sticky .sign-in,
+    .header-sticky .wishlist-view,
+    .header-sticky .header-cart-1,
+    .header-sticky .header-user {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px;
+    }
+}
