@@ -995,7 +995,7 @@
 													</div>
 												</div>
 												<div class="col-lg-12">
-													<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="{{ __('e.g 200') }}" value="{{round($data->previous_price * $sign->value , 2)}}" min="0">
+													<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="{{ __('e.g 200') }}" value="{{round($data->vendorPreviousPrice() * $sign->value , 2)}}" min="0">
 												</div>
 											</div>
 
@@ -1011,7 +1011,7 @@
 													</div>
 												</div>
 												<div class="col-lg-12">
-													<input name="price" type="number" class="input-field" placeholder="{{ __('e.g 190') }}" step="0.1" min="0" value="{{round($data->price * $sign->value , 2)}}" required="">
+													<input name="price" type="number" class="input-field" placeholder="{{ __('e.g 190') }}" step="0.1" min="0" value="{{round($data->vendorPrice() * $sign->value , 2)}}" required="">
 												</div>
 											</div>
 

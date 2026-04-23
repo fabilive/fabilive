@@ -295,6 +295,11 @@ class Product extends Model
         return (float)($this->attributes['price'] ?? 0);
     }
 
+    public function vendorPreviousPrice()
+    {
+        return (float)($this->attributes['previous_price'] ?? 0);
+    }
+
     public function vendorSizePrice()
     {
         // Use getRawOriginal to avoid triggering the getPriceAttribute accessor prematurely
