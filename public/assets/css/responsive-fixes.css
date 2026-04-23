@@ -861,22 +861,32 @@ div[data-countdown] > div span:last-child {
 @media (max-width: 767.98px) {
     .category-carousel-wrap .product-image,
     .category-carousel-wrap .product-image[style] {
-        height: 110px !important;
+        height: 160px !important; /* Increased from 110px */
+    }
+
+    /* Reduce gap between items */
+    .category-carousel-wrap .owl-item {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    .category-carousel-wrap .owl-stage-outer {
+        margin: 0 -4px !important;
     }
 
     /* Caption overlay — slimmer */
     .category-carousel-wrap .product-info {
-        padding: 6px 8px !important;
-        background: rgba(255,255,255,0.88) !important;
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        padding: 8px 10px !important;
+        background: rgba(255,255,255,0.92) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
 
     /* Category name — single line, smaller */
     .category-carousel-wrap .product-info .product-title span,
     .category-carousel-wrap .product-info h6,
     .category-carousel-wrap .product-info h6 span {
-        font-size: 11px !important;
+        font-size: 13px !important; /* Slightly bigger font for better readability with bigger cards */
         font-weight: 700 !important;
         line-height: 1.25 !important;
         white-space: nowrap !important;
@@ -888,14 +898,14 @@ div[data-countdown] > div span:last-child {
 
     /* Product count "(0)" — even smaller */
     .category-carousel-wrap .product-info .strok {
-        font-size: 9px !important;
-        color: #9ca3af !important;
+        font-size: 10px !important;
+        color: #6b7280 !important;
     }
 
-    /* Item width — tighter on mobile */
+    /* Item width — bigger on mobile */
     .category-carousel-wrap .item {
-        min-width: 110px !important;
-        max-width: 130px !important;
+        min-width: 140px !important; /* Increased from 110px */
+        max-width: 100% !important;
     }
 }
 
