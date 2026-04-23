@@ -742,3 +742,170 @@ input[type="button"],
         min-width: 32px;
     }
 }
+
+/* =========================================================
+   FIX 1 — PRODUCT TABS: Single horizontal scrollable row
+   NEW ARRIVAL | TOP SELLERS | BUYERS CHOICE | TRENDING
+   ========================================================= */
+@media (max-width: 991.98px) {
+
+    /* Make the tab list scroll horizontally as one row */
+    .top-collection-tab .nav.nav-pills {
+        display: flex !important;
+        flex-wrap: nowrap !important;           /* FORCE single line */
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        justify-content: flex-start !important; /* left-align for scroll */
+        margin-bottom: 20px !important;
+        gap: 6px;
+        padding-bottom: 4px;
+        /* Hide scrollbar visually */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .top-collection-tab .nav.nav-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Each tab item: no shrink, no wrap */
+    .top-collection-tab .nav.nav-pills .nav-item {
+        flex: 0 0 auto !important;
+        scroll-snap-align: start;
+        white-space: nowrap;
+    }
+
+    /* Tab link styling — compact pill */
+    .top-collection-tab .nav.nav-pills .nav-link {
+        white-space: nowrap;
+        font-size: 12px !important;
+        padding: 8px 14px !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
+        min-height: unset !important;
+        display: inline-flex !important;
+        align-items: center;
+    }
+}
+
+/* =========================================================
+   FIX 2 — COUNTDOWN: All 4 boxes always on one row
+   DAY | HOUR | MIN | SEC
+   ========================================================= */
+
+/* The countdown container uses .time-count with .time-box */
+.time-count,
+.time-box,
+div[data-countdown] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;           /* NEVER wrap to next line */
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+/* Each countdown unit (DAY, HOUR, MIN, SEC box) */
+.time-count > div,
+.time-box > div,
+div[data-countdown] > div {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 6px 4px !important;
+    background: #fff;
+}
+
+/* The number inside each box */
+.time-count > div span:first-child,
+.time-box > div span:first-child,
+div[data-countdown] > div span:first-child {
+    font-size: clamp(16px, 4vw, 28px) !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    display: block;
+}
+
+/* The label (DAY / HOUR / MIN / SEC) */
+.time-count > div span:last-child,
+.time-box > div span:last-child,
+div[data-countdown] > div span:last-child {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    margin-top: 2px;
+}
+
+/* Also fix the w-75 class the template uses */
+@media (max-width: 767.98px) {
+    .time-count.flex-between.w-75 {
+        width: 100% !important;
+    }
+}
+
+/* =========================================================
+   FIX 3 — CATEGORY CAROUSEL: Smaller caption, better display
+   ========================================================= */
+
+/* Reduce card height on mobile */
+@media (max-width: 767.98px) {
+    .category-carousel-wrap .product-image,
+    .category-carousel-wrap .product-image[style] {
+        height: 110px !important;
+    }
+
+    /* Caption overlay — slimmer */
+    .category-carousel-wrap .product-info {
+        padding: 6px 8px !important;
+        background: rgba(255,255,255,0.88) !important;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Category name — single line, smaller */
+    .category-carousel-wrap .product-info .product-title span,
+    .category-carousel-wrap .product-info h6,
+    .category-carousel-wrap .product-info h6 span {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        max-width: 100%;
+    }
+
+    /* Product count "(0)" — even smaller */
+    .category-carousel-wrap .product-info .strok {
+        font-size: 9px !important;
+        color: #9ca3af !important;
+    }
+
+    /* Item width — tighter on mobile */
+    .category-carousel-wrap .item {
+        min-width: 110px !important;
+        max-width: 130px !important;
+    }
+}
+
+/* Tablet tweak */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .category-carousel-wrap .product-image {
+        height: 140px !important;
+    }
+
+    .category-carousel-wrap .product-info .product-title span {
+        font-size: 12px !important;
+    }
+}
