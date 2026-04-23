@@ -123,7 +123,7 @@ class FrontendController extends FrontBaseController
         $s1->link = '#'; $s1->position = 'center';
 
         $s2 = new \stdClass();
-        $s2->photo = 'fashion_hero.png';
+        $s2->photo = 'african_fashion_v3.png';
         $s2->video = null; $s2->{'3d_model'} = null;
         $s2->subtitle_text = 'New Arrival'; $s2->title_text = 'Men Fashion'; $s2->details_text = 'Premium Quality Items';
         $s2->link = '#'; $s2->position = 'left';

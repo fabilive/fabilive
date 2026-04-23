@@ -227,7 +227,7 @@
             <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
                 @foreach ($sliders as $slide_data)
                     <div class="banner-slide-item"
-                        style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . $slide_data->photo) . "?v=1.1')" }} no-repeat center center / cover; display: flex !important;">
+                        style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . ($slide_data->title_text == 'Fashion Trends' ? 'african_fashion_v3.png' : $slide_data->photo)) . "')" }} no-repeat center center / cover; display: flex !important;">
     
                         @if(isset($slide_data->video) && $slide_data->video)
                             <video autoplay muted loop playsinline>
