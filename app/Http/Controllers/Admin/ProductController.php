@@ -52,10 +52,7 @@ class ProductController extends AdminBaseController
                 $gs = $this->gs;
                 $curr = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::first();
                 $value = $curr ? $curr->value : 1;
-                                $price = $data->adminShowPrice();
-
-
-                return PriceHelper::showAdminCurrencyPrice($price);
+                return $data->adminShowPrice();
             })
             ->editColumn('stock', function (Product $data) {
                 $stck = (string) $data->stock;
