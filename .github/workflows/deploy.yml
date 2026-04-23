@@ -226,3 +226,58 @@ jobs:
             chmod 644 $LOG_FILE
             chmod 644 public/schemas.txt
             cat $LOG_FILE
+
+      - name: Force Sync Images to Shared Storage
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          script: |
+            SHARED_DIR="/var/www/fabilive_shared"
+            echo "--- Force Syncing All Slider Images to Shared Storage ---"
+            mkdir -p "$SHARED_DIR/assets/images/sliders"
+            
+            # Copy images directly from the deployed code through the symlink-aware path
+            # The symlink points shared storage back to itself, so we use a temp path trick
+            # We read the files from the git repo cached on the runner - instead, find
+            # the actual files via the real path to shared storage
+            
+            # List what's currently in shared sliders
+            echo "Current shared slider images:"
+            ls -lh "$SHARED_DIR/assets/images/sliders/"
+            
+            # The deployed app's public/assets/images is a symlink to SHARED_DIR/assets/images
+            # So the source of truth is the git repo. We need to read files from a temp location.
+            # Strategy: the tarball was already unpacked before symlinking.
+            # At this point the symlink exists. We can't read "new" files through it.
+            # Instead, re-download just the slider images from GitHub directly.
+            
+            REPO="fabilive/fabilive"
+            BRANCH="main"
+            SLIDER_DIR="$SHARED_DIR/assets/images/sliders"
+            
+            # Download the specific new images directly from GitHub raw
+            echo "Downloading african_fashion_v3.png from GitHub..."
+            curl -L -o "$SLIDER_DIR/african_fashion_v3.png" \
+              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/sliders/african_fashion_v3.png" \
+              && echo "  Download OK" || echo "  Download FAILED"
+            
+            echo "Downloading fashion_hero.png from GitHub..."
+            curl -L -o "$SLIDER_DIR/fashion_hero.png" \
+              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/sliders/fashion_hero.png" \
+              && echo "  Download OK" || echo "  Download FAILED"
+            
+            echo "Downloading deal-of-the-day.png from GitHub..."
+            curl -L -o "$SHARED_DIR/assets/images/deal-of-the-day.png" \
+              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/deal-of-the-day.png" \
+              && echo "  Download OK" || echo "  Download FAILED"
+
+            # Fix permissions
+            sudo chown -R www-data:www-data "$SHARED_DIR/assets/images"
+            sudo chmod -R 775 "$SHARED_DIR/assets/images"
+            
+            echo "--- Final Slider Images in Shared Storage ---"
+            ls -lh "$SHARED_DIR/assets/images/sliders/"
+            echo "--- Image Sync Complete ---"
