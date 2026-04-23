@@ -274,6 +274,28 @@ jobs:
               "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/deal-of-the-day.png" \
               && echo "  Download OK" || echo "  Download FAILED"
 
+            # Sync New Category Images
+            CAT_DIR="$SHARED_DIR/assets/images/categories"
+            mkdir -p "$CAT_DIR"
+            NEW_CATS=(
+              "building_materials_lifestyle.png"
+              "general_market_lifestyle.png"
+              "baby_kids_lifestyle.png"
+              "health_lifestyle.png"
+              "gaming_lifestyle.png"
+              "solar_power_lifestyle.png"
+              "beauty_personal_lifestyle.png"
+              "transport_auto_lifestyle.png"
+              "internet_tech_lifestyle.png"
+            )
+
+            for img in "${NEW_CATS[@]}"; do
+              echo "Downloading category image $img..."
+              curl -L -o "$CAT_DIR/$img" \
+                "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/categories/$img" \
+                && echo "  Download OK" || echo "  Download FAILED"
+            done
+
             # Fix permissions
             sudo chown -R www-data:www-data "$SHARED_DIR/assets/images"
             sudo chmod -R 775 "$SHARED_DIR/assets/images"
