@@ -215,6 +215,14 @@
 @section('content')
     @include('partials.global.common-header')
 
+    {{-- Mobile Search Bar (visible only on mobile/tablet) --}}
+    <div class="mobile-search-bar d-block d-lg-none">
+        <form id="mobileSearchForm" action="{{ route('front.category', [Request::route('category'), Request::route('subcategory'), Request::route('childcategory')]) }}" method="GET">
+            <i class="flaticon-search flat-mini" style="color:#6c63ff; font-size:16px; flex-shrink:0;"></i>
+            <input type="text" name="search" placeholder="Search products..." value="{{ request()->input('search') }}" autocomplete="off">
+            <button type="submit"><i class="flaticon-right-arrow flat-mini" style="font-size:14px;"></i></button>
+        </form>
+    </div>
 
     @include('partials.global.subscription-popup')
 
