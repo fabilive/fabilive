@@ -123,14 +123,14 @@
                     <div class="product-wrapper">
                         <div class="product-info">
 
-                            <h3 class="product-title">{{ $gs->deal_title }}</h3>
+                            <h3 class="product-title">{{ __('Unlimited Supply Unisex Back Support Posture Belt') }}</h3>
 
                             <div class="font-fifteen">
-                                <p>{{ $gs->deal_details }}</p>
+                                <p>{{ __('Effective Instantly - Good Results. Improve your posture and relieve back pain with our premium ergonomic support belt.') }}</p>
                             </div>
                             <div class="time-count time-box text-center my-30 flex-between w-75"
                                 data-countdown="{{ $gs->deal_time }}"></div>
-                            <a href="https://fabilive.com/item/unv-back-posture-correction-belt-back-support-sge1762eev"
+                            <a href="https://fabilive.com/item/unlimited-supply-unisex-back-support-posture-belt-effective-instantly-good-results-9vf86167xo"
                                     class="btn btn-dark text-uppercase rounded-0">{{ __('Shop Now') }}</a>
                         </div>
                     </div>
