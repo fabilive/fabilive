@@ -287,6 +287,10 @@ jobs:
               "beauty.png"
               "auto.png"
               "internet.png"
+              "services.png"
+              "digital.png"
+              "food.png"
+              "garden.png"
             )
 
             for img in "${NEW_CATS[@]}"; do
