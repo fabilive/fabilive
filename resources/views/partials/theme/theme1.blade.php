@@ -349,7 +349,7 @@
                                                 '1568878596home.jpg'
                                             ];
                                             foreach($patterns as $p) {
-                                                if(file_exists(public_path('assets/images/categories/'.$p))) {
+                                                if(file_exists(public_path('featured_categories/'.$p))) {
                                                     $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
                                                     $s_clean = strtolower(str_replace('-', ' ', $slug));
                                                     
@@ -373,6 +373,16 @@
                                                        (str_contains($slug, 'service') && str_contains($p, 'service')) || 
                                                        (str_contains($slug, 'food') && str_contains($p, 'food')) || 
                                                        (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
+                                                        $fcat_image = asset('featured_categories/'.$p).'?v='.time();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            // Final Fallback to assets if not found in featured_categories
+                                            if(!$fcat_image) {
+                                                foreach($patterns as $p) {
+                                                    if(file_exists(public_path('assets/images/categories/'.$p))) {
                                                         $fcat_image = asset('assets/images/categories/'.$p).'?v='.time();
                                                         break;
                                                     }
