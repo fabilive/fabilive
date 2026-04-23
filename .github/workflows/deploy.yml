@@ -135,6 +135,21 @@ jobs:
             fi
 
             # Assets linkage
+            # Sync new images from deployment into shared storage BEFORE linking
+            # This ensures images pushed via git actually reach the live server
+            echo "--- Syncing New Images to Shared Storage ---"
+            if [ -d "/var/www/fabilive/public/assets/images" ] && [ ! -L "/var/www/fabilive/public/assets/images" ]; then
+              echo "  Syncing slider images to shared storage..."
+              mkdir -p "$SHARED_DIR/assets/images/sliders"
+              cp -f /var/www/fabilive/public/assets/images/sliders/*.png "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
+              cp -f /var/www/fabilive/public/assets/images/sliders/*.jpg "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
+              cp -f /var/www/fabilive/public/assets/images/sliders/*.jfif "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
+              cp -f /var/www/fabilive/public/assets/images/sliders/*.jpeg "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
+              cp -f /var/www/fabilive/public/assets/images/*.png "$SHARED_DIR/assets/images/" 2>/dev/null || true
+              cp -f /var/www/fabilive/public/assets/images/*.jpg "$SHARED_DIR/assets/images/" 2>/dev/null || true
+              echo "  Sync complete."
+            fi
+
             # First remove placeholder empty directories from the deployment
             rm -rf /var/www/fabilive/public/assets/images
             rm -rf /var/www/fabilive/public/assets/files
