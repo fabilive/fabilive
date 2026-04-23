@@ -90,7 +90,7 @@ class AdminBaseController extends Controller
         }
 
         // Force value to 1 for CFA/XFA to avoid unintended conversions
-        if (isset($this->curr->sign) && in_array($this->curr->sign, ['CFA', 'XFA'])) {
+        if (isset($this->curr->sign) && in_array($this->curr->sign, ['CFA', 'XFA', 'XAF', 'XOF'])) {
             $this->curr->value = 1;
         }
 

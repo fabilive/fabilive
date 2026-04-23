@@ -62,7 +62,7 @@ class PriceHelper
         }
 
         // Force value to 1 for CFA/XFA to avoid unintended conversions
-        if (in_array($curr->sign, ['CFA', 'XFA'])) {
+        if (in_array($curr->sign, ['CFA', 'XFA', 'XAF', 'XOF'])) {
             $curr->value = 1;
         }
 
@@ -95,7 +95,7 @@ class PriceHelper
         }
 
         // Force value to 1 for CFA/XFA to avoid unintended conversions
-        if (in_array($curr->sign, ['CFA', 'XFA'])) {
+        if (in_array($curr->sign, ['CFA', 'XFA', 'XAF', 'XOF'])) {
             $curr->value = 1;
         }
 
