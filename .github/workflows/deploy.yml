@@ -142,14 +142,16 @@ jobs:
             # This ensures images pushed via git actually reach the live server
             echo "--- Syncing New Images to Shared Storage ---"
             if [ -d "/var/www/fabilive/public/assets/images" ] && [ ! -L "/var/www/fabilive/public/assets/images" ]; then
-              echo "  Syncing slider images to shared storage..."
+              echo "  Syncing assets to shared storage..."
               mkdir -p "$SHARED_DIR/assets/images/sliders"
-              cp -f /var/www/fabilive/public/assets/images/sliders/*.png "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
-              cp -f /var/www/fabilive/public/assets/images/sliders/*.jpg "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
-              cp -f /var/www/fabilive/public/assets/images/sliders/*.jfif "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
-              cp -f /var/www/fabilive/public/assets/images/sliders/*.jpeg "$SHARED_DIR/assets/images/sliders/" 2>/dev/null || true
-              cp -f /var/www/fabilive/public/assets/images/*.png "$SHARED_DIR/assets/images/" 2>/dev/null || true
-              cp -f /var/www/fabilive/public/assets/images/*.jpg "$SHARED_DIR/assets/images/" 2>/dev/null || true
+              mkdir -p "$SHARED_DIR/assets/images/categories"
+              
+              # Copy all images from the deployment folder to shared storage
+              # Use -n (no-clobber) to preserve existing user-uploaded images, 
+              # but we want to OVERWRITE the ones we just pushed if they are newer.
+              # So use cp -rv to see what's happening.
+              cp -rv /var/www/fabilive/public/assets/images/* "$SHARED_DIR/assets/images/"
+              
               echo "  Sync complete."
             fi
 
@@ -251,58 +253,6 @@ jobs:
             echo "Current shared slider images:"
             ls -lh "$SHARED_DIR/assets/images/sliders/"
             
-            # The deployed app's public/assets/images is a symlink to SHARED_DIR/assets/images
-            # So the source of truth is the git repo. We need to read files from a temp location.
-            # Strategy: the tarball was already unpacked before symlinking.
-            # At this point the symlink exists. We can't read "new" files through it.
-            # Instead, re-download just the slider images from GitHub directly.
-            
-            REPO="fabilive/fabilive"
-            BRANCH="main"
-            SLIDER_DIR="$SHARED_DIR/assets/images/sliders"
-            
-            # Download the specific new images directly from GitHub raw
-            echo "Downloading african_fashion_v3.png from GitHub..."
-            curl -L -o "$SLIDER_DIR/african_fashion_v3.png" \
-              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/sliders/african_fashion_v3.png" \
-              && echo "  Download OK" || echo "  Download FAILED"
-            
-            echo "Downloading fashion_hero.png from GitHub..."
-            curl -L -o "$SLIDER_DIR/fashion_hero.png" \
-              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/sliders/fashion_hero.png" \
-              && echo "  Download OK" || echo "  Download FAILED"
-            
-            echo "Downloading deal-of-the-day.png from GitHub..."
-            curl -L -o "$SHARED_DIR/assets/images/deal-of-the-day.png" \
-              "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/deal-of-the-day.png" \
-              && echo "  Download OK" || echo "  Download FAILED"
-
-            # Sync New Category Images
-            CAT_DIR="$SHARED_DIR/assets/images/categories"
-            mkdir -p "$CAT_DIR"
-            NEW_CATS=(
-              "building.png"
-              "market.png"
-              "baby.png"
-              "health.png"
-              "gaming.png"
-              "solar.png"
-              "beauty.png"
-              "auto.png"
-              "internet.png"
-              "services.png"
-              "digital.png"
-              "food.png"
-              "garden.png"
-            )
-
-            for img in "${NEW_CATS[@]}"; do
-              echo "Downloading category image $img..."
-              curl -L -o "$CAT_DIR/$img" \
-                "https://raw.githubusercontent.com/$REPO/$BRANCH/public/assets/images/categories/$img" \
-                && echo "  Download OK" || echo "  Download FAILED"
-            done
-
             # Fix permissions
             sudo chown -R www-data:www-data "$SHARED_DIR/assets/images"
             sudo chmod -R 775 "$SHARED_DIR/assets/images"
