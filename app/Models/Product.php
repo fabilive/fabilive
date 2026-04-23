@@ -33,6 +33,10 @@ class Product extends Model
             cache()->forget('homepage_hot_products');
             cache()->forget('homepage_sale_products');
             cache()->forget('homepage_best_products');
+            cache()->forget('homepage_popular_products');
+            cache()->forget('homepage_top_products');
+            cache()->forget('homepage_big_products');
+            cache()->forget('homepage_trending_products');
             cache()->forget('homepage_featured_categories');
             cache()->forget('homepage_arrivals');
         });
@@ -42,6 +46,10 @@ class Product extends Model
             cache()->forget('homepage_hot_products');
             cache()->forget('homepage_sale_products');
             cache()->forget('homepage_best_products');
+            cache()->forget('homepage_popular_products');
+            cache()->forget('homepage_top_products');
+            cache()->forget('homepage_big_products');
+            cache()->forget('homepage_trending_products');
         });
     }
 

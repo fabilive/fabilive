@@ -881,8 +881,8 @@ class ProductController extends AdminBaseController
             $input['tags'] = null;
         }
 
-        $input['price'] = $input['price'];
-        $input['previous_price'] = $input['previous_price'];
+        $input['price'] = $input['price'] / $sign->value;
+        $input['previous_price'] = $input['previous_price'] / $sign->value;
 
         // store filtering attributes for physical product
         $attrArr = [];
