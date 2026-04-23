@@ -350,14 +350,30 @@
                                             ];
                                             foreach($patterns as $p) {
                                                 if(file_exists(public_path('assets/images/categories/'.$p))) {
-                                                    // Only use if it somewhat matches the slug
-                                                    $p_name = str_replace('_', ' ', $p);
-                                                    if(str_contains($p_name, str_replace('-', ' ', $slug)) || 
+                                                    $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
+                                                    $s_clean = strtolower(str_replace('-', ' ', $slug));
+                                                    
+                                                    // Extract keywords (longer than 2 chars)
+                                                    $p_keywords = array_filter(explode(' ', $p_clean), function($v) { return strlen($v) > 2; });
+                                                    $s_keywords = array_filter(explode(' ', $s_clean), function($v) { return strlen($v) > 2; });
+                                                    
+                                                    // Check if any keyword matches
+                                                    $match = false;
+                                                    foreach($p_keywords as $pk) {
+                                                        foreach($s_keywords as $sk) {
+                                                            if(str_contains($pk, $sk) || str_contains($sk, $pk)) {
+                                                                $match = true;
+                                                                break 2;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if($match || 
                                                        (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
                                                        (str_contains($slug, 'service') && str_contains($p, 'service')) || 
                                                        (str_contains($slug, 'food') && str_contains($p, 'food')) || 
                                                        (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
-                                                        $fcat_image = asset('assets/images/categories/'.$p);
+                                                        $fcat_image = asset('assets/images/categories/'.$p).'?v='.time();
                                                         break;
                                                     }
                                                 }
