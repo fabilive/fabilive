@@ -126,6 +126,9 @@ jobs:
             fi
             
             # --- ESTABLISH PERSISTENT SYMLINKS ---
+            echo "--- Linked Directory Check ---" >> $LOG_FILE 2>&1
+            pwd >> $LOG_FILE
+            ls -R public/ >> $LOG_FILE
             echo "--- Linking Persistent Shared Assets ---" >> $LOG_FILE 2>&1
             
             # .env linkage
