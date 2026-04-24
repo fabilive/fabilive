@@ -282,6 +282,31 @@ Route::get('/admin/schema-polish', function () {
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%instagram.com%')->update(['icon' => 'fab fa-instagram']);
             \Illuminate\Support\Facades\DB::table('social_links')->where('link', 'like', '%facebook.com%')->update(['icon' => 'fab fa-facebook-f']);
         }
+
+        // 13. Orders table missing columns (Fixes SQL errors during checkout)
+        if (\Illuminate\Support\Facades\Schema::hasTable('orders')) {
+            \Illuminate\Support\Facades\Schema::table('orders', function ($table) {
+                $cols = [
+                    'coupon_id' => 'string',
+                    'coupon_code' => 'string',
+                    'coupon_discount' => 'string',
+                    'affilate_users' => 'text',
+                    'shipping_title' => 'string',
+                    'packing_title' => 'string',
+                    'packing_cost' => 'double',
+                    'is_shipping' => 'integer',
+                    'vendor_ids' => 'text'
+                ];
+                foreach ($cols as $col => $type) {
+                    if (! \Illuminate\Support\Facades\Schema::hasColumn('orders', $col)) {
+                        if ($type == 'string') $table->string($col)->nullable();
+                        elseif ($type == 'text') $table->text($col)->nullable();
+                        elseif ($type == 'double') $table->double($col)->default(0);
+                        elseif ($type == 'integer') $table->integer($col)->default(0);
+                    }
+                }
+            });
+        }
         return "Schema Polish Completed Successfully!";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
