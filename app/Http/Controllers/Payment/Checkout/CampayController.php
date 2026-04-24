@@ -89,7 +89,8 @@ class CampayController extends CheckoutBaseControlller
         $input['user_id'] = Auth::check() ? Auth::user()->id : null;
         $input['customer_whatsapp'] = $request->customer_whatsapp;
         $input['cart'] = json_encode($cart);
-        $input['pay_amount'] = $orderTotal / $this->curr->value;
+        $input['wallet_price'] = ($request->wallet_price ?? 0) / $this->curr->value;
+        $input['pay_amount'] = ($orderTotal - ($input['wallet_price'] * $this->curr->value)) / $this->curr->value;
         $input['order_number'] = $order_number;
         $input['method'] = 'Campay';
         $input['payment_status'] = 'Pending';

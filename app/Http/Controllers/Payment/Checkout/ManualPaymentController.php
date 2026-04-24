@@ -105,9 +105,9 @@ class ManualPaymentController extends CheckoutBaseControlller
         $input['user_id'] = Auth::check() ? Auth::user()->id : null;
         $input['cart'] = $new_cart;
         $input['affilate_users'] = $affilate_users;
-        $input['pay_amount'] = $orderTotal;
+        $input['wallet_price'] = ($request->wallet_price ?? 0) / $this->curr->value;
+        $input['pay_amount'] = ($orderTotal - ($input['wallet_price'] * $this->curr->value)) / $this->curr->value;
         $input['order_number'] = Str::random(4).time();
-        $input['wallet_price'] = $request->wallet_price / $this->curr->value;
 
         if ($input['tax_type'] == 'state_tax') {
             $input['tax_location'] = State::findOrFail($input['tax'])->state;

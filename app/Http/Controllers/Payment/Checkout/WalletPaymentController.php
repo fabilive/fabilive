@@ -287,15 +287,15 @@ class WalletPaymentController extends CheckoutBaseControlller
             $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['cart'] = $new_cart;
-            $input['pay_amount'] = $orderTotal / $this->curr->value;
-            $input['order_number'] = Str::random(4).time();
-            
-            // Safety Fallback: If wallet_price is missing or 0 in request but method is Wallet, use orderTotal
+            // Calculate wallet portion first
             $wallet_pay_amount = $request->wallet_price;
             if(empty($wallet_pay_amount) || $wallet_pay_amount == 0) {
                 $wallet_pay_amount = $orderTotal;
             }
             $input['wallet_price'] = $wallet_pay_amount / $this->curr->value;
+
+            $input['pay_amount'] = ($orderTotal - $wallet_pay_amount) / $this->curr->value;
+            $input['order_number'] = Str::random(4).time();
             
             $input['method'] = 'Wallet';
             $input['payment_status'] = 'Completed';
