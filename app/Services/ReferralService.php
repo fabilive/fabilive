@@ -97,8 +97,10 @@ class ReferralService
                 throw new Exception('You have already used a referral code before.');
             }
 
-            // First purchase check
-            $orderCount = \App\Models\Order::where('user_id', $user->id)->count();
+            // First purchase check (Only count successful or active orders)
+            $orderCount = \App\Models\Order::where('user_id', $user->id)
+                ->whereIn('status', ['completed', 'processing', 'on delivery'])
+                ->count();
             if ($orderCount > 0) {
                 throw new Exception('Referral discounts are only available for your first purchase.');
             }
