@@ -178,7 +178,9 @@ class CouponController extends FrontBaseController
                 // Global discount of 200
                 $total = (float) preg_replace('/[^0-9\.]/ui', '', request()->get('total', 0));
                 $curr = $this->curr;
-                $discount = 200 * $curr->value;
+                
+                // Get discount from settings
+                $discount = ($gs->referral_bonus_referred ?? 200) * $curr->value;
 
                 if ($discount >= $total) {
                     return response()->json(3);

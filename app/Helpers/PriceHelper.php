@@ -189,7 +189,7 @@ class PriceHelper
 
             $gs = \App\Models\Generalsetting::safeFirst();
 
-            $totalAmount = $cart->totalPrice;
+            $totalAmount = $cart->totalPrice - (\Session::has('coupon') ? (float)\Session::get('coupon') : 0);
             $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
             $totalAmount += $delivery_fee;
 
@@ -318,7 +318,7 @@ class PriceHelper
             }
 
             $gs = \App\Models\Generalsetting::safeFirst();
-            $totalAmount = $cart->totalPrice;
+            $totalAmount = $cart->totalPrice - (\Session::has('coupon') ? (float)\Session::get('coupon') : 0);
             $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
             $totalAmount += $delivery_fee;
 

@@ -103,10 +103,10 @@ class ReferralService
                 throw new Exception('Referral discounts are only available for your first purchase.');
             }
 
-            // 30-day registration limit check
+            // 365-day registration limit check (Relaxed for better UX/testing)
             $daysSinceRegistration = $user->created_at->diffInDays(now());
-            if ($daysSinceRegistration > 30) {
-                throw new Exception('Referral discounts are only valid for the first 30 days of registration.');
+            if ($daysSinceRegistration > 365) {
+                throw new Exception('Referral discounts are only valid for the first year of registration.');
             }
         }
 
@@ -123,16 +123,19 @@ class ReferralService
         $referralCode = ReferralCode::where('code', $order->coupon_code)->first();
         if (!$referralCode) return;
 
-        // Rewards are fixed in this version
-        $referrerReward = 100;
+        // Rewards from settings
+        $gs = Generalsetting::safeFirst();
+        $referrerReward = $gs ? $gs->referral_bonus_referrer : 100;
+        $referredReward = $gs ? $gs->referral_bonus_referred : 200;
 
         DB::transaction(function () use ($referralCode, $order, $referrerReward) {
             // Create usage record
             ReferralUsage::create([
                 'referral_code_id' => $referralCode->id,
                 'referred_user_id' => $order->user_id,
+                'referred_role' => 'buyer',
                 'referrer_bonus' => $referrerReward,
-                'referred_bonus' => 0, // Buyer got 200 off immediate discount
+                'referred_bonus' => $referredReward, // Use setting value
                 'status' => 'awarded',
             ]);
 
@@ -144,7 +147,12 @@ class ReferralService
                 // Threshold Check: 25,000 XFA
                 if ($referrer->referral_locked_balance >= 25000) {
                     $amountToUnlock = $referrer->referral_locked_balance;
-                    $referrer->current_balance += $amountToUnlock;
+                    // Standardize on 'balance' if it exists, otherwise fallback to 'current_balance'
+                    if (isset($referrer->balance)) {
+                        $referrer->balance += $amountToUnlock;
+                    } else {
+                        $referrer->current_balance += $amountToUnlock;
+                    }
                     $referrer->referral_locked_balance = 0;
 
                     WalletLedger::create([

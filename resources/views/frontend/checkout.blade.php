@@ -1253,8 +1253,8 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                      $('.total-cost-dum #total-cost').html(data[0]);
                      $('#discount').html(data[2]+'{{ $curr->sign }}');
                   }
-                     $('#grandtotal').val(data[0]);
-                     $('#tgrandtotal').val(data[0]);
+                     $('#grandtotal').val(data[6]);
+                     $('#tgrandtotal').val(data[6]);
                      $('#coupon_code').val(data[1]);
                      $('#coupon_discount').val(data[2]);
                      if(data[4] != 0){

@@ -169,6 +169,7 @@ class OrderHelper
      */
     public static function finalizeOrder($order, $cart)
     {
+        try {
             // 1. Marketplace Commission Calculation
             $orderCommission = 0;
             if ($cart->items) {
