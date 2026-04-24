@@ -558,17 +558,21 @@
                                         <span class="badge badge-success">{{ __('Completed') }}</span>
 
                                         @else
-                                        @if($user->status == 'pending')
-                                        <span class="badge badge-warning">{{ucwords($user->status)}}</span>
-                                        @elseif($user->status == 'processing')
-                                        <span class="badge badge-info">{{ucwords($user->status)}}</span>
-                                        @elseif($user->status == 'on delivery')
-                                        <span class="badge badge-primary">{{ucwords($user->status)}}</span>
-                                        @elseif($user->status == 'completed')
-                                        <span class="badge badge-success">{{ucwords($user->status)}}</span>
-                                        @elseif($user->status == 'declined')
-                                        <span class="badge badge-danger">{{ucwords($user->status)}}</span>
-                                        @endif
+                                         @if($user)
+                                            @if($user->status == 'pending')
+                                            <span class="badge badge-warning">{{ucwords($user->status)}}</span>
+                                            @elseif($user->status == 'processing')
+                                            <span class="badge badge-info">{{ucwords($user->status)}}</span>
+                                            @elseif($user->status == 'on delivery')
+                                            <span class="badge badge-primary">{{ucwords($user->status)}}</span>
+                                            @elseif($user->status == 'completed')
+                                            <span class="badge badge-success">{{ucwords($user->status)}}</span>
+                                            @elseif($user->status == 'declined')
+                                            <span class="badge badge-danger">{{ucwords($user->status)}}</span>
+                                            @endif
+                                         @else
+                                            <span class="badge badge-secondary">{{ __('N/A') }}</span>
+                                         @endif
                                         @endif
 
                                         @endif
