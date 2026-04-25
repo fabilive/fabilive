@@ -607,6 +607,18 @@ class ProductController extends AdminBaseController
                         $input['tags'] = $line[14];
                         $input['product_type'] = $line[19];
                         $input['affiliate_link'] = $line[20];
+                        
+                        // New Advanced E-commerce Variables
+                        $input['delivery_fee'] = isset($line[21]) && $line[21] != '' ? $line[21] : 0;
+                        $input['delivery_unit'] = isset($line[22]) && $line[22] != '' ? $line[22] : null;
+                        $input['product_location'] = isset($line[23]) && $line[23] != '' ? $line[23] : null;
+                        $input['product_condition'] = isset($line[24]) && $line[24] != '' ? $line[24] : 0;
+                        $input['minimum_qty'] = isset($line[25]) && $line[25] != '' ? $line[25] : null;
+                        $input['measure'] = isset($line[26]) && $line[26] != '' ? $line[26] : null;
+                        $input['discount_date_start'] = isset($line[27]) && $line[27] != '' ? $line[27] : null;
+                        $input['discount_date_end'] = isset($line[28]) && $line[28] != '' ? $line[28] : null;
+                        $input['cross_products'] = isset($line[29]) && $line[29] != '' ? $line[29] : null;
+                        $input['ship'] = isset($line[30]) && $line[30] != '' ? $line[30] : null;
                         $input['slug'] = Str::slug($input['name'], '-').'-'.strtolower($input['sku']);
 
                         $image_url = $line[5];
