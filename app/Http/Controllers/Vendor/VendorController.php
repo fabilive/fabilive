@@ -18,107 +18,49 @@ class VendorController extends VendorBaseController
 {
     public function index()
     {
+        $vendorId = $this->user->id;
         $data['days'] = '';
         $data['sales'] = '';
+        
+        // Last 30 days sales chart
         for ($i = 0; $i < 30; $i++) {
+            $date = date('Y-m-d', strtotime('-'.$i.' days'));
             $data['days'] .= "'".date('d M', strtotime('-'.$i.' days'))."',";
             try {
-                $count = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->whereDate('created_at', '=', date('Y-m-d', strtotime('-'.$i.' days')))->count();
+                $count = VendorOrder::where('user_id', $vendorId)
+                    ->where('status', 'completed')
+                    ->whereDate('created_at', $date)
+                    ->count();
                 $data['sales'] .= "'".$count."',";
             } catch (\Exception $e) {
                 $data['sales'] .= "'0',";
             }
         }
         
-        $data['pproducts'] = collect();
-        $data['rorders'] = collect();
-        $data['pending'] = collect();
-        $data['processing'] = collect();
-        $data['completed'] = collect();
-        
-        try {
-            $data['pproducts'] = Product::where('user_id', '=', $this->user->id)->latest('id')->take(6)->get();
-            $data['rorders'] = VendorOrder::where('user_id', '=', $this->user->id)->latest('id')->take(10)->get();
-            $data['pending'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'pending')->get();
-            $data['processing'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'processing')->get();
-            $data['completed'] = VendorOrder::where('user_id', '=', $this->user->id)->where('status', '=', 'completed')->get();
-        } catch (\Exception $e) {}
-
         $data['user'] = $this->user;
-        $actualBalance = $this->user ? $this->user->current_balance : 0;
-        $data['actual_balance'] = $actualBalance;
+        $data['pproducts'] = Product::where('user_id', $vendorId)->latest('id')->take(6)->get();
+        $data['rorders'] = VendorOrder::where('user_id', $vendorId)->latest('id')->take(10)->get();
+        
+        // Status counts
+        $data['pending'] = VendorOrder::where('user_id', $vendorId)->where('status', 'pending')->get();
+        $data['processing'] = VendorOrder::where('user_id', $vendorId)->where('status', 'processing')->get();
+        $data['completed'] = VendorOrder::where('user_id', $vendorId)->whereIn('status', ['completed', 'delivered'])->get();
+        
+        // Financials
+        $data['actual_balance'] = $this->user->current_balance; // Settled funds
+        $data['pending_balance'] = VendorOrder::where('user_id', $vendorId)
+            ->whereIn('status', ['processing', 'delivered'])
+            ->sum('price');
+        $data['total_earning'] = VendorOrder::where('user_id', $vendorId)
+            ->whereIn('status', ['completed', 'delivered'])
+            ->sum('price');
+
+
+
 
         return view('vendor.index', $data);
     }
 
-    //     public function index()
-    //     {
-    //     $vendorId = $this->user->id;
-    //     $data['days'] = "";
-    //     $data['sales'] = "";
-    //     for ($i = 0; $i < 30; $i++) {
-    //         $data['days'] .= "'" . date("d M", strtotime('-' . $i . ' days')) . "',";
-    //         $data['sales'] .= "'" . VendorOrder::where('user_id', $vendorId)
-    //             ->where('status', 'completed')
-    //             ->whereDate('created_at', date("Y-m-d", strtotime('-' . $i . ' days')))
-    //             ->count() . "',";
-    //     }
-    //     $commissionTotal = VendorOrder::where('user_id', $vendorId)
-    //         ->where('status', 'completed')
-    //         ->with('order') // eager load to avoid N+1 problem
-    //         ->get()
-    //         ->sum(function ($vo) {
-    //             return $vo->order ? $vo->order->commission : 0;
-    //         });
-    //     $actualBalance =  $this->user->current_balance - $commissionTotal;
-    //     $data['pproducts'] = Product::where('user_id', $vendorId)->latest('id')->take(6)->get();
-    //     $data['rorders'] = VendorOrder::where('user_id', $vendorId)->latest('id')->take(10)->get();
-    //     $data['user'] = $this->user;
-    //     $data['pending'] = VendorOrder::where('user_id', $vendorId)->where('status', 'pending')->get();
-    //     $data['processing'] = VendorOrder::where('user_id', $vendorId)->where('status', 'processing')->get();
-    //     $data['completed'] = VendorOrder::where('user_id', $vendorId)->where('status', 'completed')->get();
-    //     $data['actual_balance'] = $actualBalance;
-    //     return view('vendor.index', $data);
-    // }
-
-    //         public function index()
-    //         {
-    //     $vendorId = $this->user->id;
-
-    //     $data['days'] = "";
-    //     $data['sales'] = "";
-
-    //     for ($i = 0; $i < 30; $i++) {
-    //         $data['days'] .= "'" . date("d M", strtotime('-' . $i . ' days')) . "',";
-    //         $data['sales'] .= "'" . \App\Models\VendorOrder::where('user_id', $vendorId)
-    //             ->where('status', 'completed')
-    //             ->whereDate('created_at', date("Y-m-d", strtotime('-' . $i . ' days')))
-    //             ->count() . "',";
-    //     }
-
-    //     // ✅ Correct commission calculation from related orders
-    //     $commissionTotal = \App\Models\VendorOrder::where('user_id', $vendorId)
-    //         ->whereHas('order') // only if order exists
-    //         ->with('order')     // eager load to prevent N+1 queries
-    //         ->get()
-    //         ->sum(function ($vendorOrder) {
-    //             return $vendorOrder->order->commission ?? 0;
-    //         });
-
-    //     // ✅ Subtract commission from current_balance in users table
-    //     $actualBalance = $this->user->current_balance - $commissionTotal;
-
-    //     // ✅ Pass data to view
-    //     $data['pproducts'] = \App\Models\Product::where('user_id', $vendorId)->latest('id')->take(6)->get();
-    //     $data['rorders'] = \App\Models\VendorOrder::where('user_id', $vendorId)->latest('id')->take(10)->get();
-    //     $data['user'] = $this->user;
-    //     $data['pending'] = \App\Models\VendorOrder::where('user_id', $vendorId)->where('status', 'pending')->get();
-    //     $data['processing'] = \App\Models\VendorOrder::where('user_id', $vendorId)->where('status', 'processing')->get();
-    //     $data['completed'] = \App\Models\VendorOrder::where('user_id', $vendorId)->where('status', 'completed')->get();
-    //     $data['actual_balance'] = $actualBalance;
-
-    //     return view('vendor.index', $data);
-    // }
 
     public function profileupdate(Request $request)
     {

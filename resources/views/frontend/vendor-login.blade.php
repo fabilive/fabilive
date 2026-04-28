@@ -91,28 +91,15 @@
 
                                             <button type="submit" class="woocommerce-form-login__submit btn btn-primary border-0 rounded-0 submit-btn float-none w-100" name="login" value="Log in">{{ __('Log in') }}</button>
 
-                                            @if($socialsetting->f_check == 1 || $socialsetting->g_check == 1)
+                                            @if($socialsetting->g_check == 1)
                                                     <div class="social-area text-center">
                                                         <h3 class="title  mt-3">{{ ('OR') }}</h3>
-                                                        <p class="text">{{ __('Sign In with social media') }}</p>
-                                                        <ul class="social-links">
-                                                            @if($socialsetting->f_check == 1)
-                                                            <li>
-                                                            <a href="{{ route('social-provider','facebook') }}">
-                                                                <i class="fab fa-facebook-f"></i>
-                                                            </a>
-                                                            </li>
-                                                            @endif
-                                                            @if($socialsetting->g_check == 1)
-                                                            <li>
-                                                            <a href="{{ route('social-provider','google') }}">
-                                                                <i class="fab fa-google-plus-g"></i>
-                                                            </a>
-                                                            </li>
-                                                            @endif
-                                                        </ul>
+                                                        <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'seller']) }}" class="btn btn-outline-danger w-100 mt-2 d-flex align-items-center justify-content-center">
+                                                            <i class="fab fa-google mr-2"></i> &nbsp; {{ __('Continue with Google') }}
+                                                        </a>
                                                     </div>
-					              @endif
+                                            @endif
+
                                         </form>
                                     </div>
                                 </div>

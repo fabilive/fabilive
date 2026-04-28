@@ -18,21 +18,29 @@ class DashboardController extends AdminBaseController
 {
     public function index()
     {
-        $data['pending'] = Order::where('status', '=', 'pending')->get();
-        $data['processing'] = Order::where('status', '=', 'processing')->get();
-        $data['completed'] = Order::where('status', '=', 'completed')->get();
+        $data['pending'] = Order::where('status', 'pending')->get();
+        $data['processing'] = Order::where('status', 'processing')->get();
+        $data['completed'] = Order::where('status', 'completed')->get();
         $data['days'] = '';
         $data['sales'] = '';
+        
         for ($i = 0; $i < 30; $i++) {
+            $date = date('Y-m-d', strtotime('-'.$i.' days'));
             $data['days'] .= "'".date('d M', strtotime('-'.$i.' days'))."',";
-
-            $data['sales'] .= "'".Order::where('status', '=', 'completed')->whereDate('created_at', '=', date('Y-m-d', strtotime('-'.$i.' days')))->count()."',";
+            $data['sales'] .= "'".Order::where('status', 'completed')->whereDate('created_at', $date)->count()."',";
         }
+        
         $data['users'] = User::all();
         $data['products'] = Product::all();
         $data['blogs'] = Blog::all();
-        $data['total_commission'] = Order::sum('commission');
-        $data['default_currency'] = \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('name', 'CFA')->first() ?? \App\Models\Currency::first();
+        
+        // Total commission from COMPLETED orders only
+        $data['total_commission'] = Order::where('status', 'completed')->sum('commission');
+        
+        $data['default_currency'] = \App\Models\Currency::where('is_default', 1)->first() 
+                                    ?? \App\Models\Currency::where('name', 'CFA')->first() 
+                                    ?? \App\Models\Currency::first();
+
         $data['pproducts'] = Product::latest('id')->take(5)->get();
         $data['rorders'] = Order::latest('id')->take(5)->get();
         $data['poproducts'] = Product::latest('views')->take(5)->get();

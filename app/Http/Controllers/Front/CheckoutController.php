@@ -46,136 +46,35 @@ class CheckoutController extends FrontBaseController
             ]);
         }
 
-        // User ka selected service area
-        $userArea = ServiceArea::find($request->service_area_id);
-        if (! $userArea) {
-            return response()->json(['error' => 'Service area not found']);
-        }
-
-        $gs = \App\Models\Generalsetting::find(1);
-        $sameAreaUnitFee = $gs ? (float) $gs->same_servicearea_delivery_fee : 0;
-
+        $grandTotal = \PriceHelper::calculateDeliveryFee($cart);
         $vendorDistances = [];
-        $totalGram = 0;
-        $totalKg = 0;
-        $totalTon = 0;
-
+        $uniqueSellers = [];
         foreach ($cart->items as $item) {
-            $cartProduct = Product::find($item['item']->id);
-            if (! $cartProduct) {
-                continue;
-            }
-
-            // ✅ Product ka service area base
-            if ($cartProduct->product_servicearea) {
-                $productArea = ServiceArea::find($cartProduct->product_servicearea);
-                if ($productArea && $productArea->latitude && $productArea->longitude) {
-                    $distance = (float) $this->haversineGreatCircleDistance(
-                        $userArea->latitude,
-                        $userArea->longitude,
-                        $productArea->latitude,
-                        $productArea->longitude
-                    );
-
-                    $vendorDistances[$cartProduct->product_servicearea] = $distance;
-                }
-            }
-
-            // ✅ Weight wise fees calculation
-            if ($cartProduct->delivery_fee && $cartProduct->delivery_unit) {
-                $qty = $item['qty'] ?? 1;
-                $weight = (float) $cartProduct->delivery_fee * $qty;
-
-                switch (strtolower($cartProduct->delivery_unit)) {
-                    case 'gram':
-                    case 'g':
-                        $totalGram += $weight;
-                        break;
-                    case 'kg':
-                    case 'kilogram':
-                        $totalKg += $weight;
-                        break;
-                    case 'ton':
-                    case 'tons':
-                    case 't':
-                        $totalTon += $weight;
-                        break;
-                }
+            $sellerId = $item['item']['user_id'] ?? 0;
+            if (!in_array($sellerId, $uniqueSellers)) {
+                $uniqueSellers[] = $sellerId;
             }
         }
-
-        // ✅ Distance slabs
-        $slabs = DistanceFee::select('distance_start_range', 'distance_end_range', 'fee')
-            ->orderBy('distance_start_range', 'asc')
-            ->get();
-
-        $distanceFeeSum = 0;
-        $totalDistance = array_sum($vendorDistances);
-        $applicableFee = 0;
-
-        foreach ($slabs as $slab) {
-            if ($totalDistance >= $slab->distance_start_range && $totalDistance <= $slab->distance_end_range) {
-                $applicableFee = $slab->fee;
-                break;
-            }
-        }
-        if ($applicableFee === 0) {
-            foreach ($slabs as $slab) {
-                if ($totalDistance > $slab->distance_end_range) {
-                    $applicableFee = $slab->fee;
-                }
-            }
-        }
-
-        $distanceFeeSum = $applicableFee;
-
-        // ✅ Weight fees
-        $gramFee = DeliveryFee::whereRaw('LOWER(weight) = ?', ['gram'])
-            ->where('start_range', '<=', $totalGram)
-            ->where('end_range', '>=', $totalGram)
-            ->value('fee') ?? 0;
-
-        $kgFee = DeliveryFee::whereRaw('LOWER(weight) = ?', ['kg'])
-            ->where('start_range', '<=', $totalKg)
-            ->where('end_range', '>=', $totalKg)
-            ->value('fee') ?? 0;
-
-        $tonFee = DeliveryFee::whereRaw('LOWER(weight) = ?', ['ton'])
-            ->where('start_range', '<=', $totalTon)
-            ->where('end_range', '>=', $totalTon)
-            ->value('fee') ?? 0;
-
-        // ✅ Grand total
-        $grandTotal = $distanceFeeSum + $gramFee + $kgFee + $tonFee;
-
-        // ✅ Same service area handling
-        $sameAreaCount = 0;
-        foreach ($vendorDistances as $areaId => $d) {
-            if ($d == 0) {
-                $sameAreaCount++;
-            }
-        }
-        $sameAreaTotal = $sameAreaCount * $sameAreaUnitFee;
-        $grandTotal += $sameAreaTotal;
 
         Session::put('cart_delivery_fee', round($grandTotal, 2));
 
         return response()->json([
             'total_fee' => round($grandTotal, 2),
-            'distance_km' => round($totalDistance, 2),
-            'weight_gram' => $totalGram,
-            'weight_kg' => $totalKg,
-            'weight_ton' => $totalTon,
-            'distance_fee' => round($distanceFeeSum, 2),
-            'gram_fee' => round($gramFee, 2),
-            'kg_fee' => round($kgFee, 2),
-            'ton_fee' => round($tonFee, 2),
-            'same_area_count' => $sameAreaCount,
-            'same_area_unit_fee' => round($sameAreaUnitFee, 2),
-            'same_area_fee' => round($sameAreaTotal, 2),
-            'vendor_count' => count($vendorDistances),
-            'vendor_distances' => $vendorDistances,
+            'distance_km' => 0,
+            'weight_gram' => 0,
+            'weight_kg' => 0,
+            'weight_ton' => 0,
+            'distance_fee' => 0,
+            'gram_fee' => 0,
+            'kg_fee' => 0,
+            'ton_fee' => 0,
+            'same_area_count' => 0,
+            'same_area_unit_fee' => 0,
+            'same_area_fee' => 0,
+            'vendor_count' => count($uniqueSellers),
+            'vendor_distances' => [],
         ]);
+
     }
 
     private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earthRadius = 6371)

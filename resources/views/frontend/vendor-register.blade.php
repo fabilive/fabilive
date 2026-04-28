@@ -209,6 +209,18 @@
                                         {{ __('Do have any account?') }}<a href="{{ route('user.login') }}"
                                             class="text-secondary">{{ __(' Login') }}</a>
                                     </p>
+                                    @php
+                                        $socialsetting = App\Models\Socialsetting::find(1);
+                                    @endphp
+                                    @if($socialsetting->g_check == 1)
+                                        <div class="social-area text-center">
+                                            <h3 class="title mt-3">{{ 'OR' }}</h3>
+                                            <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'seller']) }}" class="btn btn-outline-danger w-100 mt-2 d-flex align-items-center justify-content-center">
+                                                <i class="fab fa-google mr-2"></i> &nbsp; {{ __('Continue with Google') }}
+                                            </a>
+                                        </div>
+                                    @endif
+
                                 </div>
                             </div>
                         </div>

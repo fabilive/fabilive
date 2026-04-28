@@ -49,6 +49,11 @@ class RegisterController extends FrontBaseController
             'password' => 'required|confirmed',
         ];
 
+        if ($gs->is_capcha == 1) {
+            $rules['g-recaptcha-response'] = 'required|captcha';
+        }
+
+
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {

@@ -54,12 +54,30 @@
                                             <p>
                                                 <input type="password" name="password_confirmation" class="form-control" required=""  placeholder="{{ __('Confirm Password') }}" >
                                             </p>
-                                            <input id="processdata" type="hidden" value="{{ __('Processing...') }}">
+                                            @if($gs->is_capcha == 1)
+                                                <div class="form-input mb-3">
+                                                     {!! NoCaptcha::display() !!}
+                                                     @error('g-recaptcha-response')
+                                                     <p class="my-2 text-danger">{{$message}}</p>
+                                                     @enderror
+                                                 </div>
+                                            @endif
                                             <button class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
                                         </form>
                                         <p>
                                                 {{ __("Do have any account?") }}<a href="{{ route('user.login') }}"  class="text-secondary">{{__(' Login')}}</a>
                                         </p>
+                                        @php
+                                            $socialsetting = App\Models\Socialsetting::find(1);
+                                        @endphp
+                                        @if($socialsetting->g_check == 1)
+                                            <div class="social-area text-center">
+                                                <h3 class="title mt-3">{{ 'OR' }}</h3>
+                                                <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'buyer']) }}" class="btn btn-outline-danger w-100 mt-2 d-flex align-items-center justify-content-center">
+                                                    <i class="fab fa-google mr-2"></i> &nbsp; {{ __('Continue with Google') }}
+                                                </a>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -72,10 +90,9 @@
 @endsection
 @section('script')
 
-    {{-- V90.7: Captcha JS DISABLED for recovery --}}
-    {{-- @if($gs->is_capcha == 1)
+    @if($gs->is_capcha == 1)
         {!! NoCaptcha::renderJs() !!}
-    @endif --}}
+    @endif
 
     <script src="{{ asset('assets/js/selfie-capture.js') }}"></script>
 

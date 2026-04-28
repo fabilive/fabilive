@@ -80,7 +80,7 @@ class MessageDeliveryController extends Controller
                 'message' => 'required|string|max:2000',
             ]);
 
-            $chat = Chat::findOrFail($request->chat_id);
+            $chat = Chat::with('order')->findOrFail($request->chat_id);
 
             if ($chat->rider_id != $rider->id) {
                 return response()->json([
@@ -88,6 +88,14 @@ class MessageDeliveryController extends Controller
                     'message' => 'You are not authorized for this chat.',
                 ], 403);
             }
+
+            if ($chat->order && $chat->order->status === 'completed') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This chat is closed because the order is completed.',
+                ], 403);
+            }
+
 
             $message = ChatMessages::create([
                 'chat_id' => $chat->id,

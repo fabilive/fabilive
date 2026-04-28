@@ -31,6 +31,21 @@ class ForgotController extends Controller
 
     public function forgot(Request $request)
     {
+        $gs = \App\Models\Generalsetting::findOrFail(1);
+        if ($gs->is_capcha == 1) {
+            $rules = [
+                'g-recaptcha-response' => 'required|captcha'
+            ];
+            $messages = [
+                'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
+                'g-recaptcha-response.captcha' => 'Captcha error! try again later or contact site admin..'
+            ];
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+        }
+
         $input = $request->all();
         if (User::where('email', '=', $request->email)->count() > 0) {
             // user found

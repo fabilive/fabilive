@@ -7,6 +7,32 @@
     <!-- Main Widget Window -->
     <div id="fabi-support-window" style="display: none; width: 380px; height: 550px; background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; border: 1px solid #eee;">
         
+        <style>
+            .fabi-typing {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                padding: 10px 14px;
+                background: #f1f1f1;
+                border-radius: 12px;
+                border-bottom-left-radius: 2px;
+                width: fit-content;
+            }
+            .fabi-dot {
+                width: 6px;
+                height: 6px;
+                background: #888;
+                border-radius: 50%;
+                animation: fabi-bounce 1.4s infinite ease-in-out;
+            }
+            .fabi-dot:nth-child(1) { animation-delay: -0.32s; }
+            .fabi-dot:nth-child(2) { animation-delay: -0.16s; }
+            @keyframes fabi-bounce {
+                0%, 80%, 100% { transform: scale(0); }
+                40% { transform: scale(1); }
+            }
+        </style>
+
         <!-- Header -->
         <div style="background: #000; color: #fff; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -60,6 +86,17 @@
                 <div id="fabi-support-messages" style="flex: 1; overflow-y: auto; margin-bottom: 10px; font-size: 14px; display: flex; flex-direction: column; gap: 12px;">
                     <!-- Messages go here -->
                 </div>
+                
+                <!-- Typing Indicator Row (Hidden by default) -->
+                <div id="fabi-typing-indicator" style="display: none; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                    <img src="{{asset('assets/images/logo.png')}}" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #eee;">
+                    <div class="fabi-typing">
+                        <div class="fabi-dot"></div>
+                        <div class="fabi-dot"></div>
+                        <div class="fabi-dot"></div>
+                    </div>
+                </div>
+
 
                 <!-- Step 4: Rating View (Appears inside chat view) -->
                 <div id="fabi-support-rating-view" style="display: none; padding: 20px; background: #f9f9f9; border-radius: 10px; text-align: center; border: 1px solid #eee; margin-top: auto;">
@@ -380,6 +417,11 @@
             addMessage('user', text);
             inputField.value = '';
 
+            // Show typing indicator
+            const typingIndicator = document.getElementById('fabi-typing-indicator');
+            typingIndicator.style.display = 'flex';
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
             // 1. Intelligent Routing: Switch to live endpoint if an agent is active/requested
             const endpoint = (conversationStatus === 'waiting_agent' || conversationStatus === 'assigned') 
                              ? '/support/chat/send' 
@@ -400,28 +442,39 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success') {
-                    conversationId = data.conversation_id || (data.message ? data.message.conversation_id : conversationId);
-                    
-                    if (data.bot_message) {
-                        addMessage('bot', data.bot_message.body_text);
-                        
-                        const msgTextLower = data.bot_message.body_text.toLowerCase();
-                        const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
-                        const shouldShowEscalate = triggerKeywords.some(keyword => msgTextLower.includes(keyword));
-
-                        if (shouldShowEscalate) {
-                            escalateBtn.style.display = 'block';
-                        }
-                    }
-                } else if (data.status === 'error') {
-                    addMessage('system', data.message || 'An error occurred.');
+                // Simulate typing delay based on message length (min 1s, max 3s)
+                let delay = 1000;
+                if (data.bot_message && data.bot_message.body_text) {
+                    delay = Math.min(3000, Math.max(1000, data.bot_message.body_text.length * 20));
                 }
+
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                    if (data.status === 'success') {
+                        conversationId = data.conversation_id || (data.message ? data.message.conversation_id : conversationId);
+                        
+                        if (data.bot_message) {
+                            addMessage('bot', data.bot_message.body_text);
+                            
+                            const msgTextLower = data.bot_message.body_text.toLowerCase();
+                            const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
+                            const shouldShowEscalate = triggerKeywords.some(keyword => msgTextLower.includes(keyword));
+
+                            if (shouldShowEscalate) {
+                                escalateBtn.style.display = 'block';
+                            }
+                        }
+                    } else if (data.status === 'error') {
+                        addMessage('system', data.message || 'An error occurred.');
+                    }
+                }, delay);
             })
             .catch(err => {
+                typingIndicator.style.display = 'none';
                 addMessage('system', 'Unable to reach support. Our team is investigating.');
             });
         }
+
 
         // Image Upload Logic
         const attachBtn = document.getElementById('fabi-support-attach');

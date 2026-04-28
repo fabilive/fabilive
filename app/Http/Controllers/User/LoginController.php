@@ -40,6 +40,12 @@ class LoginController extends FrontBaseController
             'password' => 'required',
         ];
 
+        $gs = \App\Models\Generalsetting::findOrFail(1);
+        if ($gs->is_capcha == 1) {
+            $rules['g-recaptcha-response'] = 'required|captcha';
+        }
+
+
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
@@ -72,9 +78,11 @@ class LoginController extends FrontBaseController
         return response()->json(['errors' => [0 => 'Credentials Doesn\'t Match !']]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect('/');
     }

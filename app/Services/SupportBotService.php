@@ -15,15 +15,36 @@ class SupportBotService
      */
     public function processMessage(string $message, string $context): ?array
     {
-        // Get active rules for this context or 'both', ordered by highest priority
+        $messageLower = Str::lower(trim($message));
+
+        // 1. Check for localized / common greetings first
+        $greetings = [
+            'hello' => "Hello! I'm MbokoAi, your Fabilive assistant. How can I help you today?",
+            'hi' => "Hi there! I'm MbokoAi. Ready to help with your orders or account.",
+            'mboko' => "Mboko is here! 😊 How can I support you today?",
+            'who are you' => "I am MbokoAi, the smart support bot for Fabilive. I can help you track orders, manage your shop, or find products.",
+            'how are you' => "I'm doing great and ready to serve you! How about you?",
+            'thanks' => "You're very welcome! Let me know if you need anything else.",
+            'thank you' => "Happy to help! Fabilive is here for you.",
+        ];
+
+        foreach ($greetings as $key => $response) {
+            if (Str::contains($messageLower, $key)) {
+                return [
+                    'response_text' => $response,
+                    'suggested_faq' => null,
+                    'rule_id' => 'greeting',
+                ];
+            }
+        }
+
+        // 2. Fallback to database rules
         $rules = SupportBotRule::where(function ($query) use ($context) {
             $query->where('context', $context)->orWhere('context', 'both');
         })
             ->where('is_active', true)
             ->orderBy('priority', 'desc')
             ->get();
-
-        $messageLower = Str::lower($message);
 
         foreach ($rules as $rule) {
             if ($this->ruleMatches($rule, $message, $messageLower)) {
@@ -45,6 +66,7 @@ class SupportBotService
 
         return null;
     }
+
 
     /**
      * Determine if a rule matches the message.

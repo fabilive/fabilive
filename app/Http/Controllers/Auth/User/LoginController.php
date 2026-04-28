@@ -22,9 +22,10 @@ class LoginController extends Controller
         ];
 
         $gs = \App\Models\Generalsetting::findOrFail(1);
-        if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
+        if ($gs->is_capcha == 1) {
             $rules['g-recaptcha-response'] = 'required|captcha';
         }
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
@@ -60,9 +61,11 @@ class LoginController extends Controller
         return response()->json(['errors' => [0 => __('Credentials Doesn\'t Match !')]]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect('/');
     }

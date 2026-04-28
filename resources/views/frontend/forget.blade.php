@@ -38,6 +38,14 @@
                               <input type="email" name="email" class="form-control border" placeholder="{{ __('Enter Email Address') }}" id="reg_email"  required="">
                            </p>
                            <p>{{ __('A password will be sent to your email address.') }}</p>
+                           @if($gs->is_capcha == 1)
+                              <div class="form-input mb-3">
+                                   {!! NoCaptcha::display() !!}
+                                   @error('g-recaptcha-response')
+                                   <p class="my-2 text-danger">{{$message}}</p>
+                                   @enderror
+                               </div>
+                           @endif
                            <p>
                               <input class="authdata" type="hidden" value="{{ __('Checking...')}}">
                               <button type="submit" class="btn btn-primary rounded-0 submit-btn" name="register" value="Register">{{ __('Submit') }}</button>
@@ -55,4 +63,7 @@
 @include('partials.global.common-footer')
 @endsection
 @section('script')
+    @if($gs->is_capcha == 1)
+        {!! NoCaptcha::renderJs() !!}
+    @endif
 @endsection

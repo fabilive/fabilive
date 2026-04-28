@@ -66,7 +66,8 @@ class EscrowReleaseService
                                 $finalSellerPayout = $vendorAmount;
 
 
-                                $vendor->balance += $finalSellerPayout;
+                                // Add to vendor's current_balance
+                                $vendor->current_balance += $finalSellerPayout;
                                 $vendor->save();
 
                                 WalletLedger::create([

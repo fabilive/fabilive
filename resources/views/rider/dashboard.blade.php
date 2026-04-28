@@ -57,16 +57,18 @@
                      </div>
                   </div>
                </div>
-               <div class="col-lg-6">
-                  <div class="widget border-0 p-30 widget_categories bg-light account-info">
-                     <h4 class="widget-title down-line mb-30">{{ __('My Wallet') }}</h4>
-                     <div class="user-info">
-                        <h5 class="title">{{ __('Current Balance') }}:</h5>
-                        <h5 class="title w-price">{{ App\Models\Product::vendorConvertPrice($user->balance) }}</h5>
-                        <hr>
-                     </div>
-                  </div>
-               </div>
+                <div class="col-lg-6">
+                   <div class="widget border-0 p-30 widget_categories bg-light account-info">
+                      <h4 class="widget-title down-line mb-30">{{ __('My Wallet & Stats') }}</h4>
+                      <div class="user-info">
+                         <h5 class="title">{{ __('Current Balance') }}: <span class="float-right">{{ App\Models\Product::vendorConvertPrice($user->balance) }}</span></h5>
+                         <p><span class="user-title">{{ __('Completed Deliveries') }}:</span> <span class="float-right">{{ $total_deliveries }}</span></p>
+                         <p><span class="user-title">{{ __('Active Jobs') }}:</span> <span class="float-right">{{ $active_jobs_count }}</span></p>
+                         <hr>
+                      </div>
+                   </div>
+                </div>
+
             </div>
             <div class="row mt-3">
                <div class="col-lg-12">

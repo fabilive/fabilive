@@ -315,7 +315,15 @@ class MessageController extends UserBaseController
 
         $chat = Chat::where('id', $request->chat_id)
             ->where('buyer_id', $user->id)
+            ->with('order')
             ->firstOrFail();
+
+        if ($chat->order && $chat->order->status === 'completed') {
+            return response()->json([
+                'status' => false,
+                'message' => 'This chat is closed because the order is completed.',
+            ], 403);
+        }
 
         $message = ChatMessages::create([
             'chat_id' => $chat->id,

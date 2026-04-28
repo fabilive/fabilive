@@ -12,6 +12,41 @@ use Session;
 
 class PriceHelper
 {
+    public static function calculateDeliveryFee($cart)
+    {
+        if (!$cart || !isset($cart->items) || count($cart->items) === 0) {
+            return 0;
+        }
+
+        // Check if there are any physical products
+        $hasPhysical = false;
+        $uniqueSellers = [];
+
+        foreach ($cart->items as $item) {
+            if (($item['item']['type'] ?? '') === 'Physical') {
+                $hasPhysical = true;
+                $sellerId = $item['item']['user_id'] ?? 0;
+                if (!in_array($sellerId, $uniqueSellers)) {
+                    $uniqueSellers[] = $sellerId;
+                }
+            }
+        }
+
+        if (!$hasPhysical) {
+            return 0;
+        }
+
+        $sellerCount = count($uniqueSellers);
+        $baseFee = 999;
+        $additionalSellerFee = 300;
+
+        if ($sellerCount <= 1) {
+            return $baseFee;
+        }
+
+        return $baseFee + (($sellerCount - 1) * $additionalSellerFee);
+    }
+
     public static function showPrice($price)
     {
         $gs = \App\Models\Generalsetting::safeFirst();
@@ -190,7 +225,9 @@ class PriceHelper
             $gs = \App\Models\Generalsetting::safeFirst();
 
             $totalAmount = $cart->totalPrice - (\Session::has('coupon') ? (float)\Session::get('coupon') : 0);
-            $delivery_fee = isset($input['total_delivery_fee']) ? (float) $input['total_delivery_fee'] : 0;
+            
+            // Recalculate delivery fee on backend to prevent tampering
+            $delivery_fee = self::calculateDeliveryFee($cart);
             $totalAmount += $delivery_fee;
 
             $tax_amount = 0;

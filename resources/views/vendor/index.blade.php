@@ -99,6 +99,9 @@
                 <div class="left">
                     <h5 class="title">{{ __('Current Balance') }}</h5>
                     <span class="number">{{ App\Models\Product::vendorConvertPrice($actual_balance) }}</span>
+                    <p style="font-size: 11px; margin-top: 5px; opacity: 0.8;">
+                        <strong>{{ __('Pending') }}:</strong> {{ App\Models\Product::vendorConvertPrice($pending_balance) }}
+                    </p>
                 </div>
                 
                 <div class="right d-flex align-self-center">
@@ -113,24 +116,8 @@
             <div class="mycard bg3">
                 
                 <div class="left">
-    @php
-        // Get all vendor orders for the logged-in user with their associated orders
-        $vendorOrders = App\Models\VendorOrder::with('order')->where('user_id', Auth::user()->id)->get();
-
-        // Total earning from vendor orders
-        $totalPrice = $vendorOrders->sum('price');
-
-        // Total commission from related orders
-        $totalCommission = $vendorOrders->sum(function($vo) {
-            return optional($vo->order)->commission ?? 0;
-        });
-
-        // Net total earning
-        $netEarning = $totalPrice - $totalCommission;
-    @endphp
-
-    <h5 class="title">{{ __('Total Earning') }}</h5>
-    <span class="number">{{ App\Models\Product::vendorConvertPrice($netEarning) }}</span>
+                    <h5 class="title">{{ __('Total Earning') }}</h5>
+                    <span class="number">{{ App\Models\Product::vendorConvertPrice($total_earning) }}</span>
 </div>
 
 
@@ -192,6 +179,7 @@
                                     </td>
                                 </tr>
                                 @endforeach
+
                             </tbody>
                         </table>
                     </div>

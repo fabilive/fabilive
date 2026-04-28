@@ -24,7 +24,7 @@ class RegisterController extends Controller
         $gs = Generalsetting::findOrFail(1);
 
         // ------------------- CAPTCHA Validation -------------------
-        if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
+        if ($gs->is_capcha == 1) {
             $rules = ['g-recaptcha-response' => 'required|captcha'];
             $customs = [
                 'g-recaptcha-response.required' => 'Please verify that you are not a robot.',

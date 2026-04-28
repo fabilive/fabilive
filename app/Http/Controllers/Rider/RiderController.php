@@ -23,15 +23,25 @@ class RiderController extends RiderBaseController
         $orders = DeliveryRider::where('rider_id', $this->rider->id)
             ->orderby('id', 'desc')->take(8)->get();
 
-        // Fetch available jobs for all riders (removed service area restriction as per user request)
+        // Fetch available jobs for all riders
         $available_jobs = \App\Models\DeliveryJob::where('status', 'available')
             ->with(['order', 'stops'])
             ->latest()
             ->take(20)
             ->get();
 
-        return view('rider.dashboard', compact('orders', 'user', 'available_jobs'));
+        // Aggregate Metrics
+        $total_deliveries = DeliveryRider::where('rider_id', $this->rider->id)
+            ->where('status', 'delivered')
+            ->count();
+            
+        $active_jobs_count = \App\Models\DeliveryJob::where('assigned_rider_id', $this->rider->id)
+            ->whereIn('status', ['picking_up', 'delivering', 'accepted'])
+            ->count();
+
+        return view('rider.dashboard', compact('orders', 'user', 'available_jobs', 'total_deliveries', 'active_jobs_count'));
     }
+
 
     public function profile()
     {
