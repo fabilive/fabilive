@@ -1263,7 +1263,8 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                      else{
                      $('.dpercent').html('');
                      }
-                  var ttotal = data[6] + parseFloat(mship) + parseFloat(mpack);
+                  var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
+                  var ttotal = data[6] + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
                   ttotal = parseFloat(ttotal);
                      if(ttotal % 1 != 0)
                      {

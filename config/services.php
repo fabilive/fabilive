@@ -40,6 +40,12 @@ return [
         'secret' => env('NOCAPTCHA_SECRET'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URL'),
+    ],
+
     'hitpay' => [
         'api_key' => env('HITPAY_API_KEY'),
         'salt' => env('HITPAY_SALT'),

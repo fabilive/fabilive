@@ -65,8 +65,23 @@
                       </a>
                     </div>
                   </div>
+                  @if($gs->is_capcha == 1)
+                  <div class="form-input mb-3">
+                      {!! NoCaptcha::display() !!}
+                      {!! NoCaptcha::renderJs() !!}
+                      @error('g-recaptcha-response')
+                      <p class="my-2 text-danger">{{$message}}</p>
+                      @enderror
+                  </div>
+                  @endif
                   <input id="authdata" type="hidden"  value="{{ __('Authenticating...') }}">
                   <button class="submit-btn">{{ __('Login') }}</button>
+                  <div class="mt-4 text-center">
+                      <p class="mb-2">Or</p>
+                      <a href="{{ route('admin.google.login') }}" class="btn btn-outline-dark btn-block d-flex justify-content-center align-items-center" style="width: 100%;">
+                          <i class="fab fa-google mr-2" style="font-size: 1.2rem; margin-right: 10px;"></i> {{ __('Sign in with Google') }}
+                      </a>
+                  </div>
                 </form>
               </div>
             </div>

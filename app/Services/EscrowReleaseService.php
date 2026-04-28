@@ -116,6 +116,13 @@ class EscrowReleaseService
                 $order->payout_released_at = now();
                 $order->save();
 
+                // 6. Send commission credited notifications to seller + rider
+                try {
+                    \App\Services\FabiliveNotifier::commissionCredited($order);
+                } catch (\Exception $ne) {
+                    Log::error('Commission Notification Error: ' . $ne->getMessage());
+                }
+
                 return true;
 
             }, 5);

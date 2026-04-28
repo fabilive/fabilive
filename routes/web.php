@@ -2394,6 +2394,14 @@ Route::prefix('admin')->group(function () {
     Route::middleware('throttle:5,1')->post('/login', 'Auth\Admin\LoginController@login')->name('admin.login.submit');
     Route::get('/logout', 'Auth\Admin\LoginController@logout')->name('admin.logout');
 
+    // OTP Verify Routes
+    Route::get('/otp-verify', 'Admin\OtpVerificationController@showForm')->name('admin.otp.show');
+    Route::post('/otp-verify', 'Admin\OtpVerificationController@verify')->name('admin.otp.verify');
+
+    // Google Socialite Routes
+    Route::get('/login/google', 'Admin\SocialAuthController@redirectToGoogle')->name('admin.google.login');
+    Route::get('/login/google/callback', 'Admin\SocialAuthController@handleGoogleCallback')->name('admin.google.callback');
+
     //------------ ADMIN LOGIN SECTION ENDS ------------
 
     //------------ ADMIN FORGOT SECTION ------------
@@ -3664,6 +3672,12 @@ Route::group(['middleware' => 'maintenance'], function () {
 
         Route::get('/logout', 'User\LoginController@logout')->name('user-logout');
         Route::get('/dashboard', 'User\UserController@index')->name('user-dashboard');
+
+        // User Notifications
+        Route::get('/notifications/count', 'User\NotificationController@count')->name('user-notf-count');
+        Route::get('/notifications/show', 'User\NotificationController@show')->name('user-notf-show');
+        Route::get('/notifications/clear', 'User\NotificationController@clear')->name('user-notf-clear');
+
 
         Route::get('/chat/{id}', 'User\UserController@chat')->name('chat.show');
         Route::post('/chat/send', 'User\UserController@sendMessage')->name('chat.send');

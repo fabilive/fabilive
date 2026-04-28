@@ -147,8 +147,16 @@
 									class="fa fa-home mr-2"></i>{{ __('Dashboard') }}</a>
 						</li>
 						<li>
-							<a href="{{ route('vendor.delivery.index') }}" class="wave-effect"><i
-									class="fas fa-shipping-fast"></i>{{ __('Delivery') }}</a>
+							<a href="#delivery" class="accordion-toggle wave-effect" data-toggle="collapse"
+								aria-expanded="false"><i class="fas fa-shipping-fast mr-2"></i>{{ __('Delivery') }}</a>
+							<ul class="collapse list-unstyled" id="delivery" data-parent="#accordion">
+								<li>
+									<a href="{{ route('vendor.delivery.index') }}"> {{ __('All Deliveries') }}</a>
+								</li>
+								<li>
+									<a href="{{ route('vendor.delivery.index', ['status' => 'completed']) }}"> {{ __('Completed Deliveries') }}</a>
+								</li>
+							</ul>
 						</li>
 						<li>
 							<a href="{{ route('vendor.live-messages') }}" class="wave-effect"><i

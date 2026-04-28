@@ -308,74 +308,83 @@ class OrderController extends AdminBaseController
                     }
 
                     $cart = json_decode($data->cart, true);
-                    if (! empty($cart['items'])) {
-                        foreach ($cart['items'] as $item) {
-                            $productId = $item['item']['id'];
-                            $productFee = $item['delivery_fee'] ?? 0;
-                            $deliveryRiders = DeliveryRider::where([
-                                'order_id' => $data->id,
-                                'product_id' => $productId,
-                            ])->get();
-                            foreach ($deliveryRiders as $deliveryRider) {
-                                $rider = Rider::lockForUpdate()->find($deliveryRider->rider_id);
-                                if ($rider) {
-                                    $rider->balance += $productFee;
-                                    $rider->save();
+                    $job = \App\Models\DeliveryJob::where('order_id', $data->id)->first();
+                    if ($job) {
+                        if ($job->status !== 'delivered_verified') {
+                            app(\App\Services\DeliveryJobService::class)->verifyAndSettle($job);
+                        }
+                    } else {
+                        // Legacy logic for digital or non-delivery orders
+                        if ($data->escrow_status !== 'released') {
+                            if (! empty($cart['items'])) {
+                                foreach ($cart['items'] as $item) {
+                                    $productId = $item['item']['id'];
+                                    $productFee = $item['delivery_fee'] ?? 0;
+                                    $deliveryRiders = DeliveryRider::where([
+                                        'order_id' => $data->id,
+                                        'product_id' => $productId,
+                                    ])->get();
+                                    foreach ($deliveryRiders as $deliveryRider) {
+                                        $rider = Rider::lockForUpdate()->find($deliveryRider->rider_id);
+                                        if ($rider) {
+                                            $rider->balance += $productFee;
+                                            $rider->save();
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                    foreach ($data->vendororders as $vorder) {
-                        $uprice = User::lockForUpdate()->find($vorder->user_id);
-                        if ($uprice) {
-                            $uprice->current_balance = $uprice->current_balance + $vorder->price;
-                            $vorder->status = 'completed';
-                            $vorder->update();
-                            $uprice->update();
-                        }
-                    }
-                    if (User::where('id', $data->affilate_user)->exists()) {
-                        $auser = User::lockForUpdate()->where('id', $data->affilate_user)->first();
-                        $auser->affilate_income += $data->affilate_charge;
-                        $auser->update();
-                        $affiliate_bonus = new AffliateBonus();
-                        $affiliate_bonus->refer_id = $auser->id;
-                        $affiliate_bonus->bonus = $data->affilate_charge;
-                        $affiliate_bonus->type = 'Order';
-                        $affiliate_bonus->user_id = $data->user_id;
-                        $affiliate_bonus->save();
-                    }
-                    if ($data->affilate_users != null) {
-                        $ausers = json_decode($data->affilate_users, true);
-                        foreach ($ausers as $auser) {
-                            $user = User::lockForUpdate()->find($auser['user_id']);
-                            if ($user) {
-                                $user->affilate_income += $auser['charge'];
-                                $user->update();
+                            foreach ($data->vendororders as $vorder) {
+                                $uprice = User::lockForUpdate()->find($vorder->user_id);
+                                if ($uprice) {
+                                    $uprice->current_balance = $uprice->current_balance + $vorder->price;
+                                    $vorder->status = 'completed';
+                                    $vorder->update();
+                                    $uprice->update();
+                                }
                             }
+                            if (User::where('id', $data->affilate_user)->exists()) {
+                                $auser = User::lockForUpdate()->where('id', $data->affilate_user)->first();
+                                $auser->affilate_income += $data->affilate_charge;
+                                $auser->update();
+                                $affiliate_bonus = new AffliateBonus();
+                                $affiliate_bonus->refer_id = $auser->id;
+                                $affiliate_bonus->bonus = $data->affilate_charge;
+                                $affiliate_bonus->type = 'Order';
+                                $affiliate_bonus->user_id = $data->user_id;
+                                $affiliate_bonus->save();
+                            }
+                            if ($data->affilate_users != null) {
+                                $ausers = json_decode($data->affilate_users, true);
+                                foreach ($ausers as $auser) {
+                                    $user = User::lockForUpdate()->find($auser['user_id']);
+                                    if ($user) {
+                                        $user->affilate_income += $auser['charge'];
+                                        $user->update();
+                                    }
+                                }
+                            }
+                            // Release Escrow
+                            $data->escrow_status = 'released';
+                            $data->update();
+
+                            WalletLedger::create([
+                                'user_id' => $data->user_id ?? 0,
+                                'amount' => $data->pay_amount,
+                                'type' => 'escrow_release',
+                                'order_id' => $data->id,
+                                'reference' => $data->txnid,
+                                'status' => 'completed',
+                                'details' => 'Escrow released upon order completion',
+                            ]);
                         }
                     }
-                    // Release Escrow
-                    $data->escrow_status = 'released';
-                    $data->update();
 
-                    WalletLedger::create([
-                        'user_id' => $data->user_id ?? 0,
-                        'amount' => $data->pay_amount,
-                        'type' => 'escrow_release',
-                        'order_id' => $data->id,
-                        'reference' => $data->txnid,
-                        'status' => 'completed',
-                        'details' => 'Escrow released upon order completion',
-                    ]);
-
-                    $maildata = [
-                        'to' => $data->customer_email,
-                        'subject' => 'Your order '.$data->order_number.' is Confirmed!',
-                        'body' => 'Hello '.$data->customer_name.','."\n Thank you for shopping with us. We are looking forward to your next visit.",
-                    ];
-                    $mailer = new GeniusMailer();
-                    $mailer->sendCustomMail($maildata);
+                    // Send branded email + in-app notifications
+                    try {
+                        \App\Services\FabiliveNotifier::orderCompleted($data);
+                    } catch (\Exception $ne) {
+                        \Log::error('Order Completed Notification Error: ' . $ne->getMessage());
+                    }
                 }
                 if ($input['status'] == 'declined') {
                     if ($data->user_id != 0) {
@@ -408,13 +417,19 @@ class OrderController extends AdminBaseController
                             $product->update();
                         }
                     }
-                    $maildata = [
-                        'to' => $data->customer_email,
-                        'subject' => 'Your order '.$data->order_number.' is Declined!',
-                        'body' => 'Hello '.$data->customer_name.','."\n We are sorry for the inconvenience caused. We are looking forward to your next visit.",
-                    ];
-                    $mailer = new GeniusMailer();
-                    $mailer->sendCustomMail($maildata);
+                    // Send branded email + in-app notifications
+                    try {
+                        \App\Services\FabiliveNotifier::orderDeclined($data);
+                    } catch (\Exception $ne) {
+                        \Log::error('Order Declined Notification Error: ' . $ne->getMessage());
+                    }
+                }
+                if ($input['status'] == 'processing') {
+                    try {
+                        \App\Services\FabiliveNotifier::orderProcessing($data);
+                    } catch (\Exception $ne) {
+                        \Log::error('Order Processing Notification Error: ' . $ne->getMessage());
+                    }
                 }
                 $data->update($input);
                 if ($request->track_text) {

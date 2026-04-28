@@ -45,9 +45,9 @@
                                 <p class="mb-0 text-dark">
                                     {{ __('Your referral code can now be used as a coupon during checkout.') }} 
                                     <br>
-                                    <strong>{{ __('Your Friends Get') }}:</strong> <span class="badge badge-success px-3">200 CFA {{ __('Discount') }}</span>
+                                    <strong>{{ __('Your Friends Get') }}:</strong> <span class="badge px-3 text-white" style="background-color: #28a745;">200 CFA {{ __('Discount') }}</span>
                                     <br>
-                                    <strong>{{ __('You Get') }}:</strong> <span class="badge badge-primary px-3">100 CFA {{ __('Locked Reward') }}</span> {{ __('per first-time purchaser!') }}
+                                    <strong>{{ __('You Get') }}:</strong> <span class="badge px-3 text-white" style="background-color: #28a745;">100 CFA {{ __('Locked Reward') }}</span> {{ __('per first-time purchaser!') }}
                                 </p>
                             </div>
 

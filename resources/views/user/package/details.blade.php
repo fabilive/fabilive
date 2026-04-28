@@ -234,17 +234,23 @@
                                             </div>
                                             <br>
                                             <div class="row">
+                                                <div class="col-lg-12 mb-3">
+                                                    <div class="alert alert-info">
+                                                        <label><strong>{{ __('Download & Sign') }}</strong></label>
+                                                        <p>{{ __('Please download the Sub-Merchant Agreement, sign it, and upload it at the bottom of this section.') }}</p>
+                                                        <a href="{{ asset('assets/files/agreements/submerchant_agreement.pdf') }}" target="_blank" class="btn btn-sm btn-info text-white">
+                                                            <i class="fa fa-download"></i> {{ __('Download Sub-Merchant Agreement') }}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-lg-4">
                                                     <h5 class="title pt-1">
                                                         {{ __('Fabilive Sub-Merchant Agreement') }} *
                                                     </h5>
                                                 </div>
                                                 <div class="col-lg-8">
-                                                    <div class="mb-2">
-                                                        <a href="{{ asset('assets/files/agreements/submerchant_agreement.pdf') }}" target="_blank" class="text-info">
-                                                            <i class="fa fa-download"></i> {{ __('Download Sub-Merchant Agreement') }}
-                                                        </a>
-                                                    </div>
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="submerchant_agreement"
                                                         placeholder="{{ __('Fabilive Sub-Merchant Agreement') }}"
@@ -274,11 +280,6 @@
                                                         Capture
                                                     </button>
 
-                                                    <div id="fileFallback" class="mt-2">
-                                                        <p class="small text-muted mb-1">{{ __('Or upload a selfie file:') }}</p>
-                                                        <input type="file" id="selfieFileInput" class="form-control form-control-sm" name="selfie_image_file">
-                                                    </div>
-
                                                     <script>
                                                     document.addEventListener('DOMContentLoaded', () => {
                                                         const video = document.getElementById('cam');
@@ -297,7 +298,7 @@
                                                                 captureBtn.style.display = 'inline-block';
                                                                 openBtn.style.display = 'none';
                                                             } catch (err) {
-                                                                alert('Camera access denied or NOT available. Please upload a file instead.');
+                                                                alert('Camera access denied or NOT available.');
                                                             }
                                                         });
 
@@ -323,20 +324,6 @@
                                                                 openBtn.textContent = 'Retake Selfie';
                                                                 openBtn.style.display = 'inline-block';
                                                             }, 'image/jpeg', 0.9);
-                                                        });
-
-                                                        document.getElementById('selfieFileInput').addEventListener('change', function(e) {
-                                                            if (this.files && this.files[0]) {
-                                                                preview.src = URL.createObjectURL(this.files[0]);
-                                                                preview.style.display = 'block';
-                                                                video.style.display = 'none';
-                                                                if (stream) {
-                                                                    stream.getTracks().forEach(t => t.stop());
-                                                                }
-                                                                openBtn.textContent = 'Retake Selfie';
-                                                                captureBtn.style.display = 'none';
-                                                                openBtn.style.display = 'inline-block';
-                                                            }
                                                         });
                                                     });
                                                     </script>

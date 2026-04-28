@@ -112,6 +112,16 @@ class DeliveryJobService
             // Status specific updates
             if ($newStatus === 'assigned') {
                 $job->update(['accepted_at' => now()]);
+
+                // Notify buyer + rider + seller of rider assignment
+                try {
+                    $order = $job->order;
+                    if ($order) {
+                        \App\Services\FabiliveNotifier::riderAssigned($order, $job->assigned_rider_id);
+                    }
+                } catch (\Exception $ne) {
+                    \Log::error('Rider Assignment Notification Error: ' . $ne->getMessage());
+                }
             } elseif ($newStatus === 'picked_up') {
                 $job->update(['picked_up_at' => now()]);
             } elseif ($newStatus === 'delivered' || $newStatus === 'delivered_pending_verification') {
@@ -147,6 +157,16 @@ class DeliveryJobService
 
             // 3. Log Event
             $this->logEvent($job, 'rider', $job->assigned_rider_id, 'delivered_pending_verification');
+
+            // 4. Send delivery notifications (buyer + seller + rider)
+            try {
+                \App\Services\FabiliveNotifier::orderDelivered($order, $job->assigned_rider_id);
+            } catch (\Exception $ne) {
+                \Log::error('Delivery Notification Error: ' . $ne->getMessage());
+            }
+
+            // 5. Close Chat Threads immediately upon delivery
+            app(DeliveryChatService::class)->closeChatThreads($job);
         });
     }
 

@@ -98,11 +98,7 @@
                                                 </p>
                                                 <p>
                                                     <label for="submerchant_agreement_company">{{ __('Step 2: Upload Signed Delivery Company Agreement') }} *</label>
-                                                    <div class="mb-2">
-                                                        <a href="{{ asset('assets/images/submerchantagreementrider/1773713000CompanyAgreement.pdf') }}" target="_blank" class="text-info small">
-                                                            <i class="fa fa-download"></i> {{ __('Re-download Agreement') }}
-                                                        </a>
-                                                    </div>
+
                                                     <input type="file" name="submerchant_agreement_company" id="submerchant_agreement_company" class="form-control agreement-upload">
                                                 </p>
                                             </div>
@@ -156,11 +152,7 @@
                                                 </p>
                                                 <p>
                                                     <label for="submerchant_agreement_individual">{{ __('Step 2: Upload Signed Delivery Agent Agreement') }} *</label>
-                                                    <div class="mb-2">
-                                                        <a href="{{ asset('assets/images/submerchantagreementrider/1773713000IndividualAgreement.pdf') }}" target="_blank" class="text-info small">
-                                                            <i class="fa fa-download"></i> {{ __('Re-download Agreement') }}
-                                                        </a>
-                                                    </div>
+
                                                     <input type="file" name="submerchant_agreement_individual" id="submerchant_agreement_individual" class="form-control agreement-upload">
                                                 </p>
                                             </div>

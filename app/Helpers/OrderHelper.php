@@ -227,7 +227,14 @@ class OrderHelper
             self::stock_check($cart);
             self::vendor_order_check($cart, $order);
 
-            // 6. Clear All Related Sessions (Prevents "Ghost Coupons")
+            // 6. Send Email & In-App Notifications (Buyer + Seller + Admin)
+            try {
+                \App\Services\FabiliveNotifier::orderPlaced($order);
+            } catch (\Exception $ne) {
+                \Log::error('Order Notification Error: ' . $ne->getMessage());
+            }
+
+            // 7. Clear All Related Sessions (Prevents "Ghost Coupons")
             Session::put('temporder', $order);
             Session::put('tempcart', $cart);
             Session::forget('cart');

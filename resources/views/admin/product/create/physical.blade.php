@@ -353,89 +353,109 @@
 										<!--						</div>-->
 										<!--					</div>-->
 															
-										<!--					<div class="row">-->
-										<!--						<div class="col-lg-12">-->
-										<!--							<div class="left-area">-->
-			
-										<!--							</div>-->
-										<!--						</div>-->
-										<!--						<div class="col-lg-12">-->
-										<!--							<ul class="list">-->
-										<!--								<li>-->
-										<!--									<input class="checkclickc" name="color_check" type="checkbox" id="check3" value="1">-->
-										<!--									<label for="check3">{{ __('Allow Product Colors') }}</label>-->
-										<!--								</li>-->
-										<!--							</ul>-->
-										<!--						</div>-->
-										<!--					</div>-->
-										<!--					<div class="showbox">-->
-										<!--						<div class="row">-->
-										<!--								<div  class="col-lg-12">-->
-										<!--									<div class="left-area">-->
-										<!--										<h4 class="heading">-->
-										<!--											{{ __('Product Colors') }}*-->
-										<!--										</h4>-->
-										<!--										<p class="sub-heading">-->
-										<!--											{{ __('(Choose Your Favorite Colors)') }}-->
-										<!--										</p>-->
-										<!--									</div>-->
-										<!--								</div>-->
-										<!--								<div  class="col-lg-12">-->
-										<!--									<div class="select-input-color" id="color-section">-->
-										<!--										<div class="color-area">-->
-										<!--											<span class="remove color-remove"><i class="fas fa-times"></i></span>-->
-										<!--											<div class="input-group colorpicker-component cp">-->
-										<!--											  <input type="text" name="color_all[]" class="input-field cp tcolor"/>-->
-										<!--											  <span class="input-group-addon"><i></i></span>-->
-										<!--											</div>-->
-										<!--										 </div>-->
-										<!--									</div>-->
-										<!--								<a href="javascript:;" id="color-btn" class="add-more mt-4 mb-3"><i class="fas fa-plus"></i>{{ __('Add More Color') }} </a>-->
-										<!--							</div>-->
-										<!--						</div>-->
-			
-										<!--					</div>-->
-															
-										<!--					<div class="row">-->
-										<!--						<div class="col-lg-12">-->
-										<!--							<div class="left-area">-->
-			
-										<!--							</div>-->
-										<!--						</div>-->
-										<!--						<div class="col-lg-12">-->
-										<!--							<ul class="list">-->
-										<!--								<li>-->
-										<!--									<input class="checkclicks" name="size_check" type="checkbox" id="tcheck" value="1">-->
-										<!--									<label for="tcheck">{{ __('Allow Product Sizes') }}</label>-->
-										<!--								</li>-->
-										<!--							</ul>-->
-										<!--						</div>-->
-										<!--					</div>-->
-										<!--					<div class="showbox">-->
-										<!--						<div class="row">-->
-										<!--								<div  class="col-lg-4">-->
-										<!--									<div class="left-area">-->
-										<!--										<h4 class="heading">-->
-										<!--											{{ __('Product Size') }}*-->
-										<!--										</h4>-->
-										<!--										<p class="sub-heading">-->
-										<!--											{{ __('(eg. S,M,L,XL,XXL,3XL,4XL)') }}-->
-										<!--										</p>-->
-										<!--									</div>-->
-										<!--								</div>-->
-										<!--								<div  class="col-lg-12">-->
-										<!--										<div class="select-input-tsize" id="tsize-section">-->
-										<!--											<div class="tsize-area">-->
-										<!--												<span class="remove tsize-remove"><i class="fas fa-times"></i></span>-->
-										<!--												<input  type="text" name="size_all[]" class="input-field tsize" placeholder="{{ __('Enter Product Size') }}"  >-->
-																						
-										<!--											 </div>-->
-										<!--										</div>-->
-										<!--									<a href="javascript:;" id="tsize-btn" class="add-more mt-4 mb-3"><i class="fas fa-plus"></i>{{ __('Add More Size') }} </a>-->
-										<!--								</div>-->
-										<!--						</div>-->
-			
-										<!--					</div>-->
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <ul class="list">
+                                                    <li>
+                                                        <input class="checkclick1" name="color_check" type="checkbox" id="check3" value="1">
+                                                        <label for="check3">{{ __('Allow Product Colors') }}</label>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="showbox">
+                                            <div class="row">
+                                                <div  class="col-lg-12">
+                                                    <div class="left-area">
+                                                        <h4 class="heading">
+                                                            {{ __('Product Colors') }}*
+                                                        </h4>
+                                                        <p class="sub-heading">
+                                                            {{ __('(Hold Ctrl/Cmd to select multiple)') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div  class="col-lg-12">
+                                                    <select name="color_all[]" class="form-control select2-tags" multiple>
+                                                        <option value="Black">Black</option>
+                                                        <option value="White">White</option>
+                                                        <option value="Red">Red</option>
+                                                        <option value="Blue">Blue</option>
+                                                        <option value="Green">Green</option>
+                                                        <option value="Yellow">Yellow</option>
+                                                        <option value="Orange">Orange</option>
+                                                        <option value="Purple">Purple</option>
+                                                        <option value="Pink">Pink</option>
+                                                        <option value="Brown">Brown</option>
+                                                        <option value="Grey">Grey</option>
+                                                        <option value="Silver">Silver</option>
+                                                        <option value="Gold">Gold</option>
+                                                        <option value="Multicolor">Multicolor</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <ul class="list">
+                                                    <li>
+                                                        <input class="checkclick1" name="size_check" type="checkbox" id="tcheck" value="1">
+                                                        <label for="tcheck">{{ __('Allow Product Sizes') }}</label>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="showbox">
+                                            <div class="row">
+                                                <div  class="col-lg-12">
+                                                    <div class="left-area">
+                                                        <h4 class="heading">
+                                                            {{ __('Product Size') }}*
+                                                        </h4>
+                                                        <p class="sub-heading">
+                                                            {{ __('(Hold Ctrl/Cmd to select multiple)') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div  class="col-lg-12">
+                                                    <select name="size_all[]" class="form-control select2-tags" multiple>
+                                                        <optgroup label="Clothes Sizes">
+                                                            <option value="S">S</option>
+                                                            <option value="SM">SM</option>
+                                                            <option value="M">M</option>
+                                                            <option value="L">L</option>
+                                                            <option value="XL">XL</option>
+                                                            <option value="XXL">XXL</option>
+                                                            <option value="XXXL">XXXL</option>
+                                                        </optgroup>
+                                                        <optgroup label="Adult Shoe Sizes (EU)">
+                                                            @for($i = 20; $i <= 45; $i++)
+                                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                            @endfor
+                                                        </optgroup>
+                                                        <optgroup label="Baby Shoe Sizes">
+                                                            <option value="0-3 Months">0-3 Months</option>
+                                                            <option value="3-6 Months">3-6 Months</option>
+                                                            <option value="6-9 Months">6-9 Months</option>
+                                                            <option value="9-12 Months">9-12 Months</option>
+                                                            <option value="12-18 Months">12-18 Months</option>
+                                                            <option value="18-24 Months">18-24 Months</option>
+                                                        </optgroup>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
 															
 										<!--					<div class="row">-->
 										<!--						<div class="col-lg-12">-->
@@ -962,6 +982,11 @@ $(document).on('click','#size-check',function(){
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        $('.select2-tags').select2({
+            tags: true,
+            tokenSeparators: [','],
+            width: '100%'
+        });
         $('#service_area_id').select2({
             placeholder: 'Select Service Area',
             allowClear: true,

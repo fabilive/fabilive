@@ -15,29 +15,31 @@ use Illuminate\Http\Request;
 class DeliveryController extends VendorBaseController
 {
     // iiss ka jo commented code tha woh mieny fabilive k folder mien localdisk E mien put kiya hoa ha.
-    public function index()
+    public function index(Request $request)
     {
-        return view('vendor.delivery.index');
+        return view('vendor.delivery.index', ['status' => $request->status]);
     }
 
-    public function datatables()
+    public function datatables(Request $request)
     {
         $user = $this->user;
-        $datas = Order::orderby('id', 'desc')
+        $query = Order::orderby('id', 'desc')
             ->with([
                 'customerCity',
                 'vendororders',   // vendor-related
                 'servicearea',     // 👈 GLOBAL pickup location
             ])
-            ->get()
-            ->reject(function ($item) use ($user) {
-                // vendor filtering ONLY here
-                return $item->vendororders()
-                    ->where('user_id', $user->id)
-                    ->count() == 0;
+            ->whereHas('vendororders', function ($q) use ($user) {
+                 $q->where('user_id', $user->id);
             });
 
-        // dd($datas);
+        if ($request->has('status') && $request->status == 'completed') {
+            $query->whereHas('vendororders', function ($q) use ($user) {
+                $q->where('user_id', $user->id)->where('status', 'completed');
+            });
+        }
+
+        $datas = $query;
         // dd($datas);
         return Datatables::of($datas)
             ->editColumn('totalQty', function (Order $data) use ($user) {

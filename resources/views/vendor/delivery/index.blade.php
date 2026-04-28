@@ -136,7 +136,7 @@
                 ordering: false,
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('vendor-delivery-order-datatables') }}',
+                ajax: '{!! route('vendor-delivery-order-datatables', ['status' => $status ?? '']) !!}',
                 columns: [{
                         data: 'order_number',
                         name: 'order_number'

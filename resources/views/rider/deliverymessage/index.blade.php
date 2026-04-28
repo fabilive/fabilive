@@ -37,10 +37,21 @@
                 </div>
 
                 <div class="col-xl-9">
-                    <div class="row g-0 border rounded shadow-sm" style="height:600px;">
-
+                    <div class="row g-0 border rounded shadow-sm chat-container">
+                        <style>
+                            @media (max-width: 991px) {
+                                .chat-container { height: auto !important; min-height: 600px; }
+                                #chat-sidebar { display: block; }
+                                #chat-main { display: none; }
+                                .chat-active #chat-sidebar { display: none; }
+                                .chat-active #chat-main { display: flex !important; }
+                            }
+                            @media (min-width: 992px) {
+                                .chat-container { height: 600px; }
+                            }
+                        </style>
                         <!-- CHAT LIST -->
-                        <div class="col-xl-3 col-lg-4 border-end bg-light overflow-auto">
+                        <div class="col-xl-3 col-lg-4 border-end bg-light overflow-auto" id="chat-sidebar" style="max-height: 600px;">
                             <div class="p-3 border-bottom">
                                 <h5 class="mb-0">{{ __('Chats') }}</h5>
                             </div>
@@ -63,9 +74,12 @@
                         </div>
 
                         <!-- CHAT AREA -->
-                        <div class="col-xl-9 col-lg-8 d-flex flex-column bg-white">
+                        <div class="col-xl-9 col-lg-8 d-flex flex-column bg-white" id="chat-main">
 
-                            <div class="p-3 border-bottom">
+                            <div class="p-3 border-bottom d-flex align-items-center">
+                                <button class="btn btn-sm btn-outline-secondary me-2 d-lg-none" id="back-to-chats">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
                                 <h6 class="mb-0" id="chat-header">
                                     {{ __('Select a chat') }}
                                 </h6>
@@ -150,12 +164,24 @@
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
 
+        const chatContainer = document.querySelector('.chat-container');
+        const backToChatsBtn = document.getElementById('back-to-chats');
+
+        if (backToChatsBtn) {
+            backToChatsBtn.addEventListener('click', function() {
+                chatContainer.classList.remove('chat-active');
+                currentChatId = null;
+                chatItems.forEach(i => i.classList.remove('active'));
+            });
+        }
+
         // CLICK CHAT → FETCH MESSAGES
         chatItems.forEach(item => {
             item.addEventListener('click', function() {
 
                 chatItems.forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
+                chatContainer.classList.add('chat-active');
 
                 currentChatId = this.dataset.chatId;
                 const productName = this.dataset.productName || 'N/A';

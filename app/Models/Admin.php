@@ -6,12 +6,16 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Admin extends Authenticatable implements FilamentUser
 {
+    use HasFactory;
+
     protected $guard = 'admin';
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'section', 'created_at', 'updated_at', 'remember_token', 'shop_name',
+        'name', 'email', 'phone', 'password', 'email_token', 'role_id', 'photo', 'section', 'created_at', 'updated_at', 'remember_token', 'shop_name', 'google_id', 'otp_code', 'otp_expires_at'
     ];
 
     protected $hidden = [

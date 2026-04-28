@@ -212,12 +212,6 @@ class SubscriptionController extends UserBaseController
             $file->move($uploadPath, $filename);
             $input['selfie_image'] = 'assets/images/attachments/'.$filename;
             $attachments[] = $filename;
-        } elseif ($request->hasFile('selfie_image_file')) {
-            $file = $request->file('selfie_image_file');
-            $filename = time().'_selfie.'.$file->getClientOriginalExtension();
-            $file->move($uploadPath, $filename);
-            $input['selfie_image'] = 'assets/images/attachments/'.$filename;
-            $attachments[] = $filename;
         }
         if ($request->hasFile('business_registration_certificate')) {
             $file = $request->file('business_registration_certificate');

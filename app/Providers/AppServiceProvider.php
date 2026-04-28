@@ -129,7 +129,10 @@ class AppServiceProvider extends ServiceProvider
             if ($dbAvailable) {
                 try {
                     $categories = cache()->remember('global_categories', now()->addDay(), function() {
-                        return \App\Models\Category::with('subs')->where('status', 1)->get();
+                        return \App\Models\Category::with('subs')
+                            ->where('status', 1)
+                            ->whereNotIn('name', ['Food', 'Drinks'])
+                            ->get();
                     });
                 } catch (\Exception $e) {}
 

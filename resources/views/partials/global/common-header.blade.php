@@ -426,56 +426,80 @@
                             </a>
                             @include('load.cart')
                         </div>
+                        @if (Auth::guard('web')->check() || Auth::guard('rider')->check())
                         <div class="header-user">
-                            <a href="#" class="user-icon" id="userDropdownToggle" title="User Menu">
+                            <a href="#" class="user-icon" id="userDropdownToggle" title="Notifications">
                                 <div class="icon">
                                     <i class="fas fa-bell"></i>
-                                    <span class="notification-count"
-                                        id="notificationCount">{{ session()->get('notifications', []) ? count(session()->get('notifications', [])) : 0 }}</span>
-                                    <!-- Notification count added here -->
+                                    <span class="notification-count" id="user-notf-count">
+                                        {{ App\Models\UserNotification::countOrder() }}
+                                    </span>
                                 </div>
                             </a>
                             <div class="dropdown-menu dropdown-custom" id="userDropdown">
-                                <div class="dropdown-header">New Notification(s).</div>
-                                @php
-                                    $sessionNotifications = session()->get('notifications', []);
-                                @endphp
-                                <ul>
-                                    @foreach ($sessionNotifications as $noti)
-                                        <li><a href="{{ url('carts') }}"> {{ $noti['message'] }}</a></li>
-                                    @endforeach
-                                </ul>
-                                <div class="dropdown-footer"><a href="#">Clear All</a></div>
+
+                                <div id="user-notf-show" data-href="{{ route('user-notf-show') }}">
+                                    <div class="dropdown-header">{{ __('Loading...') }}</div>
+                                </div>
                             </div>
                         </div>
-                        <!-- JavaScript -->
+
                         <script>
                             document.addEventListener("DOMContentLoaded", function() {
                                 var userIcon = document.getElementById("userDropdownToggle");
                                 var dropdown = document.getElementById("userDropdown");
+                                var notfShow = document.getElementById("user-notf-show");
+                                var notfCount = document.getElementById("user-notf-count");
 
                                 userIcon.addEventListener("click", function(event) {
                                     event.preventDefault();
+                                    
+                                    // Fetch notifications if opening
+                                    if (dropdown.style.display !== "block") {
+                                        fetch(notfShow.getAttribute('data-href'))
+                                            .then(response => response.text())
+                                            .then(html => {
+                                                notfShow.innerHTML = html;
+                                                notfCount.innerText = '0'; // Clear count locally
+                                                
+                                                // Re-bind clear all button if it exists
+                                                var clearBtn = document.getElementById('user-notf-clear');
+                                                if (clearBtn) {
+                                                    clearBtn.addEventListener('click', function(e) {
+                                                        e.preventDefault();
+                                                        fetch(this.getAttribute('data-href'))
+                                                            .then(() => {
+                                                                notfShow.innerHTML = '<div class="dropdown-header">{{ __("Notifications") }}</div><ul><li><a href="javascript:;" class="text-center">{{ __("No New Notifications.") }}</a></li></ul>';
+                                                            });
+                                                    });
+                                                }
+                                            });
+                                    }
 
                                     // Toggle dropdown visibility
                                     if (dropdown.style.display === "block") {
                                         dropdown.style.display = "none";
                                     } else {
                                         dropdown.style.display = "block";
-
+                                        
                                         // Ensure dropdown stays inside the screen
                                         var rect = dropdown.getBoundingClientRect();
                                         var screenWidth = window.innerWidth;
-
                                         if (rect.right > screenWidth) {
-                                            dropdown.style.right = "auto";
-                                            dropdown.style.left = "-200px";
-                                        } else {
                                             dropdown.style.right = "0";
-                                            dropdown.style.left = "-200px";
+                                            dropdown.style.left = "auto";
                                         }
                                     }
                                 });
+
+                                // Poll for unread count every 30 seconds
+                                setInterval(function() {
+                                    fetch("{{ route('user-notf-count') }}")
+                                        .then(response => response.json())
+                                        .then(count => {
+                                            notfCount.innerText = count;
+                                        });
+                                }, 30000);
 
                                 // Hide dropdown when clicking outside
                                 document.addEventListener("click", function(event) {
@@ -490,6 +514,8 @@
                                 });
                             });
                         </script>
+                        @endif
+
 
                         <!-- Responsive CSS -->
                         <style>

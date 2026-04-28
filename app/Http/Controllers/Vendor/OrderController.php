@@ -20,40 +20,36 @@ class OrderController extends VendorBaseController
     {
         try {
             $user = $this->user;
-            $datas = Order::with(['vendororders' => function ($query) use ($user) {
+            // Use whereHas to filter at the database level and return a Builder
+            // This prevents fetching all orders into memory and fixes the "only first order" bug caused by non-sequential collection keys.
+            $datas = Order::whereHas('vendororders', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            }])->orderby('id', 'desc')->get()->reject(function ($item) use ($user) {
-                if ($item->vendororders()->where('user_id', '=', $user->id)->count() == 0) {
-                    return true;
-                }
-
-                return false;
-            });
+            })->with(['vendororders' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }])->orderby('id', 'desc');
         } catch (\Exception $e) {
             $datas = collect();
         }
 
         return Datatables::of($datas)
             ->editColumn('totalQty', function (Order $data) {
-                return $data->vendororders()->where('user_id', '=', $this->user->id)->sum('qty');
+                return $data->vendororders->sum('qty');
             })
             ->editColumn('pay_amount', function (Order $data) {
-                $order = Order::findOrFail($data->id);
-                $user = $this->user;
-                $price = $order->vendororders()->where('user_id', '=', $user->id)->sum('price');
-                $order_curr_value = ($order->currency_value > 0) ? $order->currency_value : 1;
+                $price = $data->vendororders->sum('price');
+                $order_curr_value = ($data->currency_value > 0) ? $data->currency_value : 1;
                 $price = round($price * $order_curr_value, 2);
                 
                 return \PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
-                $pending = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'pending')->count() > 0 ? 'selected' : '';
-                $processing = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'processing')->count() > 0 ? 'selected' : '';
-                $completed = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'completed')->count() > 0 ? 'selected' : '';
-                $declined = $data->vendororders()->where('user_id', '=', $this->user->id)->where('status', 'declined')->count() > 0 ? 'selected' : '';
-
-                $vorder = $data->vendororders()->where('user_id', '=', $this->user->id)->first();
+                $vorder = $data->vendororders->first();
                 $vstatus = $vorder ? $vorder->status : 'pending';
+
+                $pending = $vstatus == 'pending' ? 'selected' : '';
+                $processing = $vstatus == 'processing' ? 'selected' : '';
+                $completed = $vstatus == 'completed' ? 'selected' : '';
+                $declined = $vstatus == 'declined' ? 'selected' : '';
 
                 return '
                                 <div class="action-list">

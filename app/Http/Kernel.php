@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
         'maintenance' => \App\Http\Middleware\MaintenanceMode::class,
         'setapi' => \App\Http\Middleware\SetApiGuard::class,
         'delivery.chat.access' => \App\Http\Middleware\EnsureDeliveryChatAccess::class,
+        'admin.2fa' => \App\Http\Middleware\Admin2FAMiddleware::class,
     ];
 }

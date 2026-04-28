@@ -244,6 +244,98 @@
                                             </div>
                                         </div>
 
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <ul class="list">
+                                                    <li>
+                                                        <input class="checkclick1" name="color_check" type="checkbox" id="check3" value="1" {{ !empty($data->color_all) ? "checked":"" }}>
+                                                        <label for="check3">{{ __('Allow Product Colors') }}</label>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="{{ !empty($data->color_all) ? "" : "showbox" }}">
+                                            <div class="row">
+                                                <div  class="col-lg-12">
+                                                    <div class="left-area">
+                                                        <h4 class="heading">
+                                                            {{ __('Product Colors') }}*
+                                                        </h4>
+                                                        <p class="sub-heading">
+                                                            {{ __('(Hold Ctrl/Cmd to select multiple)') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div  class="col-lg-12">
+                                                    @php
+                                                        $selected_colors = !empty($data->color_all) ? explode(',', $data->color_all) : [];
+                                                    @endphp
+                                                    <select name="color_all[]" class="form-control select2-tags" multiple>
+                                                        @foreach(['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Grey', 'Silver', 'Gold', 'Multicolor'] as $color)
+                                                            <option value="{{ $color }}" {{ in_array($color, $selected_colors) ? 'selected' : '' }}>{{ $color }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="left-area">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <ul class="list">
+                                                    <li>
+                                                        <input class="checkclick1" name="size_check" type="checkbox" id="tcheck" value="1" {{ !empty($data->size_all) ? "checked":"" }}>
+                                                        <label for="tcheck">{{ __('Allow Product Sizes') }}</label>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="{{ !empty($data->size_all) ? "" : "showbox" }}">
+                                            <div class="row">
+                                                <div  class="col-lg-12">
+                                                    <div class="left-area">
+                                                        <h4 class="heading">
+                                                            {{ __('Product Size') }}*
+                                                        </h4>
+                                                        <p class="sub-heading">
+                                                            {{ __('(Hold Ctrl/Cmd to select multiple)') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div  class="col-lg-12">
+                                                    @php
+                                                        $selected_sizes = !empty($data->size_all) ? explode(',', $data->size_all) : [];
+                                                    @endphp
+                                                    <select name="size_all[]" class="form-control select2-tags" multiple>
+                                                        <optgroup label="Clothes Sizes">
+                                                            @foreach(['S', 'SM', 'M', 'L', 'XL', 'XXL', 'XXXL'] as $sz)
+                                                                <option value="{{ $sz }}" {{ in_array($sz, $selected_sizes) ? 'selected' : '' }}>{{ $sz }}</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Adult Shoe Sizes (EU)">
+                                                            @for($i = 20; $i <= 45; $i++)
+                                                                <option value="{{ $i }}" {{ in_array((string)$i, $selected_sizes) ? 'selected' : '' }}>{{ $i }}</option>
+                                                            @endfor
+                                                        </optgroup>
+                                                        <optgroup label="Baby Shoe Sizes">
+                                                            @foreach(['0-3 Months', '3-6 Months', '6-9 Months', '9-12 Months', '12-18 Months', '18-24 Months'] as $bsz)
+                                                                <option value="{{ $bsz }}" {{ in_array($bsz, $selected_sizes) ? 'selected' : '' }}>{{ $bsz }}</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
 
 									@php
 									$selectedAttrs = json_decode($data->attributes, true);
@@ -1257,6 +1349,11 @@ $('.cropme').simpleCropper();
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        $('.select2-tags').select2({
+            tags: true,
+            tokenSeparators: [','],
+            width: '100%'
+        });
         $('#service_area_id').select2({
             placeholder: 'Select Service Area',
             allowClear: true,
