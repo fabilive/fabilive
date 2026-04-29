@@ -70,7 +70,6 @@
                                         @php
                                             $socialsetting = App\Models\Socialsetting::find(1);
                                         @endphp
-                                        @if($socialsetting->g_check == 1)
                                             <div class="social-area text-center mt-4">
                                                 <div class="border-top pt-3">
                                                     <p class="text-muted mb-3">{{ __("OR") }}</p>
@@ -80,7 +79,6 @@
                                                     </a>
                                                 </div>
                                             </div>
-                                        @endif
                                     </div>
                                 </div>
                             </div>

@@ -99,7 +99,6 @@
                                             class="woocommerce-form-login__submit btn btn-primary border-0 rounded-0 submit-btn float-none w-100"
                                             name="login" value="Log in">{{ __('Log in') }}</button>
 
-                                        @if ($socialsetting->g_check == 1)
                                             <div class="social-area text-center mt-4">
                                                 <div class="border-top pt-3">
                                                     <p class="text-muted mb-3">{{ __("OR") }}</p>
@@ -109,7 +108,6 @@
                                                     </a>
                                                 </div>
                                             </div>
-                                        @endif
 
                                     </form>
                                 </div>

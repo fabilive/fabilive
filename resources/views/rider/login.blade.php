@@ -97,20 +97,7 @@
                                         class="woocommerce-form-login__submit btn btn-primary border-0 rounded-0 submit-btn float-none w-100"
                                         name="login" value="Log in">{{ __('Log in') }}</button>
 
-                                    @php
-                                        $socialsetting = App\Models\Socialsetting::find(1);
-                                    @endphp
-                                    @if($socialsetting->g_check == 1)
-                                        <div class="social-area text-center mt-4">
-                                            <div class="border-top pt-3">
-                                                <p class="text-muted mb-3">{{ __("OR") }}</p>
-                                                <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'rider']) }}" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2 shadow-sm border-2 rounded-2">
-                                                    <img src="{{ asset('assets/images/google-icon.png') }}" alt="Google" style="width: 20px; margin-right: 10px;">
-                                                    <span style="font-weight: 600; color: #333;">{{ __('Continue with Google') }}</span>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    @endif
+
                                 </form>
                             </div>
                         </div>
