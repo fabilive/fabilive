@@ -170,6 +170,12 @@ class OrderHelper
     public static function finalizeOrder($order, $cart)
     {
         try {
+            // Fallback for total_delivery_fee if not set by controller
+            if (empty($order->total_delivery_fee)) {
+                $order->total_delivery_fee = PriceHelper::calculateDeliveryFee($cart);
+                $order->update();
+            }
+
             // 1. Marketplace Commission Calculation
             $orderCommission = 0;
             if ($cart->items) {

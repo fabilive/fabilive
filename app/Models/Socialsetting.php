@@ -35,6 +35,8 @@ class Socialsetting extends Model
         $social->t_status = 0;
         $social->g_status = 0;
         $social->l_status = 0;
+        $social->g_check = 0;
+        $social->f_check = 0;
         return $social;
     }
 }

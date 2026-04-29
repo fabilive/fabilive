@@ -37,8 +37,10 @@ class PriceHelper
         }
 
         $sellerCount = count($uniqueSellers);
-        $baseFee = 999;
-        $additionalSellerFee = 300;
+        
+        $gs = \App\Models\Generalsetting::safeFirst();
+        $baseFee = $gs->delivery_base_fee ?? 1000;
+        $additionalSellerFee = $gs->delivery_stopover_fee ?? 300;
 
         if ($sellerCount <= 1) {
             return $baseFee;
@@ -256,6 +258,7 @@ class PriceHelper
 
                 return [
                     'total_amount' => $totalAmount,
+                    'delivery_fee' => $delivery_fee,
                     'shipping' => $shipping,
                     'packeing' => $packeing,
                     'is_shipping' => 0,
@@ -313,6 +316,7 @@ class PriceHelper
 
                 return [
                     'total_amount' => $totalAmount,
+                    'delivery_fee' => $delivery_fee,
                     'shipping' => isset($shipping) ? $shipping : null,
                     'packeing' => isset($packeing) ? $packeing : null,
                     'is_shipping' => 1,

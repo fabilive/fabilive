@@ -71,11 +71,14 @@
                                             $socialsetting = App\Models\Socialsetting::find(1);
                                         @endphp
                                         @if($socialsetting->g_check == 1)
-                                            <div class="social-area text-center">
-                                                <h3 class="title mt-3">{{ 'OR' }}</h3>
-                                                <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'buyer']) }}" class="btn btn-outline-danger w-100 mt-2 d-flex align-items-center justify-content-center">
-                                                    <i class="fab fa-google mr-2"></i> &nbsp; {{ __('Continue with Google') }}
-                                                </a>
+                                            <div class="social-area text-center mt-4">
+                                                <div class="border-top pt-3">
+                                                    <p class="text-muted mb-3">{{ __("OR") }}</p>
+                                                    <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'buyer']) }}" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2 shadow-sm border-2 rounded-2">
+                                                        <img src="{{ asset('assets/images/google-icon.png') }}" alt="Google" style="width: 20px; margin-right: 10px;">
+                                                        <span style="font-weight: 600; color: #333;">{{ __('Continue with Google') }}</span>
+                                                    </a>
+                                                </div>
                                             </div>
                                         @endif
                                     </div>

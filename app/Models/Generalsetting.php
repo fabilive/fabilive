@@ -94,6 +94,10 @@ class Generalsetting extends Model
         $gs->thousand_separator = ',';
         $gs->from_email = 'support@fabilive.com';
         $gs->from_name = 'Fabilive';
+        $gs->delivery_base_fee = 1000;
+        $gs->delivery_stopover_fee = 300;
+        $gs->rider_percentage_commission = 80;
+        $gs->is_capcha = 0;
 
         return $gs;
     }

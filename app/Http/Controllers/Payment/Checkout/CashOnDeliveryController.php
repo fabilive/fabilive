@@ -52,6 +52,8 @@ class CashOnDeliveryController extends CheckoutBaseControlller
             return redirect()->back()->with('unsuccess', $orderCalculate['message']);
         }
 
+        $input['total_delivery_fee'] = $orderCalculate['delivery_fee'];
+
         if ($this->gs->multiple_shipping == 0) {
             $orderTotal = $orderCalculate['total_amount'];
             $shipping = $orderCalculate['shipping'];

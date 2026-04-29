@@ -16,6 +16,21 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        $gs = Generalsetting::findOrFail(1);
+
+        if ($gs->is_capcha == 1) {
+            $rules = [
+                'g-recaptcha-response' => 'required',
+            ];
+            $customs = [
+                'g-recaptcha-response.required' => 'Please verify that you are not a robot.',
+            ];
+            $validator = Validator::make($request->all(), $rules, $customs);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
+            }
+        }
+
         $rules = [
             'email' => 'required|email',
             'password' => 'required',

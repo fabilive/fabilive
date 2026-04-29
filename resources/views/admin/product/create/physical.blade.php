@@ -769,8 +769,7 @@
 																		</p>
 																	</div>
 																</div>
-																<div class="col-lg-12">
-																	<input name="price" type="number" class="input-field" placeholder="{{ __('e.g 20') }}" step="0.1" required="" min="0">
+																	<input name="price" type="number" class="input-field" placeholder="{{ __('e.g 20') }}" step="0.1" required="" min="1000">
 																</div>
 															</div>
 			
@@ -782,7 +781,7 @@
 																	</div>
 																</div>
 																<div class="col-lg-12">
-																	<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="{{ __('e.g 20') }}" min="0">
+																	<input name="previous_price" step="0.1" type="number" class="input-field" placeholder="{{ __('e.g 20') }}" min="1000">
 																</div>
 															</div>
 

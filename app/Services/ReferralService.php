@@ -127,8 +127,8 @@ class ReferralService
 
         // Rewards from settings
         $gs = Generalsetting::safeFirst();
-        $referrerReward = $gs ? $gs->referral_bonus_referrer : 100;
-        $referredReward = $gs ? $gs->referral_bonus_referred : 200;
+        $referrerReward = $gs ? $gs->referral_bonus : 150;
+        $referredReward = $gs ? $gs->referral_amount : 500;
 
         DB::transaction(function () use ($referralCode, $order, $referrerReward) {
             // Create usage record

@@ -103,10 +103,12 @@ class StripeController extends CheckoutBaseControlller
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
 
             $orderCalculate = \PriceHelper::getOrderTotal($input, $cart);
-
+            // dd($orderCalculate,'multi');
             if (isset($orderCalculate['success']) && $orderCalculate['success'] == false) {
                 return redirect()->back()->with('unsuccess', $orderCalculate['message']);
             }
+
+            $input['total_delivery_fee'] = $orderCalculate['delivery_fee'];
 
             if ($this->gs->multiple_shipping == 0) {
                 $orderTotal = $orderCalculate['total_amount'];

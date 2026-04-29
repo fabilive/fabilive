@@ -257,8 +257,14 @@ class ProductController extends AdminBaseController
             $rules = [
                 'photo' => 'required',
                 'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif',
+                'price' => 'required|numeric|min:1000',
+                'previous_price' => 'nullable|numeric|min:1000',
             ];
-            $validator = Validator::make($request->all(), $rules);
+            $messages = [
+                'price.min' => __('Minimum product listing price is 1,000 XAF.'),
+                'previous_price.min' => __('Minimum product regular price is 1,000 XAF.'),
+            ];
+            $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->getMessageBag()->toArray()]);
             }
@@ -718,9 +724,15 @@ class ProductController extends AdminBaseController
         //--- Validation Section
         $rules = [
             'file' => 'mimes:zip',
+            'price' => 'required|numeric|min:1000',
+            'previous_price' => 'nullable|numeric|min:1000',
+        ];
+        $messages = [
+            'price.min' => __('Minimum product listing price is 1,000 XAF.'),
+            'previous_price.min' => __('Minimum product regular price is 1,000 XAF.'),
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->getMessageBag()->toArray()]);

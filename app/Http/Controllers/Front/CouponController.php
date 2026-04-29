@@ -28,7 +28,7 @@ class CouponController extends FrontBaseController
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
 
                 $curr = $this->curr;
-                $discount = 200 * $curr->value;
+                $discount = ($gs->referral_amount ?? 500) * $curr->value;
                 if ($discount >= $total) {
                     return response()->json(3); // Discount more than total
                 }
@@ -180,7 +180,7 @@ class CouponController extends FrontBaseController
                 $curr = $this->curr;
                 
                 // Get discount from settings
-                $discount = ($gs->referral_bonus_referred ?? 200) * $curr->value;
+                $discount = ($gs->referral_amount ?? 500) * $curr->value;
 
                 if ($discount >= $total) {
                     return response()->json(3);

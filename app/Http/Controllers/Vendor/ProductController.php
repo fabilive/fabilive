@@ -401,12 +401,16 @@ class ProductController extends VendorBaseController
                     'file' => 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx,txt,mp4,mov,avi,webm,webp,svg,gif,jfif',
                     'discount_date_start' => 'required|date|after_or_equal:today',
                     'discount_date_end' => 'nullable|date|after:discount_date_start',
+                    'price' => 'required|numeric|min:1000',
+                    'previous_price' => 'nullable|numeric|min:1000',
                 ];
 
                 $customMessages = [
                     'discount_date_start.required' => __('Discount Start Date is compulsory.'),
                     'discount_date_start.after_or_equal' => __('Discount Start Date cannot be in the past.'),
                     'discount_date_end.after' => __('Discount End Date must be after the Start Date.'),
+                    'price.min' => __('Minimum product listing price is 1,000 XAF.'),
+                    'previous_price.min' => __('Minimum product regular price is 1,000 XAF.'),
                 ];
 
                 $validator = Validator::make($request->all(), $rules, $customMessages);
@@ -799,12 +803,16 @@ class ProductController extends VendorBaseController
             'file' => 'mimes:zip',
             'discount_date_start' => 'required|date|after_or_equal:today',
             'discount_date_end' => 'nullable|date|after:discount_date_start',
+            'price' => 'required|numeric|min:1000',
+            'previous_price' => 'nullable|numeric|min:1000',
         ];
 
         $customMessages = [
             'discount_date_start.required' => __('Discount Start Date is compulsory.'),
             'discount_date_start.after_or_equal' => __('Discount Start Date cannot be in the past.'),
             'discount_date_end.after' => __('Discount End Date must be after the Start Date.'),
+            'price.min' => __('Minimum product listing price is 1,000 XAF.'),
+            'previous_price.min' => __('Minimum product regular price is 1,000 XAF.'),
         ];
 
         $validator = Validator::make($request->all(), $rules, $customMessages);

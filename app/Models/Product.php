@@ -127,21 +127,19 @@ class Product extends Model
 
     public static function getTieredCommission($price)
     {
-        if ($price <= 5000) {
-            return 700;
-        } elseif ($price <= 10000) {
-            return 800;
-        } elseif ($price <= 20000) {
-            return 999;
-        } elseif ($price <= 30000) {
-            return 1000;
-        } elseif ($price <= 50000) {
+        if ($price >= 1000 && $price <= 10000) {
+            return 900;
+        } elseif ($price >= 10001 && $price <= 30000) {
             return 1200;
-        } elseif ($price <= 100000) {
+        } elseif ($price >= 30001 && $price <= 50000) {
             return 1500;
-        } else {
+        } elseif ($price >= 50001 && $price <= 100000) {
+            return 1700;
+        } elseif ($price > 100000) {
             return 2000;
         }
+
+        return 0;
     }
 
     public function getPriceAttribute($value)

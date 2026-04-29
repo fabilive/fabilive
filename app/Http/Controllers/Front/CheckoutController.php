@@ -147,7 +147,7 @@ class CheckoutController extends FrontBaseController
                     $oldCart = Session::get('cart');
                     $cart = new Cart($oldCart);
                     $curr = $this->curr;
-                    $discount = 200 * $curr->value;
+                    $discount = ($this->gs->referral_amount ?? 500) * $curr->value;
 
                     if ($discount < $cart->totalPrice) {
                         Session::put('coupon', $discount);

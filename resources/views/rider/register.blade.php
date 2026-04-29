@@ -184,8 +184,17 @@
                                              </div>
                                              @endif
                                             <input id="processdata" type="hidden" value="{{ __('Processing...') }}">
-                                                <button type="submit" class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
-                                            </p>
+                                            <button type="submit" class="btn btn-primary float-none w-100 rounded-0 submit-btn" name="register" value="Register">{{ __('Register') }}</button>
+                                            
+                                            <div class="social-area text-center mt-4">
+                                                <div class="border-top pt-3">
+                                                    <p class="text-muted mb-3">{{ __("OR") }}</p>
+                                                    <a href="{{ route('social-provider', ['provider' => 'google', 'role' => 'rider']) }}" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2 shadow-sm border-2 rounded-2">
+                                                        <img src="{{ asset('assets/images/google-icon.png') }}" alt="Google" style="width: 20px; margin-right: 10px;">
+                                                        <span style="font-weight: 600; color: #333;">{{ __('Continue with Google') }}</span>
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </form>
                                         <p>
                                                 {{ __("Do have any account?") }}<a href="{{ route('rider.login') }}"  class="text-secondary">{{__(' Login')}}</a>
