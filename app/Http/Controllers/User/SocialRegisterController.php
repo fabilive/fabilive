@@ -16,11 +16,11 @@ class SocialRegisterController extends Controller
     public function __construct()
     {
         $link = Socialsetting::findOrFail(1);
-        Config::set('services.google.client_id', $link->gclient_id);
-        Config::set('services.google.client_secret', $link->gclient_secret);
+        if(!empty($link->gclient_id)) Config::set('services.google.client_id', $link->gclient_id);
+        if(!empty($link->gclient_secret)) Config::set('services.google.client_secret', $link->gclient_secret);
         Config::set('services.google.redirect', url('/auth/google/callback'));
-        Config::set('services.facebook.client_id', $link->fclient_id);
-        Config::set('services.facebook.client_secret', $link->fclient_secret);
+        if(!empty($link->fclient_id)) Config::set('services.facebook.client_id', $link->fclient_id);
+        if(!empty($link->fclient_secret)) Config::set('services.facebook.client_secret', $link->fclient_secret);
         $url = url('/auth/facebook/callback');
         $url = preg_replace('/^http:/i', 'https:', $url);
         Config::set('services.facebook.redirect', $url);
