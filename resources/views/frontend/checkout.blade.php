@@ -448,6 +448,24 @@
                                   </div>
                                  <div class="row">
                                     <div class="col-lg-12">
+                                       @if (Auth::check())
+                                       @php
+                                          $user_balance = Auth::user()->balance;
+                                       @endphp
+                                       <div class="wallet-partial-use p-3 mb-4 border rounded bg-white shadow-sm" style="border-left: 4px solid #1a1a1a !important;">
+                                           <div class="custom-control custom-checkbox d-flex align-items-center">
+                                               <input type="checkbox" class="custom-control-input" id="use_wallet" data-balance="{{ $user_balance }}" style="width: 20px; height: 20px; cursor: pointer;">
+                                               <label class="custom-control-label ml-2" for="use_wallet" style="font-weight: 600; cursor: pointer; color: #1a1a1a;">
+                                                   {{ __('Use my wallet balance') }} 
+                                                   <span class="text-primary">({{ App\Models\Product::convertPrice($user_balance) }})</span>
+                                               </label>
+                                           </div>
+                                           <div id="wallet-reduction-info" class="mt-2 small text-muted d-none">
+                                               <i class="fas fa-info-circle mr-1"></i> {{ __('CFA') }} <span id="wallet-deduction-amount">0</span> {{ __('will be deducted from your wallet.') }}
+                                           </div>
+                                       </div>
+                                       @endif
+
                                        <div class="nav flex-column" role="tablist" aria-orientation="vertical">
 
                                           @if (Auth::check())
@@ -468,9 +486,7 @@
                                                 <span style="font-weight: 600; color: #4a5568;">({{ App\Models\Product::convertPrice($user_balance) }})</span>
                                                 <small>
                                                    {{ __('Pay from your wallet') }}
-                                                   @if($is_insufficient)
-                                                   <span class="text-danger ml-2" style="font-weight: 700;"> - {{ __('Insufficient Balance') }}</span>
-                                                   @endif
+                                                   <span class="text-danger ml-2 wallet-insufficient {{ $is_insufficient ? '' : 'd-none' }}" style="font-weight: 700;"> - {{ __('Insufficient Balance') }}</span>
                                                 </small>
                                              </p>
                                           </a>
@@ -1241,39 +1257,28 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                      }
                      else
                      {
-                           $("#check-coupon-form").toggle();
-                           $(".discount-bar").removeClass('d-none');
-                           $('#discount').html(data[4]);
-                           
-                     $('#grandtotal').val(data[6]);
-                     $('#tgrandtotal').val(data[6]);
-                     $('#base-cart-total').val(data[6]);
-                     $('#coupon_code').val(data[1]);
-                     $('#coupon_discount').val(data[2]);
-                     if(data[4] != 0){
-                     $('.dpercent').html('('+data[4]+')');
-                     }
-                     else{
-                     $('.dpercent').html('');
-                     }
-                  var cartDeliveryFee = parseFloat($('#total_delivery_fee').val()) || 0;
-                  var ttotal = data[6] + parseFloat(mship) + parseFloat(mpack) + cartDeliveryFee;
-                  ttotal = parseFloat(ttotal);
-                     if(ttotal % 1 != 0)
-                     {
-                        ttotal = ttotal.toFixed(2);
-                     }
-                        if(pos == 0){
-                           $('#final-cost').html('{{ $curr->sign }}'+ttotal)
+                        $("#check-coupon-form").toggle();
+                        $(".discount-bar").removeClass('d-none');
+                        $('#discount').html(data[4]); // Percentage or amount text
+                        
+                        // data[1] = coupon code, data[2] = discount amount
+                        $('#coupon_code').val(data[1]);
+                        $('#coupon_discount').val(data[2]);
+                        
+                        if(data[4] != 0){
+                           $('.dpercent').html('('+data[4]+')');
+                        } else {
+                           $('.dpercent').html('');
                         }
-                        else{
-                           $('#final-cost').html(ttotal+'{{ $curr->sign }}')
-                        }
-                              toastr.success(lang.coupon_found);
-                              $("#code").val("");
-                              }
-                           }
-                        });
+
+                        // Trigger centralized recalculation to handle shipping, packing, and wallet
+                        recalculateGrandTotal();
+                        
+                        toastr.success(lang.coupon_found);
+                        $("#code").val("");
+                     }
+                  }
+               });
             return false;
    });
    $("#open-pass").on( "change", function() {
@@ -1448,6 +1453,79 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         }
     });
 
+
+   // Centralized Total Recalculation (Partial Wallet + Shipping + Packing + Coupons)
+    function recalculateGrandTotal() {
+        // Base cart total (raw price from Session/Cart)
+        let baseTotal = parseFloat($('#ttotal').val()) || 0; 
+        
+        // Coupon discount (already stored in hidden field when applied)
+        let couponDiscount = parseFloat($('#coupon_discount').val()) || 0;
+        
+        // Shipping & Packing
+        let shippingCost = 0;
+        let packingCost = 0;
+        $('.shipping:checked').each(function() { shippingCost += parseFloat($(this).data('price')) || 0; });
+        $('.packing:checked').each(function() { packingCost += parseFloat($(this).data('price')) || 0; });
+        
+        // Step 1: Base Total - Coupon
+        let totalAfterDiscount = Math.max(0, baseTotal - couponDiscount);
+        
+        // Step 2: Add Shipping & Packing
+        let finalOrderTotal = totalAfterDiscount + shippingCost + packingCost;
+        
+        // Step 3: Tax (if applicable)
+        let taxPercent = parseFloat($('.original_tax').first().text()) || 0;
+        if (taxPercent > 0) {
+            finalOrderTotal += (finalOrderTotal * taxPercent / 100);
+        }
+        
+        // Update hidden grandtotal (what the order value is)
+        $('#grandtotal').val(finalOrderTotal.toFixed(2));
+        
+        // Step 4: Handle Wallet Balance
+        let useWallet = $('#use_wallet').is(':checked');
+        let userBalance = parseFloat($('#use_wallet').data('balance')) || 0;
+        let walletDeduction = 0;
+        
+        // Special case: If payment method is "Wallet", we effectively use 100% wallet
+        let selectedPayment = $('.payment.active').data('val');
+        if (selectedPayment === 'wallet') {
+            walletDeduction = Math.min(userBalance, finalOrderTotal);
+            // Sync checkbox for consistency
+            $('#use_wallet').prop('checked', true).prop('disabled', true);
+        } else {
+            $('#use_wallet').prop('disabled', false);
+            if (useWallet) {
+                walletDeduction = Math.min(userBalance, finalOrderTotal);
+            }
+        }
+        
+        // Update UI
+        if (walletDeduction > 0) {
+            $('#wallet-reduction-info').removeClass('d-none');
+            $('#wallet-deduction-amount').text(walletDeduction.toFixed(2));
+        } else {
+            $('#wallet-reduction-info').addClass('d-none');
+        }
+        
+        // Set hidden wallet-price for backend
+        $('#wallet-price').val(walletDeduction.toFixed(2));
+        
+        // Step 5: Final Amount to Pay (Gateway amount)
+        let payAmount = Math.max(0, finalOrderTotal - walletDeduction);
+        
+        // Update Displays
+        $('#final-cost').text('{{ $curr->sign }}' + payAmount.toFixed(2));
+        $('#total-fee').text(shippingCost.toFixed(2));
+        $('.packing_cost_view').text('{{ $curr->sign }}' + packingCost.toFixed(2));
+    }
+
+    // Trigger recalculation on various events
+    $(document).on('change', '.shipping, .packing, #use_wallet', function() {
+        recalculateGrandTotal();
+    });
+
    // When user clicks a payment method
 $('.payment').on('click', function () {
     var paymentVal = $(this).data('val');          // e.g., paystack, mercadopago, wallet
@@ -1455,13 +1533,6 @@ $('.payment').on('click', function () {
 
     // Set the form action to the correct POST route
     $('.checkoutform').attr('action', paymentFormAction);
-
-    // NEW: Populate wallet_price if wallet is selected
-    if(paymentVal === 'wallet') {
-        $('#wallet-price').val($('#grandtotal').val());
-    } else {
-        $('#wallet-price').val(0);
-    }
 
     // Set form ID if needed for specific payment JS
     if(paymentVal === 'paystack') {
@@ -1517,23 +1588,25 @@ $('.payment').on('click', function () {
                 phoneInput.val('+237');
             }
         }
-        return;
-    }
-
-    // Safety check: Only load if we have a valid URL
-    if (ajaxLoadUrl && ajaxLoadUrl.trim() !== "") {
-        $tabPane.addClass('active show').load(ajaxLoadUrl, function(response, status, xhr) {
-            if (status == "error") {
-                console.error("Payment load failed: " + xhr.status + " " + xhr.statusText);
-            }
-        });
     } else {
-        // Just show the tab if no loading needed (like Wallet)
-        $tabPane.addClass('active show');
-    }
+        // Safety check: Only load if we have a valid URL
+        if (ajaxLoadUrl && ajaxLoadUrl.trim() !== "") {
+            $tabPane.addClass('active show').load(ajaxLoadUrl, function(response, status, xhr) {
+                if (status == "error") {
+                    console.error("Payment load failed: " + xhr.status + " " + xhr.statusText);
+                }
+            });
+        } else {
+            // Just show the tab if no loading needed (like Wallet)
+            $tabPane.addClass('active show');
+        }
 
-    // Remove active/show from other tabs
-    $('#v-pills-tabContent .tab-pane').not($tabPane).removeClass('active show').html('');
+        // Remove active/show from other tabs
+        $('#v-pills-tabContent .tab-pane').not($tabPane).removeClass('active show').html('');
+    }
+    
+    // Recalculate totals whenever payment method changes
+    recalculateGrandTotal();
 });
 
 
@@ -1541,12 +1614,14 @@ $('.payment').on('click', function () {
     $(document).on('submit', '#step1-form', function(){
         $('#preloader').hide();
         var val = $('#sub').val();
-        var total = Math.round($('#grandtotal').val());
-        if(val == 0) {
+        // Pay amount is total - wallet deduction
+        var payAmount = parseFloat($('#grandtotal').val()) - parseFloat($('#wallet-price').val());
+        
+        if(val == 0 && payAmount > 0) {
             var handler = PaystackPop.setup({
                 key: '{{$paystack['key']}}',
                 email: $('input[name=customer_email]').val(),
-                amount: total * 100,
+                amount: Math.round(payAmount * 100),
                 currency: "{{$curr->name}}",
                 ref: '' + Math.floor((Math.random() * 1000000000) + 1),
                 callback: function(response){

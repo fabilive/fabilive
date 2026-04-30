@@ -240,7 +240,12 @@ class OrderHelper
                 \Log::error('Order Notification Error: ' . $ne->getMessage());
             }
 
-            // 7. Clear All Related Sessions (Prevents "Ghost Coupons")
+            // 7. Wallet Deduction (Partial or Full)
+            if (Auth::check() && !empty($order->wallet_price) && $order->wallet_price > 0) {
+                self::add_to_transaction($order, $order->wallet_price);
+            }
+
+            // 8. Clear All Related Sessions (Prevents "Ghost Coupons")
             Session::put('temporder', $order);
             Session::put('tempcart', $cart);
             Session::forget('cart');
@@ -364,6 +369,16 @@ class OrderHelper
             $user = $transaction->user;
             $user->balance = $user->balance - $balance;
             $user->update();
+
+            // Also add to Wallet Ledger for consistent tracking
+            \App\Models\WalletLedger::create([
+                'user_id' => $user->id,
+                'amount' => $balance,
+                'type' => 'wallet_payment',
+                'order_id' => $data->id,
+                'status' => 'completed',
+                'details' => 'Partial or full payment via wallet balance for order #' . $data->order_number,
+            ]);
         } catch (\Exception $e) {
             \Log::error('Add to Transaction Error: '.$e->getMessage());
             throw $e;

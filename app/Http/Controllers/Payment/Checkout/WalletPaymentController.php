@@ -192,13 +192,8 @@ class WalletPaymentController extends CheckoutBaseControlller
             $order->fill($input)->save();
 
 
-            // 1. Unified Order Finalization (Tracks, Coupons, Rewards, Stock, Session Clear)
+            // 1. Unified Order Finalization (Tracks, Coupons, Rewards, Stock, Session Clear, and Wallet Deduction)
             OrderHelper::finalizeOrder($order, $cart);
-
-            // Deduct from wallet balance BEFORE commit
-            if ($order->user_id != 0 && $order->wallet_price != 0) {
-                OrderHelper::add_to_transaction($order, $order->wallet_price); // Store To Transactions
-            }
 
             Session::put('temporder', $order);
             Session::put('tempcart', $cart);
