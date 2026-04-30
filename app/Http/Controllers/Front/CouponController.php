@@ -26,6 +26,9 @@ class CouponController extends FrontBaseController
                 $referralService = app(\App\Services\ReferralService::class);
                 $user = Auth::user();
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
+                if (!$referralCode) {
+                    return response()->json(0); // Not a referral code either
+                }
 
                 $curr = $this->curr;
                 $discount = ($gs->referral_amount ?? 500) * $curr->value;
@@ -175,13 +178,25 @@ class CouponController extends FrontBaseController
                 $referralService = app(\App\Services\ReferralService::class);
                 $user = Auth::user();
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
+                if (!$referralCode) {
+                    return response()->json(0); // Not a referral code either
+                }
 
-                // Global discount of 200
+                // Global discount of 500
                 $total = (float) request()->get('total', 0);
                 $curr = $this->curr;
                 
                 // Get discount from settings
-                $discount = ($gs->referral_amount ?? 500) * $curr->value;
+                $discount_val = (float) ($gs->referral_amount ?? 500);
+                $discount = $discount_val * $curr->value;
+
+                \Log::info('Referral Coupon Apply', [
+                    'code' => $code,
+                    'input_total' => $total,
+                    'discount_val' => $discount_val,
+                    'curr_value' => $curr->value,
+                    'final_discount' => $discount
+                ]);
 
                 if ($discount >= $total) {
                     return response()->json(3);
@@ -201,7 +216,7 @@ class CouponController extends FrontBaseController
                 $data[3] = 'referral';
                 $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
                 $data[5] = 1;
-                $data[6] = round($total, 2);
+                $data[6] = (float) round($total, 2);
 
                 return response()->json($data);
             }
