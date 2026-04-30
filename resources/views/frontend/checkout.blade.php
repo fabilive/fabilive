@@ -595,25 +595,26 @@
                <input type="hidden" name="currency_value" value="{{ $curr->value }}">
                @php
                @endphp
-               @if(Session::has('coupon_total'))
-               <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
-               <input type="hidden" id="tgrandtotal" value="{{ $totalPrice }}">
+                @if(Session::has('coupon_total'))
+                <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
+                <input type="hidden" id="tgrandtotal" value="{{ $totalPrice }}">
+                <input type="hidden" id="base-total" value="{{ $totalPrice }}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
                 <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
 
-               @elseif(Session::has('coupon_total1'))
-               <input type="hidden" name="total" id="grandtotal" value="{{ preg_replace(" /[^0-9,.]/", "" ,
-                  Session::get('coupon_total1') ) }}">
-               <input type="hidden" id="tgrandtotal" value="{{ preg_replace(" /[^0-9,.]/", "" ,
-                  Session::get('coupon_total1') ) }}">
-                  <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
-                  <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
-               @else
-               <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
-               <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
-               <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
-               <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
-               @endif
+                @elseif(Session::has('coupon_total1'))
+                <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
+                <input type="hidden" id="tgrandtotal" value="{{ $totalPrice }}">
+                <input type="hidden" id="base-total" value="{{ $totalPrice }}">
+                <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
+                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
+                @else
+                <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
+                <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
+                <input type="hidden" id="base-total" value="{{ $totalPrice }}">
+                <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
+                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
+                @endif
                <input type="hidden" id="original_tax" value="0">
                <input type="hidden" id="wallet-price" name="wallet_price" value="0">
                <input type="hidden" id="ttotal"
@@ -1056,23 +1057,20 @@ $(document).on('change', '#service_area_select, #service_area_id', function () {
         var fee = parseFloat(String(res.total_fee).toString().replace(/[^0-9.\-]+/g, '')) || 0;
         $('#total-fee').text(fee.toFixed(2) + ' {{ $curr->sign }}');
         $('#total-fee-row').show();
-        var baseVal = $('#base-cart-total').val() || $('#tgrandtotal').val() || '0';
-        var cartBase = parseFloat(String(baseVal).replace(/[^0-9.\-]+/g, '')) || 0;
-        var finalWithDelivery = cartBase + fee;
-        if (parseInt(pos) === 0) {
-            $('#final-cost').html('{{ $curr->sign }}' + finalWithDelivery.toFixed(2));
-        } else {
-            $('#final-cost').html(finalWithDelivery.toFixed(2) + '{{ $curr->sign }}');
-        }
-        if ($('#grandtotal').length) {
-            $('#grandtotal').val(finalWithDelivery.toFixed(2));
-        }
-        cartDeliveryFee = fee;
+        var baseVal = $('#base-total').val() || '0';
+        var cartBase = parseFloat(baseVal) || 0;
+        
+        // Update the hidden delivery fee input
         if ($('#total_delivery_fee').length === 0) {
             var $form = $('form.checkoutform').length ? $('form.checkoutform') : $('form').first();
             $form.append('<input type="hidden" name="total_delivery_fee" id="total_delivery_fee" />');
         }
-        $('#total_delivery_fee').val(cartDeliveryFee.toFixed(2));
+        $('#total_delivery_fee').val(fee.toFixed(2));
+        
+        // Use the centralized recalculation instead of manual DOM updates
+        recalculateGrandTotal();
+        
+        cartDeliveryFee = fee;
     })
     .fail(function(xhr, status, err) {
         console.error('calculateDistance request failed:', status, err, xhr.responseText);
@@ -1454,25 +1452,28 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     });
 
 
-   // Centralized Total Recalculation (Partial Wallet + Shipping + Packing + Coupons)
+    // Centralized Total Recalculation (Partial Wallet + Shipping + Packing + Coupons + Distance Fee)
     function recalculateGrandTotal() {
         // Base cart total (raw price from Session/Cart)
-        let baseTotal = parseFloat($('#ttotal').val()) || 0; 
+        let baseTotal = parseFloat($('#base-total').val()) || 0; 
         
         // Coupon discount (already stored in hidden field when applied)
         let couponDiscount = parseFloat($('#coupon_discount').val()) || 0;
         
-        // Shipping & Packing
+        // Standard Shipping & Packing (Fixed rates)
         let shippingCost = 0;
         let packingCost = 0;
         $('.shipping:checked').each(function() { shippingCost += parseFloat($(this).data('price')) || 0; });
         $('.packing:checked').each(function() { packingCost += parseFloat($(this).data('price')) || 0; });
         
+        // Distance-based delivery fee (from calculateDistance AJAX)
+        let distanceFee = parseFloat($('#total_delivery_fee').val()) || 0;
+        
         // Step 1: Base Total - Coupon
         let totalAfterDiscount = Math.max(0, baseTotal - couponDiscount);
         
-        // Step 2: Add Shipping & Packing
-        let finalOrderTotal = totalAfterDiscount + shippingCost + packingCost;
+        // Step 2: Add All Fees
+        let finalOrderTotal = totalAfterDiscount + shippingCost + packingCost + distanceFee;
         
         // Step 3: Tax (if applicable)
         let taxPercent = parseFloat($('.original_tax').first().text()) || 0;
@@ -1516,9 +1517,26 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         let payAmount = Math.max(0, finalOrderTotal - walletDeduction);
         
         // Update Displays
-        $('#final-cost').text('{{ $curr->sign }}' + payAmount.toFixed(2));
+        let formattedTotal = finalOrderTotal.toFixed(2);
+        let formattedPayAmount = payAmount.toFixed(2);
+        
+        if (parseInt(pos) === 0) {
+            $('#final-cost').text('{{ $curr->sign }}' + formattedPayAmount);
+        } else {
+            $('#final-cost').text(formattedPayAmount + '{{ $curr->sign }}');
+        }
+        
         $('#total-fee').text(shippingCost.toFixed(2));
         $('.packing_cost_view').text('{{ $curr->sign }}' + packingCost.toFixed(2));
+        
+        // Show/Hide "Insufficient Balance" for Wallet Payment method
+        if (selectedPayment === 'wallet') {
+            if (userBalance < finalOrderTotal) {
+                $('.wallet-insufficient').removeClass('d-none');
+            } else {
+                $('.wallet-insufficient').addClass('d-none');
+            }
+        }
     }
 
     // Trigger recalculation on various events
