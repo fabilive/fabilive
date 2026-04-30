@@ -149,12 +149,13 @@ class CheckoutController extends FrontBaseController
                     $curr = $this->curr;
                     $discount = ($this->gs->referral_amount ?? 500) * $curr->value;
 
-                    if ($discount < $cart->totalPrice) {
+                    if ($discount < ($cart->totalPrice * $curr->value)) {
                         Session::put('coupon', $discount);
                         Session::put('coupon_code', $code);
                         Session::put('coupon_id', 'referral');
                         Session::put('coupon_is_referral', true);
-                        Session::put('coupon_total', \PriceHelper::showCurrencyPrice($cart->totalPrice - $discount));
+                        Session::put('coupon_total', \PriceHelper::showCurrencyPrice(($cart->totalPrice * $curr->value) - $discount));
+                        Session::put('coupon_total_raw', ($cart->totalPrice * $curr->value) - $discount);
                         Session::put('coupon_percentage', \PriceHelper::showCurrencyPrice($discount));
                         
                         // Mark as already applied to avoid repeat messages if we had any
@@ -202,16 +203,22 @@ class CheckoutController extends FrontBaseController
                     break;
                 }
             }
-            $total = $cart->totalPrice;
+            $total = ($cart->totalPrice * $this->curr->value);
             $coupon = Session::has('coupon') ? Session::get('coupon') : 0;
-            if (! Session::has('coupon_total')) {
-                $total = $total - $coupon;
-                $total = $total + 0;
-            } else {
+            if (Session::has('coupon_total_raw')) {
+                $total = Session::get('coupon_total_raw');
+            } elseif (Session::has('coupon_total')) {
                 $total = Session::get('coupon_total');
                 if (is_string($total)) {
+                    // Fallback parsing, but try to be smarter or just recalculate
                     $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                    // If parsing results in a suspicious value (e.g. dot as thousand separator), recalculate
+                    if (Session::has('coupon') && $total < ($cart->totalPrice * $this->curr->value) / 2 && Session::get('coupon') < ($cart->totalPrice * $this->curr->value) / 2) {
+                         $total = ($cart->totalPrice * $this->curr->value) - Session::get('coupon');
+                    }
                 }
+            } else {
+                $total = $total - $coupon;
             }
             $service_areas = ServiceArea::all();
 
@@ -238,16 +245,20 @@ class CheckoutController extends FrontBaseController
                         break;
                     }
                 }
-                $total = $cart->totalPrice;
+                $total = ($cart->totalPrice * $this->curr->value);
                 $coupon = Session::has('coupon') ? Session::get('coupon') : 0;
-                if (! Session::has('coupon_total')) {
-                    $total = $total - $coupon;
-                    $total = $total + 0;
-                } else {
+                if (Session::has('coupon_total_raw')) {
+                    $total = Session::get('coupon_total_raw');
+                } elseif (Session::has('coupon_total')) {
                     $total = Session::get('coupon_total');
                     if (is_string($total)) {
                         $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                        if (Session::has('coupon') && $total < ($cart->totalPrice * $this->curr->value) / 2 && Session::get('coupon') < ($cart->totalPrice * $this->curr->value) / 2) {
+                             $total = ($cart->totalPrice * $this->curr->value) - Session::get('coupon');
+                        }
                     }
+                } else {
+                    $total = $total - $coupon;
                 }
                 foreach ($products as $prod) {
                     if ($prod['item']['type'] != 'Physical') {
@@ -275,16 +286,20 @@ class CheckoutController extends FrontBaseController
                 } else {
                     $package_data = DB::table('packages')->where('user_id', '=', 0)->get();
                 }
-                $total = $cart->totalPrice;
+                $total = ($cart->totalPrice * $this->curr->value);
                 $coupon = Session::has('coupon') ? Session::get('coupon') : 0;
-                if (! Session::has('coupon_total')) {
-                    $total = $total - $coupon;
-                    $total = $total + 0;
-                } else {
+                if (Session::has('coupon_total_raw')) {
+                    $total = Session::get('coupon_total_raw');
+                } elseif (Session::has('coupon_total')) {
                     $total = Session::get('coupon_total');
                     if (is_string($total)) {
                         $total = (float) preg_replace('/[^0-9\.]/ui', '', $total);
+                        if (Session::has('coupon') && $total < ($cart->totalPrice * $this->curr->value) / 2 && Session::get('coupon') < ($cart->totalPrice * $this->curr->value) / 2) {
+                             $total = ($cart->totalPrice * $this->curr->value) - Session::get('coupon');
+                        }
                     }
+                } else {
+                    $total = $total - $coupon;
                 }
                 $ck = 1;
 

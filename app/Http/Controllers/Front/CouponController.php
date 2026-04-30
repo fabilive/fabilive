@@ -18,7 +18,7 @@ class CouponController extends FrontBaseController
         try {
             $gs = $this->gs;
             $code = request()->get('code');
-            $total = (float) preg_replace('/[^0-9\.]/ui', '', request()->get('total', 0));
+            $total = (float) request()->get('total', 0);
             $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
 
             if (!$coupon) {
@@ -42,6 +42,7 @@ class CouponController extends FrontBaseController
                 Session::put('coupon_id', 'referral');
                 Session::put('coupon_is_referral', true);
                 Session::put('coupon_total', $data[0]);
+                Session::put('coupon_total_raw', $total);
                 $data[3] = 'referral';
                 $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
                 $data[5] = 1;
@@ -176,7 +177,7 @@ class CouponController extends FrontBaseController
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
 
                 // Global discount of 200
-                $total = (float) preg_replace('/[^0-9\.]/ui', '', request()->get('total', 0));
+                $total = (float) request()->get('total', 0);
                 $curr = $this->curr;
                 
                 // Get discount from settings
@@ -195,6 +196,7 @@ class CouponController extends FrontBaseController
                 Session::put('coupon_id', 'referral');
                 Session::put('coupon_is_referral', true);
                 Session::put('coupon_total', $data[0]);
+                Session::put('coupon_total_raw', $total);
                 
                 $data[3] = 'referral';
                 $data[4] = \PriceHelper::showCurrencyPrice($data[2]);

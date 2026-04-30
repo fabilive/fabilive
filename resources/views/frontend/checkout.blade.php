@@ -1223,7 +1223,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
    })
    $("#check-coupon-form").on('submit', function () {
       var val = $("#code").val();
-      var total = $("#ttotal").val();
+      var total = $("#tgrandtotal").val();
       var ship = 0;
          $.ajax({
                   type: "GET",
@@ -1246,12 +1246,12 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                            $("#check-coupon-form").toggle();
                            $(".discount-bar").removeClass('d-none');
                   if(pos == 0){
-                     $('.total-cost-dum #total-cost').html('{{ $curr->sign }}'+data[0]);
-                     $('#discount').html('{{ $curr->sign }}'+data[2]);
+                     $('.total-cost-dum #total-cost').html(data[0]);
+                     $('#discount').html(data[4]);
                   }
                   else{
                      $('.total-cost-dum #total-cost').html(data[0]);
-                     $('#discount').html(data[2]+'{{ $curr->sign }}');
+                     $('#discount').html(data[4]);
                   }
                      $('#grandtotal').val(data[6]);
                      $('#tgrandtotal').val(data[6]);
