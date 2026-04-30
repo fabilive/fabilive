@@ -597,8 +597,8 @@
                @endphp
                 @if(Session::has('coupon_total'))
                 <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
-                <input type="hidden" id="tgrandtotal" value="{{ $totalPrice }}">
-                <input type="hidden" id="base-total" value="{{ $totalPrice }}">
+                <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
+                <input type="hidden" id="base-total" value="{{round(Session::get('cart')->totalPrice * $curr->value, 2)}}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
                 <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
 
@@ -611,7 +611,7 @@
                 @else
                 <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
                 <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
-                <input type="hidden" id="base-total" value="{{ $totalPrice }}">
+                <input type="hidden" id="base-total" value="{{round(Session::get('cart')->totalPrice * $curr->value, 2)}}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
                 <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
                 @endif
@@ -658,6 +658,10 @@
                         <li class="discount-bar {{ Session::has('coupon') ? '' : 'd-none' }}">
                            <p>{{ __('Discount') }} <span class="dpercent">{{ Session::has('coupon') && Session::get('coupon_percentage') != 0 ? '('.Session::get('coupon_percentage').')' : '' }}</span></p>
                            <P><b id="discount">{{ Session::has('coupon') ? ($gs->currency_format == 0 ? $curr->sign : '') . Session::get('coupon') . ($gs->currency_format == 1 ? $curr->sign : '') : '' }}</b></P>
+                        </li>
+                        <li class="border-top pt-3 mt-2">
+                           <p><b>{{ __('Total Amount') }}</b></p>
+                           <P><b><span id="grand-total-display">0.00</span></b></P>
                         </li>
                      </ul>
 
@@ -1522,8 +1526,10 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         
         if (parseInt(pos) === 0) {
             $('#final-cost').text('{{ $curr->sign }}' + formattedPayAmount);
+            $('#grand-total-display').text('{{ $curr->sign }}' + formattedTotal);
         } else {
             $('#final-cost').text(formattedPayAmount + '{{ $curr->sign }}');
+            $('#grand-total-display').text(formattedTotal + '{{ $curr->sign }}');
         }
         
         $('#total-fee').text((shippingCost + distanceFee).toFixed(2));
