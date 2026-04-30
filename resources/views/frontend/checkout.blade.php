@@ -1455,19 +1455,19 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
     // Centralized Total Recalculation (Partial Wallet + Shipping + Packing + Coupons + Distance Fee)
     function recalculateGrandTotal() {
         // Base cart total (raw price from Session/Cart)
-        let baseTotal = parseFloat($('#base-total').val()) || 0; 
+        let baseTotal = parseFloat(String($('#base-total').val()).replace(/[^0-9.]/g, '')) || 0; 
         
         // Coupon discount (already stored in hidden field when applied)
-        let couponDiscount = parseFloat($('#coupon_discount').val()) || 0;
+        let couponDiscount = parseFloat(String($('#coupon_discount').val()).replace(/[^0-9.]/g, '')) || 0;
         
         // Standard Shipping & Packing (Fixed rates)
         let shippingCost = 0;
         let packingCost = 0;
-        $('.shipping:checked').each(function() { shippingCost += parseFloat($(this).data('price')) || 0; });
-        $('.packing:checked').each(function() { packingCost += parseFloat($(this).data('price')) || 0; });
+        $('.shipping:checked').each(function() { shippingCost += parseFloat(String($(this).attr('data-price')).replace(/[^0-9.]/g, '')) || 0; });
+        $('.packing:checked').each(function() { packingCost += parseFloat(String($(this).attr('data-price')).replace(/[^0-9.]/g, '')) || 0; });
         
         // Distance-based delivery fee (from calculateDistance AJAX)
-        let distanceFee = parseFloat($('#total_delivery_fee').val()) || 0;
+        let distanceFee = parseFloat(String($('#total_delivery_fee').val()).replace(/[^0-9.]/g, '')) || 0;
         
         // Step 1: Base Total - Coupon
         let totalAfterDiscount = Math.max(0, baseTotal - couponDiscount);
@@ -1526,7 +1526,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
             $('#final-cost').text(formattedPayAmount + '{{ $curr->sign }}');
         }
         
-        $('#total-fee').text(shippingCost.toFixed(2));
+        $('#total-fee').text((shippingCost + distanceFee).toFixed(2));
         $('.packing_cost_view').text('{{ $curr->sign }}' + packingCost.toFixed(2));
         
         // Show/Hide "Insufficient Balance" for Wallet Payment method
@@ -1539,8 +1539,33 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
         }
     }
 
-    // Trigger recalculation on various events
-    $(document).on('change', '.shipping, .packing, #use_wallet', function() {
+    // Restore uncheck logic and trigger recalculation
+    $(document).on('mousedown', '.shipping, .packing', function() {
+        $(this).data('wasChecked', $(this).is(':checked'));
+    });
+
+    $(document).on('click', '.shipping, .packing', function() {
+        if ($(this).data('wasChecked')) {
+            $(this).prop('checked', false);
+            $(this).data('wasChecked', false);
+            
+            // Clear associated hidden IDs
+            if($(this).hasClass('shipping')) $('#multi_shipping_id').val('');
+            if($(this).hasClass('packing')) $('#multi_packaging_id').val('');
+        } else {
+            // Unset wasChecked for siblings
+            let cls = $(this).hasClass('shipping') ? '.shipping' : '.packing';
+            $(cls).data('wasChecked', false);
+            $(this).data('wasChecked', true);
+            
+            // Set associated hidden IDs
+            if($(this).hasClass('shipping')) $('#multi_shipping_id').val($(this).val());
+            if($(this).hasClass('packing')) $('#multi_packaging_id').val($(this).val());
+        }
+        recalculateGrandTotal();
+    });
+
+    $(document).on('change', '#use_wallet', function() {
         recalculateGrandTotal();
     });
 
