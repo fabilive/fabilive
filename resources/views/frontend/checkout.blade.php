@@ -713,7 +713,7 @@
                      <span class="font-weight-bold text-dark h6 mb-0">{{ __('Final Price') }} :</span>
                      <span id="final-cost" class="text-primary font-weight-bold h4 mb-0">
                         @if(Session::has('coupon_total'))
-                           {{ $gs->currency_format == 0 ? $curr->sign : '' }}{{ $totalPrice }}{{ $gs->currency_format == 1 ? $curr->sign : '' }}
+                           {{ Session::get('coupon_total') }}
                         @elseif(Session::has('coupon_total1'))
                            {{ Session::get('coupon_total1') }}
                         @else
@@ -1247,6 +1247,7 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                            
                      $('#grandtotal').val(data[6]);
                      $('#tgrandtotal').val(data[6]);
+                     $('#base-cart-total').val(data[6]);
                      $('#coupon_code').val(data[1]);
                      $('#coupon_discount').val(data[2]);
                      if(data[4] != 0){
