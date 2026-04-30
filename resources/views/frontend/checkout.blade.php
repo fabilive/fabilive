@@ -638,12 +638,10 @@
                            <p>{{ __('Packaging Cost')}}</p>
                            <P><b> <span class="packing_cost_view">{{App\Models\Product::convertPrice(0)}}</span> </b></P>
                         </li>
-                        @if(Session::has('coupon'))
-                        <li class="discount-bar">
-                           <p>{{ __('Discount') }} <span class="dpercent">{{ Session::get('coupon_percentage') == 0 ? '' : '('.Session::get('coupon_percentage').')' }}</span></p>
-                           <P><b>{{ $gs->currency_format == 0 ? $curr->sign : '' }}{{ Session::get('coupon') }}{{ $gs->currency_format == 1 ? $curr->sign : '' }}</b></P>
+                        <li class="discount-bar {{ Session::has('coupon') ? '' : 'd-none' }}">
+                           <p>{{ __('Discount') }} <span class="dpercent">{{ Session::has('coupon') && Session::get('coupon_percentage') != 0 ? '('.Session::get('coupon_percentage').')' : '' }}</span></p>
+                           <P><b id="discount">{{ Session::has('coupon') ? ($gs->currency_format == 0 ? $curr->sign : '') . Session::get('coupon') . ($gs->currency_format == 1 ? $curr->sign : '') : '' }}</b></P>
                         </li>
-                        @endif
                      </ul>
 
                      <div class="cupon-box mt-3">
@@ -1245,14 +1243,8 @@ $(document).on('submit', 'form.checkoutform, form#checkoutForm, form[name="check
                      {
                            $("#check-coupon-form").toggle();
                            $(".discount-bar").removeClass('d-none');
-                  if(pos == 0){
-                     $('.total-cost-dum #total-cost').html(data[0]);
-                     $('#discount').html(data[4]);
-                  }
-                  else{
-                     $('.total-cost-dum #total-cost').html(data[0]);
-                     $('#discount').html(data[4]);
-                  }
+                           $('#discount').html(data[4]);
+                           
                      $('#grandtotal').val(data[6]);
                      $('#tgrandtotal').val(data[6]);
                      $('#coupon_code').val(data[1]);
