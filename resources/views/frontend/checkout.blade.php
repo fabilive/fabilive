@@ -454,7 +454,7 @@
                                        @endphp
                                        <div class="wallet-partial-use p-3 mb-4 border rounded bg-white shadow-sm" style="border-left: 4px solid #1a1a1a !important;">
                                            <div class="custom-control custom-checkbox d-flex align-items-center">
-                                               <input type="checkbox" class="custom-control-input" id="use_wallet" data-balance="{{ $user_balance }}" style="width: 20px; height: 20px; cursor: pointer;">
+                                               <input type="checkbox" class="custom-control-input" id="use_wallet" data-balance="{{ round($user_balance * $curr->value, 2) }}" style="width: 20px; height: 20px; cursor: pointer;">
                                                <label class="custom-control-label ml-2" for="use_wallet" style="font-weight: 600; cursor: pointer; color: #1a1a1a;">
                                                    {{ __('Use my wallet balance') }} 
                                                    <span class="text-primary">({{ App\Models\Product::convertPrice($user_balance) }})</span>
@@ -472,7 +472,7 @@
                                           {{-- wallet checkout start --}}
                                           @php
                                              $user_balance = Auth::user()->balance;
-                                             $is_insufficient = $user_balance < $totalPrice;
+                                             $is_insufficient = round($user_balance * $curr->value, 2) < round($totalPrice * $curr->value, 2);
                                           @endphp
                                           <a class="nav-link payment" href="#v-pills-tab-wallet" data-show="no"
                                              data-val="wallet" data-toggle="pill" role="tab"
