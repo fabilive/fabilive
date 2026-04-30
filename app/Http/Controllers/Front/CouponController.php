@@ -171,26 +171,25 @@ class CouponController extends FrontBaseController
         try {
             $gs = $this->gs;
             $code = request()->get('code');
-            $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+            // Prioritize Referral Code check
+            $referralService = app(\App\Services\ReferralService::class);
+            $user = Auth::user();
+            // Check if it's a Referral Code without throwing exception yet
+            $referralCodeRecord = \App\Models\ReferralCode::where('code', strtoupper(trim($code)))->first();
 
-            if (!$coupon) {
-                // Check if it's a Referral Code
-                $referralService = app(\App\Services\ReferralService::class);
-                $user = Auth::user();
+            if ($referralCodeRecord) {
                 $referralCode = $referralService->validateReferralForCoupon($code, $user);
-                if (!$referralCode) {
-                    return response()->json(0); // Not a referral code either
-                }
-
+                // The validate method will throw exception if invalid (already used, etc.)
+                // If it passes:
                 // Global discount of 500
                 $total = (float) request()->get('total', 0);
                 $curr = $this->curr;
                 
-                // Get discount from settings
-                $discount_val = (float) ($gs->referral_amount ?? 500);
+                // Get discount from settings (fallback to 500 if 0 or empty)
+                $discount_val = (float) ($gs->referral_amount > 0 ? $gs->referral_amount : 500);
                 $discount = $discount_val * $curr->value;
 
-                \Log::info('Referral Coupon Apply', [
+                \Log::info('Referral Coupon Apply (Priority)', [
                     'code' => $code,
                     'input_total' => $total,
                     'discount_val' => $discount_val,
@@ -219,6 +218,12 @@ class CouponController extends FrontBaseController
                 $data[6] = (float) round($total, 2);
 
                 return response()->json($data);
+            }
+
+            $coupon = Coupon::where('code', '=', $code)->where('status', 1)->first();
+
+            if (!$coupon) {
+                return response()->json(0);
             }
         } catch (\Throwable $e) {
             return response()->json(['status' => 0, 'message' => $e->getMessage()]);
