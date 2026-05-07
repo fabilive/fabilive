@@ -10,12 +10,10 @@ use App\Models\Order;
 use App\Models\PaymentGateway;
 use App\Models\Reward;
 use App\Models\State;
-use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
 
 class MercadopagoController extends CheckoutBaseControlller
@@ -129,7 +127,7 @@ class MercadopagoController extends CheckoutBaseControlller
 
             $order = new Order;
             $input['cart'] = $new_cart;
-            $input['user_id'] = FacadesAuth::check() ? FacadesAuth::user()->id : null;
+            $input['user_id'] = Auth::check() ? Auth::user()->id : null;
             $input['affilate_users'] = $affilate_users;
             $input['pay_amount'] = $orderTotal;
             $input['order_number'] = $item_number;

@@ -12,11 +12,10 @@ use App\Models\Reward;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
 
 class AuthorizeController extends CheckoutBaseControlller

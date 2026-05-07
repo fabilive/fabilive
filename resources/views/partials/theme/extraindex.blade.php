@@ -130,7 +130,7 @@
                             </div>
                             <div class="time-count time-box text-center my-30 flex-between w-75"
                                 data-countdown="{{ $gs->deal_time }}"></div>
-                            <a href="https://fabilive.com/item/unlimited-supply-unisex-back-support-posture-belt-effective-instantly-good-results-9vf86167xo"
+                            <a href="https://fabilive.com/item/unlimited-supply-unisex-back-support-posture-belt-effective-instantly-good-results-chi1673qaq"
                                     class="btn btn-dark text-uppercase rounded-0">{{ __('Shop Now') }}</a>
                         </div>
                     </div>

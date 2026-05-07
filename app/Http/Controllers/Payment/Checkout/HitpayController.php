@@ -12,9 +12,8 @@ use App\Services\HitPayService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use OrderHelper;
-use Session;
-use Str;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use App\Helpers\PriceHelper;
 use App\Helpers\OrderHelper;
 
@@ -84,10 +83,10 @@ class HitpayController extends CheckoutBaseControlller
             $new_cart['totalPrice'] = $t_cart->totalPrice;
             $new_cart['items'] = $t_cart->items;
             $new_cart = json_encode($new_cart);
-            $temp_affilate_users = \OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
+            $temp_affilate_users = OrderHelper::product_affilate_check($cart); // For Product Based Affilate Checking
             $affilate_users = $temp_affilate_users == null ? null : json_encode($temp_affilate_users);
 
-            $orderCalculate = \PriceHelper::getOrderTotal($input, $cart);
+            $orderCalculate = PriceHelper::getOrderTotal($input, $cart);
 
             if (isset($orderCalculate['success']) && $orderCalculate['success'] == false) {
                 return redirect()->back()->with('unsuccess', $orderCalculate['message']);

@@ -9,9 +9,8 @@ use App\Models\User;
 use App\Models\UserSubscription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
 
 class FlutterwaveController extends SubscriptionBaseController

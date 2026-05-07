@@ -11,10 +11,9 @@ use App\Models\Reward;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Mollie\Laravel\Facades\Mollie;
-use OrderHelper;
-use Session;
 use App\Helpers\OrderHelper;
 
 class MollieController extends CheckoutBaseControlller

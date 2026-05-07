@@ -10,7 +10,7 @@ use App\Models\UserSubscription;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Input;
+
 use Validator;
 
 class PackageController extends Controller
@@ -50,7 +50,7 @@ class PackageController extends Controller
             $customs = [
                 'id.required' => 'Package ID is required.',
             ];
-            $validator = Validator::make(Input::all(), $rules, $customs);
+            $validator = Validator::make($request->all(), $rules, $customs);
 
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'data' => [], 'error' => $validator->errors()]);
@@ -143,7 +143,7 @@ class PackageController extends Controller
                     'shop_number.required' => 'Shop number is required.',
                     'shop_address.required' => 'Shop address is required.',
                 ];
-                $validator = Validator::make(Input::all(), $rules, $customs);
+                $validator = Validator::make($request->all(), $rules, $customs);
 
                 if ($validator->fails()) {
                     return response()->json(['status' => false, 'data' => [], 'error' => $validator->errors()]);
@@ -166,7 +166,7 @@ class PackageController extends Controller
             $sub->days = $subs->days;
             $sub->allowed_products = $subs->allowed_products;
             $sub->details = $subs->details;
-            $sub->method = $request->method;
+            $sub->method = $request->input('method');
             $sub->txnid = $request->txnid;
             $sub->status = 1;
             $sub->save();
