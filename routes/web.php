@@ -4336,8 +4336,11 @@ Route::group(['middleware' => 'web'], function () {
     // Public/Guest allowed
     Route::get('/support/faqs', 'SupportController@getFaqs')->name('support.faqs.get');
 
-    // Auth required (using a throttle for messages to prevent spam)
-    Route::group(['middleware' => ['auth', 'throttle:60,1']], function () {
+    // Auto-detect role (no strict auth gate - controller checks internally)
+    Route::get('/support/detect-role', 'SupportController@detectRole')->name('support.detect.role');
+
+    // Throttled support endpoints (controller handles multi-guard auth internally)
+    Route::group(['middleware' => ['throttle:60,1']], function () {
         Route::post('/support/bot/chat', 'SupportController@botChat')->name('support.bot.chat');
         Route::post('/support/live/request', 'SupportController@requestLiveSupport')->name('support.live.request');
         Route::post('/support/chat/send', 'SupportController@sendMessage')->name('support.chat.send');
@@ -4347,3 +4350,4 @@ Route::group(['middleware' => 'web'], function () {
         Route::get('/support/chat/list', 'SupportController@getUserConversations')->name('support.chat.list');
     });
 });
+

@@ -2,20 +2,111 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SupportAgent;
+use App\Models\SupportConversation;
+use App\Models\SupportConversationEvent;
 use App\Models\SupportFaqCategory;
+use App\Models\SupportMessage;
+use App\Models\SupportRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SupportController extends Controller
 {
     /**
-     * Get FAQs based on the selected context (buyer/vendor).
+     * Auto-detect the user's role from authentication state.
+     * Priority: admin > rider > vendor > buyer (default).
+     *
+     * @return array{role: string, user_id: int|null, user: mixed}
+     */
+    protected function detectUserRole(): array
+    {
+        // 1. Check admin guard first
+        $admin = Auth::guard('admin')->user();
+        if ($admin) {
+            return ['role' => 'admin', 'user_id' => $admin->id, 'user' => $admin, 'guard' => 'admin'];
+        }
+
+        // 2. Check rider guard
+        $rider = Auth::guard('rider')->user();
+        if ($rider) {
+            return ['role' => 'rider', 'user_id' => $rider->id, 'user' => $rider, 'guard' => 'rider'];
+        }
+
+        // 3. Check web/user guard
+        $user = Auth::guard('web')->user();
+        if ($user) {
+            // Vendor check: is_vendor == 2 means approved vendor
+            if ($user->is_vendor == 2) {
+                return ['role' => 'vendor', 'user_id' => $user->id, 'user' => $user, 'guard' => 'web'];
+            }
+            return ['role' => 'buyer', 'user_id' => $user->id, 'user' => $user, 'guard' => 'web'];
+        }
+
+        return ['role' => 'guest', 'user_id' => null, 'user' => null, 'guard' => null];
+    }
+
+    /**
+     * Get the authenticated user for support purposes.
+     * Supports web, rider, and admin guards.
+     */
+    protected function getSupportUser(): ?object
+    {
+        return Auth::guard('web')->user()
+            ?? Auth::guard('rider')->user()
+            ?? Auth::guard('admin')->user();
+    }
+
+    /**
+     * Get the user ID for support conversation ownership.
+     * For riders and admins, we still use their respective IDs.
+     */
+    protected function getSupportUserId(): ?int
+    {
+        $user = Auth::guard('web')->user();
+        if ($user) return $user->id;
+
+        $rider = Auth::guard('rider')->user();
+        if ($rider) return $rider->id;
+
+        $admin = Auth::guard('admin')->user();
+        if ($admin) return $admin->id;
+
+        return null;
+    }
+
+    /**
+     * API endpoint: auto-detect the user's role.
+     * Frontend calls this to skip manual role selection.
+     */
+    public function detectRole(Request $request)
+    {
+        $detected = $this->detectUserRole();
+
+        if ($detected['role'] === 'guest') {
+            return response()->json([
+                'status' => 'unauthenticated',
+                'role' => 'guest',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'role' => $detected['role'],
+            'user_name' => $detected['user']->name ?? $detected['user']->email ?? 'User',
+        ]);
+    }
+
+    /**
+     * Get FAQs based on the selected context.
      * Accessible by guests as well.
      */
     public function getFaqs(Request $request)
     {
         $request->validate([
-            'context' => 'required|in:buyer,vendor',
+            'context' => 'required|in:buyer,vendor,rider,admin',
         ]);
 
         $context = $request->context;
@@ -37,31 +128,49 @@ class SupportController extends Controller
 
     /**
      * Start a bot interaction or process a message through the bot.
+     * Supports all roles: buyer, vendor, rider, admin.
      */
     public function botChat(Request $request, \App\Services\SupportBotService $botService)
     {
         $request->validate([
-            'context' => 'required|in:buyer,vendor',
-            'message' => 'nullable|string',
-            'attachment' => 'nullable|file|max:5120', // 5MB max
+            'context' => 'required|in:buyer,vendor,rider,admin',
+            'message' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|max:5120',
             'conversation_id' => 'nullable|integer',
         ]);
 
-        $user = Auth::guard('web')->user();
-        if (! $user) {
+        // Use auto-detection with manual context as override
+        $detected = $this->detectUserRole();
+        $user = $detected['user'];
+        $userId = $detected['user_id'];
+
+        if (!$user || $detected['role'] === 'guest') {
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
+        // Use detected role, but allow manual override only if valid
+        $context = $request->context;
+        $detectedRole = $detected['role'];
+
+        // Security: Prevent non-admins from using admin context
+        if ($context === 'admin' && $detectedRole !== 'admin') {
+            $context = $detectedRole;
+        }
+
+        // Sanitize message text
+        $messageText = $request->message ? $this->sanitizeInput($request->message) : null;
+
         // Fetch or create conversation
         if ($request->conversation_id) {
-            $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-            if ($conversation->requester_user_id !== $user->id) {
+            $conversation = SupportConversation::findOrFail($request->conversation_id);
+            if ($conversation->requester_user_id !== $userId) {
                 abort(403);
             }
         } else {
-            $conversation = \App\Models\SupportConversation::create([
-                'requester_user_id' => $user->id,
-                'context' => $request->context,
+            $conversation = SupportConversation::create([
+                'requester_user_id' => $userId,
+                'context' => $context,
+                'detected_role' => $detectedRole,
                 'status' => 'bot_active',
             ]);
         }
@@ -70,9 +179,9 @@ class SupportController extends Controller
         $msgData = [
             'conversation_id' => $conversation->id,
             'sender_type' => 'user',
-            'sender_id' => $user->id,
+            'sender_id' => $userId,
             'type' => 'text',
-            'body_text' => $request->message,
+            'body_text' => $messageText,
         ];
 
         if ($request->hasFile('attachment')) {
@@ -88,44 +197,61 @@ class SupportController extends Controller
             }
         }
 
-        \App\Models\SupportMessage::create($msgData);
+        SupportMessage::create($msgData);
+
+        // Retrieve session order ID from conversation meta
+        $sessionOrderId = session("mboko_order_{$conversation->id}");
 
         // Process through bot (only if there's text AND it's bot_active)
         $botResponseText = '';
-        if ($request->message && $conversation->status === 'bot_active') {
-            $reply = $botService->processMessage($request->message, $request->context);
+        $botMsg = null;
+        if ($messageText && $conversation->status === 'bot_active') {
+            $reply = $botService->processMessage(
+                $messageText,
+                $context,
+                $userId,
+                $sessionOrderId
+            );
+
             if ($reply) {
                 $botResponseText = $reply['response_text'];
 
-                // If bot indicates escalation is needed
+                // Store the session order ID for follow-up questions
+                if (!empty($reply['session_order_id'])) {
+                    session(["mboko_order_{$conversation->id}" => $reply['session_order_id']]);
+                }
+
+                // If bot indicates escalation is needed, keep bot active so user can click escalate button
                 if (isset($reply['escalate']) && $reply['escalate'] === true) {
-                    $conversation->status = 'bot_active'; // Keep bot active so user can click escalate button
+                    $conversation->status = 'bot_active';
                     $conversation->save();
                 }
             }
         }
 
         if (! $botResponseText && $conversation->status === 'bot_active') {
-            // Count consecutive misses to trigger escalation
-            // We can check the last 2 messages from bot if they were fallback
-            $recentBotMessages = \App\Models\SupportMessage::where('conversation_id', $conversation->id)
+            // Count consecutive misses to trigger auto-escalation suggestion
+            $recentBotMessages = SupportMessage::where('conversation_id', $conversation->id)
                 ->where('sender_type', 'bot')
                 ->latest()
                 ->take(2)
                 ->get();
 
-            $repeatedMiss = $recentBotMessages->count() === 2 && $recentBotMessages->every(fn ($msg) => str_contains($msg->body_text, 'Please clarify') || str_contains($msg->body_text, 'Live Support'));
+            $repeatedMiss = $recentBotMessages->count() === 2 && $recentBotMessages->every(
+                fn ($msg) => str_contains($msg->body_text, 'rephrase')
+                    || str_contains($msg->body_text, 'Live Support')
+                    || str_contains($msg->body_text, 'not sure I understood')
+            );
 
             if ($repeatedMiss) {
-                $botResponseText = "You want talk with a live agent? Make you click 'Request Live Support' button below.";
+                $botResponseText = "I think a live agent would help you better. 🧑‍💼 Please click the 'Request Live Support' button below to connect with our team.";
             } else {
-                $botResponseText = "I no fully understand. Please clarify your question, or click 'Request Live Support' to chat with a human agent.";
+                $botResponseText = "I'm not sure I understood that completely. 🤔 Could you rephrase your question? Or click 'Request Live Support' to chat with a human agent.";
             }
         }
 
         if ($botResponseText) {
-            // Save bot message
-            $botMsg = \App\Models\SupportMessage::create([
+            $botMsg = SupportMessage::create([
                 'conversation_id' => $conversation->id,
                 'sender_type' => 'bot',
                 'sender_id' => null,
@@ -143,6 +269,7 @@ class SupportController extends Controller
 
     /**
      * Escalate to a live agent.
+     * Attempts to assign an available agent. If none available, queues the request.
      */
     public function requestLiveSupport(Request $request)
     {
@@ -150,50 +277,85 @@ class SupportController extends Controller
             'conversation_id' => 'required|exists:support_conversations,id',
         ]);
 
-        \Illuminate\Support\Facades\Log::info('DEBUG: requestLiveSupport reached with ID: '.$request->conversation_id);
-
-        $user = Auth::guard('web')->user();
-        if (! $user) {
-            \Illuminate\Support\Facades\Log::warning('DEBUG: requestLiveSupport unauthenticated');
-
+        $userId = $this->getSupportUserId();
+        if (!$userId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
-        $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
-        if ($conversation->requester_user_id !== $user->id) {
-            \Illuminate\Support\Facades\Log::error('DEBUG: requestLiveSupport ownership mismatch');
+        $conversation = SupportConversation::findOrFail($request->conversation_id);
+        if ($conversation->requester_user_id !== $userId) {
             abort(403);
         }
 
-        if ($conversation->status !== 'bot_active' && $conversation->status !== 'waiting_agent') {
+        if (!in_array($conversation->status, ['bot_active', 'waiting_agent'])) {
             return response()->json(['status' => 'error', 'message' => 'Conversation is already active or ended']);
         }
+
         try {
             $convId = $request->conversation_id;
 
-            // 1. Instant Status Switch (Direct & Fast)
-            \Illuminate\Support\Facades\DB::table('support_conversations')
-                ->where('id', $convId)
-                ->update([
-                    'status' => 'waiting_agent',
-                    'updated_at' => now(),
-                ]);
+            // 1. Try to find an available online agent
+            $availableAgent = SupportAgent::where('is_online', true)
+                ->where('last_seen_at', '>=', now()->subMinutes(10))
+                ->first();
 
-            // 2. Insert Handoff Message (No complex triggers)
-            \Illuminate\Support\Facades\DB::table('support_messages')->insert([
+            $agentAssigned = false;
+            $agentName = null;
+
+            if ($availableAgent) {
+                // Check if agent is under capacity
+                $activeChats = SupportConversation::where('assigned_agent_admin_id', $availableAgent->admin_id)
+                    ->whereIn('status', ['assigned', 'waiting_agent'])
+                    ->count();
+
+                if ($activeChats < $availableAgent->max_active_chats) {
+                    // Assign agent
+                    DB::table('support_conversations')
+                        ->where('id', $convId)
+                        ->update([
+                            'status' => 'assigned',
+                            'assigned_agent_admin_id' => $availableAgent->admin_id,
+                            'assigned_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    $agentAssigned = true;
+                    $agentName = $availableAgent->admin?->name ?? 'Support Agent';
+                }
+            }
+
+            if (!$agentAssigned) {
+                // 2. No agent available — queue the request
+                DB::table('support_conversations')
+                    ->where('id', $convId)
+                    ->update([
+                        'status' => 'waiting_agent',
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            // 3. Insert system handoff message
+            $systemMessage = $agentAssigned
+                ? "You've been connected to {$agentName}. They will respond shortly. 🧑‍💼"
+                : "Your request has been queued. A live agent will connect with you as soon as one becomes available. Please stay on this chat. ⏳";
+
+            DB::table('support_messages')->insert([
                 'conversation_id' => $convId,
                 'sender_type' => 'system',
-                'body_text' => 'Please wait for a live agent to connect with your chat... our live agent will get in touch with you shortly.',
+                'body_text' => $systemMessage,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // 3. Log the Event
-            \Illuminate\Support\Facades\DB::table('support_conversation_events')->insert([
+            // 4. Log the event
+            DB::table('support_conversation_events')->insert([
                 'conversation_id' => $convId,
                 'actor_type' => 'system',
-                'event' => 'waiting_agent',
-                'meta_json' => json_encode(['requested_at' => now()]),
+                'event' => $agentAssigned ? 'assigned' : 'waiting_agent',
+                'meta_json' => json_encode([
+                    'requested_at' => now()->toISOString(),
+                    'agent_assigned' => $agentAssigned,
+                    'agent_id' => $agentAssigned ? $availableAgent->admin_id : null,
+                ]),
                 'created_at' => now(),
             ]);
 
@@ -201,16 +363,21 @@ class SupportController extends Controller
                 'status' => 'success',
                 'conversation' => [
                     'id' => $convId,
-                    'status' => 'waiting_agent',
+                    'status' => $agentAssigned ? 'assigned' : 'waiting_agent',
+                    'agent_assigned' => $agentAssigned,
+                    'message' => $systemMessage,
                 ],
             ]);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('ULTRA STABLE ESCALATION FAILED: '.$e->getMessage());
+            Log::error('Support escalation failed: '.$e->getMessage(), [
+                'conversation_id' => $request->conversation_id,
+                'user_id' => $userId,
+            ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Escalation error. Our team is investigating.',
+                'message' => 'We could not process your request right now. Please try again.',
             ], 500);
         }
     }
@@ -222,14 +389,17 @@ class SupportController extends Controller
     {
         $request->validate([
             'conversation_id' => 'required|exists:support_conversations,id',
-            'message' => 'nullable|string',
-            'attachment' => 'nullable|file|max:5120', // 5MB max
+            'message' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|max:5120',
         ]);
 
-        $user = Auth::guard('web')->user();
-        $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
+        $userId = $this->getSupportUserId();
+        if (!$userId) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
 
-        if ($conversation->requester_user_id !== $user->id) {
+        $conversation = SupportConversation::findOrFail($request->conversation_id);
+        if ($conversation->requester_user_id !== $userId) {
             abort(403);
         }
 
@@ -240,14 +410,14 @@ class SupportController extends Controller
         $msgData = [
             'conversation_id' => $conversation->id,
             'sender_type' => 'user',
-            'sender_id' => $user->id,
+            'sender_id' => $userId,
             'type' => 'text',
-            'body_text' => $request->message,
+            'body_text' => $request->message ? $this->sanitizeInput($request->message) : null,
         ];
 
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
-            $path = $file->store('support_attachments', 'public'); // Usually using public disk or s3
+            $path = $file->store('support_attachments', 'public');
             $msgData['type'] = 'file';
             $msgData['attachment_url'] = '/storage/'.$path;
             $msgData['attachment_mime'] = $file->getMimeType();
@@ -258,10 +428,7 @@ class SupportController extends Controller
             }
         }
 
-        $message = \App\Models\SupportMessage::create($msgData);
-
-        // Here we would broadcast to the agent using Ably
-        // broadcast(new \App\Events\SupportMessageSent($message));
+        $message = SupportMessage::create($msgData);
 
         return response()->json(['status' => 'success', 'message' => $message]);
     }
@@ -275,9 +442,9 @@ class SupportController extends Controller
             'conversation_id' => 'required|exists:support_conversations,id',
         ]);
 
-        $user = Auth::guard('web')->user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('rider')->user();
         $admin = Auth::guard('admin')->user();
-        $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
+        $conversation = SupportConversation::findOrFail($request->conversation_id);
 
         if ($user && $conversation->requester_user_id !== $user->id) {
             abort(403);
@@ -292,7 +459,7 @@ class SupportController extends Controller
         $conversation->ended_by = $admin ? 'agent' : 'user';
         $conversation->save();
 
-        \App\Models\SupportConversationEvent::create([
+        SupportConversationEvent::create([
             'conversation_id' => $conversation->id,
             'actor_type' => $admin ? 'agent' : 'user',
             'actor_id' => $admin ? $admin->id : $user->id,
@@ -310,13 +477,16 @@ class SupportController extends Controller
         $request->validate([
             'conversation_id' => 'required|exists:support_conversations,id',
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
+            'comment' => 'nullable|string|max:1000',
         ]);
 
-        $user = Auth::guard('web')->user();
-        $conversation = \App\Models\SupportConversation::findOrFail($request->conversation_id);
+        $userId = $this->getSupportUserId();
+        if (!$userId) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
 
-        if ($conversation->requester_user_id !== $user->id) {
+        $conversation = SupportConversation::findOrFail($request->conversation_id);
+        if ($conversation->requester_user_id !== $userId) {
             abort(403);
         }
 
@@ -324,16 +494,16 @@ class SupportController extends Controller
             return response()->json(['status' => 'error', 'message' => 'You can only rate an ended conversation.']);
         }
 
-        if (\App\Models\SupportRating::where('conversation_id', $conversation->id)->exists()) {
+        if (SupportRating::where('conversation_id', $conversation->id)->exists()) {
             return response()->json(['status' => 'error', 'message' => 'You have already rated this conversation.']);
         }
 
-        \App\Models\SupportRating::create([
+        SupportRating::create([
             'conversation_id' => $conversation->id,
-            'agent_admin_id' => $conversation->assigned_agent_admin_id ?? 1, // Fallback if rated unassigned
-            'rater_user_id' => $user->id,
+            'agent_admin_id' => $conversation->assigned_agent_admin_id ?? 1,
+            'rater_user_id' => $userId,
             'rating' => $request->rating,
-            'comment' => $request->comment,
+            'comment' => $request->comment ? $this->sanitizeInput($request->comment) : null,
         ]);
 
         $conversation->status = 'rated';
@@ -347,21 +517,20 @@ class SupportController extends Controller
      */
     public function getChatHistory(Request $request)
     {
-        $user = Auth::guard('web')->user();
-        if (! $user) {
+        $userId = $this->getSupportUserId();
+        if (!$userId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
         $conversationId = $request->query('conversation_id');
 
         if ($conversationId) {
-            $conversation = \App\Models\SupportConversation::with('messages', 'assignedAgent')->findOrFail($conversationId);
-            if ($conversation->requester_user_id !== $user->id) {
+            $conversation = SupportConversation::with('messages', 'assignedAgent')->findOrFail($conversationId);
+            if ($conversation->requester_user_id !== $userId) {
                 abort(403);
             }
         } else {
-            // Find latest active or recently ended conversation
-            $conversation = \App\Models\SupportConversation::where('requester_user_id', $user->id)
+            $conversation = SupportConversation::where('requester_user_id', $userId)
                 ->whereIn('status', ['bot_active', 'waiting_agent', 'assigned'])
                 ->with('messages', 'assignedAgent')
                 ->orderBy('created_at', 'desc')
@@ -384,12 +553,12 @@ class SupportController extends Controller
      */
     public function getUserConversations(Request $request)
     {
-        $user = Auth::guard('web')->user();
-        if (! $user) {
+        $userId = $this->getSupportUserId();
+        if (!$userId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
-        $conversations = \App\Models\SupportConversation::where('requester_user_id', $user->id)
+        $conversations = SupportConversation::where('requester_user_id', $userId)
             ->with(['messages' => function ($q) {
                 $q->latest()->limit(1);
             }, 'assignedAgent'])
@@ -401,5 +570,14 @@ class SupportController extends Controller
             'status' => 'success',
             'conversations' => $conversations,
         ]);
+    }
+
+    /**
+     * Sanitize user input to prevent XSS when displayed.
+     * Strips tags and encodes special characters.
+     */
+    protected function sanitizeInput(string $text): string
+    {
+        return htmlspecialchars(strip_tags(trim($text)), ENT_QUOTES, 'UTF-8');
     }
 }

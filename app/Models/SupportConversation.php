@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SupportConversation extends Model
 {
-    protected $fillable = ['requester_user_id', 'context', 'status', 'assigned_agent_admin_id', 'started_at', 'assigned_at', 'ended_at', 'ended_by', 'rating_required'];
+    protected $fillable = ['requester_user_id', 'context', 'detected_role', 'status', 'assigned_agent_admin_id', 'started_at', 'assigned_at', 'ended_at', 'ended_by', 'rating_required'];
 
     protected $casts = ['started_at' => 'datetime', 'assigned_at' => 'datetime', 'ended_at' => 'datetime', 'rating_required' => 'boolean'];
 

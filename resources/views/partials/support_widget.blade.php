@@ -51,8 +51,22 @@
                 <p style="margin-bottom: 25px; font-size: 14px; color: #666;">How can we help you today?</p>
                 
                 @auth
-                    <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Buyer</button>
-                    <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">I am a Seller / Vendor</button>
+                    <div id="fabi-role-buttons" style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="fabi-context-btn" data-context="buyer" style="width: 100%; padding: 14px; border: 1px solid #000; background: #000; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🛒 I am a Buyer
+                        </button>
+                        <button class="fabi-context-btn" data-context="vendor" style="width: 100%; padding: 14px; border: 1px solid #000; background: #fff; color: #000; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🏪 I am a Seller / Vendor
+                        </button>
+                        <button class="fabi-context-btn" data-context="rider" style="width: 100%; padding: 14px; border: 1px solid #1a73e8; background: #fff; color: #1a73e8; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🚚 I am a Rider / Delivery Agent
+                        </button>
+                        @if(Auth::guard('admin')->check())
+                        <button class="fabi-context-btn" data-context="admin" style="width: 100%; padding: 14px; border: 1px solid #e74c3c; background: #fff; color: #e74c3c; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            ⚙️ Admin Support
+                        </button>
+                        @endif
+                    </div>
                 @else
                     <div style="background: #fff8e1; color: #856404; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; border: 1px solid #ffe082; font-size: 13.5px; line-height: 1.5;">
                         <span style="font-size: 18px; margin-bottom: 5px; display: block;">🔒 <strong>Member Access Only</strong></span>
@@ -324,6 +338,9 @@
             launcher.style.transform = windowEl.style.display === 'none' ? 'scale(1)' : 'scale(0.9)';
             if (windowEl.style.display === 'none') {
                 localStorage.setItem('fabi-mbokoai-closed', 'true');
+            } else {
+                // Auto-detect role when widget opens
+                autoDetectRole();
             }
         });
 
@@ -348,7 +365,45 @@
             conversationId = null;
         }
 
-        // Context Selection
+        /**
+         * Auto-detect the user's role from the server.
+         * If detected, auto-select context and skip manual buttons.
+         */
+        let autoDetected = false;
+        function autoDetectRole() {
+            if (autoDetected) return;
+            fetch('/support/detect-role')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.role && data.role !== 'guest') {
+                        autoDetected = true;
+                        currentContext = data.role;
+
+                        // Highlight the detected role button
+                        const roleButtons = document.getElementById('fabi-role-buttons');
+                        if (roleButtons) {
+                            const btns = roleButtons.querySelectorAll('.fabi-context-btn');
+                            btns.forEach(btn => {
+                                if (btn.getAttribute('data-context') === data.role) {
+                                    btn.style.border = '2px solid #2ed573';
+                                    btn.style.position = 'relative';
+                                    const badge = document.createElement('span');
+                                    badge.innerText = '✓ Auto-detected';
+                                    badge.style.cssText = 'font-size:10px;color:#2ed573;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-weight:bold;';
+                                    btn.style.justifyContent = 'flex-start';
+                                    btn.style.paddingRight = '100px';
+                                    btn.appendChild(badge);
+                                }
+                            });
+                        }
+                    }
+                })
+                .catch(() => {
+                    // Silent fail — fallback to manual selection
+                });
+        }
+
+        // Context Selection (manual or auto)
         contextBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 currentContext = e.currentTarget.getAttribute('data-context');
