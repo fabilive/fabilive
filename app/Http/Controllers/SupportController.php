@@ -78,6 +78,44 @@ class SupportController extends Controller
     }
 
     /**
+     * Verify conversation ownership based on role.
+     */
+    protected function checkConversationOwner(SupportConversation $conversation): bool
+    {
+        $detected = $this->detectUserRole();
+        $userId = $detected['user_id'];
+        $role = $detected['role'];
+
+        if ($role === 'admin') {
+            return $conversation->admin_id === $userId;
+        } elseif ($role === 'rider') {
+            return $conversation->rider_id === $userId;
+        } else {
+            return $conversation->requester_user_id === $userId;
+        }
+    }
+
+    /**
+     * Get a query builder for conversations belonging to the current user.
+     */
+    protected function getUserConversationsQuery()
+    {
+        $detected = $this->detectUserRole();
+        $userId = $detected['user_id'];
+        $role = $detected['role'];
+
+        $query = SupportConversation::query();
+        
+        if ($role === 'admin') {
+            return $query->where('admin_id', $userId);
+        } elseif ($role === 'rider') {
+            return $query->where('rider_id', $userId);
+        } else {
+            return $query->where('requester_user_id', $userId);
+        }
+    }
+
+    /**
      * API endpoint: auto-detect the user's role.
      * Frontend calls this to skip manual role selection.
      */
@@ -163,16 +201,37 @@ class SupportController extends Controller
         // Fetch or create conversation
         if ($request->conversation_id) {
             $conversation = SupportConversation::findOrFail($request->conversation_id);
-            if ($conversation->requester_user_id !== $userId) {
+            
+            // Ownership check (role-aware)
+            $isOwner = false;
+            if ($detectedRole === 'admin') {
+                $isOwner = $conversation->admin_id === $userId;
+            } elseif ($detectedRole === 'rider') {
+                $isOwner = $conversation->rider_id === $userId;
+            } else {
+                $isOwner = $conversation->requester_user_id === $userId;
+            }
+
+            if (!$isOwner) {
                 abort(403);
             }
         } else {
-            $conversation = SupportConversation::create([
-                'requester_user_id' => $userId,
+            // Map ID to correct column to avoid FK violations
+            $convData = [
                 'context' => $context,
                 'detected_role' => $detectedRole,
                 'status' => 'bot_active',
-            ]);
+            ];
+
+            if ($detectedRole === 'admin') {
+                $convData['admin_id'] = $userId;
+            } elseif ($detectedRole === 'rider') {
+                $convData['rider_id'] = $userId;
+            } else {
+                $convData['requester_user_id'] = $userId;
+            }
+
+            $conversation = SupportConversation::create($convData);
         }
 
         // Save user message
@@ -283,7 +342,7 @@ class SupportController extends Controller
         }
 
         $conversation = SupportConversation::findOrFail($request->conversation_id);
-        if ($conversation->requester_user_id !== $userId) {
+        if (!$this->checkConversationOwner($conversation)) {
             abort(403);
         }
 
@@ -399,7 +458,7 @@ class SupportController extends Controller
         }
 
         $conversation = SupportConversation::findOrFail($request->conversation_id);
-        if ($conversation->requester_user_id !== $userId) {
+        if (!$this->checkConversationOwner($conversation)) {
             abort(403);
         }
 
@@ -446,7 +505,7 @@ class SupportController extends Controller
         $admin = Auth::guard('admin')->user();
         $conversation = SupportConversation::findOrFail($request->conversation_id);
 
-        if ($user && $conversation->requester_user_id !== $user->id) {
+        if (!$this->checkConversationOwner($conversation) && !$admin) {
             abort(403);
         }
 
@@ -486,7 +545,7 @@ class SupportController extends Controller
         }
 
         $conversation = SupportConversation::findOrFail($request->conversation_id);
-        if ($conversation->requester_user_id !== $userId) {
+        if (!$this->checkConversationOwner($conversation)) {
             abort(403);
         }
 
@@ -526,11 +585,11 @@ class SupportController extends Controller
 
         if ($conversationId) {
             $conversation = SupportConversation::with('messages', 'assignedAgent')->findOrFail($conversationId);
-            if ($conversation->requester_user_id !== $userId) {
+            if (!$this->checkConversationOwner($conversation)) {
                 abort(403);
             }
         } else {
-            $conversation = SupportConversation::where('requester_user_id', $userId)
+            $conversation = $this->getUserConversationsQuery()
                 ->whereIn('status', ['bot_active', 'waiting_agent', 'assigned'])
                 ->with('messages', 'assignedAgent')
                 ->orderBy('created_at', 'desc')
@@ -558,7 +617,7 @@ class SupportController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
-        $conversations = SupportConversation::where('requester_user_id', $userId)
+        $conversations = $this->getUserConversationsQuery()
             ->with(['messages' => function ($q) {
                 $q->latest()->limit(1);
             }, 'assignedAgent'])
