@@ -23,19 +23,13 @@ class SupportController extends Controller
      */
     protected function detectUserRole(): array
     {
-        // 1. Check admin guard first
-        $admin = Auth::guard('admin')->user();
-        if ($admin) {
-            return ['role' => 'admin', 'user_id' => $admin->id, 'user' => $admin, 'guard' => 'admin'];
-        }
-
-        // 2. Check rider guard
+        // 1. Check rider guard
         $rider = Auth::guard('rider')->user();
         if ($rider) {
             return ['role' => 'rider', 'user_id' => $rider->id, 'user' => $rider, 'guard' => 'rider'];
         }
 
-        // 3. Check web/user guard
+        // 2. Check web/user guard
         $user = Auth::guard('web')->user();
         if ($user) {
             // Vendor check: is_vendor == 2 means approved vendor
@@ -55,8 +49,7 @@ class SupportController extends Controller
     protected function getSupportUser(): ?object
     {
         return Auth::guard('web')->user()
-            ?? Auth::guard('rider')->user()
-            ?? Auth::guard('admin')->user();
+            ?? Auth::guard('rider')->user();
     }
 
     /**
@@ -71,9 +64,6 @@ class SupportController extends Controller
         $rider = Auth::guard('rider')->user();
         if ($rider) return $rider->id;
 
-        $admin = Auth::guard('admin')->user();
-        if ($admin) return $admin->id;
-
         return null;
     }
 
@@ -86,9 +76,7 @@ class SupportController extends Controller
         $userId = $detected['user_id'];
         $role = $detected['role'];
 
-        if ($role === 'admin') {
-            return $conversation->admin_id === $userId;
-        } elseif ($role === 'rider') {
+        if ($role === 'rider') {
             return $conversation->rider_id === $userId;
         } else {
             return $conversation->requester_user_id === $userId;
@@ -106,9 +94,7 @@ class SupportController extends Controller
 
         $query = SupportConversation::query();
         
-        if ($role === 'admin') {
-            return $query->where('admin_id', $userId);
-        } elseif ($role === 'rider') {
+        if ($role === 'rider') {
             return $query->where('rider_id', $userId);
         } else {
             return $query->where('requester_user_id', $userId);
@@ -144,7 +130,7 @@ class SupportController extends Controller
     public function getFaqs(Request $request)
     {
         $request->validate([
-            'context' => 'required|in:buyer,vendor,rider,admin',
+            'context' => 'required|in:buyer,vendor,rider',
         ]);
 
         $context = $request->context;
@@ -171,7 +157,7 @@ class SupportController extends Controller
     public function botChat(Request $request, \App\Services\SupportBotService $botService)
     {
         $request->validate([
-            'context' => 'required|in:buyer,vendor,rider,admin',
+            'context' => 'required|in:buyer,vendor,rider',
             'message' => 'nullable|string|max:2000',
             'attachment' => 'nullable|file|max:5120',
             'conversation_id' => 'nullable|integer',
@@ -223,9 +209,7 @@ class SupportController extends Controller
                 'status' => 'bot_active',
             ];
 
-            if ($detectedRole === 'admin') {
-                $convData['admin_id'] = $userId;
-            } elseif ($detectedRole === 'rider') {
+            if ($detectedRole === 'rider') {
                 $convData['rider_id'] = $userId;
             } else {
                 $convData['requester_user_id'] = $userId;

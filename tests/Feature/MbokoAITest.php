@@ -173,11 +173,10 @@ class MbokoAITest extends TestCase
         $this->assertNotContains('seller_earnings', $allowed);
     }
 
-    public function test_rider_cannot_access_admin_intents()
+    public function test_rider_cannot_access_seller_intents()
     {
         $allowed = $this->detector->getIntentsForRole('rider');
-        $this->assertNotContains('admin_approval_issue', $allowed);
-        $this->assertNotContains('admin_payout_management', $allowed);
+        $this->assertNotContains('seller_order_issue', $allowed);
     }
 
     public function test_rider_has_delivery_intents()
@@ -185,15 +184,6 @@ class MbokoAITest extends TestCase
         $allowed = $this->detector->getIntentsForRole('rider');
         $this->assertContains('rider_delivery_jobs', $allowed);
         $this->assertContains('rider_delivery_status', $allowed);
-    }
-
-    public function test_admin_has_all_intents()
-    {
-        $allowed = $this->detector->getIntentsForRole('admin');
-        $this->assertContains('admin_approval_issue', $allowed);
-        $this->assertContains('order_status', $allowed);
-        $this->assertContains('rider_delivery_jobs', $allowed);
-        $this->assertContains('seller_order_issue', $allowed);
     }
 
     public function test_vendor_has_seller_intents()
