@@ -166,6 +166,11 @@ class IntentDetector
             'who are you', 'what are you', 'your name', 'are you a bot',
             'are you real', 'are you human', 'about you', 'what is mboko',
         ],
+        'how_to_find_info' => [
+            'where can i find', 'where to see', 'where is my order id', 'get my transaction reference',
+            'find my order number', 'where is that', 'how to get id', 'where to find reference',
+            'dashboard help', 'navigation', 'where to click',
+        ],
     ];
 
     /**
@@ -270,7 +275,7 @@ class IntentDetector
                 'order_status', 'rider_assignment_issue', 'delivery_delay',
                 'delivery_completed', 'delivery_not_completed', 'payment_issue',
                 'buyer_checkout_issue', 'coupon_referral_issue', 'product_issue',
-                'wallet_balance_issue', 'account_login_issue',
+                'wallet_balance_issue', 'account_login_issue', 'how_to_find_info',
                 'live_support_request', 'greeting', 'thanks', 'help_general', 'who_are_you',
             ],
             'vendor' => [
@@ -278,25 +283,14 @@ class IntentDetector
                 'commission_issue', 'seller_earnings', 'rider_assignment_issue',
                 'delivery_delay', 'delivery_completed', 'delivery_not_completed',
                 'payment_issue', 'wallet_balance_issue', 'withdrawal_issue',
-                'coupon_referral_issue', 'account_login_issue',
+                'coupon_referral_issue', 'account_login_issue', 'how_to_find_info',
                 'live_support_request', 'greeting', 'thanks', 'help_general', 'who_are_you',
             ],
             'rider' => [
                 'rider_delivery_jobs', 'rider_delivery_status', 'delivery_delay',
                 'delivery_completed', 'delivery_not_completed', 'rider_assignment_issue',
                 'wallet_balance_issue', 'withdrawal_issue', 'account_login_issue',
-                'coupon_referral_issue',
-                'live_support_request', 'greeting', 'thanks', 'help_general', 'who_are_you',
-            ],
-            'admin' => [
-                // Admin can access all intents
-                'order_status', 'rider_assignment_issue', 'delivery_delay',
-                'delivery_completed', 'delivery_not_completed', 'payment_issue',
-                'buyer_checkout_issue', 'coupon_referral_issue', 'product_issue',
-                'seller_order_issue', 'product_listing_issue', 'commission_issue',
-                'seller_earnings', 'rider_delivery_jobs', 'rider_delivery_status',
-                'wallet_balance_issue', 'withdrawal_issue', 'account_login_issue',
-                'admin_approval_issue', 'admin_payout_management', 'admin_system_issue',
+                'coupon_referral_issue', 'how_to_find_info',
                 'live_support_request', 'greeting', 'thanks', 'help_general', 'who_are_you',
             ],
         ];

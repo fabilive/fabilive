@@ -68,7 +68,8 @@ class ResponseGenerator
             'admin_payout_management' => $this->adminPayoutResponse(),
             'admin_system_issue' => $this->adminSystemResponse($escalate),
 
-            // ── ESCALATION ──
+            // ── NAVIGATION & HELP ──
+            'how_to_find_info' => $this->howToFindInfoResponse($role),
             'live_support_request' => $this->liveSupport($escalate),
 
             // ── UNKNOWN ──
@@ -504,13 +505,31 @@ class ResponseGenerator
         return "Of course! I'll connect you with a live agent right away. 🧑‍💼 Please click the **'Request Live Support'** button below and a team member will join your chat shortly.";
     }
 
+    protected function howToFindInfoResponse(string $role): string
+    {
+        return match ($role) {
+            'vendor' => "🔍 **Where to find your info (Vendor Dashboard):**\n\n" .
+                "• **Order ID/Number:** Go to **Orders → All Orders** in your side menu. Each order starts with a '#' (e.g., #12345).\n" .
+                "• **Transaction Reference:** Go to **Withdrawals → History** or check your **Wallet** section for specific payout references.\n" .
+                "• **Product ID:** Go to **Products → All Products**.",
+            'buyer' => "🔍 **Where to find your info (Customer Dashboard):**\n\n" .
+                "• **Order ID/Number:** Go to **My Orders** in your dashboard. You can also find it in your order confirmation email.\n" .
+                "• **Transaction ID:** Go to **Wallet → Transactions** to see your payment references.\n" .
+                "• **Tracking Number:** Check your order details under 'My Orders'.",
+            'rider' => "🔍 **Where to find your info (Rider App/Dashboard):**\n\n" .
+                "• **Order ID:** Look under the **My Delivery Jobs** or **Active Jobs** section.\n" .
+                "• **Earnings Reference:** Check your **Wallet** history in the app.",
+            default => "You can find your order number in your dashboard under 'My Orders' or in your confirmation email. Transaction IDs are located in your 'Wallet' history."
+        };
+    }
+
     // ── UNKNOWN ──
 
     protected function unknownResponse(bool &$escalate): string
     {
         $escalate = true;
         return "I'm not sure I understood that completely. 🤔 Could you rephrase your question? Here are some things I can help with:\n\n" .
-            "• Order tracking\n• Payment issues\n• Delivery questions\n• Wallet & withdrawals\n• Account help\n\n" .
+            "• Order tracking & Finding IDs\n• Payment & Withdrawal issues\n• Delivery questions\n• Wallet & Earnings\n• Navigation help\n\n" .
             "Or click **'Request Live Support'** to chat with a human agent.";
     }
 }
