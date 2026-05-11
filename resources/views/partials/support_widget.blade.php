@@ -61,11 +61,6 @@
                         <button class="fabi-context-btn" data-context="rider" style="width: 100%; padding: 14px; border: 1px solid #1a73e8; background: #fff; color: #1a73e8; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
                             🚚 I am a Rider / Delivery Agent
                         </button>
-                        @if(Auth::guard('admin')->check())
-                        <button class="fabi-context-btn" data-context="admin" style="width: 100%; padding: 14px; border: 1px solid #e74c3c; background: #fff; color: #e74c3c; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            ⚙️ Admin Support
-                        </button>
-                        @endif
                     </div>
                 @else
                     <div style="background: #fff8e1; color: #856404; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; border: 1px solid #ffe082; font-size: 13.5px; line-height: 1.5;">
@@ -240,7 +235,7 @@
                         
                         data.messages.forEach(msg => {
                             let sender = msg.sender_type;
-                            if (sender === 'admin' || sender === 'agent') sender = 'bot'; // Agents show with bot avatar on user side for consistency or custom agent avatar?
+                            if (sender === 'admin' || sender === 'agent') sender = 'agent'; 
                             addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                         });
                         
@@ -321,9 +316,7 @@
                                 const newMessages = data.messages.slice(currentMsgCount);
                                 newMessages.forEach(msg => {
                                     let sender = msg.sender_type;
-                                    // Distinguish between bot (AI) and human (agent/admin)
                                     if (sender === 'admin' || sender === 'agent') sender = 'agent';
-                                    
                                     addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                                 });
                             }
