@@ -508,18 +508,18 @@ class ResponseGenerator
     protected function howToFindInfoResponse(string $role): string
     {
         return match ($role) {
-            'vendor' => "🔍 **Where to find your info (Vendor Dashboard):**\n\n" .
-                "• **Order ID/Number:** Go to **Orders → All Orders** in your side menu. Each order starts with a '#' (e.g., #12345).\n" .
-                "• **Transaction Reference:** Go to **Withdrawals → History** or check your **Wallet** section for specific payout references.\n" .
-                "• **Product ID:** Go to **Products → All Products**.",
-            'buyer' => "🔍 **Where to find your info (Customer Dashboard):**\n\n" .
-                "• **Order ID/Number:** Go to **My Orders** in your dashboard. You can also find it in your order confirmation email.\n" .
-                "• **Transaction ID:** Go to **Wallet → Transactions** to see your payment references.\n" .
-                "• **Tracking Number:** Check your order details under 'My Orders'.",
-            'rider' => "🔍 **Where to find your info (Rider App/Dashboard):**\n\n" .
-                "• **Order ID:** Look under the **My Delivery Jobs** or **Active Jobs** section.\n" .
-                "• **Earnings Reference:** Check your **Wallet** history in the app.",
-            default => "You can find your order number in your dashboard under 'My Orders' or in your confirmation email. Transaction IDs are located in your 'Wallet' history."
+            'vendor' => "🔍 **Vendor Dashboard Navigation:**\n\n" .
+                "• **Order Number:** Click on **Orders** in your side menu, then select **All Orders**. You will see your order IDs (e.g., #12345) in the list.\n" .
+                "• **Transaction Reference:** Go to **Withdrawals** → **History**. You can also find your payment records in the **Wallet** section.\n" .
+                "• **Product Details:** Go to **Products** → **All Products**.",
+            'buyer' => "🔍 **Customer Dashboard Navigation:**\n\n" .
+                "• **Order Number:** Click on **My Orders** in your dashboard. You can also find it in your order confirmation email.\n" .
+                "• **Transaction ID:** Go to **Wallet** → **Transactions** to see all your payment references.\n" .
+                "• **Tracking:** Look for the 'Track' button under your order in 'My Orders'.",
+            'rider' => "🔍 **Rider App Navigation:**\n\n" .
+                "• **Order ID:** Look under the **My Delivery Jobs** section.\n" .
+                "• **Payments:** Check your **Wallet** history inside the app.",
+            default => "You can find your order number in your dashboard under 'My Orders' or in your confirmation email."
         };
     }
 

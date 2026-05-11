@@ -622,6 +622,25 @@
             } else {
                 msgEl.innerText = text;
             }
+
+            // INJECT ESCALATION BUTTON IF SUGGESTED
+            if (sender === 'bot') {
+                const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
+                const textLower = text.toLowerCase();
+                const shouldOfferEscalation = triggerKeywords.some(kw => textLower.includes(kw));
+                
+                if (shouldOfferEscalation) {
+                    const escBtn = document.createElement('button');
+                    escBtn.innerText = '🎧 Request Live Support Now';
+                    escBtn.style.cssText = 'display:block; width:100%; margin-top:10px; padding:8px; background:#ff4757; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;';
+                    escBtn.onclick = () => {
+                        escBtn.innerText = 'Requesting...';
+                        escBtn.disabled = true;
+                        document.getElementById('fabi-escalate-btn').click();
+                    };
+                    msgEl.appendChild(escBtn);
+                }
+            }
             
             row.appendChild(msgEl);
             messageContainer.appendChild(row);

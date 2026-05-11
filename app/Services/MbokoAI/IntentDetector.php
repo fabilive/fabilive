@@ -169,7 +169,8 @@ class IntentDetector
         'how_to_find_info' => [
             'where can i find', 'where to see', 'where is my order id', 'get my transaction reference',
             'find my order number', 'where is that', 'how to get id', 'where to find reference',
-            'dashboard help', 'navigation', 'where to click',
+            'dashboard help', 'navigation', 'where to click', 'how to see', 'where will i see',
+            'where to get', 'find my info', 'look for order id', 'order number location',
         ],
     ];
 
