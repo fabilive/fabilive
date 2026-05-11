@@ -691,6 +691,9 @@
             Promise.race([escalationRequest, escalationTimeout])
                 .then(data => {
                     updateUIAsWaiting();
+                    if (data.conversation && data.conversation.message) {
+                        addMessage('system', data.conversation.message);
+                    }
                 })
                 .catch(err => {
                     if (err.message === 'TIMEOUT') {
