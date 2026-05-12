@@ -164,6 +164,7 @@
         let conversationStatus = null;
         let pollInterval = null;
         let selectedRating = 0;
+        let messageCount = 0;
         const botLogo = "{{asset('assets/images/logo.png')}}";
 
         // Initial Inbox Load
@@ -238,6 +239,7 @@
                             if (sender === 'admin' || sender === 'agent') sender = 'agent'; 
                             addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                         });
+                        messageCount = data.messages.length;
                         
                         startChat();
                         backBtn.style.display = 'block';
@@ -308,17 +310,17 @@
                             }
                             
                             // Check for new messages
-                            const currentMsgCount = messageContainer.children.length;
                             const newMsgCount = data.messages.length;
                             
-                            if (newMsgCount > currentMsgCount) {
+                            if (newMsgCount > messageCount) {
                                 // Add only new messages
-                                const newMessages = data.messages.slice(currentMsgCount);
+                                const newMessages = data.messages.slice(messageCount);
                                 newMessages.forEach(msg => {
                                     let sender = msg.sender_type;
                                     if (sender === 'admin' || sender === 'agent') sender = 'agent';
                                     addMessage(sender, msg.body_text || '', !!msg.attachment_url);
                                 });
+                                messageCount = newMsgCount;
                             }
                         }
                     });
@@ -501,8 +503,12 @@
                     if (data.status === 'success') {
                         conversationId = data.conversation_id || (data.message ? data.message.conversation_id : conversationId);
                         
+                        // Increment local message count for the message we just added manually
+                        messageCount++;
+
                         if (data.bot_message) {
                             addMessage('bot', data.bot_message.body_text);
+                            messageCount++;
                             
                             const msgTextLower = data.bot_message.body_text.toLowerCase();
                             const triggerKeywords = ['request live support', 'live agent', 'human agent', 'requesting live agent', 'real person'];
@@ -686,6 +692,7 @@
                     updateUIAsWaiting();
                     if (data.conversation && data.conversation.message) {
                         addMessage('system', data.conversation.message);
+                        messageCount++;
                     }
                 })
                 .catch(err => {

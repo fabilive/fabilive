@@ -55,6 +55,7 @@ class SupportConversationResource extends Resource
                 Tables\Columns\TextColumn::make('assignedAgent.name')->label('Agent'),
                 Tables\Columns\TextColumn::make('started_at')->dateTime()->sortable(),
             ])
+            ->defaultSort('id', 'desc')
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ]);
