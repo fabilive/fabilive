@@ -167,6 +167,9 @@
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="business_registration_certificate"
                                                         placeholder="{{ __('Business Registration Certificate') }}">
+                                                     @if($user->business_registration_certificate)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -180,7 +183,10 @@
                                                 <div class="col-lg-8">
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="taxpayer_card_copy" placeholder="{{ __('Taxpayer Card') }}"
-                                                        required>
+                                                        {{ $user->taxpayer_card_copy ? '' : 'required' }}>
+                                                     @if($user->taxpayer_card_copy)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -201,8 +207,11 @@
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <input type="file" class="option form-control form-control-sm"
-                                                        id="id_card_copy" name="id_card_copy"
-                                                        placeholder="{{ __('National ID Card') }}">
+                                                         id="id_card_copy" name="id_card_copy"
+                                                         placeholder="{{ __('National ID Card') }}">
+                                                     @if($user->id_card_copy)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -214,8 +223,11 @@
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <input type="file" class="option form-control form-control-sm"
-                                                        id="passport_copy" name="passport_copy"
-                                                        placeholder="{{ __('Passport Copy') }}">
+                                                         id="passport_copy" name="passport_copy"
+                                                         placeholder="{{ __('Passport Copy') }}">
+                                                     @if($user->passport_copy)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -228,8 +240,11 @@
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <input type="file" class="option form-control form-control-sm"
-                                                        id="driver_license_copy" name="driver_license_copy"
-                                                        placeholder="{{ __('Driver License Copy') }}">
+                                                         id="driver_license_copy" name="driver_license_copy"
+                                                         placeholder="{{ __('Driver License Copy') }}">
+                                                     @if($user->driver_license_copy)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -254,7 +269,10 @@
                                                     <input type="file" class="option form-control form-control-sm"
                                                         name="submerchant_agreement"
                                                         placeholder="{{ __('Fabilive Sub-Merchant Agreement') }}"
-                                                        required>
+                                                        {{ $user->submerchant_agreement ? '' : 'required' }}>
+                                                     @if($user->submerchant_agreement)
+                                                         <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                     @endif
                                                 </div>
                                             </div>
                                             <br>
@@ -268,6 +286,9 @@
                                                 <div class="col-lg-8">
 
                                                     <input type="file" id="selfieFile" class="w-100" name="selfie_image" style="display:none;">
+                                                    @if($user->selfie_image)
+                                                        <span class="text-success small"><i class="fas fa-check-circle"></i> {{ __('Already Uploaded') }}</span>
+                                                    @endif
 
                                                     <video id="cam" class="w-100 rounded mb-2" style="display:none;"></video>
 
@@ -461,24 +482,32 @@
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script>
         document.getElementById('subscribe-form').addEventListener('submit', function(e) {
-
+            // If it's an AJAX-based payment (like Paystack handled elsewhere), 
+            // we don't want to show loading too early, but for free plans it's good.
+            const isFree = {{ $subs->price == 0 ? 'true' : 'false' }};
+            
             const passport = document.getElementById('passport_copy').files.length;
             const idCard = document.getElementById('id_card_copy').files.length;
             const license = document.getElementById('driver_license_copy').files.length;
+            
+            // Check if they have existing docs in the system
+            const hasExistingPassport = {{ $user->passport_copy ? 'true' : 'false' }};
+            const hasExistingId = {{ $user->id_card_copy ? 'true' : 'false' }};
+            const hasExistingLicense = {{ $user->driver_license_copy ? 'true' : 'false' }};
 
-            if (!passport && !idCard && !license) {
-                e.preventDefault(); // stop form submit
-
+            if (!passport && !idCard && !license && !hasExistingPassport && !hasExistingId && !hasExistingLicense) {
+                e.preventDefault();
                 const errorBox = document.getElementById('identityError');
                 errorBox.classList.remove('d-none');
-
-                errorBox.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
             }
 
+            if (isFree) {
+                const btn = document.getElementById('final-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            }
         });
     </script>
 

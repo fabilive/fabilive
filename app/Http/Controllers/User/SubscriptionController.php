@@ -154,7 +154,9 @@ class SubscriptionController extends UserBaseController
             return redirect()->back();
         }
         $this->validate($request, [
-            'shop_name' => 'unique:users',
+            'shop_name' => 'unique:users,shop_name,'.$this->user->id,
+            'email' => 'unique:users,email,'.$this->user->id,
+            'phone' => 'unique:users,phone,'.$this->user->id,
             'business_registration_certificate' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
 
             'passport_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
@@ -177,9 +179,12 @@ class SubscriptionController extends UserBaseController
             'submerchant_agreement.mimetypes' => __('The sub-merchant agreement must be an image (jpg, png, webp, etc.) or PDF.'),
         ]);
         if (
-            ! $request->hasFile('passport_copy') &&
-            ! $request->hasFile('id_card_copy') &&
-            ! $request->hasFile('driver_license_copy')
+            !$request->hasFile('passport_copy') &&
+            !$request->hasFile('id_card_copy') &&
+            !$request->hasFile('driver_license_copy') &&
+            !$user->passport_copy &&
+            !$user->id_card_copy &&
+            !$user->driver_license_copy
         ) {
             return redirect()->back()
                 ->withErrors([
@@ -282,7 +287,7 @@ class SubscriptionController extends UserBaseController
             $ver = new Verification();
             $ver->user_id = $user->id;
             $ver->attachments = implode(',', $attachments);
-            $ver->text = $request->message;
+            $ver->text = $request->shop_message;
             $ver->status = 'Pending';
             $ver->save();
         }
@@ -299,7 +304,7 @@ class SubscriptionController extends UserBaseController
         $mailer = new GeniusMailer();
         $mailer->sendAutoMail($data);
 
-        return redirect($success_url)->with('success', __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
+        return redirect()->route('user-dashboard')->with('success', __('Vendor Application Submitted Successfully. Please wait for admin approval.'));
     }
 
     public function paycancle()
