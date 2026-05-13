@@ -46,7 +46,7 @@ class SupportFaqCategoryResource extends Resource
                 Tables\Columns\TextColumn::make('context'),
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('sort_order')->sortable(),
-                Tables\Columns\BooleanColumn::make('is_active'),
+                Tables\Columns\IconColumn::make('is_active')->boolean(),
             ])
             ->actions([Tables\Actions\EditAction::make()]);
     }

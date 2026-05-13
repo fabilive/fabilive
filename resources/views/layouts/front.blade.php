@@ -280,7 +280,7 @@
 
   <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
   <script src="{{ asset('assets/front/js/custom.js') }}"></script>
-  <script src="{{ asset('assets/front/js/main.js') }}"></script>
+  <script src="{{ asset('assets/front/js/main.js') }}?v={{ time() }}"></script>
 
 
 

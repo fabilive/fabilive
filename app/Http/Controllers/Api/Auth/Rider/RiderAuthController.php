@@ -25,7 +25,9 @@ class RiderAuthController extends Controller
             ];
             $request->validate($rules);
             $credentials = $request->only(['email', 'password']);
-            if (! $token = auth('rider-api')->setTTL(43200)->attempt($credentials)) {
+            /** @var \Tymon\JWTAuth\JWTGuard $guard */
+            $guard = auth('rider-api');
+            if (! $token = $guard->setTTL(43200)->attempt($credentials)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid credentials',

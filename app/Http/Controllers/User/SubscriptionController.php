@@ -182,9 +182,9 @@ class SubscriptionController extends UserBaseController
             !$request->hasFile('passport_copy') &&
             !$request->hasFile('id_card_copy') &&
             !$request->hasFile('driver_license_copy') &&
-            !$user->passport_copy &&
-            !$user->id_card_copy &&
-            !$user->driver_license_copy
+            !$this->user->passport_copy &&
+            !$this->user->id_card_copy &&
+            !$this->user->driver_license_copy
         ) {
             return redirect()->back()
                 ->withErrors([

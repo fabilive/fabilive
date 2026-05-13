@@ -25,7 +25,7 @@ class ThreeDGeneratorService extends AIService
      */
     public function generateForProduct(Product $product, string $imagePath)
     {
-        $this->auditLog('3d_generation_start', ['product_id' => $product->id, 'image' => $imagePath]);
+        $this->auditLog($product->user_id, '3d_generator', 'start', ['product_id' => $product->id, 'image' => $imagePath]);
 
         try {
             if ($this->provider === 'mock') {
@@ -37,7 +37,7 @@ class ThreeDGeneratorService extends AIService
             return $this->generateMock($product);
 
         } catch (\Exception $e) {
-            $this->auditLog('3d_generation_failed', ['error' => $e->getMessage()]);
+            $this->auditLog($product->user_id, '3d_generator', 'failed', ['error' => $e->getMessage()]);
 
             return null;
         }
@@ -65,7 +65,7 @@ class ThreeDGeneratorService extends AIService
 
         if (file_exists($sourcePath)) {
             copy($sourcePath, public_path($destPath));
-            $this->auditLog('3d_generation_success', ['path' => $destPath, 'type' => 'mock']);
+            $this->auditLog($product->user_id, '3d_generator', 'success', ['path' => $destPath, 'type' => 'mock']);
 
             return $destPath;
         }

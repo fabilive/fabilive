@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth\Rider;
 
 use App\Http\Controllers\Controller;
+use App\Models\Generalsetting;
 use Auth;
 use Illuminate\Http\Request;
 use Validator;
@@ -16,7 +17,7 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $gs = Generalsetting::findOrFail(1);
+        $gs = Generalsetting::safeFirst();
 
         if ($gs->is_capcha == 1) {
             $rules = [

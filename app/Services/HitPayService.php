@@ -58,21 +58,22 @@ class HitPayService
         return $response->json();
     }
 
-    public function generatePaymentLink($amount, $currency = 'SGD', $description = 'Deposit', $redirectUrl = null)
+    public function generatePaymentLink($amount, $currency = 'SGD', $description = 'Deposit', $redirectUrl = null, array $extra = [])
     {
         $fullUrl = "{$this->baseUrl}/v1/payment-requests";
 
-        $response = Http::withHeaders([
-            'X-BUSINESS-API-KEY' => $this->apiKey,
-            'Content-Type' => 'application/json',
-        ])->post($fullUrl, [
+        $payload = array_merge([
             'amount' => $amount,
             'currency' => $currency,
             'purpose' => $description,
             'redirect_url' => $redirectUrl,
             'webhook' => $redirectUrl,
-            //'payment_methods' => ['card'],
-        ]);
+        ], $extra);
+
+        $response = Http::withHeaders([
+            'X-BUSINESS-API-KEY' => $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->post($fullUrl, $payload);
 
         return $response->json();
 

@@ -21,7 +21,7 @@ class RiderProfileController extends Controller
             'message' => 'Login successful',
             'data' => [
                 'rider_type' => $rider->rider_type,
-                'rider' => new \App\Http\Resources\RiderResource($rider),
+                'rider' => new RiderResource($rider),
             ],
         ]);
     }
@@ -218,8 +218,9 @@ class RiderProfileController extends Controller
         $validated = $request->validate($rules);
         $rider->password = Hash::make($validated['password']);
         $rider->save();
-        auth('rider-api')->invalidate(true);
-        $token = auth('rider-api')->setTTL(43200)->login($rider);
+        $guard = auth('rider-api');
+        $guard->invalidate(true);
+        $token = $guard->setTTL(43200)->login($rider);
 
         return response()->json([
             'status' => true,

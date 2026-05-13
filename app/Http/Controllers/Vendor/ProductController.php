@@ -576,8 +576,7 @@ class ProductController extends VendorBaseController
                 if (! empty($request->tags)) {
                     $input['tags'] = implode(',', $request->tags);
                 }
-                $input['price'] = $input['price'];
-                $input['previous_price'] = $input['previous_price'];
+
                 $input['user_id'] = $this->user->id;
                 $attrArr = [];
                 if (! empty($request->category_id)) {
@@ -653,15 +652,11 @@ class ProductController extends VendorBaseController
                 if (isset($input['license'])) {
                     if (is_array($input['license'])) {
                         $input['license'] = implode(', ', $input['license']);
-                    } else {
-                        $input['license'] = $input['license'];
                     }
                 }
                 if (isset($input['license_qty'])) {
                     if (is_array($input['license_qty'])) {
                         $input['license_qty'] = implode(', ', $input['license_qty']);
-                    } else {
-                        $input['license_qty'] = $input['license_qty'];
                     }
                 }
                 $data->fill($input)->save();
@@ -1217,8 +1212,7 @@ class ProductController extends VendorBaseController
             }
 
             // Conert Price According to Currency
-            $input['price'] = $input['price'];
-            $input['previous_price'] = $input['previous_price'];
+
             $input['user_id'] = $this->user->id;
 
             // store filtering attributes for physical product

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Generalsetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class LoginController extends Controller
             'password' => 'required',
         ];
 
-        $gs = \App\Models\Generalsetting::findOrFail(1);
+        $gs = Generalsetting::safeFirst();
         if ($gs->is_capcha == 1) {
             $rules['g-recaptcha-response'] = 'required|captcha';
         }

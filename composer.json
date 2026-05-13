@@ -12,7 +12,7 @@
         "barryvdh/laravel-dompdf": "^2.0",
         "brian2694/laravel-toastr": "^5.57",
         "cartalyst/stripe-laravel": "^15.0",
-
+        "filament/filament": "^3.2",
         "guzzlehttp/guzzle": "^7.8",
         "instamojo/instamojo-php": "^1.0",
         "intervention/image": "^2.7",
@@ -29,12 +29,12 @@
         "predis/predis": "^3.4",
         "pusher/pusher-php-server": "^7.2",
         "razorpay/razorpay": "^2.8",
+        "react/promise": "^3.3",
         "sentry/sentry-laravel": "^4.21",
         "spatie/laravel-activitylog": "^4.8",
         "stripe/stripe-php": "^12.6",
         "tymon/jwt-auth": "^2.0",
-        "yajra/laravel-datatables-oracle": "^10.8",
-        "filament/filament": "^3.2"
+        "yajra/laravel-datatables-oracle": "^10.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

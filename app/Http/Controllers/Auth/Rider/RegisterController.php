@@ -15,7 +15,7 @@ class RegisterController extends Controller
 {
     public function register(Request $request)
     {
-        $gs = Generalsetting::findOrFail(1);
+        $gs = Generalsetting::safeFirst();
         if ($gs->is_capcha == 1 && config('app.env') !== 'local') {
             $rules = [
                 'g-recaptcha-response' => 'required',
@@ -218,7 +218,7 @@ class RegisterController extends Controller
 
     public function token($token)
     {
-        $gs = Generalsetting::findOrFail(1);
+        $gs = Generalsetting::safeFirst();
         if ($gs->is_verification_email == 1) {
             $rider = Rider::where('email_token', '=', $token)->first();
             if (isset($rider)) {
@@ -235,7 +235,7 @@ class RegisterController extends Controller
                 ];
                 $mailer = new GeniusMailer();
                 $mailer->sendAutoMail($data);
-                Auth::gurad('rider')->login($rider);
+                Auth::guard('rider')->login($rider);
 
                 return redirect()->route('rider-dashboard')->with('success', __('Email Verified Successfully'));
             }

@@ -206,6 +206,10 @@ class CampayController extends CheckoutBaseControlller
                     $this->finalizeOrder($order);
                 }
 
+                // Initialize cart object from order data for finalization
+                $cart = json_decode($order->cart, true);
+                $cartObject = new \App\Models\Cart($cart);
+
                 // Unified Finalization (Sessions, Coupons, Rewards, etc.)
                 OrderHelper::finalizeOrder($order, $cartObject);
 

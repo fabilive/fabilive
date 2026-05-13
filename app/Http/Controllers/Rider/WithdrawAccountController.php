@@ -30,7 +30,7 @@ class WithdrawAccountController extends RiderBaseController
             'acc_name' => 'required',
         ];
 
-        if ($request->method == 'Bank') {
+        if ($request->input('method') == 'Bank') {
             $rules['bank_name'] = 'required';
             $rules['iban'] = 'required';
         }
@@ -78,7 +78,7 @@ class WithdrawAccountController extends RiderBaseController
             'acc_name' => 'required',
         ];
 
-        if ($request->method == 'Bank') {
+        if ($request->input('method') == 'Bank') {
             $rules['bank_name'] = 'required';
             $rules['iban'] = 'required';
         }

@@ -11,7 +11,7 @@ use Auth;
 use Config;
 use Illuminate\Http\Request;
 use Session;
-use Socialite;
+use Laravel\Socialite\Facades\Socialite;
 
 class SocialRegisterController extends Controller
 {
@@ -49,22 +49,22 @@ class SocialRegisterController extends Controller
 
         $socialProvider = SocialProvider::where('provider_id', $socialUser->getId())->first();
         if (! $socialProvider) {
-            $user = User::where('email', '=', $socialUser->email)->first();
+            $user = User::where('email', '=', $socialUser->getEmail())->first();
             
             if (!$user) {
                 // Create new user
                 $user = new User;
-                $user->email = $socialUser->email;
-                $user->name = $socialUser->name;
-                $user->photo = $socialUser->avatar_original;
+                $user->email = $socialUser->getEmail();
+                $user->name = $socialUser->getName();
+                $user->photo = $socialUser->getAvatar();
                 $user->email_verified = 'Yes';
                 $user->is_provider = 1;
-                $user->affilate_code = md5($socialUser->name.$socialUser->email);
+                $user->affilate_code = md5($socialUser->getName().$socialUser->getEmail());
                 
                 // Set role
                 if ($role === 'seller') {
                     $user->is_vendor = 2; // Approved vendor status
-                    $user->shop_name = $socialUser->name . "'s Shop";
+                    $user->shop_name = $socialUser->getName() . "'s Shop";
                 } else {
                     $user->is_vendor = 0;
                 }

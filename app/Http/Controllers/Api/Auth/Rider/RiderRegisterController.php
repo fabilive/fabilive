@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\PriceHelper;
+use Illuminate\Support\Facades\Validator;
 
 class RiderRegisterController extends Controller
 {
@@ -114,7 +115,9 @@ class RiderRegisterController extends Controller
             ];
             $mailer = new GeniusMailer();
             $mailer->sendAutoMail($data);
-            $token = auth('rider-api')->setTTL(43200)->login($rider);
+            /** @var \Tymon\JWTAuth\JWTGuard $guard */
+            $guard = auth('rider-api');
+            $token = $guard->setTTL(43200)->login($rider);
         }
 
         return response()->json([
@@ -156,7 +159,9 @@ class RiderRegisterController extends Controller
         $rider->email_verify = 'Yes';
         $rider->update();
 
-        $token = auth('rider-api')->login($rider);
+        /** @var \Tymon\JWTAuth\JWTGuard $guard */
+        $guard = auth('rider-api');
+        $token = $guard->login($rider);
 
         return response()->json([
             'message' => 'Account verified successfully',

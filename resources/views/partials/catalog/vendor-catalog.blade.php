@@ -59,17 +59,17 @@
     </form>
 
 
-    @if ((!empty($cat) && !empty(json_decode($cat->attributes, true))) || (!empty($subcat) && !empty(json_decode($subcat->attributes, true))) || (!empty($childcat) && !empty(json_decode($childcat->attributes, true))))
+    @if ((!empty($cat) && $cat->attributes->count() > 0) || (!empty($subcat) && $subcat->attributes->count() > 0) || (!empty($childcat) && $childcat->attributes->count() > 0))
 
     <form id="attrForm" action="{{ route('front.category',[Request::route('category'),Request::route('subcategory'),Request::route('childcategory')]) }}" method="post">
 
-        @if (!empty($cat) && !empty(json_decode($cat->attributes, true)))
+        @if (!empty($cat) && $cat->attributes->count() > 0)
         @foreach ($cat->attributes as $key => $attr)
 
         <div id="bigbazar-attributes-filter-{{$attr->name}}" class="widget woocommerce bigbazar-attributes-filter widget_layered_nav widget-toggle">
             <h2 class="widget-title">{{$attr->name}}</h2>
             <ul class="swatch-filter-pa_color">
-                @if (!empty($attr->attribute_options))
+                @if ($attr->attribute_options->count() > 0)
                       @foreach ($attr->attribute_options as $key => $option)
                       <div class="form-check ml-0 pl-0">
                         <input name="{{$attr->input_name}}[]" class="form-check-input attribute-input" type="checkbox" id="{{$attr->input_name}}{{$option->id}}" value="{{$option->name}}">
@@ -82,12 +82,12 @@
         @endforeach
         @endif
 
-        @if (!empty($subcat) && !empty(json_decode($subcat->attributes, true)))
+        @if (!empty($subcat) && $subcat->attributes->count() > 0)
             @foreach ($subcat->attributes as $key => $attr)
                 <div id="bigbazar-attributes-filter-{{$attr->name}}" class="widget woocommerce bigbazar-attributes-filter widget_layered_nav widget-toggle">
                     <h2 class="widget-title">{{$attr->name}}</h2>
                     <ul class="swatch-filter-pa_color">
-                        @if (!empty($attr->attribute_options))
+                        @if ($attr->attribute_options->count() > 0)
                               @foreach ($attr->attribute_options as $key => $option)
                               <div class="form-check ml-0 pl-0">
                                 <input name="{{$attr->input_name}}[]" class="form-check-input attribute-input" type="checkbox" id="{{$attr->input_name}}{{$option->id}}" value="{{$option->name}}">
@@ -100,12 +100,12 @@
             @endforeach
         @endif
 
-    @if (!empty($childcat) && !empty(json_decode($childcat->attributes, true)))
+    @if (!empty($childcat) && $childcat->attributes->count() > 0)
         @foreach ($childcat->attributes as $key => $attr)
             <div id="bigbazar-attributes-filter-{{$attr->name}}" class="widget woocommerce bigbazar-attributes-filter widget_layered_nav widget-toggle">
                 <h2 class="widget-title">{{$attr->name}}</h2>
                 <ul class="swatch-filter-pa_color">
-                    @if (!empty($attr->attribute_options))
+                    @if ($attr->attribute_options->count() > 0)
                           @foreach ($attr->attribute_options as $key => $option)
                           <div class="form-check ml-0 pl-0">
                             <input name="{{$attr->input_name}}[]" class="form-check-input attribute-input" type="checkbox" id="{{$attr->input_name}}{{$option->id}}" value="{{$option->name}}">

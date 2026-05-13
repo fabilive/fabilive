@@ -62,7 +62,7 @@ class SupportBotRuleResource extends Resource
                 Tables\Columns\TextColumn::make('pattern_type'),
                 Tables\Columns\TextColumn::make('pattern_value')->searchable(),
                 Tables\Columns\TextColumn::make('priority')->sortable(),
-                Tables\Columns\BooleanColumn::make('is_active'),
+                Tables\Columns\IconColumn::make('is_active')->boolean(),
             ])
             ->actions([Tables\Actions\EditAction::make()]);
     }

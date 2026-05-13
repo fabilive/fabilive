@@ -215,6 +215,13 @@
           }
           $this.find("button.submit-btn").prop("disabled", false);
         },
+        error: function (data) {
+          $this.find(".alert-info").hide();
+          $this.find(".alert-danger").addClass("d-flex");
+          $this.find(".alert-danger").show();
+          $this.find(".alert-danger p").html("Something went wrong. Please try again.");
+          $this.find("button.submit-btn").prop("disabled", false);
+        },
       });
     });
     // MODAL LOGIN FORM ENDS

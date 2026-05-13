@@ -391,8 +391,7 @@ class ProductController extends AdminBaseController
             if (! empty($request->tags)) {
                 $input['tags'] = implode(',', $request->tags);
             }
-            $input['price'] = $input['price'];
-            $input['previous_price'] = $input['previous_price'];
+
             if ($request->cross_products) {
                 $input['cross_products'] = implode(',', $request->cross_products);
             }
@@ -662,8 +661,7 @@ class ProductController extends AdminBaseController
                         $timg->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
                         $input['thumbnail'] = $thumbnail;
 
-                        $input['price'] = $input['price'];
-                        $input['previous_price'] = $input['previous_price'];
+
 
                         // Save Data
                         $data->fill($input)->save();

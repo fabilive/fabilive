@@ -37,7 +37,7 @@ class CouponController extends FrontBaseController
                 }
 
                 $total = $total - $discount;
-                $data[0] = \PriceHelper::showCurrencyPrice($total);
+                $data[0] = PriceHelper::showCurrencyPrice($total);
                 $data[1] = $code;
                 $data[2] = $discount;
                 Session::put('coupon', $data[2]);
@@ -47,7 +47,7 @@ class CouponController extends FrontBaseController
                 Session::put('coupon_total', $data[0]);
                 Session::put('coupon_total_raw', $total);
                 $data[3] = 'referral';
-                $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
+                $data[4] = PriceHelper::showCurrencyPrice($data[2]);
                 $data[5] = 1;
 
                 return response()->json($data);
@@ -122,7 +122,7 @@ class CouponController extends FrontBaseController
                         $val = $total / 100;
                         $sub = $val * $coupon->price;
                         $total = $total - $sub;
-                        $data[0] = \PriceHelper::showCurrencyPrice($total);
+                        $data[0] = PriceHelper::showCurrencyPrice($total);
                         $data[1] = $code;
                         $data[2] = round($sub, 2);
                         Session::put('coupon', $data[2]);
@@ -150,8 +150,8 @@ class CouponController extends FrontBaseController
                         Session::put('coupon_id', $coupon->id);
                         Session::put('coupon_total', $data[0]);
                         $data[3] = $coupon->id;
-                        $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
-                        $data[0] = \PriceHelper::showCurrencyPrice($data[0]);
+                        $data[4] = PriceHelper::showCurrencyPrice($data[2]);
+                        $data[0] = PriceHelper::showCurrencyPrice($data[0]);
                         Session::put('coupon_percentage', 0);
                         $data[5] = 1;
 
@@ -202,7 +202,7 @@ class CouponController extends FrontBaseController
                 }
 
                 $total = $total - $discount;
-                $data[0] = \PriceHelper::showCurrencyPrice($total);
+                $data[0] = PriceHelper::showCurrencyPrice($total);
                 $data[1] = $code;
                 $data[2] = $discount;
                 Session::put('coupon', $data[2]);
@@ -213,7 +213,7 @@ class CouponController extends FrontBaseController
                 Session::put('coupon_total_raw', $total);
                 
                 $data[3] = 'referral';
-                $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
+                $data[4] = PriceHelper::showCurrencyPrice($data[2]);
                 $data[5] = 1;
                 $data[6] = (float) round($total, 2);
 
@@ -314,7 +314,7 @@ class CouponController extends FrontBaseController
                         $sub = $val * $coupon->price;
                         $total = $total - $sub;
                         $total = $total + $_GET['shipping_cost'];
-                        $data[0] = \PriceHelper::showCurrencyPrice($total);
+                        $data[0] = PriceHelper::showCurrencyPrice($total);
                         $data[1] = $code;
                         $data[2] = round($sub, 2);
 
@@ -341,8 +341,8 @@ class CouponController extends FrontBaseController
                         $data[1] = $code;
                         $data[2] = $coupon->price * $curr->value;
                         $data[3] = $coupon->id;
-                        $data[4] = \PriceHelper::showCurrencyPrice($data[2]);
-                        $data[0] = \PriceHelper::showCurrencyPrice($data[0]);
+                        $data[4] = PriceHelper::showCurrencyPrice($data[2]);
+                        $data[0] = PriceHelper::showCurrencyPrice($data[0]);
                         Session::put('coupon', $data[2]);
                         Session::put('coupon_code', $code);
                         Session::put('coupon_id', $coupon->id);

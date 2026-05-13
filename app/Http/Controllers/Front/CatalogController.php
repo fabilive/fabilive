@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use App\Helpers\OrderHelper;
+use Illuminate\Support\Facades\Validator;
 
 class CatalogController extends FrontBaseController
 {
@@ -137,7 +138,8 @@ class CatalogController extends FrontBaseController
         $prods = $prods->where(function ($query) use ($cat, $subcat, $childcat, $request) {
             $flag = 0;
             if (! empty($cat)) {
-                foreach ($cat->attributes as $key => $attribute) {
+                $cat_attributes = $cat->attributes()->get();
+                foreach ($cat_attributes as $key => $attribute) {
                     $inname = $attribute->input_name;
                     $chFilters = $request["$inname"];
 
@@ -155,7 +157,8 @@ class CatalogController extends FrontBaseController
             }
 
             if (! empty($subcat)) {
-                foreach ($subcat->attributes as $attribute) {
+                $subcat_attributes = $subcat->attributes()->get();
+                foreach ($subcat_attributes as $attribute) {
                     $inname = $attribute->input_name;
                     $chFilters = $request["$inname"];
 
@@ -173,7 +176,8 @@ class CatalogController extends FrontBaseController
             }
 
             if (! empty($childcat)) {
-                foreach ($childcat->attributes as $attribute) {
+                $childcat_attributes = $childcat->attributes()->get();
+                foreach ($childcat_attributes as $attribute) {
                     $inname = $attribute->input_name;
                     $chFilters = $request["$inname"];
 

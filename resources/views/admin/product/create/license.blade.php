@@ -44,7 +44,7 @@
 												<div class="col-lg-12">
 													<div class="product-description">
 														<div class="body-area">
-															<div class="gocover" style="background: url({{asset('assets/images/'.$gs->admin_loader)}}) no-repeat scroll center center rgba(45, 45, 45, 0.5);"></div>
+															<div class="gocover" style="background: url({{asset('assets/images/'.($gs->admin_loader ?? ''))}}) no-repeat scroll center center rgba(45, 45, 45, 0.5);"></div>
 															
 
 															<div class="row">
@@ -452,7 +452,7 @@
 																			{{ __('Product Current Price') }}*
 																		</h4>
 																		<p class="sub-heading">
-																			({{ __('In') }} {{$sign->name}})
+																			({{ __('In') }} {{ $sign->name ?? '' }})
 																		</p>
 																	</div>
 																</div>

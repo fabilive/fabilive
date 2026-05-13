@@ -130,7 +130,7 @@ class ReferralService
         $referrerReward = $gs ? $gs->referral_bonus : 150;
         $referredReward = $gs ? $gs->referral_amount : 500;
 
-        DB::transaction(function () use ($referralCode, $order, $referrerReward) {
+        DB::transaction(function () use ($referralCode, $order, $referrerReward, $referredReward) {
             // Create usage record
             ReferralUsage::create([
                 'referral_code_id' => $referralCode->id,

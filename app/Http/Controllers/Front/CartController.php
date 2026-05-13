@@ -144,7 +144,7 @@ class CartController extends FrontBaseController
         // Set Attribute
 
         if (! empty($prod->attributes)) {
-            $attrArr = json_decode($prod->attributes, true);
+            $attrArr = is_array($prod->attributes) ? $prod->attributes : json_decode($prod->attributes, true);
 
             $count = count($attrArr);
             $i = 0;
@@ -260,7 +260,7 @@ class CartController extends FrontBaseController
         // Set Attribute
 
         if (! empty($prod->attributes)) {
-            $attrArr = json_decode($prod->attributes, true);
+            $attrArr = is_array($prod->attributes) ? $prod->attributes : json_decode($prod->attributes, true);
 
             $count = count($attrArr);
             $i = 0;
@@ -494,7 +494,7 @@ class CartController extends FrontBaseController
         Session::put('notifications', $notifications);
         $data[0] = count($cart->items);
         $data[1] = $cart->totalPrice;
-        $data[1] = \PriceHelper::showCurrencyPrice($data[1] * $curr->value);
+        $data[1] = PriceHelper::showCurrencyPrice($data[1] * $curr->value);
 
         return response()->json($data);
     }
@@ -654,7 +654,7 @@ class CartController extends FrontBaseController
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'previous_price', 'discount_date_start', 'discount_date_end', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes', 'stock_check']);
         
         if (! empty($prod->attributes)) {
-            $attrArr = json_decode($prod->attributes, true);
+            $attrArr = is_array($prod->attributes) ? $prod->attributes : json_decode($prod->attributes, true);
             $count = count($attrArr);
             $j = 0;
             if (! empty($attrArr)) {
@@ -713,9 +713,9 @@ class CartController extends FrontBaseController
 
         $data[1] = $cart->items[$itemid]['qty'];
         $data[2] = $cart->items[$itemid]['price'];
-        $data[0] = \PriceHelper::showCurrencyPrice($data[0] * $curr->value);
-        $data[2] = \PriceHelper::showCurrencyPrice($data[2] * $curr->value);
-        $data[3] = \PriceHelper::showCurrencyPrice($data[3] * $curr->value);
+        $data[0] = PriceHelper::showCurrencyPrice($data[0] * $curr->value);
+        $data[2] = PriceHelper::showCurrencyPrice($data[2] * $curr->value);
+        $data[3] = PriceHelper::showCurrencyPrice($data[3] * $curr->value);
         $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '('.$cart->items[$itemid]['discount'].'% '.__('Off').')';
 
         return response()->json($data);
@@ -734,7 +734,7 @@ class CartController extends FrontBaseController
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'photo', 'size', 'size_qty', 'size_price', 'color', 'price', 'previous_price', 'discount_date_start', 'discount_date_end', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'whole_sell_qty', 'whole_sell_discount', 'attributes']);
 
         if (! empty($prod->attributes)) {
-            $attrArr = json_decode($prod->attributes, true);
+            $attrArr = is_array($prod->attributes) ? $prod->attributes : json_decode($prod->attributes, true);
             $count = count($attrArr);
             $j = 0;
             if (! empty($attrArr)) {
@@ -779,9 +779,9 @@ class CartController extends FrontBaseController
 
         $data[1] = $cart->items[$itemid]['qty'];
         $data[2] = $cart->items[$itemid]['price'];
-        $data[0] = \PriceHelper::showCurrencyPrice($data[0] * $curr->value);
-        $data[2] = \PriceHelper::showCurrencyPrice($data[2] * $curr->value);
-        $data[3] = \PriceHelper::showCurrencyPrice($data[3] * $curr->value);
+        $data[0] = PriceHelper::showCurrencyPrice($data[0] * $curr->value);
+        $data[2] = PriceHelper::showCurrencyPrice($data[2] * $curr->value);
+        $data[3] = PriceHelper::showCurrencyPrice($data[3] * $curr->value);
         $data[4] = $cart->items[$itemid]['discount'] == 0 ? '' : '('.$cart->items[$itemid]['discount'].'% '.__('Off').')';
 
         return response()->json($data);

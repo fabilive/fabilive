@@ -64,19 +64,19 @@ class WithdrawController
 
                     $newwithdraw = new Withdraw();
                     $newwithdraw['user_id'] = $from->id;
-                    $newwithdraw['method'] = $request->method;
+                    $newwithdraw['method'] = $request->input('method');
                     $newwithdraw['amount'] = number_format($finalamount, 2, '.', '');
                     $newwithdraw['fee'] = $fee;
                     $newwithdraw['type'] = 'rider';
                     $newwithdraw['reference'] = $request->reference;
 
-                    if ($request->method == 'Campay') {
+                    if ($request->input('method') == 'Campay') {
                         $newwithdraw['network'] = $request->network;
                         $newwithdraw['campay_acc_no'] = $request->campay_acc_no;
                         $newwithdraw['campay_acc_name'] = $request->campay_acc_name;
                     }
 
-                    if ($request->method == 'Bank') {
+                    if ($request->input('method') == 'Bank') {
                         $newwithdraw['iban'] = $request->iban;
                         $newwithdraw['acc_name'] = $request->acc_name;
                         $newwithdraw['address'] = $request->address;

@@ -46,7 +46,7 @@ class CheckoutController extends FrontBaseController
             ]);
         }
 
-        $grandTotal = \PriceHelper::calculateDeliveryFee($cart);
+        $grandTotal = PriceHelper::calculateDeliveryFee($cart);
         $vendorDistances = [];
         $uniqueSellers = [];
         foreach ($cart->items as $item) {

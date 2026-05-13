@@ -171,7 +171,7 @@ class CheckoutController extends Controller
                     $input['affilate_charge'] = $sub;
                 }
             }
-            $service_areas = \App\Models\ServiceArea::all();
+            $service_areas = ServiceArea::all();
             $input['service_area_id'] = $request->service_area_id;
             
             // Ensure coupon details are captured if passed (Standard for mobile checkouts)
@@ -298,8 +298,33 @@ class CheckoutController extends Controller
                             }
                         }
                     }
-                    $cart = unserialize(bzdecompress(utf8_decode($data->cart)));
-                    foreach ($cart->items as $prod) {
+
+                    $raw_cart = $data->cart;
+                    $cart = json_decode($raw_cart, true);
+                    if ($cart === null && ! empty($raw_cart)) {
+                        try {
+                            if (strpos($raw_cart, 'a:') === 0 || strpos($raw_cart, 'O:') === 0) {
+                                $cart = unserialize($raw_cart);
+                            } elseif (function_exists('bzdecompress')) {
+                                $cart = unserialize(bzdecompress(utf8_decode($raw_cart)));
+                            }
+                            
+                            if (is_object($cart)) {
+                                $cart = json_decode(json_encode($cart), true);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error('Cart decompression failed: ' . $e->getMessage());
+                        }
+                    }
+
+                    if (!is_array($cart)) {
+                        $cart = ['items' => []];
+                    }
+                    if (!isset($cart['items'])) {
+                        $cart = ['items' => $cart];
+                    }
+
+                    foreach ($cart['items'] as $prod) {
                         $x = (string) $prod['stock'];
                         if ($x != null) {
                             $product = Product::find($prod['item']['id']);
