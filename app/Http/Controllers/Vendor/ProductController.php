@@ -671,19 +671,18 @@ class ProductController extends VendorBaseController
                         }
                         if (is_array($request->galval) && in_array($key, $request->galval)) {
                             $gallery = new Gallery;
-                            $name = \PriceHelper::ImageCreateName($file);
-                            
                             $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
                             if ($is_image) {
                                 try {
-                                    $img = \Image::make($file->getRealPath())->resize(800, 800);
-                                    $img->save(public_path().'/assets/images/galleries/'.$name);
+                                    $name = \App\Helpers\ImageHelper::processImage($file->getRealPath(), public_path('assets/images/galleries'), 800, 800, true, strtolower($file->getClientOriginalExtension()));
                                 } catch (\Exception $e) {
                                     \Log::warning('Vendor Product Store: Gallery image processing failed: ' . $e->getMessage());
-                                    $file->move(public_path().'/assets/images/galleries/', $name);
+                                    $name = \PriceHelper::ImageCreateName($file);
+                                    $file->move(public_path('assets/images/galleries'), $name);
                                 }
                             } else {
-                                $file->move(public_path().'/assets/images/galleries/', $name);
+                                $name = \PriceHelper::ImageCreateName($file);
+                                $file->move(public_path('assets/images/galleries'), $name);
                             }
 
                             $gallery['photo'] = $name;
@@ -1285,14 +1284,18 @@ class ProductController extends VendorBaseController
                     }
                     if (is_array($request->galval) && in_array($key, $request->galval)) {
                         $gallery = new Gallery;
-                        $name = \PriceHelper::ImageCreateName($file);
-                        
                         $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
                         if ($is_image) {
-                            $img = \Image::make($file->getRealPath())->resize(800, 800);
-                            $img->save(public_path().'/assets/images/galleries/'.$name);
+                            try {
+                                $name = \App\Helpers\ImageHelper::processImage($file->getRealPath(), public_path('assets/images/galleries'), 800, 800, true, strtolower($file->getClientOriginalExtension()));
+                            } catch (\Exception $e) {
+                                \Log::warning('Vendor Product Update: Gallery image processing failed: ' . $e->getMessage());
+                                $name = \PriceHelper::ImageCreateName($file);
+                                $file->move(public_path('assets/images/galleries'), $name);
+                            }
                         } else {
-                            $file->move(public_path().'/assets/images/galleries/', $name);
+                            $name = \PriceHelper::ImageCreateName($file);
+                            $file->move(public_path('assets/images/galleries'), $name);
                         }
 
                         $gallery['photo'] = $name;

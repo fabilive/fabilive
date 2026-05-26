@@ -18,6 +18,12 @@
 
                               <div id="gallery_09" class="product-slide-thumb">
                                   <div class="owl-carousel four-carousel dot-disable nav-arrow-middle owl-mx-5">
+                                      {{-- Add Main Image as the first thumbnail --}}
+                                      <div class="item">
+                                          <a class="active" href="{{ $productt->photo }}" data-image="{{ $productt->photo }}" data-zoom-image="{{ $productt->photo }}">
+                                              <img src="{{ $productt->photo }}" alt="Thumb Image" />
+                                          </a>
+                                      </div>
                                   @foreach($productt->galleries as $gal)
                                       @php
                                         $file_ext = pathinfo($gal->photo, PATHINFO_EXTENSION);

@@ -473,8 +473,19 @@ class ProductController extends AdminBaseController
                     }
                     if (in_array($key, $request->galval)) {
                         $gallery = new Gallery;
-                        $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
-                        $file->move(public_path('assets/images/galleries'), $name);
+                        $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
+                        if ($is_image) {
+                            try {
+                                $name = \App\Helpers\ImageHelper::processImage($file->getRealPath(), public_path('assets/images/galleries'), 800, 800, true, strtolower($file->getClientOriginalExtension()));
+                            } catch (\Exception $e) {
+                                \Log::warning('Admin Product Store: Gallery image processing failed: ' . $e->getMessage());
+                                $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
+                                $file->move(public_path('assets/images/galleries'), $name);
+                            }
+                        } else {
+                            $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
+                            $file->move(public_path('assets/images/galleries'), $name);
+                        }
                         $gallery['photo'] = $name;
                         $gallery['product_id'] = $lastid;
                         $gallery->save();
