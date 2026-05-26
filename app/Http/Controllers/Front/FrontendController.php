@@ -215,8 +215,14 @@ class FrontendController extends FrontBaseController
 
         try {
             $data['sale_products'] = cache()->remember('homepage_sale_products', now()->addHour(), function() use ($gs) {
-                return Product::whereSale(1)->whereStatus(1)
-                    ->take($gs->sale_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['top_vendor_ids'])) {
+                    $q->whereIn('user_id', $dynamicIds['top_vendor_ids']);
+                } else {
+                    $q->whereSale(1);
+                }
+                return $q->take($gs->sale_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
@@ -235,11 +241,20 @@ class FrontendController extends FrontBaseController
 
         try {
             $data['popular_products'] = cache()->remember('homepage_popular_products', now()->addHour(), function() use ($gs) {
-                return Product::whereStatus(1)->whereFeatured(1)
-                    ->take($gs->popular_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['popular_product_ids'])) {
+                    $q->whereIn('id', $dynamicIds['popular_product_ids']);
+                    if (count($dynamicIds['popular_product_ids']) > 0) {
+                        $q->orderByRaw('FIELD(id, ' . implode(',', $dynamicIds['popular_product_ids']) . ')');
+                    }
+                } else {
+                    $q->whereFeatured(1)->latest('id');
+                }
+                return $q->take($gs->popular_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
-                    ->latest('id')->get();
+                    ->get();
             });
         } catch (\Exception $e) {}
 
@@ -265,11 +280,20 @@ class FrontendController extends FrontBaseController
 
         try {
             $data['trending_products'] = cache()->remember('homepage_trending_products', now()->addHour(), function() use ($gs) {
-                return Product::whereStatus(1)->whereTrending(1)
-                    ->take($gs->trending_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['trending_product_ids'])) {
+                    $q->whereIn('id', $dynamicIds['trending_product_ids']);
+                    if (count($dynamicIds['trending_product_ids']) > 0) {
+                        $q->orderByRaw('FIELD(id, ' . implode(',', $dynamicIds['trending_product_ids']) . ')');
+                    }
+                } else {
+                    $q->whereTrending(1)->latest('id');
+                }
+                return $q->take($gs->trending_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor'), 'category'])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
-                    ->latest('id')->get();
+                    ->get();
             });
         } catch (\Exception $e) {}
 
@@ -323,8 +347,14 @@ class FrontendController extends FrontBaseController
             } catch (\Exception $e) {}
 
             try {
-                $data['sale_products'] = Product::whereSale(1)->whereStatus(1)
-                    ->take($gs->sale_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['top_vendor_ids'])) {
+                    $q->whereIn('user_id', $dynamicIds['top_vendor_ids']);
+                } else {
+                    $q->whereSale(1);
+                }
+                $data['sale_products'] = $q->take($gs->sale_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
                     ->latest('id')->get();
@@ -339,11 +369,20 @@ class FrontendController extends FrontBaseController
             } catch (\Exception $e) {}
 
             try {
-                $data['popular_products'] = Product::whereStatus(1)->whereFeatured(1)
-                    ->take($gs->popular_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['popular_product_ids'])) {
+                    $q->whereIn('id', $dynamicIds['popular_product_ids']);
+                    if (count($dynamicIds['popular_product_ids']) > 0) {
+                        $q->orderByRaw('FIELD(id, ' . implode(',', $dynamicIds['popular_product_ids']) . ')');
+                    }
+                } else {
+                    $q->whereFeatured(1)->latest('id');
+                }
+                $data['popular_products'] = $q->take($gs->popular_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
-                    ->latest('id')->get();
+                    ->get();
             } catch (\Exception $e) {}
 
             try {
@@ -363,11 +402,20 @@ class FrontendController extends FrontBaseController
             } catch (\Exception $e) {}
 
             try {
-                $data['trending_products'] = Product::whereStatus(1)->whereTrending(1)
-                    ->take($gs->trending_count ?: 8)
+                $dynamicIds = $this->getDynamicSalesData();
+                $q = Product::whereStatus(1);
+                if (!empty($dynamicIds['trending_product_ids'])) {
+                    $q->whereIn('id', $dynamicIds['trending_product_ids']);
+                    if (count($dynamicIds['trending_product_ids']) > 0) {
+                        $q->orderByRaw('FIELD(id, ' . implode(',', $dynamicIds['trending_product_ids']) . ')');
+                    }
+                } else {
+                    $q->whereTrending(1)->latest('id');
+                }
+                $data['trending_products'] = $q->take($gs->trending_count ?: 8)
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
                     ->withCount('ratings')->withAvg('ratings', 'rating')
-                    ->latest('id')->get();
+                    ->get();
             } catch (\Exception $e) {}
 
             try {
@@ -778,5 +826,78 @@ class FrontendController extends FrontBaseController
     public function success(Request $request, $get)
     {
         return view('frontend.thank', compact('get'));
+    }
+
+    private function getDynamicSalesData()
+    {
+        return cache()->remember('homepage_dynamic_sales_data', now()->addHour(), function() {
+            $data = [
+                'top_vendor_ids' => [],
+                'popular_product_ids' => [],
+                'trending_product_ids' => []
+            ];
+
+            try {
+                // 1. Top Sellers: Top vendors by order volume
+                $data['top_vendor_ids'] = \App\Models\VendorOrder::select('user_id', \Illuminate\Support\Facades\DB::raw('SUM(qty) as total_qty'))
+                    ->where('user_id', '!=', 0)
+                    ->groupBy('user_id')
+                    ->orderBy('total_qty', 'desc')
+                    ->take(20)
+                    ->pluck('user_id')
+                    ->toArray();
+                
+                // 2. Buyers Choice: Most ordered products
+                $orders = \App\Models\Order::latest('id')->take(500)->get(['cart']);
+                $productSales = [];
+                foreach($orders as $order) {
+                    $cart = $order->cart;
+                    if (is_string($cart)) {
+                        $cart = json_decode($cart, true);
+                        if ($cart === null && !empty($order->cart)) {
+                            $cart = @unserialize($order->cart);
+                            if (is_object($cart)) {
+                                $cart = json_decode(json_encode($cart), true);
+                            }
+                        }
+                    } elseif (is_object($cart)) {
+                        $cart = json_decode(json_encode($cart), true);
+                    }
+                    
+                    if (is_array($cart) && isset($cart['items'])) {
+                        foreach($cart['items'] as $item) {
+                            $pid = isset($item['item']['id']) ? $item['item']['id'] : 0;
+                            if ($pid) {
+                                $qty = isset($item['qty']) ? (int)$item['qty'] : 1;
+                                if (!isset($productSales[$pid])) {
+                                    $productSales[$pid] = 0;
+                                }
+                                $productSales[$pid] += $qty;
+                            }
+                        }
+                    }
+                }
+                
+                arsort($productSales);
+                $data['popular_product_ids'] = array_slice(array_keys($productSales), 0, 20);
+
+                // 3. Trending: High views + High sales
+                $topViewed = \App\Models\Product::where('status', 1)->orderBy('views', 'desc')->take(100)->pluck('views', 'id')->toArray();
+                
+                $trendingScores = [];
+                foreach($topViewed as $pid => $views) {
+                    $sales = $productSales[$pid] ?? 0;
+                    $trendingScores[$pid] = ($sales * 10) + $views;
+                }
+                
+                arsort($trendingScores);
+                $data['trending_product_ids'] = array_slice(array_keys($trendingScores), 0, 20);
+
+            } catch (\Exception $e) {
+                \Log::error('Error generating dynamic sales data: ' . $e->getMessage());
+            }
+
+            return $data;
+        });
     }
 }
