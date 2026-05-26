@@ -10,7 +10,7 @@
             <div class="col-12">
                 <h3 class="mb-2 text-white">{{ isset($vendor) ? $vendor->shop_name : __('Products') }}</h3>
                 @if(isset($vendor))
-                <div class="mt-3">
+                <div class="mt-3 d-flex flex-wrap justify-content-center" style="gap: 10px;">
                     @if(Auth::check() && Auth::user()->id != $vendor->id)
                         @php
                             $fav = App\Models\FavoriteSeller::where('user_id', Auth::user()->id)->where('vendor_id', $vendor->id)->first();
