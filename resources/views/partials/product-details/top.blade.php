@@ -19,10 +19,22 @@
                               <div id="gallery_09" class="product-slide-thumb">
                                   <div class="owl-carousel four-carousel dot-disable nav-arrow-middle owl-mx-5">
                                   @foreach($productt->galleries as $gal)
+                                      @php
+                                        $file_ext = pathinfo($gal->photo, PATHINFO_EXTENSION);
+                                        $is_video = in_array(strtolower($file_ext), ['mp4', 'mov', 'avi', 'webm']);
+                                      @endphp
                                       <div class="item">
-                                          <a class="active" href="{{asset('assets/images/galleries/'.$gal->photo)}}" data-image="{{asset('assets/images/galleries/'.$gal->photo)}}" data-zoom-image="{{asset('assets/images/galleries/'.$gal->photo)}}">
-                                              <img src="{{asset('assets/images/galleries/'.$gal->photo)}}" alt="Thumb Image" />
-                                          </a>
+                                          @if($is_video)
+                                            <div class="gallery-video-wrapper" style="position: relative; padding-top: 56.25%;">
+                                                <video style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" controls>
+                                                    <source src="{{asset('assets/images/galleries/'.$gal->photo)}}" type="video/{{$file_ext}}">
+                                                </video>
+                                            </div>
+                                          @else
+                                            <a class="active" href="{{asset('assets/images/galleries/'.$gal->photo)}}" data-image="{{asset('assets/images/galleries/'.$gal->photo)}}" data-zoom-image="{{asset('assets/images/galleries/'.$gal->photo)}}">
+                                                <img src="{{asset('assets/images/galleries/'.$gal->photo)}}" alt="Thumb Image" />
+                                            </a>
+                                          @endif
                                       </div>
                                   @endforeach
                                   </div>

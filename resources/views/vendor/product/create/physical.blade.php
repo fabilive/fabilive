@@ -718,7 +718,7 @@
                                         </div>
                                         <input type="hidden" id="feature_photo" name="photo" value="">
                                         <input type="file" name="gallery[]" class="hidden" id="uploadgallery"
-                                            multiple>
+                                            accept="image/*,video/*" multiple>
                                         <div class="row mb-4">
                                             <div class="col-lg-12 mb-2">
                                                 <div class="left-area">
@@ -877,7 +877,7 @@
         <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">{{ __('Image Gallery') }}</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">{{ __('Image & Video Gallery') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -896,7 +896,7 @@
                                         class="fas fa-check"></i> {{ __('Done') }}</a>
                             </div>
                             <div class="col-sm-12 text-center">(
-                                <small>{{ __('You can upload multiple Images.') }}</small> )</div>
+                                <small>{{ __('You can upload multiple Images and Videos.') }}</small> )</div>
                         </div>
                     </div>
                     <div class="gallery-images">
@@ -939,14 +939,22 @@
             $("#uploadgallery").change(function() {
                 var total_file = document.getElementById("uploadgallery").files.length;
                 for (var i = 0; i < total_file; i++) {
+                    var file = event.target.files[i];
+                    var is_video = file.type.startsWith('video/');
+                    var media_html = '';
+                    if(is_video) {
+                        media_html = '<video width="100%" height="auto" controls><source src="' + URL.createObjectURL(file) + '" type="' + file.type + '"></video>';
+                    } else {
+                        media_html = '<img src="' + URL.createObjectURL(file) + '" alt="gallery image">';
+                    }
+
                     $('.selected-image .row').append('<div class="col-sm-6">' +
                         '<div class="img gallery-img">' +
                         '<span class="remove-img"><i class="fas fa-times"></i>' +
                         '<input type="hidden" value="' + i + '">' +
                         '</span>' +
-                        '<a href="' + URL.createObjectURL(event.target.files[i]) + '" target="_blank">' +
-                        '<img src="' + URL.createObjectURL(event.target.files[i]) +
-                        '" alt="gallery image">' +
+                        '<a href="' + URL.createObjectURL(file) + '" target="_blank">' +
+                        media_html +
                         '</a>' +
                         '</div>' +
                         '</div> '

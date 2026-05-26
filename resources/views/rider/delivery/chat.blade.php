@@ -50,7 +50,7 @@
 
                     <div class="chat-messages d-flex flex-column" id="chat-box">
                         @forelse($thread->messages as $msg)
-                            <div class="message {{ $msg->sent_user == auth()->guard('rider')->id() ? 'sent' : 'received' }}">
+                            <div class="message {{ $msg->sender_id == auth()->guard('rider')->id() ? 'sent' : 'received' }}">
                                 {{ $msg->message }}
                                 <div class="text-right mt-1" style="font-size: 0.7rem; opacity: 0.7;">
                                     {{ $msg->created_at->format('h:i A') }}
@@ -143,13 +143,14 @@
 
     // Polling for new messages (simple implementation for now)
     setInterval(() => {
-        fetch("{{ url('/rider/delivery/chat/messages') }}/" + threadId)
+        fetch("{{ route('rider-delivery-chat-messages', $thread->id) }}")
         .then(res => res.json())
         .then(data => {
             if(data.status) {
                 const currentCount = chatBox.querySelectorAll('.message').length;
                 if(data.messages.length > currentCount) {
-                    // Refresh if new messages (could be optimized)
+                    // Update: instead of reload, just append new ones? 
+                    // For now reload is safer but we should probably use Pusher.
                     location.reload(); 
                 }
             }

@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Message;
+use App\Models\ChatMessages;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -18,7 +18,7 @@ class DeliveryMessageSent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(Message $message)
+    public function __construct(ChatMessages $message)
     {
         $this->message = $message;
     }
@@ -32,7 +32,7 @@ class DeliveryMessageSent implements ShouldBroadcastNow
     {
         // Use a private channel for the specific delivery chat thread
         return [
-            new PrivateChannel('delivery-chat.' . $this->message->delivery_chat_thread_id),
+            new PrivateChannel('delivery-chat.' . $this->message->chat_id),
         ];
     }
 
@@ -53,9 +53,9 @@ class DeliveryMessageSent implements ShouldBroadcastNow
     {
         return [
             'id' => $this->message->id,
-            'delivery_chat_thread_id' => $this->message->delivery_chat_thread_id,
+            'delivery_chat_thread_id' => $this->message->chat_id,
             'message' => $this->message->message,
-            'sent_user' => $this->message->sent_user,
+            'sent_user' => $this->message->sender_id,
             'created_at' => $this->message->created_at->toDateTimeString(),
         ];
     }

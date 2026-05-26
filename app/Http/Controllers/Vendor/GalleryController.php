@@ -30,14 +30,21 @@ class GalleryController extends VendorBaseController
         if ($files = $request->file('gallery')) {
             foreach ($files as $key => $file) {
                 $val = $file->getClientOriginalExtension();
-                if ($val == 'jpeg' || $val == 'jpg' || $val == 'png' || $val == 'svg') {
+                if (in_array(strtolower($val), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif'])) {
                     $gallery = new Gallery;
-
                     $img = Image::make($file->getRealPath())->resize(800, 800);
-                    $thumbnail = time().Str::random(8).'.jpg';
+                    $thumbnail = time().Str::random(8).'.'.$val;
                     $img->save(public_path().'/assets/images/galleries/'.$thumbnail);
 
                     $gallery['photo'] = $thumbnail;
+                    $gallery['product_id'] = $lastid;
+                    $gallery->save();
+                    $data[] = $gallery;
+                } elseif (in_array(strtolower($val), ['mp4', 'mov', 'avi', 'webm'])) {
+                    $gallery = new Gallery;
+                    $name = time().Str::random(8).'.'.$val;
+                    $file->move(public_path().'/assets/images/galleries/', $name);
+                    $gallery['photo'] = $name;
                     $gallery['product_id'] = $lastid;
                     $gallery->save();
                     $data[] = $gallery;

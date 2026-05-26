@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Compare extends Model
+class Compare
 {
     public $items = null;
 
-    public function __construct($oldCompare)
+    public function __construct($oldCompare = null)
     {
         if ($oldCompare) {
             $this->items = $oldCompare->items;

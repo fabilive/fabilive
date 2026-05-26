@@ -1087,7 +1087,7 @@
 	<div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalCenterTitle">{{ __('Image Gallery') }}</h5>
+				<h5 class="modal-title" id="exampleModalCenterTitle">{{ __('Image & Video Gallery') }}</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">×</span>
 				</button>
@@ -1101,7 +1101,7 @@
 									@csrf
 									<input type="hidden" id="pid" name="product_id" value="">
 									<input type="file" name="gallery[]" class="hidden" id="uploadgallery"
-										accept="image/*" multiple>
+										accept="image/*,video/*" multiple>
 									<label for="image-upload" id="prod_gallery"><i class="icofont-upload-alt"></i>{{
 										__('Upload File') }}</label>
 								</form>
@@ -1111,7 +1111,7 @@
 							<a href="javascript:;" class="upload-done" data-dismiss="modal"> <i
 									class="fas fa-check"></i> {{ __('Done') }}</a>
 						</div>
-						<div class="col-sm-12 text-center">( <small>{{ __('You can upload multiple Images.') }}</small>
+						<div class="col-sm-12 text-center">( <small>{{ __('You can upload multiple Images and Videos.') }}</small>
 							)</div>
 					</div>
 				</div>
@@ -1160,13 +1160,22 @@
 
                           for(var k in arr)
                           {
+                            var file_ext = arr[k]['photo'].split('.').pop().toLowerCase();
+                            var is_video = ['mp4', 'mov', 'avi', 'webm'].includes(file_ext);
+                            var media_html = '';
+                            if(is_video) {
+                                media_html = '<video width="100%" height="auto" controls><source src="{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" type="video/'+file_ext+'"></video>';
+                            } else {
+                                media_html = '<img src="{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" alt="gallery image">';
+                            }
+
         				$('.selected-image .row').append('<div class="col-sm-6">'+
                                         '<div class="img gallery-img">'+
                                             '<span class="remove-img"><i class="fas fa-times"></i>'+
                                             '<input type="hidden" value="'+arr[k]['id']+'">'+
                                             '</span>'+
                                             '<a href="'+'{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" target="_blank">'+
-                                            '<img src="'+'{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" alt="gallery image">'+
+                                            media_html +
                                             '</a>'+
                                         '</div>'+
                                   	'</div>');
@@ -1216,13 +1225,22 @@
 		        return el });
 		        for(var k in arr)
 		           {
+                        var file_ext = arr[k]['photo'].split('.').pop().toLowerCase();
+                        var is_video = ['mp4', 'mov', 'avi', 'webm'].includes(file_ext);
+                        var media_html = '';
+                        if(is_video) {
+                            media_html = '<video width="100%" height="auto" controls><source src="{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" type="video/'+file_ext+'"></video>';
+                        } else {
+                            media_html = '<img src="{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" alt="gallery image">';
+                        }
+
         				$('.selected-image .row').append('<div class="col-sm-6">'+
                                         '<div class="img gallery-img">'+
                                             '<span class="remove-img"><i class="fas fa-times"></i>'+
                                             '<input type="hidden" value="'+arr[k]['id']+'">'+
                                             '</span>'+
                                             '<a href="'+'{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" target="_blank">'+
-                                            '<img src="'+'{{asset('assets/images/galleries').'/'}}'+arr[k]['photo']+'" alt="gallery image">'+
+                                            media_html +
                                             '</a>'+
                                         '</div>'+
                                   	'</div>');

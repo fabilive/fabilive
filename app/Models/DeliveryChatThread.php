@@ -41,6 +41,6 @@ class DeliveryChatThread extends Model
 
     public function messages()
     {
-        return $this->hasMany(Message::class, 'delivery_chat_thread_id');
+        return $this->hasMany(ChatMessages::class, 'chat_id');
     }
 }

@@ -1317,16 +1317,22 @@ class ProductController extends VendorBaseController
             $lastid = $data->id;
             if ($files = $request->file('gallery')) {
                 foreach ($files as $key => $file) {
-                    $extensions = ['jpeg', 'jpg', 'png', 'svg'];
-                    if (! in_array($file->getClientOriginalExtension(), $extensions)) {
-                        return response()->json(['errors' => ['Image format not supported']]);
+                    $extensions = ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif', 'mp4', 'mov', 'avi', 'webm'];
+                    if (! in_array(strtolower($file->getClientOriginalExtension()), $extensions)) {
+                        return response()->json(['errors' => ['File format not supported: '.$file->getClientOriginalExtension()]]);
                     }
-                    if (in_array($key, $request->galval)) {
+                    if (is_array($request->galval) && in_array($key, $request->galval)) {
                         $gallery = new Gallery;
                         $name = \PriceHelper::ImageCreateName($file);
-                        $img = \Image::make($file->getRealPath())->resize(800, 800);
-                        $thumbnail = time().Str::random(8).'.jpg';
-                        $img->save(public_path().'/assets/images/galleries/'.$name);
+                        
+                        $is_image = in_array(strtolower($file->getClientOriginalExtension()), ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif']);
+                        if ($is_image) {
+                            $img = \Image::make($file->getRealPath())->resize(800, 800);
+                            $img->save(public_path().'/assets/images/galleries/'.$name);
+                        } else {
+                            $file->move(public_path().'/assets/images/galleries/', $name);
+                        }
+
                         $gallery['photo'] = $name;
                         $gallery['product_id'] = $lastid;
                         $gallery->save();
