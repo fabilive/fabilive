@@ -30,13 +30,11 @@ class GalleryController extends Controller
         $lastid = $request->product_id;
         if ($files = $request->file('gallery')) {
             foreach ($files as $key => $file) {
-                $val = $file->getClientOriginalExtension();
-                if ($val == 'jpeg' || $val == 'jpg' || $val == 'png' || $val == 'svg') {
+                $val = strtolower($file->getClientOriginalExtension());
+                if (in_array($val, ['jpeg', 'jpg', 'png', 'svg', 'webp', 'gif', 'jfif'])) {
                     $gallery = new Gallery;
 
-                    $img = Image::make($file->getRealPath())->resize(800, 800);
-                    $thumbnail = time().Str::random(8).'.jpg';
-                    $img->save('assets/images/galleries/'.$thumbnail);
+                    $thumbnail = \App\Helpers\ImageHelper::processImage($file->getRealPath(), public_path('assets/images/galleries'), 800, 800, true, $val);
 
                     $gallery['photo'] = $thumbnail;
                     $gallery['product_id'] = $lastid;

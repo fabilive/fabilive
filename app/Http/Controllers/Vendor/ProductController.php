@@ -200,26 +200,25 @@ class ProductController extends VendorBaseController
 
         //--- Validation Section Ends
         $image = $request->image;
-        [$type, $image] = explode(';', $image);
-        [, $image] = explode(',', $image);
-        $image = base64_decode($image);
-        $image_name = time().Str::random(8).'.png';
-        $path = 'assets/images/products/'.$image_name;
-        file_put_contents(public_path($path), $image);
+        $processed = \App\Helpers\ImageHelper::processBase64Photo($image, public_path());
 
-        $input['photo'] = $image_name;
+        if ($data->photo != null) {
+            if (file_exists(public_path().'/assets/images/products/'.$data->photo)) {
+                unlink(public_path().'/assets/images/products/'.$data->photo);
+            }
+        }
+        if ($data->thumbnail != null) {
+            if (file_exists(public_path().'/assets/images/thumbnails/'.$data->thumbnail)) {
+                unlink(public_path().'/assets/images/thumbnails/'.$data->thumbnail);
+            }
+        }
+
+        $input['photo'] = $processed['photo'];
+        $data->thumbnail = $processed['thumbnail'];
 
         $data->update($input);
 
-        return response()->json(['status' => true, 'file_name' => $image_name]);
-
-        $img = \Image::make(public_path().'/assets/images/products/'.$data->photo)->resize(285, 285);
-        $thumbnail = time().Str::random(8).'.jpg';
-        $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
-        $data->thumbnail = $thumbnail;
-        $data->update();
-
-        return response()->json(['status' => true, 'file_name' => $image_name]);
+        return response()->json(['status' => true, 'file_name' => $processed['photo']]);
     }
 
     //*** POST Request
@@ -334,21 +333,15 @@ class ProductController extends VendorBaseController
                             $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
                             $thumb_url = '';
                             if (strpos($contentType, 'image/') !== false) {
-                                $fimg = \Image::make($line[5])->resize(800, 800);
-                                $fphoto = time().Str::random(8).'.jpg';
-                                $fimg->save(public_path().'/assets/images/products/'.$fphoto);
+                                $fphoto = \App\Helpers\ImageHelper::processImage($line[5], public_path('assets/images/products'), 800, 800, true, 'jpg');
                                 $input['photo'] = $fphoto;
                                 $thumb_url = $line[5];
                             } else {
-                                $fimg = \Image::make(public_path().'/assets/images/noimage.png')->resize(800, 800);
-                                $fphoto = time().Str::random(8).'.jpg';
-                                $fimg->save(public_path().'/assets/images/products/'.$fphoto);
+                                $fphoto = \App\Helpers\ImageHelper::processImage(public_path('assets/images/noimage.png'), public_path('assets/images/products'), 800, 800, true, 'jpg');
                                 $input['photo'] = $fphoto;
-                                $thumb_url = public_path().'/assets/images/noimage.png';
+                                $thumb_url = public_path('assets/images/noimage.png');
                             }
-                            $timg = \Image::make($thumb_url)->resize(285, 285);
-                            $thumbnail = time().Str::random(8).'.jpg';
-                            $timg->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
+                            $thumbnail = \App\Helpers\ImageHelper::processImage($thumb_url, public_path('assets/images/thumbnails'), 285, 285, false, 'jpg');
                             $input['thumbnail'] = $thumbnail;
                             $input['price'] = ($input['price'] / $sign->value);
                             $input['previous_price'] = ($input['previous_price'] / $sign->value);
@@ -451,17 +444,9 @@ class ProductController extends VendorBaseController
                 if (! empty($request->photo)) {
                     $image = $request->photo;
                     if (strpos($image, ';') !== false && strpos($image, ',') !== false) {
-                        [$type, $image] = explode(';', $image);
-                        [, $image] = explode(',', $image);
-                        $image = base64_decode($image);
-                        $image_name = time().Str::random(8).'.png';
-                        $path = 'assets/images/products/'.$image_name;
-                        $directory = public_path('assets/images/products');
-                        if (!file_exists($directory)) {
-                            mkdir($directory, 0755, true);
-                        }
-                        file_put_contents(public_path($path), $image);
-                        $input['photo'] = $image_name;
+                        $processed = \App\Helpers\ImageHelper::processBase64Photo($image, public_path());
+                        $input['photo'] = $processed['photo'];
+                        $input['thumbnail'] = $processed['thumbnail'];
                     }
                 }
 
@@ -469,7 +454,7 @@ class ProductController extends VendorBaseController
                 if (empty($input['name']) && $request->isMethod('post')) {
                     return response()->json(['errors' => [0 => 'The server received an empty request. This usually happens if the upload size exceeds server limits (currently 2MB/8MB). Please try a smaller file.']]);
                 }
-                $input['thumbnail'] = $image_name ?? 'noimage.png'; // Fallback
+                $input['thumbnail'] = $input['thumbnail'] ?? ($input['photo'] ?? 'noimage.png'); // Fallback
                 if ($request->type == 'Physical' || $request->type == 'Listing') {
                     $rules = ['sku' => 'min:8|unique:products'];
                     $validator = Validator::make($request->all(), $rules);
@@ -667,31 +652,8 @@ class ProductController extends VendorBaseController
                 } else {
                     $prod->slug = Str::slug($data->name, '-').'-'.strtolower($data->sku);
                 }
-                // Safeguard main photo resizing
-                $main_photo_path = public_path().'/assets/images/products/'.$prod->photo;
-                $thumb_dir = public_path().'/assets/images/thumbnails';
-                if (!file_exists($thumb_dir)) {
-                    mkdir($thumb_dir, 0755, true);
-                }
-                if (file_exists($main_photo_path)) {
-                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                    $mime = finfo_file($finfo, $main_photo_path);
-                    finfo_close($finfo);
-
-                    if (strpos($mime, 'image/') === 0) {
-                        try {
-                            $img = \Image::make($main_photo_path)->resize(285, 285);
-                            $thumbnail = time().Str::random(8).'.jpg';
-                            $img->save(public_path().'/assets/images/thumbnails/'.$thumbnail);
-                            $prod->thumbnail = $thumbnail;
-                        } catch (\Exception $e) {
-                            \Log::warning('Vendor Product Store: Thumbnail generation failed: ' . $e->getMessage());
-                            $prod->thumbnail = 'noimage.png';
-                        }
-                    } else {
-                        $prod->thumbnail = 'noimage.png'; // Or some default
-                    }
-                }
+                // Thumbnail has already been generated by ImageHelper.
+                $prod->thumbnail = $input['thumbnail'];
                 $prod->update();
 
                 $lastid = $data->id;

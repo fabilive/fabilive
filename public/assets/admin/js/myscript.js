@@ -224,11 +224,13 @@
 
     $(document).on('change', '#cat', function () {
       let catId = $(this).val();
-      let url = mainurl + "/admin/get/crossproduct/" + catId;
-      $.get(url, function (data) {
-        $('#cross_product').html(data);
-        }
-      );
+      if ($('#cross_product').length > 0) {
+          let url = mainurl + "/admin/get/crossproduct/" + catId;
+          $.get(url, function (data) {
+            $('#cross_product').html(data);
+            }
+          );
+      }
     })
 
 
