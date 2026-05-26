@@ -17,9 +17,9 @@ return new class extends Migration
             DB::table('sliders')->insert([
                 [
                     'photo' => '1750049373industries-consumer-electronicsjpeg.jpeg',
-                    'title_text' => 'Premium Electronics',
+                    'title_text' => 'Premium Products',
                     'subtitle_text' => 'Get the best deals on the latest gadgets',
-                    'details_text' => 'Up to 50% OFF on all electronics',
+                    'details_text' => 'Up to 50% OFF on all Products',
                     'link' => '/category/electronics',
                     'position' => 1
                 ],

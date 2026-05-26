@@ -187,21 +187,14 @@
                                                                                                 Panel' }}</span></a>
                                         </li>
                                         <li><a href="{{ route('rider-profile') }}"><span
-                                                    class="menu-item-text">{{ __('Edit
-                                                                                                Profile') }}</span></a>
+                                                    class="menu-item-text">{{ __('Edit Profile') }}</span></a>
                                         </li>
                                         <li><a href="{{ route('rider-logout') }}"><span
                                                     class="menu-item-text">{{ __('Logout') }}</span></a></li>
                                     @else
-                                        <li><a href="{{ route('user.login') }}"><span
-                                                    class="menu-item-text sign-in">{{ __('User
-                                                                                                Login') }}</span></a>
-                                        </li>
-                                        <li><a href="{{ route('rider.login') }}"><span
-                                                    class="menu-item-text sign-in">{{ __('Delivery Login') }}</span></a>
-                                        </li>
-                                        <li><a href="{{ route('user.register') }}"><span
-                                                    class="menu-item-text join">{{ __('Join') }}</span></a></li>
+                                        <li><a href="{{ route('user.login') }}"><span class="menu-item-text sign-in">{{ __('User Login') }}</span></a></li>
+                                        <li><a href="{{ route('rider.login') }}"><span class="menu-item-text sign-in">{{ __('Delivery Login') }}</span></a></li>
+                                        <li><a href="{{ route('user.register') }}"><span class="menu-item-text join">{{ __('Join') }}</span></a></li>
                                     @endif
                                 </ul>
                             </li>

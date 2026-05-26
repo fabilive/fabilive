@@ -16,9 +16,9 @@
                             $fav = App\Models\FavoriteSeller::where('user_id', Auth::user()->id)->where('vendor_id', $vendor->id)->first();
                         @endphp
                         @if($fav)
-                            <a href="{{ route('user-favorite-delete', $fav->id) }}" class="btn btn-danger btn-sm"><i class="fas fa-heart-broken"></i> {{ __('Unfollow Store') }}</a>
+                            <a href="{{ route('user-favorite-delete', $fav->id) }}" class="btn btn-danger btn-sm unfollow-store"><i class="fas fa-heart-broken"></i> {{ __('Unfollow Store') }}</a>
                         @else
-                            <a href="{{ route('user-favorite', ['id1' => Auth::user()->id, 'id2' => $vendor->id]) }}" class="btn btn-primary btn-sm"><i class="fas fa-heart"></i> {{ __('Follow Store') }}</a>
+                            <a href="{{ route('user-favorite', ['id1' => Auth::user()->id, 'id2' => $vendor->id]) }}" class="btn btn-primary btn-sm follow-store"><i class="fas fa-heart"></i> {{ __('Follow Store') }}</a>
                         @endif
                     @endif
                     <button class="btn btn-info btn-sm" onclick="shareStore()"><i class="fas fa-share-alt"></i> {{ __('Share Store') }}</button>
@@ -238,15 +238,36 @@
                 console.log('Error sharing', error);
             });
         } else {
-            var tempInput = document.createElement("input");
-            tempInput.value = url;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            alert("Store link copied to clipboard: " + url);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    alert("Store link copied to clipboard: " + url);
+                }).catch(function(err) {
+                    fallbackCopyTextToClipboard(url);
+                });
+            } else {
+                fallbackCopyTextToClipboard(url);
+            }
         }
     };
+
+    function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert("Store link copied to clipboard: " + text);
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+            alert("Please copy the URL manually: " + text);
+        }
+        document.body.removeChild(textArea);
+    }
 
   $(function () {
     $("#slider-range").slider({
@@ -270,6 +291,26 @@
     $("#min_price").val($("#slider-range").slider("values", 0));
     $("#max_price").val($("#slider-range").slider("values", 1));
 
+  });
+
+  $(document).on('click', '.follow-store, .unfollow-store', function(e) {
+      e.preventDefault();
+      var url = $(this).attr('href');
+      var btn = $(this);
+      
+      btn.prop('disabled', true).addClass('disabled');
+      
+      $.ajax({
+          url: url,
+          type: 'GET',
+          success: function(response) {
+              location.reload();
+          },
+          error: function(xhr, status, error) {
+              console.error('Action failed', error);
+              location.reload();
+          }
+      });
   });
 
 })(jQuery);

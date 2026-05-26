@@ -119,7 +119,7 @@ class FrontendController extends FrontBaseController
         $s1 = new \stdClass();
         $s1->photo = 'electronics_hero.png';
         $s1->video = null; $s1->{'3d_model'} = null;
-        $s1->subtitle_text = 'Flash Sale'; $s1->title_text = 'Latest Electronics'; $s1->details_text = 'Up to 50% Off';
+        $s1->subtitle_text = 'Flash Sale'; $s1->title_text = 'Premium Products'; $s1->details_text = 'Up to 50% OFF on all Products';
         $s1->link = '#'; $s1->position = 'center';
 
         $s2 = new \stdClass();
