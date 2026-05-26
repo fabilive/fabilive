@@ -27,6 +27,13 @@ return new class extends Migration
                 ->update([
                     'details_text' => 'Up to 50% OFF on all Products'
                 ]);
+            
+            // Clear homepage slider cache to make the change visible immediately
+            cache()->forget('homepage_sliders');
+            try {
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+                \Illuminate\Support\Facades\Artisan::call('view:clear');
+            } catch (\Exception $e) {}
         }
     }
 
