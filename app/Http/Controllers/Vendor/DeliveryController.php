@@ -67,11 +67,18 @@ class DeliveryController extends VendorBaseController
 
                 return '<span class="badge badge-danger p-1">'.__('Not Assigned').'</span>';
             })
-            ->editColumn('pay_amount', function (Order $data) use ($user) {
-                $price = $data->vendororders()->where('user_id', $user->id)->sum('price');
-                $price = round($price * $data->currency_value, 2);
-
-                return \PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
+            ->addColumn('pay_amount', function (Order $data) {
+                $user = auth()->user();
+                $cartData = json_decode($data->cart, true);
+                $sum = 0;
+                if (! empty($cartData['items'])) {
+                    foreach ($cartData['items'] as $item) {
+                        if (isset($item['user_id']) && $item['user_id'] == $user->id) {
+                            $sum += $item['price'];
+                        }
+                    }
+                }
+                return \PriceHelper::showOrderCurrencyPrice($sum, $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
                 $delevery = DeliveryRider::where('vendor_id', auth()->id())
@@ -80,16 +87,36 @@ class DeliveryController extends VendorBaseController
                 if ($delevery) {
                     if ($delevery->status == 'delivered') {
                         return '<div class="action-list">
-                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
                     <i class="fa fa-eye"></i> '.__('Order View').'
                 </a>
             </div>';
-                    } else {
+                    } elseif (in_array($delevery->status, ['picked_up', 'on_delivery', 'returning'])) {
+                        $phone = $delevery->rider ? $delevery->rider->phone : '';
+                        $waPhone = preg_replace('/[^0-9]/', '', $phone);
+                        $contactBtn = '';
+                        if($waPhone) {
+                            $contactBtn = '<a href="https://wa.me/'.$waPhone.'" target="_blank" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fab fa-whatsapp"></i> '.__('Contact Rider').'</a>';
+                        } else {
+                            $contactBtn = '<a href="tel:'.$phone.'" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fas fa-phone"></i> '.__('Contact Rider').'</a>';
+                        }
+                        
+                        $statusText = $delevery->status == 'picked_up' ? __('Picked Up') : ($delevery->status == 'on_delivery' ? __('Out for Delivery') : __('Returning'));
+                        $badgeClass = $delevery->status == 'returning' ? 'badge-danger' : 'badge-warning';
+                        
                         return '<div class="action-list">
-                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
                     <i class="fa fa-eye"></i> '.__('Order View').'
                 </a>
-                <span class="badge badge-info mt-1 d-block">'.__('Assigned').'</span>
+                <span class="badge '.$badgeClass.' mt-1 d-block w-100">'.$statusText.'</span>
+                '.$contactBtn.'
+            </div>';
+                    } else {
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+                <span class="badge badge-info mt-1 d-block w-100">'.__('Assigned').'</span>
             </div>';
                     }
                 }
