@@ -68,41 +68,30 @@ class DeliveryController extends VendorBaseController
                 return '<span class="badge badge-danger p-1">'.__('Not Assigned').'</span>';
             })
             ->editColumn('pay_amount', function (Order $data) use ($user) {
-                $order = Order::findOrFail($data->id);
-                $price = $order->vendororders()->where('user_id', $user->id)->sum('price');
-                $price = round($price * $order->currency_value, 2);
-                if ($order->is_shipping == 1) {
-                    $vendor_shipping = json_decode($order->vendor_shipping_id, true);
-                    $shipping_id = $vendor_shipping[$user->id] ?? null;
-                    if ($shipping_id) {
-                        $shipping = Shipping::find($shipping_id);
-                        if ($shipping) {
-                            $price += round($shipping->price * $order->currency_value, 2);
-                        }
-                    }
-                    $vendor_packing_id = json_decode($order->vendor_packing_id, true);
-                    $packing_id = $vendor_packing_id[$user->id] ?? null;
-                    if ($packing_id) {
-                        $packaging = Package::find($packing_id);
-                        if ($packaging) {
-                            $price += round($packaging->price * $order->currency_value, 2);
-                        }
-                    }
-                }
-                $commission = round($order->commission * $order->currency_value, 2);
+                $price = $data->vendororders()->where('user_id', $user->id)->sum('price');
+                $price = round($price * $data->currency_value, 2);
 
-                return \PriceHelper::showOrderCurrencyPrice(($price - $commission), $data->currency_sign);
+                return \PriceHelper::showOrderCurrencyPrice($price, $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
                 $delevery = DeliveryRider::where('vendor_id', auth()->id())
                     ->where('order_id', $data->id)
                     ->first();
-                if ($delevery && $delevery->status == 'delivered') {
-                    return '<div class="action-list">
-            <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm">
-                <i class="fa fa-eye"></i> '.__('Order View').'
-            </a>
-        </div>';
+                if ($delevery) {
+                    if ($delevery->status == 'delivered') {
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+            </div>';
+                    } else {
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+                <span class="badge badge-info mt-1 d-block">'.__('Assigned').'</span>
+            </div>';
+                    }
                 }
                 $cartData = json_decode($data->cart, true);
                 $firstProd = null;
