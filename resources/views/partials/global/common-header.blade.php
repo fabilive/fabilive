@@ -14,7 +14,7 @@
     <div class="main-nav py-4 d-none d-lg-block">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-xl-7 col-lg-9">
+                <div class="col-xl-5 col-lg-5">
                     <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
                         <a class="navbar-brand" href="{{ route('front.index') }}">
                             @php
@@ -28,8 +28,8 @@
                             <img class="nav-logo" src="{{ $active_logo }}" alt="Fabilive Logo">
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
-                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
+                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                             aria-expanded="false" aria-label="Toggle navigation">
                             <i class="flaticon-menu-2 flat-small text-primary"></i>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -40,7 +40,7 @@
                                     <ul class="dropdown-menu">
                                         @foreach ($pages->where('header', '=', 1) as $data)
                                             <li><a class="dropdown-item"
-                                                    href="{{ route('front.vendor', $data->slug) }}">{{ $data->title }}</a>
+                                                     href="{{ route('front.vendor', $data->slug) }}">{{ $data->title }}</a>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -48,28 +48,28 @@
                                 @if ($ps->blog == 1)
                                     <li class="nav-item dropdown {{ request()->path() == 'blog' ? 'active' : '' }}">
                                         <a class="nav-link dropdown-toggle"
-                                            href="{{ route('front.blog') }}">{{ __('Blog') }}</a>
+                                             href="{{ route('front.blog') }}">{{ __('Blog') }}</a>
                                     </li>
                                 @endif
                                 @if ($ps->faq == 1)
                                     <li class="nav-item dropdown {{ request()->path() == 'faq' ? 'active' : '' }}">
                                         <a class="nav-link dropdown-toggle"
-                                            href="{{ route('front.faq') }}">{{ __('FAQ') }}</a>
+                                             href="{{ route('front.faq') }}">{{ __('FAQ') }}</a>
                                     </li>
                                 @endif
                                 @if ($ps->contact == 1)
                                     <li class="nav-item {{ request()->path() == 'contact' ? 'active' : '' }}"><a
-                                            class="nav-link"
-                                            href="{{ route('front.contact') }}">{{ __('Contact') }}</a>
+                                             class="nav-link"
+                                             href="{{ route('front.contact') }}">{{ __('Contact') }}</a>
                                     </li>
                                 @endif
                             </ul>
                         </div>
                     </nav>
                 </div>
-                <div class="col-xl-5 col-lg-3">
+                <div class="col-xl-7 col-lg-7">
                     <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
-                        <div class="product-search-one flex-grow-1 global-search touch-screen-view">
+                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 450px;">
                             <form id="searchForm" class="search-form form-inline search-pill-shape"
                                 action="{{ route('front.category', [Request::route('category'), Request::route('subcategory'), Request::route('childcategory')]) }}"
                                 method="GET">
