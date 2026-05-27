@@ -54,12 +54,21 @@ class DeliveryController extends VendorBaseController
                 return $info;
             })
             ->editColumn('riders', function (Order $data) {
+                $job = \App\Models\DeliveryJob::where('order_id', $data->id)->first();
+                if ($job && $job->assigned_rider_id) {
+                    $riderName = $job->rider ? $job->rider->name : 'N/A';
+                    return '<strong class="display-5">Rider : '.$riderName.'</br>
+                        Status :
+                        <span class="badge badge-dark p-1">'.ucwords(str_replace('_', ' ', $job->status)).'</span>
+                        </strong>';
+                }
+
                 $delivery = DeliveryRider::where('order_id', $data->id)
                     ->whereVendorId(auth()->id())
                     ->first();
                 if ($delivery) {
                     return '<strong class="display-5">Rider : '.$delivery->rider->name.'</br>
-                        Pickup Point : '.$delivery->pickup->location.'</br>
+                        Pickup Point : '.($delivery->pickup ? $delivery->pickup->location : 'N/A').'</br>
                         Status :
                         <span class="badge badge-dark p-1">'.$delivery->status.'</span>
                         </strong>';
@@ -81,9 +90,48 @@ class DeliveryController extends VendorBaseController
                 return \PriceHelper::showOrderCurrencyPrice($sum, $data->currency_sign);
             })
             ->addColumn('action', function (Order $data) {
+                $job = \App\Models\DeliveryJob::where('order_id', $data->id)->first();
                 $delevery = DeliveryRider::where('vendor_id', auth()->id())
                     ->where('order_id', $data->id)
                     ->first();
+
+                if ($job && $job->assigned_rider_id) {
+                    if ($job->status == 'delivered') {
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+            </div>';
+                    } elseif (in_array($job->status, ['picking_up', 'picked_up', 'delivering', 'returned'])) {
+                        $phone = $job->rider ? $job->rider->phone : '';
+                        $waPhone = preg_replace('/[^0-9]/', '', $phone);
+                        $contactBtn = '';
+                        if($waPhone) {
+                            $contactBtn = '<a href="https://wa.me/'.$waPhone.'" target="_blank" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fab fa-whatsapp"></i> '.__('Contact Rider').'</a>';
+                        } else {
+                            $contactBtn = '<a href="tel:'.$phone.'" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fas fa-phone"></i> '.__('Contact Rider').'</a>';
+                        }
+                        
+                        $statusText = ($job->status == 'picking_up' || $job->status == 'picked_up') ? __('Picked Up') : ($job->status == 'delivering' ? __('Out for Delivery') : __('Returning'));
+                        $badgeClass = $job->status == 'returned' ? 'badge-danger' : 'badge-warning';
+                        
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+                <span class="badge '.$badgeClass.' mt-1 d-block w-100">'.$statusText.'</span>
+                '.$contactBtn.'
+            </div>';
+                    } else {
+                        return '<div class="action-list">
+                <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
+                    <i class="fa fa-eye"></i> '.__('Order View').'
+                </a>
+                <span class="badge badge-info mt-1 d-block w-100">'.__('Assigned').'</span>
+            </div>';
+                    }
+                }
+
                 if ($delevery) {
                     if ($delevery->status == 'delivered') {
                         return '<div class="action-list">
