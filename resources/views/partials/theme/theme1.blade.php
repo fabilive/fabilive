@@ -241,6 +241,24 @@
             background: rgba(108,99,255,0.9) !important;
             color: #fff !important;
         }
+        
+        /* Match Slider Height to Sidebar Category Menu */
+        @media (min-width: 992px) {
+            .home-slider, 
+            .banner-slide-item,
+            .banner-slide-item video {
+                height: 540px !important;
+                min-height: 540px !important;
+            }
+        }
+        @media (max-width: 991px) {
+            .home-slider, 
+            .banner-slide-item,
+            .banner-slide-item video {
+                height: 320px !important;
+                min-height: 320px !important;
+            }
+        }
     </style>
 @endsection
 @section('content')
@@ -306,10 +324,10 @@
                     <span class="nextBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-right"></i></span>
                     <span class="prevBtn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-left"></i></span>
                     
-                    <section class="home-slider owl-theme owl-carousel rounded overflow-hidden" style="display: block !important; min-height: 320px; height: 320px; opacity: 1 !important; visibility: visible !important;">
+                    <section class="home-slider owl-theme owl-carousel rounded overflow-hidden" style="display: block !important; min-height: 100%; height: 100%; opacity: 1 !important; visibility: visible !important;">
                         @foreach ($sliders as $slide_data)
                             <div class="banner-slide-item"
-                                style="position: relative; height: 320px; min-height: 320px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . ($slide_data->title_text == 'Fashion Trends' ? 'african_fashion_v3.png' : $slide_data->photo)) . "')" }} no-repeat center center / cover; display: flex !important;">
+                                style="position: relative; height: 100%; min-height: 100%; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . ($slide_data->title_text == 'Fashion Trends' ? 'african_fashion_v3.png' : $slide_data->photo)) . "')" }} no-repeat center center / cover; display: flex !important;">
             
                                 @if(isset($slide_data->video) && $slide_data->video)
                                     <video autoplay muted loop playsinline>
