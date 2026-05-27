@@ -15,6 +15,37 @@
             background-color: #050505;
         }
 
+        /* Mega Menu Styles */
+        .mega-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+        .mega-menu-item:hover .text-dark {
+            color: #ff6a00 !important;
+        }
+        .mega-menu-content {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 750px;
+            min-height: 100%;
+            background: #fff;
+            z-index: 1050;
+            border: 1px solid #eee;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+        .mega-menu-item:hover .mega-menu-content {
+            display: block;
+        }
+
+        .hover-zoom {
+            transition: transform 0.3s ease;
+        }
+        .hover-zoom:hover {
+            transform: scale(1.05);
+        }
+
         .banner-slide-item video {
             position: absolute;
             top: 50%;
@@ -228,77 +259,161 @@
 
 
     @if ($ps->slider == 1 || (isset($sliders) && !$sliders->isEmpty()))
-        <div class="position-relative">
-            <span class="nextBtn"></span>
-            <span class="prevBtn"></span>
-            <!-- Dynamic Slide Banner (Full Carousel Restoration) -->
-            <section class="home-slider owl-theme owl-carousel" style="display: block !important; min-height: 600px; opacity: 1 !important; visibility: visible !important;">
-                @foreach ($sliders as $slide_data)
-                    <div class="banner-slide-item"
-                        style="position: relative; height: 600px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . ($slide_data->title_text == 'Fashion Trends' ? 'african_fashion_v3.png' : $slide_data->photo)) . "')" }} no-repeat center center / cover; display: flex !important;">
-    
-                        @if(isset($slide_data->video) && $slide_data->video)
-                            <video autoplay muted loop playsinline>
-                                <source src="{{ asset('assets/videos/' . $slide_data->video) }}" type="video/mp4">
-                            </video>
-                        @endif
-
-                        @if(isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'})
-                            <model-viewer 
-                                src="{{ asset('assets/models/' . $slide_data->{'3d_model'}) }}" 
-                                alt="A 3D robot model" 
-                                auto-rotate 
-                                camera-controls 
-                                autoplay 
-                                animation-name="Idle"
-                                shadow-intensity="1" 
-                                class="robot-float"
-                                exposure="1"
-                                environment-image="neutral"
-                                disable-zoom>
-                            </model-viewer>
-                        @endif
-
-                        <!-- Overlay -->
-                        <div
-                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); z-index: 1;">
-                        </div>
-
-                        <!-- Text Section -->
-                        <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
-                            <div class="banner-wrapper-item text-{{ $slide_data->position }}" style="width: 100%;">
-                                <div class="banner-content-box {{ $slide_data->position == 'right' ? 'ms-auto' : ($slide_data->position == 'center' ? 'mx-auto' : '') }}">
-                                    <div class="banner-content" style="text-align: {{ $slide_data->position }};">
-
-                                        <!-- Subtitle -->
-                                        <span class="subtitle animate-stagger-1">
-                                            {{ str_replace('2026', '', $slide_data->subtitle_text) }}
-                                        </span>
-
-                                        <!-- Title -->
-                                        <h1 class="title animate-stagger-2">
-                                            {{ str_replace('2026', '', $slide_data->title_text) }}
-                                        </h1>
-
-                                        <!-- Paragraph -->
-                                        <p class="details-text animate-stagger-2">
-                                            {{ $slide_data->details_text }}
-                                        </p>
-
-                                        <!-- Button -->
-                                        <div class="animate-stagger-3 mt-4">
-                                            <a href="{{ route('front.category') }}" class="premium-btn">
-                                                {{ __('EXPLORE COLLECTION') }}
-                                            </a>
+        <div class="container mt-4">
+            <div class="row g-3">
+                <!-- Left Column: Category Menu -->
+                <div class="col-lg-2 d-none d-lg-block position-relative">
+                    <div class="vertical-menu bg-white rounded shadow-sm border h-100" style="padding: 10px 0;">
+                        <ul class="list-unstyled mb-0" id="mega-menu-list">
+                            @foreach (isset($global_categories) ? $global_categories->take(11) : collect() as $cat)
+                                <li class="mega-menu-item" style="padding: 6px 15px; cursor: pointer; transition: background 0.2s;">
+                                    <a href="{{ route('front.category', $cat->slug) }}" class="text-dark d-flex align-items-center text-decoration-none" style="font-size: 13px;">
+                                        <i class="flaticon-menu-2 me-2" style="font-size: 14px; color: #666;"></i>
+                                        <span class="text-truncate">{{ $cat->name }}</span>
+                                        @if($cat->subs->count() > 0)
+                                            <i class="fas fa-chevron-right ms-auto" style="font-size: 10px; color: #ccc;"></i>
+                                        @endif
+                                    </a>
+                                    
+                                    @if($cat->subs->count() > 0)
+                                        <div class="mega-menu-content shadow">
+                                            <div class="row g-4 p-4">
+                                                @foreach($cat->subs->take(6) as $sub)
+                                                    <div class="col-4">
+                                                        <a href="{{ route('front.category', [$cat->slug, $sub->slug]) }}" class="d-block font-weight-bold text-dark mb-2 text-decoration-none" style="font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                                                            {{ strtoupper($sub->name) }}
+                                                        </a>
+                                                        @if($sub->childs->count() > 0)
+                                                            <ul class="list-unstyled">
+                                                                @foreach($sub->childs->take(5) as $child)
+                                                                    <li><a href="{{ route('front.category', [$cat->slug, $sub->slug, $child->slug]) }}" class="text-muted text-decoration-none d-block py-1" style="font-size: 13px; transition: color 0.2s;">{{ $child->name }}</a></li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
+                                    @endif
+                                </li>
+                            @endforeach
+                            @if(isset($global_categories) && $global_categories->count() > 11)
+                                <li class="mega-menu-item" style="padding: 6px 15px; cursor: pointer;">
+                                    <a href="{{ route('front.category') }}" class="text-dark d-flex align-items-center text-decoration-none" style="font-size: 13px;">
+                                        <i class="fas fa-ellipsis-h me-2" style="font-size: 14px; color: #666;"></i>
+                                        <span>{{ __('Other categories') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
 
+                <!-- Center Column: Slider -->
+                <div class="col-lg-7 position-relative">
+                    <span class="nextBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-right"></i></span>
+                    <span class="prevBtn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-left"></i></span>
+                    
+                    <section class="home-slider owl-theme owl-carousel rounded overflow-hidden" style="display: block !important; min-height: 400px; height: 100%; opacity: 1 !important; visibility: visible !important;">
+                        @foreach ($sliders as $slide_data)
+                            <div class="banner-slide-item"
+                                style="position: relative; height: 100%; min-height: 400px; background: {{ (isset($slide_data->video) && $slide_data->video) || (isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'}) ? 'black' : "url('" . asset('assets/images/sliders/' . ($slide_data->title_text == 'Fashion Trends' ? 'african_fashion_v3.png' : $slide_data->photo)) . "')" }} no-repeat center center / cover; display: flex !important;">
+            
+                                @if(isset($slide_data->video) && $slide_data->video)
+                                    <video autoplay muted loop playsinline>
+                                        <source src="{{ asset('assets/videos/' . $slide_data->video) }}" type="video/mp4">
+                                    </video>
+                                @endif
+
+                                @if(isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'})
+                                    <model-viewer 
+                                        src="{{ asset('assets/models/' . $slide_data->{'3d_model'}) }}" 
+                                        alt="A 3D model" 
+                                        auto-rotate 
+                                        camera-controls 
+                                        autoplay 
+                                        animation-name="Idle"
+                                        shadow-intensity="1" 
+                                        class="robot-float"
+                                        exposure="1"
+                                        environment-image="neutral"
+                                        disable-zoom>
+                                    </model-viewer>
+                                @endif
+
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); z-index: 1;"></div>
+
+                                <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
+                                    <div class="banner-wrapper-item text-{{ $slide_data->position }}" style="width: 100%;">
+                                        <div class="banner-content-box {{ $slide_data->position == 'right' ? 'ms-auto' : ($slide_data->position == 'center' ? 'mx-auto' : '') }}">
+                                            <div class="banner-content" style="text-align: {{ $slide_data->position }}; padding: 30px;">
+                                                <span class="subtitle animate-stagger-1" style="font-size: 14px; margin-bottom: 10px;">
+                                                    {{ str_replace('2026', '', $slide_data->subtitle_text) }}
+                                                </span>
+                                                <h1 class="title animate-stagger-2" style="font-size: clamp(24px, 5vw, 42px); margin-bottom: 15px;">
+                                                    {{ str_replace('2026', '', $slide_data->title_text) }}
+                                                </h1>
+                                                <p class="details-text animate-stagger-2" style="font-size: 15px; margin-bottom: 20px;">
+                                                    {{ $slide_data->details_text }}
+                                                </p>
+                                                <div class="animate-stagger-3 mt-2">
+                                                    <a href="{{ route('front.category') }}" class="premium-btn" style="padding: 10px 25px; font-size: 14px;">
+                                                        {{ __('SHOP NOW') }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        @endforeach
+                    </section>
+                </div>
+
+                <!-- Right Column: Promo Blocks -->
+                <div class="col-lg-3 d-none d-lg-block">
+                    <div class="h-100 d-flex flex-column gap-3">
+                        <!-- Top Action Blocks -->
+                        <div class="bg-white rounded shadow-sm border p-3 flex-grow-1 d-flex flex-column justify-content-around">
+                            <a href="{{ route('front.contact') }}" class="d-flex align-items-center text-decoration-none text-dark py-2 border-bottom">
+                                <div class="icon-wrap rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border: 1px solid #eee; margin-right: 15px;">
+                                    <i class="flaticon-phone-call text-primary" style="font-size: 18px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 13px; font-weight: 600;">CALL TO ORDER</div>
+                                    <div style="font-size: 12px; color: #666;">{{ $ps->phone }}</div>
+                                </div>
+                            </a>
+                            
+                            <a href="{{ route('user.register', ['source' => 'seller_application']) }}" class="d-flex align-items-center text-decoration-none text-dark py-2 border-bottom">
+                                <div class="icon-wrap rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border: 1px solid #eee; margin-right: 15px;">
+                                    <i class="flaticon-shop text-primary" style="font-size: 18px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 13px; font-weight: 600;">Sell on Fabilive</div>
+                                </div>
+                            </a>
+
+                            <a href="{{ route('rider.register') }}" class="d-flex align-items-center text-decoration-none text-dark py-2">
+                                <div class="icon-wrap rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border: 1px solid #eee; margin-right: 15px;">
+                                    <i class="flaticon-truck text-primary" style="font-size: 18px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 13px; font-weight: 600;">Delivery Agent</div>
+                                </div>
+                            </a>
                         </div>
+                        
+                        <!-- Bottom Banner -->
+                        <a href="{{ route('user.register') }}" class="rounded shadow-sm overflow-hidden d-block text-center flex-grow-1 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%); color: white; text-decoration: none;">
+                            <div class="p-4">
+                                <h3 style="font-weight: 900; font-size: 24px; margin-bottom: 5px; color: white;">FABILIVE FORCE</h3>
+                                <div style="font-weight: 700; font-size: 16px; background: white; color: #f97316; display: inline-block; padding: 5px 15px; border-radius: 4px; margin-top: 10px;">JOIN NOW</div>
+                            </div>
+                        </a>
                     </div>
-                @endforeach
-            </section>
+                </div>
+            </div>
         </div>
     @endif
 
@@ -306,100 +421,95 @@
 
 
     <!--==================== Category Section Start ====================-->
-    <div class="full-row pt-0 mt-5 px-sm-5 pb-0 category-carousel-wrap">
-        <div class="container-fluid">
+    <div class="container mt-3 mb-4 category-carousel-wrap">
+        <div class="bg-white rounded shadow-sm p-3">
             <div class="category-owl-carousel owl-carousel owl-theme">
                 @foreach ($featured_categories as $fcategory)
-                    <div class="item">
-                        <a href="{{ route('front.category', $fcategory->slug) }}" style="text-decoration:none;">
-                            <div class="product-wrapper" style="border-radius:12px;overflow:hidden;position:relative;">
-                                <div class="product-image" style="height:200px;overflow:hidden;">
-                                    @php
-                                        $slug = $fcategory->slug;
-                                        $fcat_image = asset('assets/images/noimage.png');
-                                        
-                                        // Priority 1: Database fields
-                                        if($fcategory->image && file_exists(public_path('assets/images/categories/'.$fcategory->image))) {
-                                            $fcat_image = asset('assets/images/categories/' . $fcategory->image);
-                                        } elseif($fcategory->photo && file_exists(public_path('assets/images/categories/'.$fcategory->photo))) {
-                                            $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
-                                        } else {
-                                            // Priority 2: Filesystem Pattern Matching (Fallback)
-                                            $patterns = [
-                                                'building.png',
-                                                'market.png',
-                                                'baby.png',
-                                                'health.png',
-                                                'gaming.png',
-                                                'solar.png',
-                                                'beauty.png',
-                                                'auto.png',
-                                                'internet.png',
-                                                'services.png',
-                                                'digital.png',
-                                                'food.png',
-                                                'garden.png',
-                                                'category_home_garden_black.png',
-                                                'category_services_black.png',
-                                                'category_food_drinks_black.png',
-                                                'category_digital_black.png',
-                                                'category_'.$slug.'.png',
-                                                'category_'.$slug.'.jpg',
-                                                '1568878538electronic.jpg',
-                                                '1568878596home.jpg'
-                                            ];
-                                            foreach($patterns as $p) {
-                                                if(file_exists(public_path('featured_categories/'.$p))) {
-                                                    $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
-                                                    $s_clean = strtolower(str_replace('-', ' ', $slug));
-                                                    
-                                                    // Extract keywords (longer than 2 chars)
-                                                    $p_keywords = array_filter(explode(' ', $p_clean), function($v) { return strlen($v) > 2; });
-                                                    $s_keywords = array_filter(explode(' ', $s_clean), function($v) { return strlen($v) > 2; });
-                                                    
-                                                    // Check if any keyword matches
-                                                    $match = false;
-                                                    foreach($p_keywords as $pk) {
-                                                        foreach($s_keywords as $sk) {
-                                                            if(str_contains($pk, $sk) || str_contains($sk, $pk)) {
-                                                                $match = true;
-                                                                break 2;
-                                                            }
+                    <div class="item text-center">
+                        <a href="{{ route('front.category', $fcategory->slug) }}" class="text-decoration-none text-dark d-block">
+                            <div class="product-image mx-auto mb-2" style="width: 140px; height: 140px; border-radius: 8px; overflow: hidden; position: relative;">
+                                @php
+                                    $slug = $fcategory->slug;
+                                    $fcat_image = asset('assets/images/noimage.png');
+                                    
+                                    // Priority 1: Database fields
+                                    if($fcategory->image && file_exists(public_path('assets/images/categories/'.$fcategory->image))) {
+                                        $fcat_image = asset('assets/images/categories/' . $fcategory->image);
+                                    } elseif($fcategory->photo && file_exists(public_path('assets/images/categories/'.$fcategory->photo))) {
+                                        $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
+                                    } else {
+                                        // Priority 2: Filesystem Pattern Matching (Fallback)
+                                        $patterns = [
+                                            'building.png',
+                                            'market.png',
+                                            'baby.png',
+                                            'health.png',
+                                            'gaming.png',
+                                            'solar.png',
+                                            'beauty.png',
+                                            'auto.png',
+                                            'internet.png',
+                                            'services.png',
+                                            'digital.png',
+                                            'food.png',
+                                            'garden.png',
+                                            'category_home_garden_black.png',
+                                            'category_services_black.png',
+                                            'category_food_drinks_black.png',
+                                            'category_digital_black.png',
+                                            'category_'.$slug.'.png',
+                                            'category_'.$slug.'.jpg',
+                                            '1568878538electronic.jpg',
+                                            '1568878596home.jpg'
+                                        ];
+                                        foreach($patterns as $p) {
+                                            if(file_exists(public_path('featured_categories/'.$p))) {
+                                                $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
+                                                $s_clean = strtolower(str_replace('-', ' ', $slug));
+                                                
+                                                // Extract keywords (longer than 2 chars)
+                                                $p_keywords = array_filter(explode(' ', $p_clean), function($v) { return strlen($v) > 2; });
+                                                $s_keywords = array_filter(explode(' ', $s_clean), function($v) { return strlen($v) > 2; });
+                                                
+                                                // Check if any keyword matches
+                                                $match = false;
+                                                foreach($p_keywords as $pk) {
+                                                    foreach($s_keywords as $sk) {
+                                                        if(str_contains($pk, $sk) || str_contains($sk, $pk)) {
+                                                            $match = true;
+                                                            break 2;
                                                         }
                                                     }
-
-                                                    if($match || 
-                                                       (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
-                                                       (str_contains($slug, 'service') && str_contains($p, 'service')) || 
-                                                       (str_contains($slug, 'food') && str_contains($p, 'food')) || 
-                                                       (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
-                                                        $fcat_image = asset('featured_categories/'.$p).'?v='.time();
-                                                        break;
-                                                    }
                                                 }
-                                            }
-                                            
-                                            // Final Fallback to assets if not found in featured_categories
-                                            if(!$fcat_image) {
-                                                foreach($patterns as $p) {
-                                                    if(file_exists(public_path('assets/images/categories/'.$p))) {
-                                                        $fcat_image = asset('assets/images/categories/'.$p).'?v='.time();
-                                                        break;
-                                                    }
+
+                                                if($match || 
+                                                   (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
+                                                   (str_contains($slug, 'service') && str_contains($p, 'service')) || 
+                                                   (str_contains($slug, 'food') && str_contains($p, 'food')) || 
+                                                   (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
+                                                    $fcat_image = asset('featured_categories/'.$p).'?v='.time();
+                                                    break;
                                                 }
                                             }
                                         }
-                                    @endphp
-                                    <img src="{{ $fcat_image }}"
-                                         alt="{{ $fcategory->name }}"
-                                         style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;">
-                                </div>
-                                <div class="product-info">
-                                    <h6 class="product-title mb-0">
-                                        <span style="font-weight:700;font-size:0.95rem;color:#111;">{{ $fcategory->name }}</span>
-                                    </h6>
-                                    <span class="strok">({{ $fcategory->products_count }})</span>
-                                </div>
+                                        
+                                        // Final Fallback to assets if not found in featured_categories
+                                        if(!$fcat_image) {
+                                            foreach($patterns as $p) {
+                                                if(file_exists(public_path('assets/images/categories/'.$p))) {
+                                                    $fcat_image = asset('assets/images/categories/'.$p).'?v='.time();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <img src="{{ $fcat_image }}"
+                                     alt="{{ $fcategory->name }}"
+                                     style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;" class="hover-zoom">
+                            </div>
+                            <div class="product-info mt-2">
+                                <span style="font-weight: 500; font-size: 13px; display: block; line-height: 1.2;">{{ $fcategory->name }}</span>
                             </div>
                         </a>
                     </div>
