@@ -69,7 +69,7 @@
                 </div>
                 <div class="col-xl-8 col-lg-8">
                     <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
-                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 700px;">
+                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 620px;">
                             <form id="searchForm" class="search-form form-inline search-pill-shape"
                                 action="{{ route('front.category', [Request::route('category'), Request::route('subcategory'), Request::route('childcategory')]) }}"
                                 method="GET">
@@ -154,7 +154,7 @@
                             @include('load.cart')
                         </div>
 
-                        <div class="sign-in position-relative font-general my-account-dropdown ms-3" style="min-width: max-content;">
+                        <div class="my-account-hdr position-relative font-general my-account-dropdown ms-3" style="min-width: max-content;">
                             <a href="javascript:;"
                                 class="has-dropdown d-flex align-items-center text-dark text-decoration-none"
                                 title="My Account" style="white-space: nowrap;">
