@@ -437,7 +437,7 @@
                 @foreach ($featured_categories as $fcategory)
                     <div class="item text-center">
                         <a href="{{ route('front.category', $fcategory->slug) }}" class="text-decoration-none text-dark d-block">
-                            <div class="product-image mx-auto mb-2" style="width: 140px; height: 140px; border-radius: 8px; overflow: hidden; position: relative;">
+                            <div class="product-image mx-auto mb-2" style="width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; position: relative;">
                                 @php
                                     $slug = $fcategory->slug;
                                     $fcat_image = asset('assets/images/noimage.png');
@@ -518,8 +518,8 @@
                                      alt="{{ $fcategory->name }}"
                                      style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;" class="hover-zoom">
                             </div>
-                            <div class="product-info mt-2">
-                                <span style="font-weight: 500; font-size: 13px; display: block; line-height: 1.2;">{{ $fcategory->name }}</span>
+                            <div class="product-info mt-1">
+                                <span style="font-weight: 600; font-size: 12px; display: block; line-height: 1.3; color: #333;">{{ $fcategory->name }}</span>
                             </div>
                         </a>
                     </div>
@@ -714,18 +714,18 @@
         // Category carousel — infinite scroll
         $('.category-owl-carousel').owlCarousel({
             loop: true,
-            margin: 12,
+            margin: 8,
             nav: true,
             dots: false,
             autoplay: true,
             autoplayTimeout: 3000,
             autoplayHoverPause: true,
             responsive: {
-                0:    { items: 2 },
-                576:  { items: 3 },
-                768:  { items: 4 },
-                992:  { items: 5 },
-                1200: { items: 6 }
+                0:    { items: 3 },
+                576:  { items: 4 },
+                768:  { items: 6 },
+                992:  { items: 7 },
+                1200: { items: 8 }
             },
             navText: [
                 '<i class="fa fa-chevron-left"></i>',
