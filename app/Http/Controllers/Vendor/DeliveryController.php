@@ -50,7 +50,7 @@ class DeliveryController extends VendorBaseController
                     '<strong>'.__('Email').':</strong> '.$data->customer_email.'<br>'.
                     '<strong>'.__('Phone').':</strong> '.$data->customer_phone.'<br>'.
                     '<strong>'.__('Country').':</strong> '.$data->customer_country.'<br>'.
-                    '<strong>'.__('City').':</strong> '.$data->customerCity->city_name.'<br>'.
+                    '<strong>'.__('City').':</strong> '.optional($data->customerCity)->city_name.'<br>'.
                     '<strong>'.__('Pickup Location').':</strong> '.optional($data->servicearea)->location.'<br>'.
                     '<strong>'.__('Address').':</strong> '.$data->customer_address.'<br>'.
                     '<strong>'.__('Order Date').':</strong> '.$data->created_at->diffForHumans().'<br>';
