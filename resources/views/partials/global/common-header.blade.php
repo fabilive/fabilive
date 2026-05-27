@@ -14,7 +14,7 @@
     <div class="main-nav py-4 d-none d-lg-block">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-xl-5 col-lg-5">
+                <div class="col-xl-4 col-lg-4">
                     <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
                         <a class="navbar-brand" href="{{ route('front.index') }}">
                             @php
@@ -67,9 +67,9 @@
                         </div>
                     </nav>
                 </div>
-                <div class="col-xl-7 col-lg-7">
+                <div class="col-xl-8 col-lg-8">
                     <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
-                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 650px;">
+                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 700px;">
                             <form id="searchForm" class="search-form form-inline search-pill-shape"
                                 action="{{ route('front.category', [Request::route('category'), Request::route('subcategory'), Request::route('childcategory')]) }}"
                                 method="GET">
@@ -154,11 +154,11 @@
                             @include('load.cart')
                         </div>
 
-                        <div class="sign-in position-relative font-general my-account-dropdown ms-3">
+                        <div class="sign-in position-relative font-general my-account-dropdown ms-3" style="min-width: max-content;">
                             <a href="javascript:;"
                                 class="has-dropdown d-flex align-items-center text-dark text-decoration-none"
-                                title="My Account">
-                                <i class="flaticon-user-3 flat-mini"></i> <span class="ms-1" style="font-size: 15px;">{{ __('My Account') }}</span>
+                                title="My Account" style="white-space: nowrap;">
+                                <i class="flaticon-user-3 flat-mini"></i> <span class="ms-1" style="font-size: 15px; white-space: nowrap;">{{ __('My Account') }}</span> <i class="fas fa-chevron-down ms-1" style="font-size: 9px; color: #666; margin-top: 3px;"></i>
                             </a>
                             <ul class="my-account-popup">
                                 @if (Auth::guard('web')->check())
