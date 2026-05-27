@@ -37,9 +37,16 @@
                             </h5>
                             <small>{{ __('Order') }} #{{ $thread->deliveryJob->order->order_number }}</small>
                         </div>
-                        <a href="{{ route('vendor.delivery.index') }}" class="btn btn-sm btn-light">
-                            <i class="fas fa-arrow-left"></i> {{ __('Back to Delivery') }}
-                        </a>
+                        <div>
+                            @if($thread->rider->phone)
+                            <a href="tel:{{ $thread->rider->phone }}" class="btn btn-sm btn-info mr-2">
+                                <i class="fas fa-phone-alt"></i> {{ $thread->rider->phone }}
+                            </a>
+                            @endif
+                            <a href="{{ route('vendor.delivery.index') }}" class="btn btn-sm btn-light">
+                                <i class="fas fa-arrow-left"></i> {{ __('Back to Delivery') }}
+                            </a>
+                        </div>
                     </div>
 
                     <div class="chat-messages d-flex flex-column" id="chat-box">

@@ -129,7 +129,6 @@ class DeliveryController extends VendorBaseController
                     <i class="fa fa-eye"></i> '.__('Order View').'
                 </a>
                 '.$contactBtn.'
-                '.$callBtn.'
             </div>';
                     } else {
                         return '<div class="action-list">
