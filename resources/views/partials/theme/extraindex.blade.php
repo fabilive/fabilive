@@ -1,82 +1,208 @@
+<style>
+    .jumia-style-carousel .item {
+        padding: 5px;
+    }
+    .jumia-style-carousel .product.type-product {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+    .jumia-style-carousel .product-wrapper {
+        background: #fff !important;
+        border-radius: 8px !important;
+        padding: 10px !important;
+        border: 1px solid #eaeaea !important;
+        transition: all 0.2s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .jumia-style-carousel .product-wrapper:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+    .jumia-style-carousel .product-image {
+        width: 100% !important;
+        aspect-ratio: 1/1 !important;
+        overflow: hidden !important;
+        border-radius: 6px !important;
+        background: #fff !important;
+        position: relative !important;
+    }
+    .jumia-style-carousel .product-image img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+    }
+    .jumia-style-carousel .product-info {
+        padding-top: 8px !important;
+        text-align: left !important;
+    }
+    .jumia-style-carousel .product-title {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        line-height: 1.4 !important;
+        height: 36px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        margin-bottom: 5px !important;
+    }
+    .jumia-style-carousel .product-title a {
+        color: #333 !important;
+    }
+    .jumia-style-carousel .product-price {
+        margin-top: 5px !important;
+    }
+    .jumia-style-carousel .product-price ins {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #111 !important;
+        text-decoration: none !important;
+    }
+    .jumia-style-carousel .product-price del {
+        font-size: 12px !important;
+        color: #999 !important;
+        margin-left: 5px !important;
+    }
+    .jumia-style-carousel .on-sale {
+        position: absolute !important;
+        top: 8px !important;
+        right: 8px !important;
+        background: #fef08a !important;
+        color: #a16207 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        z-index: 2 !important;
+    }
+    /* Owl Nav Buttons Styling */
+    .jumia-style-carousel-wrapper {
+        position: relative;
+    }
+    .jumia-style-carousel-wrapper .owl-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .jumia-style-carousel-wrapper .owl-prev,
+    .jumia-style-carousel-wrapper .owl-next {
+        pointer-events: all;
+        background: rgba(255,255,255,0.9) !important;
+        color: #333 !important;
+        border-radius: 50% !important;
+        width: 36px;
+        height: 36px;
+        line-height: 34px !important;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 1px solid #ddd !important;
+        transition: all 0.2s;
+    }
+    .jumia-style-carousel-wrapper .owl-prev:hover,
+    .jumia-style-carousel-wrapper .owl-next:hover {
+        background: #f68b1e !important;
+        color: #fff !important;
+        border-color: #f68b1e !important;
+    }
+    .jumia-style-carousel-wrapper .owl-prev {
+        margin-left: -18px;
+    }
+    .jumia-style-carousel-wrapper .owl-next {
+        margin-right: -18px;
+    }
+</style>
+
 <!--==================== Top Collection Section Start ====================-->
-<div class="full-row bg-white">
+<div class="full-row bg-white py-4">
     <div class="container">
-        <div class="row">
-            <div class="col">
-                <div class="top-collection-tab nav-tab-active-secondary">
-                    <ul class="nav nav-pills list-color-general justify-content-center mb-5">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="pill" href="#pills-new-arrival-two">{{ __('New
-                                Arrival') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-best-selling-two">{{ __('Top Sellers')
-                                }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-featured-two">{{ __('Buyers Choice') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="pill" href="#pills-Trending-two">{{ __('Trending')
-                                }}</a>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="pills-new-arrival-two">
-                            <div class="products product-style-1">
-                                <div
-                                    class="row g-4 row-cols-xl-4 row-cols-md-3 row-cols-sm-2 row-cols-1 e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-
-                                    @foreach($latest_products as $prod)
-                                    <div class="col">
-                                        @include('partials.product.home-product')
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
+        
+        <!-- SECTION 1: TOP SELLERS -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #f68b1e; font-weight: 700;">
+                <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Top Sellers') }}</h4>
+                <a href="{{ route('front.category') }}?sort=sales_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
+                    {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
+                </a>
+            </div>
+            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel">
+                    @foreach($sale_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
                         </div>
-                        <div class="tab-pane fade" id="pills-Trending-two">
-                            <div class="products product-style-1">
-                                <div
-                                    class="row g-4 row-cols-xl-4 row-cols-md-3 row-cols-sm-2 row-cols-1 e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-                                    @foreach($trending_products as $prod)
-                                    <div class="col">
-                                        @include('partials.product.home-product')
-                                    </div>
-                                    @endforeach
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-best-selling-two">
-                            <div class="products product-style-1">
-                                <div
-                                    class="row g-4 row-cols-xl-4 row-cols-md-3 row-cols-sm-2 row-cols-1 e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-                                    @foreach($sale_products as $prod)
-                                    <div class="col">
-                                        @include('partials.product.home-product')
-                                    </div>
-                                    @endforeach
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-featured-two">
-                            <div class="products product-style-1">
-                                <div
-                                    class="row g-4 row-cols-xl-4 row-cols-md-3 row-cols-sm-2 row-cols-1 e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-                                    @foreach($popular_products as $prod)
-                                    <div class="col">
-                                        @include('partials.product.home-product')
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
+
+        <!-- SECTION 2: NEW ARRIVALS -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #111; font-weight: 700;">
+                <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('New Arrivals') }}</h4>
+                <a href="{{ route('front.category') }}?sort=date_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
+                    {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
+                </a>
+            </div>
+            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel">
+                    @foreach($latest_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: BUYERS CHOICE -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #f68b1e; font-weight: 700;">
+                <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Buyers Choice') }}</h4>
+                <a href="{{ route('front.category') }}?sort=views_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
+                    {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
+                </a>
+            </div>
+            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel">
+                    @foreach($popular_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: TRENDING -->
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #111; font-weight: 700;">
+                <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Trending') }}</h4>
+                <a href="{{ route('front.category') }}?sort=date_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
+                    {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
+                </a>
+            </div>
+            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel">
+                    @foreach($trending_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 <!--==================== Top Collection Section End ====================-->
@@ -309,3 +435,25 @@
 @includeIf('partials.global.common-footer')
 
 <script src="{{ asset('assets/front/js/extraindex.js') }}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        $('.jumia-style-carousel').owlCarousel({
+            loop: false,
+            margin: 10,
+            nav: true,
+            dots: false,
+            autoplay: false,
+            responsive: {
+                0:    { items: 2 },
+                576:  { items: 3 },
+                768:  { items: 4 },
+                992:  { items: 5 },
+                1200: { items: 6 }
+            },
+            navText: [
+                '<i class="fa fa-chevron-left"></i>',
+                '<i class="fa fa-chevron-right"></i>'
+            ]
+        });
+    });
+</script>
