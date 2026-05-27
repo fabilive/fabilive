@@ -69,7 +69,7 @@
                     <div class="invoice__shipping">
                         <p><strong>{{ __('Shipping Address') }}</strong></p>
                         <span><strong>{{ __('Customer Name') }}</strong>:
-                            {{ $order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</span><br>
+                            <i>{{ __('Hidden for Privacy') }}</i></span><br>
                         <span><strong>{{ __('Address') }}</strong>:
                             <span class="text-muted"><i>{{ __('Hidden for Privacy (Rider Delivery)') }}</i></span></span><br>
                         <span><strong>{{ __('City') }}</strong>:
@@ -85,7 +85,7 @@
                 <div class="col-lg-6">
                     <div class="buyer">
                         <p><strong>{{ __('Billing Details') }}</strong></p>
-                        <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->customer_name}}</span><br>
+                        <span><strong>{{ __('Customer Name') }}</strong>: <i>{{ __('Hidden for Privacy') }}</i></span><br>
                         <span><strong>{{ __('Address') }}</strong>: <span class="text-muted"><i>{{ __('Hidden for Privacy') }}</i></span></span><br>
                         <span><strong>{{ __('City') }}</strong>: {{ $order->customer_city }}</span><br>
                         <span><strong>{{ __('Country') }}</strong>: {{ $order->customer_country }}</span>

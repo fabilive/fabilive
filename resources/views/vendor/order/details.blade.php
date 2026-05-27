@@ -216,7 +216,7 @@
                                 <tr>
                                     <th width="45%">{{ __('Name') }}</th>
                                     <th width="10%">:</th>
-                                    <td width="45%">{{$order->customer_name}}</td>
+                                    <td width="45%"><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%">{{ __('Email') }}</th>
@@ -285,8 +285,7 @@
                                 <tr>
                                     <th width="45%"><strong>{{ __('Name') }}:</strong></th>
                                     <th width="10%">:</th>
-                                    <td>{{$order->shipping_name == null ? $order->customer_name :
-                                        $order->shipping_name}}</td>
+                                    <td><i>{{ __('Hidden for Privacy') }}</i></td>
                                 </tr>
                                 <tr>
                                     <th width="45%"><strong>{{ __('Email') }}:</strong></th>

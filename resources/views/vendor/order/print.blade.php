@@ -82,8 +82,8 @@ html {
                 <div class="col-lg-6">
                         <div class="invoice__orderDetails" style="margin-top:5px;">
                             <p><strong>{{ __('Shipping Details') }}</strong></p>
-                           <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</span><br>
-                           <span><strong>{{ __('Address') }}</strong>: {{ $order->shipping_address == null ? $order->customer_address : $order->shipping_address }}</span><br>
+                           <span><strong>{{ __('Customer Name') }}</strong>: <i>{{ __('Hidden for Privacy') }}</i></span><br>
+                           <span><strong>{{ __('Address') }}</strong>: <i>{{ __('Hidden for Privacy (Rider Delivery)') }}</i></span><br>
                            <span><strong>{{ __('City') }}</strong>: {{ $order->shipping_city == null ? $order->customer_city : $order->shipping_city }}</span><br>
                            <span><strong>{{ __('Country') }}</strong>: {{ $order->shipping_country == null ? $order->customer_country : $order->shipping_country }}</span>
                         </div>
@@ -92,8 +92,8 @@ html {
                 <div class="col-lg-6" style="width:50%;">
                         <div class="invoice__orderDetails" style="margin-top:5px;">
                             <p><strong>{{ __('Billing Details') }}</strong></p>
-                            <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->customer_name}}</span><br>
-                            <span><strong>{{ __('Address') }}</strong>: {{ $order->customer_address }}</span><br>
+                            <span><strong>{{ __('Customer Name') }}</strong>: <i>{{ __('Hidden for Privacy') }}</i></span><br>
+                            <span><strong>{{ __('Address') }}</strong>: <i>{{ __('Hidden for Privacy') }}</i></span><br>
                             <span><strong>{{ __('City') }}</strong>: {{ $order->customer_city }}</span><br>
                             <span><strong>{{ __('Country') }}</strong>: {{ $order->customer_country }}</span>
                         </div>
