@@ -103,24 +103,33 @@ class DeliveryController extends VendorBaseController
                 </a>
             </div>';
                     } elseif (in_array($job->status, ['picking_up', 'picked_up', 'delivering', 'returned'])) {
+                        $thread = \App\Models\DeliveryChatThread::where('delivery_job_id', $job->id)
+                            ->where('seller_id', auth()->id())
+                            ->first();
+
                         $phone = $job->rider ? $job->rider->phone : '';
-                        $waPhone = preg_replace('/[^0-9]/', '', $phone);
                         $contactBtn = '';
-                        if($waPhone) {
-                            $contactBtn = '<a href="https://wa.me/'.$waPhone.'" target="_blank" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fab fa-whatsapp"></i> '.__('Contact Rider').'</a>';
+                        if ($thread) {
+                            $contactBtn = '<a href="'.route('vendor-delivery-chat', $thread->id).'" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fas fa-comment-dots"></i> '.__('Chat with Rider').'</a>';
                         } else {
-                            $contactBtn = '<a href="tel:'.$phone.'" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fas fa-phone"></i> '.__('Contact Rider').'</a>';
+                            // Fallback if thread not found for some reason
+                            $waPhone = preg_replace('/[^0-9]/', '', $phone);
+                            if($waPhone) {
+                                $contactBtn = '<a href="https://wa.me/'.$waPhone.'" target="_blank" class="btn btn-outline-success btn-sm mt-1 w-100"><i class="fab fa-whatsapp"></i> '.__('Chat with Rider').'</a>';
+                            }
                         }
                         
-                        $statusText = ($job->status == 'picking_up' || $job->status == 'picked_up') ? __('Picked Up') : ($job->status == 'delivering' ? __('Out for Delivery') : __('Returning'));
-                        $badgeClass = $job->status == 'returned' ? 'badge-danger' : 'badge-warning';
+                        $callBtn = '';
+                        if ($phone) {
+                            $callBtn = '<a href="tel:'.$phone.'" class="btn btn-outline-info btn-sm mt-1 w-100"><i class="fas fa-phone-alt"></i> '.$phone.'</a>';
+                        }
                         
                         return '<div class="action-list">
                 <a href="'.route('vendor-order-show', $data->order_number).'" class="btn btn-outline-primary btn-sm mb-1 w-100">
                     <i class="fa fa-eye"></i> '.__('Order View').'
                 </a>
-                <span class="badge '.$badgeClass.' mt-1 d-block w-100">'.$statusText.'</span>
                 '.$contactBtn.'
+                '.$callBtn.'
             </div>';
                     } else {
                         return '<div class="action-list">

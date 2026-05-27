@@ -3455,6 +3455,11 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('delivery/boy/find', 'Vendor\DeliveryController@findReider')->name('vendor.find.rider');
             Route::post('rider/search/submit', 'Vendor\DeliveryController@findReiderSubmit')->name('vendor-rider-search-submit');
 
+            // Delivery Chat Routes
+            Route::get('delivery/chat/{id}', 'Vendor\DeliveryChatController@show')->name('vendor-delivery-chat');
+            Route::get('delivery/chat/messages/{id}', 'Vendor\DeliveryChatController@fetchMessages')->name('vendor-delivery-chat-messages');
+            Route::post('delivery/chat/send', 'Vendor\DeliveryChatController@sendMessage')->name('vendor-delivery-chat-send');
+
             //------------ SUBCATEGORY SECTION ------------
 
             Route::get('/load/subcategories/{id}/', 'Vendor\VendorController@subcatload')->name('vendor-subcat-load'); //JSON REQUEST
