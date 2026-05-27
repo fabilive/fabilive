@@ -71,7 +71,7 @@
                         <table class="table">
                             <tbody>
                                 <tr>
-                                    <th width="45%">{{ __('Total Delivery Fee') }}</th>
+                                    <th width="45%">{{ __('Extra Delivery Fee (Multiple Sellers)') }}</th>
                                     <th width="10%">:</th>
                                     <td width="45%">XAF {{ number_format($data->delivery_fee_total, 2) }}</td>
                                 </tr>

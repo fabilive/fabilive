@@ -39,14 +39,13 @@ class PriceHelper
         $sellerCount = count($uniqueSellers);
         
         $gs = \App\Models\Generalsetting::safeFirst();
-        $baseFee = $gs->delivery_base_fee ?? 1000;
         $additionalSellerFee = $gs->delivery_stopover_fee ?? 300;
 
         if ($sellerCount <= 1) {
-            return $baseFee;
+            return 0;
         }
 
-        return $baseFee + (($sellerCount - 1) * $additionalSellerFee);
+        return (($sellerCount - 1) * $additionalSellerFee);
     }
 
     public static function showPrice($price)

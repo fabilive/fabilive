@@ -131,7 +131,7 @@
                                 @endif
                                 
                                 <tr>
-                                    <th class="45%" width="45%">{{ __('Total Delivery Fee') }}</th>
+                                    <th class="45%" width="45%">{{ __('Extra Delivery Fee (Multiple Sellers)') }}</th>
                                     <td width="10%">:</td>
                                     <td class="45%" width="45%">{{$order->total_delivery_fee}}</td>
                                 </tr>

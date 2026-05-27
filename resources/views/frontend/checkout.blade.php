@@ -644,7 +644,7 @@
                            <P><b class="cart-total">{{ Session::has('cart') ? App\Models\Product::convertPrice(Session::get('cart')->totalPrice) : '0.00' }}</b></P>
                         </li>
                         <li id="total-fee-row" style="display:none;" class="{{ $digital == 1 ? 'd-none' : '' }}">
-                           <p>{{ __('Total Delivery Fee') }}</p>
+                           <p>{{ __('Extra Delivery Fee (Multiple Sellers)') }}</p>
                            <p><b id="total-fee">0.00</b></p>
                         </li>
                         <li class="tax_show d-none">
