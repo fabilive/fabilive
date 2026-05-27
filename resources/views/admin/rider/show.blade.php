@@ -327,25 +327,27 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($data->orders as $order)
-                                                    <tr>
-                                                        <td><a
-                                                                href="{{ route('admin-order-invoice', $order->order->id) }}">{{ sprintf("%'.08d", $order->order->id) }}</a>
-                                                        </td>
-                                                        <td>{{ Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }}
-                                                        </td>
-                                                        <td>{{ PriceHelper::showOrderCurrencyPrice(
-                                                            $order->order->pay_amount * $order->order->currency_value,
-                                                            $order->order->currency_sign,
-                                                        ) }}
-                                                        </td>
-                                                        <td>{{ ucwords($order->status) }}</td>
-                                                        <td>
-                                                            <a href=" {{ route('admin-order-show', $order->order->id) }}"
-                                                                class="view-details">
-                                                                <i class="fas fa-check"></i>{{ __('Details') }}
-                                                            </a>
-                                                        </td>
-                                                    </tr>
+                                                    @if($order->order)
+                                                        <tr>
+                                                            <td><a
+                                                                    href="{{ route('admin-order-invoice', $order->order->id) }}">{{ sprintf("%'.08d", $order->order->id) }}</a>
+                                                            </td>
+                                                            <td>{{ Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }}
+                                                            </td>
+                                                            <td>{{ PriceHelper::showOrderCurrencyPrice(
+                                                                $order->order->pay_amount * $order->order->currency_value,
+                                                                $order->order->currency_sign,
+                                                            ) }}
+                                                            </td>
+                                                            <td>{{ ucwords($order->status) }}</td>
+                                                            <td>
+                                                                <a href=" {{ route('admin-order-show', $order->order->id) }}"
+                                                                    class="view-details">
+                                                                    <i class="fas fa-check"></i>{{ __('Details') }}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    @endif
                                                 @endforeach
 
                                             </tbody>
