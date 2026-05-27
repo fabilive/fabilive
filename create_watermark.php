@@ -7,7 +7,7 @@ $kernel->bootstrap();
 use Intervention\Image\Facades\Image as Image;
 
 $logoPath = public_path('assets/images/fabilive_logo_transparent.png');
-$watermarkPath = public_path('assets/images/watermark.png');
+$watermarkPath = public_path('assets/front/images/watermark.png');
 
 if (file_exists($logoPath)) {
     // Make watermark 150px wide, keeping aspect ratio
@@ -16,7 +16,7 @@ if (file_exists($logoPath)) {
     });
     
     // Reduce opacity to make it a subtle watermark
-    $img->opacity(50);
+    // $img->opacity(50); // CAUSES GREY BACKGROUND BUG IN GD
     
     $img->save($watermarkPath);
     echo "Watermark created successfully at $watermarkPath\n";
