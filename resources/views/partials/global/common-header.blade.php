@@ -699,10 +699,10 @@
                             <div id="mobile_google_translate_element"></div>
                         </a>
                         <div class="sign-in position-relative font-general my-account-dropdown">
-                            <a href="my-account.html"
+                            <a href="javascript:;"
                                 class="has-dropdown d-flex align-items-center text-dark text-decoration-none"
                                 title="My Account">
-                                <i class="flaticon-user-3 flat-mini me-1 mx-auto"></i>
+                                <i class="flaticon-user-3 flat-mini"></i> <span class="ms-1" style="font-size: 15px;">{{ __('My Account') }}</span>
                             </a>
                             <ul class="my-account-popup">
                                 @if (Auth::guard('web')->check())
