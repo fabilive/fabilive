@@ -600,20 +600,20 @@
                 <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
                 <input type="hidden" id="base-total" value="{{round(Session::get('cart')->totalPrice * $curr->value, 2)}}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
-                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
+                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="{{ isset($extra_seller_fee) ? $extra_seller_fee : 0 }}">
 
                 @elseif(Session::has('coupon_total1'))
                 <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
                 <input type="hidden" id="tgrandtotal" value="{{ $totalPrice }}">
                 <input type="hidden" id="base-total" value="{{ $totalPrice }}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
-                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
+                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="{{ isset($extra_seller_fee) ? $extra_seller_fee : 0 }}">
                 @else
                 <input type="hidden" name="total" id="grandtotal" value="{{round($totalPrice * $curr->value,2)}}">
                 <input type="hidden" id="tgrandtotal" value="{{round($totalPrice * $curr->value,2)}}">
                 <input type="hidden" id="base-total" value="{{round(Session::get('cart')->totalPrice * $curr->value, 2)}}">
                 <input type="hidden" id="base-cart-total" value="{{ round($totalPrice * $curr->value, 2) }}">
-                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="0">
+                <input type="hidden" name="total_delivery_fee" id="total_delivery_fee" value="{{ isset($extra_seller_fee) ? $extra_seller_fee : 0 }}">
                 @endif
                <input type="hidden" id="original_tax" value="0">
                <input type="hidden" id="wallet-price" name="wallet_price" value="0">
@@ -643,9 +643,9 @@
                            <p>{{ __('Total MRP') }}</p>
                            <P><b class="cart-total">{{ Session::has('cart') ? App\Models\Product::convertPrice(Session::get('cart')->totalPrice) : '0.00' }}</b></P>
                         </li>
-                        <li id="total-fee-row" style="display:none;" class="{{ $digital == 1 ? 'd-none' : '' }}">
+                        <li id="total-fee-row" class="{{ $digital == 1 ? 'd-none' : '' }}" style="{{ isset($extra_seller_fee) && $extra_seller_fee > 0 ? '' : 'display:none;' }}">
                            <p>{{ __('Extra Delivery Fee (Multiple Sellers)') }}</p>
-                           <p><b id="total-fee">0.00</b></p>
+                           <p><b id="total-fee">{{ isset($extra_seller_fee) ? $extra_seller_fee : 0 }} {{ $curr->sign }}</b></p>
                         </li>
                         <li class="tax_show d-none">
                            <p>{{ __('Tax')}}</p>
@@ -1033,7 +1033,7 @@
 
 // Robust service-area delivery fee updater
 var pos = {{ $gs->currency_format }};   // currency position
-var cartDeliveryFee = 0;
+var cartDeliveryFee = {{ isset($extra_seller_fee) ? $extra_seller_fee : 0 }};
 $(document).on('change', '#service_area_select, #service_area_id', function () {
     var $sel = $(this);
     var serviceAreaId = $sel.val();

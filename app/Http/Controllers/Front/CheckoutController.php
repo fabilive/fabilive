@@ -222,7 +222,9 @@ class CheckoutController extends FrontBaseController
             }
             $service_areas = ServiceArea::all();
 
-            return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas]);
+            $extra_seller_fee = round(\App\Helpers\PriceHelper::calculateDeliveryFee($cart) * $curr->value, 2);
+
+            return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas, 'extra_seller_fee' => $extra_seller_fee]);
         } else {
             if ($this->gs->guest_checkout == 1) {
                 if ($this->gs->multiple_shipping == 1) {
@@ -263,14 +265,14 @@ class CheckoutController extends FrontBaseController
                 foreach ($products as $prod) {
                     if ($prod['item']['type'] != 'Physical') {
                         if (! Auth::check()) {
-                            $ck = 1;
-
-                            return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas]);
+                            $extra_seller_fee = round(\App\Helpers\PriceHelper::calculateDeliveryFee($cart) * $curr->value, 2);
+                            return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas, 'extra_seller_fee' => $extra_seller_fee]);
                         }
                     }
                 }
 
-                return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas]);
+                $extra_seller_fee = round(\App\Helpers\PriceHelper::calculateDeliveryFee($cart) * $curr->value, 2);
+                return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas, 'extra_seller_fee' => $extra_seller_fee]);
             } else {
                 if ($this->gs->multiple_shipping == 1) {
                     $ship_data = Order::getShipData($cart);
@@ -303,7 +305,8 @@ class CheckoutController extends FrontBaseController
                 }
                 $ck = 1;
 
-                return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas]);
+                $extra_seller_fee = round(\App\Helpers\PriceHelper::calculateDeliveryFee($cart) * $curr->value, 2);
+                return view('frontend.checkout', ['products' => $cart->items, 'totalPrice' => $total, 'pickups' => $pickups, 'totalQty' => $cart->totalQty, 'gateways' => $gateways, 'digital' => $dp, 'curr' => $curr, 'shipping_data' => $shipping_data, 'package_data' => $package_data, 'vendor_shipping_id' => $vendor_shipping_id, 'vendor_packing_id' => $vendor_packing_id, 'paystack' => $paystackData, 'service_areas' => $service_areas, 'extra_seller_fee' => $extra_seller_fee]);
             }
         }
     }

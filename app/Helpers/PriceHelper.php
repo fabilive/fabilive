@@ -23,9 +23,10 @@ class PriceHelper
         $uniqueSellers = [];
 
         foreach ($cart->items as $item) {
-            if (($item['item']['type'] ?? '') === 'Physical') {
+            $product = $item['item'];
+            if (($product->type ?? '') === 'Physical') {
                 $hasPhysical = true;
-                $sellerId = $item['item']['user_id'] ?? 0;
+                $sellerId = $product->user_id ?? 0;
                 if (!in_array($sellerId, $uniqueSellers)) {
                     $uniqueSellers[] = $sellerId;
                 }
