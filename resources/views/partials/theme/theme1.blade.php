@@ -396,13 +396,32 @@
                             </a>
                         </div>
                         
-                        <!-- Bottom Banner -->
-                        <a href="{{ route('user.register') }}" class="rounded shadow-sm overflow-hidden d-block text-center flex-grow-1 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%); color: white; text-decoration: none;">
-                            <div class="p-4">
-                                <h3 style="font-weight: 900; font-size: 24px; margin-bottom: 5px; color: white;">FABILIVE FORCE</h3>
-                                <div style="font-weight: 700; font-size: 16px; background: white; color: #f97316; display: inline-block; padding: 5px 15px; border-radius: 4px; margin-top: 10px;">JOIN NOW</div>
+                        <!-- Bottom Banner -> My Account Links -->
+                        <div class="rounded shadow-sm overflow-hidden text-white" style="background: #111;">
+                            <div class="p-2 text-center border-bottom border-secondary">
+                                <h3 class="mb-0" style="font-size: 15px; font-weight: 700; color: #fff;">
+                                    <i class="flaticon-user-3 flat-mini me-1"></i> {{ __('My Account') }}
+                                </h3>
                             </div>
-                        </a>
+                            <div class="d-flex flex-wrap justify-content-center p-2 gap-1" style="font-size: 12px;">
+                                @if (Auth::guard('web')->check())
+                                    <a href="{{ route('user-dashboard') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('User Panel') }}</a>
+                                    @if (Auth::guard('web')->user()->IsVendor())
+                                        <a href="{{ route('vendor.dashboard') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Vendor Panel') }}</a>
+                                    @endif
+                                    <a href="{{ route('user-profile') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Edit Profile') }}</a>
+                                    <a href="{{ route('user-logout') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Logout') }}</a>
+                                @elseif(Auth::guard('rider')->check())
+                                    <a href="{{ route('rider-dashboard') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Delivery Panel') }}</a>
+                                    <a href="{{ route('rider-profile') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Edit Profile') }}</a>
+                                    <a href="{{ route('rider-logout') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Logout') }}</a>
+                                @else
+                                    <a href="{{ route('user.login') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('User Login') }}</a>
+                                    <a href="{{ route('rider.login') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Delivery Login') }}</a>
+                                    <a href="{{ route('user.register') }}" class="text-white text-decoration-none px-2 py-1 hover-opacity">{{ __('Join') }}</a>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
