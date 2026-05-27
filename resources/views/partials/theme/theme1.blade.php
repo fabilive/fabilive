@@ -265,7 +265,7 @@
                 <div class="col-lg-2 d-none d-lg-block position-relative">
                     <div class="vertical-menu bg-white rounded shadow-sm border h-100" style="padding: 10px 0;">
                         <ul class="list-unstyled mb-0" id="mega-menu-list">
-                            @foreach (isset($global_categories) ? $global_categories->take(11) : collect() as $cat)
+                            @foreach (isset($global_categories) ? $global_categories : collect() as $cat)
                                 <li class="mega-menu-item" style="padding: 6px 15px; cursor: pointer; transition: background 0.2s;">
                                     <a href="{{ route('front.category', $cat->slug) }}" class="text-dark d-flex align-items-center text-decoration-none" style="font-size: 13px;">
                                         <i class="flaticon-menu-2 me-2" style="font-size: 14px; color: #666;"></i>
@@ -297,14 +297,6 @@
                                     @endif
                                 </li>
                             @endforeach
-                            @if(isset($global_categories) && $global_categories->count() > 11)
-                                <li class="mega-menu-item" style="padding: 6px 15px; cursor: pointer;">
-                                    <a href="{{ route('front.category') }}" class="text-dark d-flex align-items-center text-decoration-none" style="font-size: 13px;">
-                                        <i class="fas fa-ellipsis-h me-2" style="font-size: 14px; color: #666;"></i>
-                                        <span>{{ __('Other categories') }}</span>
-                                    </a>
-                                </li>
-                            @endif
                         </ul>
                     </div>
                 </div>
@@ -399,7 +391,7 @@
                                     <i class="flaticon-truck text-primary" style="font-size: 18px;"></i>
                                 </div>
                                 <div>
-                                    <div style="font-size: 13px; font-weight: 600;">Delivery Agent</div>
+                                    <div style="font-size: 13px; font-weight: 600;">Become a Delivery Agent</div>
                                 </div>
                             </a>
                         </div>
