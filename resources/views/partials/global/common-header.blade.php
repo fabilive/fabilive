@@ -69,7 +69,7 @@
                 </div>
                 <div class="col-xl-7 col-lg-7">
                     <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
-                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 450px;">
+                        <div class="product-search-one flex-grow-1 global-search touch-screen-view me-auto" style="max-width: 650px;">
                             <form id="searchForm" class="search-form form-inline search-pill-shape"
                                 action="{{ route('front.category', [Request::route('category'), Request::route('subcategory'), Request::route('childcategory')]) }}"
                                 method="GET">
@@ -153,6 +153,50 @@
                             </a>
                             @include('load.cart')
                         </div>
+
+                        <div class="sign-in position-relative font-general my-account-dropdown ms-3">
+                            <a href="javascript:;"
+                                class="has-dropdown d-flex align-items-center text-dark text-decoration-none"
+                                title="My Account">
+                                <i class="flaticon-user-3 flat-mini"></i> <span class="ms-1" style="font-size: 15px;">{{ __('My Account') }}</span>
+                            </a>
+                            <ul class="my-account-popup">
+                                @if (Auth::guard('web')->check())
+                                    <li><a href="{{ route('user-dashboard') }}"><span
+                                                class="menu-item-text">{{ __('User Panel') }}</span></a>
+                                    </li>
+                                    @if (Auth::guard('web')->user()->IsVendor())
+                                        <li><a href="{{ route('vendor.dashboard') }}"><span
+                                                    class="menu-item-text">{{ __('Vendor Panel') }}</span></a>
+                                        </li>
+                                    @endif
+                                    <li><a href="{{ route('user-profile') }}"><span
+                                                class="menu-item-text">{{ __('Edit Profile') }}</span></a>
+                                    </li>
+                                    <li><a href="{{ route('user-logout') }}"><span
+                                                class="menu-item-text">{{ __('Logout') }}</span></a></li>
+                                @elseif(Auth::guard('rider')->check())
+                                    <li><a href="{{ route('rider-dashboard') }}"><span
+                                                class="menu-item-text">{{ __('User Panel') }}</span></a>
+                                    </li>
+                                    <li><a href="{{ route('rider-profile') }}"><span
+                                                class="menu-item-text">{{ __('Edit Profile') }}</span></a>
+                                    </li>
+                                    <li><a href="{{ route('rider-logout') }}"><span
+                                                class="menu-item-text">{{ __('Logout') }}</span></a></li>
+                                @else
+                                    <li><a href="{{ route('user.login') }}"><span
+                                                class="menu-item-text sign-in">{{ __('User Login') }}</span></a>
+                                    </li>
+                                    <li><a href="{{ route('rider.login') }}"><span
+                                                class="menu-item-text sign-in">{{ __('Delivery Login') }}</span></a>
+                                    </li>
+                                    <li><a href="{{ route('user.register') }}"><span
+                                                class="menu-item-text join">{{ __('Join') }}</span></a></li>
+                                @endif
+                            </ul>
+                        </div>
+
                         @if (Auth::guard('web')->check() || Auth::guard('rider')->check())
                         <div class="header-user">
                             <a href="#" class="user-icon" id="userDropdownToggle" title="Notifications">
