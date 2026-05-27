@@ -20,7 +20,18 @@ class MessageController extends UserBaseController
     public function messages()
     {
         $user = $this->user;
-        $convs = Conversation::where('sent_user', '=', $user->id)->orWhere('recieved_user', '=', $user->id)->get();
+
+        try {
+            $convs = Conversation::where('sent_user', '=', $user->id)->orWhere('recieved_user', '=', $user->id)->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Automatically run migrations if the table is missing
+            if (\strpos($e->getMessage(), 'conversations') !== false) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                $convs = Conversation::where('sent_user', '=', $user->id)->orWhere('recieved_user', '=', $user->id)->get();
+            } else {
+                throw $e;
+            }
+        }
 
         return view('user.message.index', compact('user', 'convs'));
     }
