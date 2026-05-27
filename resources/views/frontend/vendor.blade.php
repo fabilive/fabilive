@@ -231,7 +231,7 @@
         var url = document.getElementById("store-url").value;
         if (navigator.share) {
             navigator.share({
-                title: '{{ isset($vendor) ? $vendor->shop_name : "Store" }}',
+                title: '{{ isset($vendor) ? addslashes($vendor->shop_name) : "Store" }}',
                 text: 'Check out this store on Fabilive!',
                 url: url
             }).catch(function(error) {
@@ -240,7 +240,7 @@
         } else {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(url).then(function() {
-                    alert("Store link copied to clipboard: " + url);
+                    toastr.success("Store link copied to clipboard");
                 }).catch(function(err) {
                     fallbackCopyTextToClipboard(url);
                 });
@@ -261,10 +261,10 @@
         textArea.select();
         try {
             document.execCommand('copy');
-            alert("Store link copied to clipboard: " + text);
+            toastr.success("Store link copied to clipboard");
         } catch (err) {
             console.error('Fallback copy failed', err);
-            alert("Please copy the URL manually: " + text);
+            toastr.error("Please copy the URL manually: " + text);
         }
         document.body.removeChild(textArea);
     }
