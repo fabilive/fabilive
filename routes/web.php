@@ -4321,6 +4321,21 @@ Route::group(['middleware' => 'maintenance'], function () {
 
     // VENDOR AND PAGE SECTION
     Route::get('/country/tax/check', 'Front\CartController@country_tax');
+
+    // DEALS AND CATEGORIES SECTION
+    Route::get('/phones-tablets', 'Front\CatalogController@dealPage')->name('front.deal.phones');
+    Route::get('/fashion-deals', 'Front\CatalogController@dealPage')->name('front.deal.fashion');
+    Route::get('/appliances-deals', 'Front\CatalogController@dealPage')->name('front.deal.appliances');
+    Route::get('/tv-audio-deals', 'Front\CatalogController@dealPage')->name('front.deal.tvaudio');
+    Route::get('/beauty-deals', 'Front\CatalogController@dealPage')->name('front.deal.beauty');
+    Route::get('/sneakers-deals', 'Front\CatalogController@dealPage')->name('front.deal.sneakers');
+    Route::get('/new-arrival', 'Front\CatalogController@dealPage')->name('front.deal.newarrival');
+    Route::get('/mobile-accessories-deals', 'Front\CatalogController@dealPage')->name('front.deal.accessories');
+    Route::get('/home-office-deals', 'Front\CatalogController@dealPage')->name('front.deal.homeoffice');
+    Route::get('/beverages-deals', 'Front\CatalogController@dealPage')->name('front.deal.beverages');
+    Route::get('/computing-deals', 'Front\CatalogController@dealPage')->name('front.deal.computing');
+    Route::get('/buy-now-pay-small-small', 'Front\CatalogController@dealPage')->name('front.deal.buynow');
+
     Route::get('/{slug}', 'Front\VendorController@index')->name('front.vendor');
 
     // VENDOR AND PAGE SECTION ENDS

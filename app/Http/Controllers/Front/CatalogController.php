@@ -303,4 +303,155 @@ class CatalogController extends FrontBaseController
 
         return response()->json($response);
     }
+
+    public function dealPage(Request $request)
+    {
+        $uri = $request->path();
+        // Remove leading slash if present
+        $slug = ltrim($uri, '/');
+
+        // Map deals to category titles or slugs
+        $deals = [
+            'phones-tablets' => [
+                'title' => 'Phones & Tablets',
+                'keywords' => ['phone', 'tablet', 'smartphone', 'iphone', 'android', 'samsung', 'huawei', 'pixel'],
+                'category_slugs' => ['smartphones', 'electronics']
+            ],
+            'fashion-deals' => [
+                'title' => 'Fashion Deals',
+                'keywords' => ['dress', 'shirt', 'clothing', 'fashion', 't-shirt', 'wear', 'trousers', 'suit'],
+                'category_slugs' => ['fashion', 'men-fashion', 'women-fashion']
+            ],
+            'appliances-deals' => [
+                'title' => 'Appliances Deals',
+                'keywords' => ['appliance', 'fridge', 'cooker', 'oven', 'mixer', 'kettle', 'iron', 'washing-machine'],
+                'category_slugs' => ['appliances', 'home-appliances']
+            ],
+            'tv-audio-deals' => [
+                'title' => 'TV & Audio Deals',
+                'keywords' => ['tv', 'television', 'audio', 'sound', 'speaker', 'home-theater', 'soundbar'],
+                'category_slugs' => ['electronics', 'tv-audio']
+            ],
+            'beauty-deals' => [
+                'title' => 'Beauty Must Have',
+                'keywords' => ['beauty', 'cosmetics', 'makeup', 'perfume', 'skin', 'hair', 'cream', 'lotion'],
+                'category_slugs' => ['beauty', 'health-beauty']
+            ],
+            'sneakers-deals' => [
+                'title' => 'Sneakers Deals',
+                'keywords' => ['sneaker', 'shoe', 'nike', 'adidas', 'puma', 'trainer', 'footwear'],
+                'category_slugs' => ['shoes', 'sneakers', 'sports']
+            ],
+            'new-arrival' => [
+                'title' => 'New Arrival',
+                'keywords' => [],
+                'category_slugs' => []
+            ],
+            'mobile-accessories-deals' => [
+                'title' => 'Mobile Accessories Deals',
+                'keywords' => ['case', 'charger', 'cable', 'powerbank', 'headphone', 'earbud', 'accessories'],
+                'category_slugs' => ['accessories', 'mobile-accessories']
+            ],
+            'home-office-deals' => [
+                'title' => 'Home & Office Deals',
+                'keywords' => ['chair', 'desk', 'office', 'furniture', 'table', 'lamp', 'printer'],
+                'category_slugs' => ['home-office', 'furniture', 'home-garden']
+            ],
+            'beverages-deals' => [
+                'title' => 'Beverages Deals',
+                'keywords' => ['drink', 'juice', 'wine', 'beer', 'soda', 'beverage', 'water', 'whisky'],
+                'category_slugs' => ['food-drinks', 'beverages']
+            ],
+            'computing-deals' => [
+                'title' => 'Computing Deals',
+                'keywords' => ['laptop', 'computer', 'pc', 'monitor', 'keyboard', 'mouse', 'computing'],
+                'category_slugs' => ['computing', 'laptops-computers', 'electronics']
+            ],
+            'buy-now-pay-small-small' => [
+                'title' => 'Buy Now, Pay Small Small',
+                'keywords' => [],
+                'category_slugs' => []
+            ]
+        ];
+
+        $deal = $deals[$slug] ?? [
+            'title' => 'Hot Deals',
+            'keywords' => [],
+            'category_slugs' => []
+        ];
+
+        // Perform dynamic query based on deal type
+        $prodsQuery = Product::with('user')->whereStatus(1);
+
+        if ($slug == 'new-arrival') {
+            // Ordered by latest first
+            $prodsQuery->latest('id');
+        } elseif ($slug == 'buy-now-pay-small-small') {
+            // Ordered by hottest/discount or big discounts
+            $prodsQuery->where('is_discount', 1)->orWhere('hot', 1)->latest('id');
+        } else {
+            // Find categories matching slugs
+            $catIds = Category::whereIn('slug', $deal['category_slugs'])->pluck('id')->toArray();
+            
+            $prodsQuery->where(function ($q) use ($catIds, $deal) {
+                if (!empty($catIds)) {
+                    $q->whereIn('category_id', $catIds);
+                }
+                foreach ($deal['keywords'] as $keyword) {
+                    $q->orWhere('name', 'like', '%' . $keyword . '%');
+                }
+            });
+        }
+
+        // Apply basic sort, min/max price, search inputs if present
+        $minprice = $request->min;
+        $maxprice = $request->max;
+        $sort = $request->sort;
+        $search = $request->search;
+        $pageby = $request->pageby;
+
+        if (! $this->curr) {
+            $this->curr = Currency::where('is_default', 1)->first() ?? Currency::first();
+        }
+
+        if ($minprice) {
+            $minprice = ($minprice / ($this->curr->value ?? 1));
+            $prodsQuery->where('price', '>=', $minprice);
+        }
+        if ($maxprice) {
+            $maxprice = ($maxprice / ($this->curr->value ?? 1));
+            $prodsQuery->where('price', '<=', $maxprice);
+        }
+        if ($search) {
+            $prodsQuery->where('name', 'like', '%' . $search . '%');
+        }
+
+        if ($sort) {
+            if ($sort == 'date_desc') {
+                $prodsQuery->latest('id');
+            } elseif ($sort == 'date_asc') {
+                $prodsQuery->oldest('id');
+            } elseif ($sort == 'price_desc') {
+                $prodsQuery->latest('price');
+            } elseif ($sort == 'price_asc') {
+                $prodsQuery->oldest('price');
+            }
+        }
+
+        $prods = $prodsQuery->withCount('ratings')->withAvg('ratings', 'rating')
+            ->paginate($pageby ?: ($this->gs->page_count > 0 ? $this->gs->page_count : 12));
+
+        $data['prods'] = $prods;
+        $data['deal_title'] = $deal['title'];
+        $data['deal_slug'] = $slug;
+
+        // Fetch categories and other filters to show in the sidebar catalog
+        $data['categories'] = Category::with('subcategories')->get();
+
+        if ($request->ajax()) {
+            return view('frontend.ajax.category', $data);
+        }
+
+        return view('frontend.deal', $data);
+    }
 }

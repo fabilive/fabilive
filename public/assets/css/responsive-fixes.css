@@ -974,3 +974,78 @@ div[data-countdown] > div span:last-child {
     }
 }
 
+/* =========================================================
+   GLOBAL PRODUCT CARD STYLES
+   ========================================================= */
+
+/* Black background on all cards and card wrappers */
+.product.type-product,
+.product.type-product .product-wrapper {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 1.5px solid #222222 !important;
+}
+
+.product.type-product .product-info {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    padding: 12px 10px !important;
+}
+
+/* Force product name to show and wrap fully */
+.product.type-product .product-title,
+.product.type-product .product-title a {
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: unset !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    margin-bottom: 6px !important;
+}
+
+/* Ensure price and star ratings are visible on black background */
+.product.type-product .product-price ins,
+.product.type-product .price ins {
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}
+
+.product.type-product .product-price del,
+.product.type-product .price del {
+    color: #888888 !important;
+    font-size: 11px !important;
+}
+
+.product.type-product .shipping-feed-back span,
+.product.type-product .star-rating span {
+    color: #cccccc !important;
+}
+
+/* Normalize product image container to 1:1 aspect ratio with containment (Top Sellers format) */
+.product.type-product .product-image {
+    width: 100% !important;
+    aspect-ratio: 1/1 !important;
+    overflow: hidden !important;
+    border-radius: 8px !important;
+    background-color: #000000 !important;
+    position: relative !important;
+}
+
+.product.type-product .product-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    background-color: #000000 !important;
+}
+
+

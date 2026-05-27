@@ -533,131 +533,189 @@
 
 
 
-    <!--==================== Best Month Offer Section Start ====================-->
-    <div class="full-row px-sm-5">
+    <!--==================== Deals Grid Section Start ====================-->
+    <div class="full-row px-sm-5" style="background-color: #f1f1f1; padding: 30px 0;">
         <div class="container-fluid">
-            <div class="row justify-content-center wow fadeInUp animated" data-wow-delay="200ms"
-                data-wow-duration="1000ms">
-                <div class="col-xxl-5 col-xl-7 col-lg-9">
-                    <div class="text-center mb-40">
-                        <h2 class="text-center font-500 mb-4">{{ __('Best Month Offer') }}</h2>
-                        <span class="sub-title">
-                            {{ __('Enjoy unbeatable deals and exclusive discounts available only this month.
-                                                    Don’t miss out on your chance to save big!') }}
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <h2 class="text-center font-600 mb-2 text-dark">{{ __('Best Month Offer') }}</h2>
+                        <span class="sub-title text-muted">
+                            {{ __('Enjoy unbeatable deals and exclusive discounts available only this month. Don’t miss out on your chance to save big!') }}
                         </span>
                     </div>
                 </div>
             </div>
-            <div class="row g-4">
-                @if(isset($arrivals[0]))
-                <div class="col-xxl-6 col-md-12">
-                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-122 bg-light">
+            
+            <style>
+                .deals-grid-container {
+                    display: grid;
+                    grid-template-columns: repeat(6, 1fr);
+                    gap: 12px;
+                    width: 100%;
+                }
+                .deal-grid-card {
+                    background: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    text-decoration: none !important;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding-bottom: 12px;
+                }
+                .deal-grid-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 8px 24 rgba(0,0,0,0.12);
+                }
+                .deal-grid-image-wrapper {
+                    width: 100%;
+                    aspect-ratio: 1/1;
+                    overflow: hidden;
+                    position: relative;
+                }
+                .deal-grid-image-wrapper img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.3s ease;
+                }
+                .deal-grid-card:hover .deal-grid-image-wrapper img {
+                    transform: scale(1.05);
+                }
+                .deal-grid-title {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #333333;
+                    margin-top: 10px;
+                    text-align: center;
+                    padding: 0 8px;
+                    word-wrap: break-word;
+                }
+                
+                @media (max-width: 1199.98px) {
+                    .deals-grid-container {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                }
+                @media (max-width: 767.98px) {
+                    .deals-grid-container {
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 8px;
+                    }
+                    .deal-grid-title {
+                        font-size: 12px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .deals-grid-container {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+            </style>
 
-                        <div class="banner-image overflow-hidden transation">
-                            <img src="{{ asset('assets/images/arrival/' . $arrivals[0]['photo']) }}" alt="Banner Image">
-                        </div>
-
-                        <div class="banner-content y-center position-absolute">
-                            <div class="middle-content">
-
-                                <span class="up-to-sale"
-                                style="color:#ffffff;
-                                       background:rgba(0,0,0,0.35);
-                                       padding:4px 10px;
-                                       border-radius:3px;">
-
-                                    {{ $arrivals[0]['up_sale'] }}
-                                </span>
-
-                                <h3>
-                                    <a href="{{ $arrivals[0]['url'] }}"
-                                       style="color:#ffffff; background:rgba(0,0,0,0.35); padding:6px 12px; border-radius:3px; text-decoration:none; transition: color 0.3s;"
-                                       class="arrival-link">
-                                        {{ $arrivals[0]['title'] }}
-                                    </a>
-
-                                    <style>
-                                        .arrival-link:hover {
-                                            color: #ff6a00 !important;
-                                        }
-                                    </style>
-                                </h3>
-
-
-                                <a href="{{ $arrivals[0]['url'] }}"
-                                class="category arrival-link"
-                                style="color:#ffffff;
-                                       background:rgba(0,0,0,0.35);
-                                       padding:4px 10px;
-                                       border-radius:3px;">
-                                 {{ $arrivals[0]['header'] }}
-                             </a>
-
-                            </div>
-                        </div>
-
+            <div class="deals-grid-container">
+                <!-- Card 1 -->
+                <a href="{{ url('/phones-tablets') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/3d_smartphone.png') }}" alt="Phones & Tablets">
                     </div>
-                </div>
-                @endif
-
-                @if(isset($arrivals[1]))
-                <div class="col-xxl-3 col-md-6">
-                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-123">
-                        <div class="banner-image overflow-hidden transation"><img
-                                src="{{ asset('assets/images/arrival/' . $arrivals[1]['photo']) }}" alt="Banner Image">
-                        </div>
-                        <div class="banner-content position-absolute">
-                            <div class="middle-content">
-                                <span class="up-to-sale">{{ $arrivals[1]['up_sale'] }}</span>
-                                <h3><a href="{{ $arrivals[1]['url'] }}"
-                                        class="text-dark text-decoration-none">{{ $arrivals[1]['title'] }}</a></h3>
-                                <a href="{{ $arrivals[1]['url'] }}" class="category">{{ $arrivals[1]['header'] }}</a>
-                            </div>
-                        </div>
+                    <div class="deal-grid-title">Phones & Tablets</div>
+                </a>
+                
+                <!-- Card 2 -->
+                <a href="{{ url('/fashion-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/category_fashion.png') }}" alt="Fashion Deals">
                     </div>
-                </div>
-                @endif
-                @if(isset($arrivals[2]))
-                <div class="col-xxl-3 col-md-6">
-                    <div class="banner-wrapper hover-img-zoom banner-one custom-class-124"
-                         style="position:relative; overflow:hidden; border-radius:8px;">
+                    <div class="deal-grid-title">Fashion deals</div>
+                </a>
 
-                        <div class="banner-image overflow-hidden transation">
-                            <img src="{{ asset('assets/images/arrival/' . $arrivals[2]['photo']) }}"
-                                 alt="Banner Image"
-                                 style="width:100%; display:block;">
-
-                            <!-- Overlay -->
-                            <div style="position:absolute; top:0; left:0; width:100%; height:100%;
-                                        background:rgba(0,0,0,0.35); pointer-events:none;" class="p-3">
-                            </div>
-                        </div>
-
-                        <div class="banner-content position-absolute" style="top:10px; left:10px;">
-                            <span style="color:#ffffff; padding:4px 10px; border-radius:3px;">{{ $arrivals[2]['up_sale'] }}</span>
-
-                            <h5>
-                                <a href="{{ $arrivals[2]['url'] }}" class="arrival-link"
-                                   style="color:#ffffff; text-decoration:none; padding:6px 12px; border-radius:3px"
-                                  >
-                                   {{ $arrivals[2]['title'] }}
-                                </a>
-                            </h5>
-
-                            <a href="{{ $arrivals[2]['url'] }}"
-                               style="color:#ffffff; padding:4px 10px; border-radius:3px; text-decoration:none;"
-                                class="arrival-link">
-                               {{ $arrivals[2]['header'] }}
-                            </a>
-                        </div>
+                <!-- Card 3 -->
+                <a href="{{ url('/appliances-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/garden.png') }}" alt="Appliances Deals">
                     </div>
-                </div>
-                @endif
+                    <div class="deal-grid-title">Appliances deals</div>
+                </a>
 
+                <!-- Card 4 -->
+                <a href="{{ url('/tv-audio-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/category_electronic.png') }}" alt="TV & Audio Deals">
+                    </div>
+                    <div class="deal-grid-title">TV & Audio deals</div>
+                </a>
+
+                <!-- Card 5 -->
+                <a href="{{ url('/beauty-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/beauty.png') }}" alt="Beauty Must Have">
+                    </div>
+                    <div class="deal-grid-title">Beauty Must Have</div>
+                </a>
+
+                <!-- Card 6 -->
+                <a href="{{ url('/sneakers-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/category_sport.png') }}" alt="Sneakers Deals">
+                    </div>
+                    <div class="deal-grid-title">Sneakers deals</div>
+                </a>
+
+                <!-- Card 7 -->
+                <a href="{{ url('/new-arrival') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/category_camera.png') }}" alt="New Arrival">
+                    </div>
+                    <div class="deal-grid-title">New Arrival</div>
+                </a>
+
+                <!-- Card 8 -->
+                <a href="{{ url('/mobile-accessories-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/category_surveillance.png') }}" alt="Mobile Accessories">
+                    </div>
+                    <div class="deal-grid-title">Mobile Accessories deals</div>
+                </a>
+
+                <!-- Card 9 -->
+                <a href="{{ url('/home-office-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/building.png') }}" alt="Home & Office Deals">
+                    </div>
+                    <div class="deal-grid-title">Home & Office deals</div>
+                </a>
+
+                <!-- Card 10 -->
+                <a href="{{ url('/beverages-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/food.png') }}" alt="Beverages Deals">
+                    </div>
+                    <div class="deal-grid-title">Beverages deals</div>
+                </a>
+
+                <!-- Card 11 -->
+                <a href="{{ url('/computing-deals') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/3d_laptop.png') }}" alt="Computing Deals">
+                    </div>
+                    <div class="deal-grid-title">Computing deals</div>
+                </a>
+
+                <!-- Card 12 -->
+                <a href="{{ url('/buy-now-pay-small-small') }}" class="deal-grid-card">
+                    <div class="deal-grid-image-wrapper">
+                        <img src="{{ asset('assets/images/categories/services.png') }}" alt="Buy Now Pay Small Small">
+                    </div>
+                    <div class="deal-grid-title">Buy Now, Pay Small Small</div>
+                </a>
             </div>
         </div>
     </div>
-    <!--==================== Best Month Offer Section End ====================-->
+    <!--==================== Deals Grid Section End ====================-->
 
 
     @include('partials.theme.extraindex')
