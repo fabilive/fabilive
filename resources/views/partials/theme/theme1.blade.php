@@ -321,8 +321,8 @@
 
                 <!-- Center Column: Slider -->
                 <div class="col-lg-7 position-relative">
-                    <span class="nextBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-right"></i></span>
-                    <span class="prevBtn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-chevron-left"></i></span>
+                    <span class="nextBtn d-flex align-items-center justify-content-center" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.85); border-radius: 50%; width: 44px; height: 44px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: all 0.2s;"><i class="fas fa-chevron-right" style="font-size: 14px; color: #222;"></i></span>
+                    <span class="prevBtn d-flex align-items-center justify-content-center" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); z-index: 10; cursor: pointer; background: rgba(255,255,255,0.85); border-radius: 50%; width: 44px; height: 44px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: all 0.2s;"><i class="fas fa-chevron-left" style="font-size: 14px; color: #222;"></i></span>
                     
                     <section class="home-slider owl-theme owl-carousel rounded overflow-hidden" style="display: block !important; min-height: 100%; height: 100%; opacity: 1 !important; visibility: visible !important;">
                         @foreach ($sliders as $slide_data)
@@ -334,7 +334,7 @@
                                         <source src="{{ asset('assets/videos/' . $slide_data->video) }}" type="video/mp4">
                                     </video>
                                 @endif
-
+ 
                                 @if(isset($slide_data->{'3d_model'}) && $slide_data->{'3d_model'})
                                     <model-viewer 
                                         src="{{ asset('assets/models/' . $slide_data->{'3d_model'}) }}" 
@@ -350,20 +350,20 @@
                                         disable-zoom>
                                     </model-viewer>
                                 @endif
-
+ 
                                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); z-index: 1;"></div>
-
+ 
                                 <div class="container" style="position: relative; z-index: 2; display: flex; align-items: center; height: 100%;">
                                     <div class="banner-wrapper-item text-{{ $slide_data->position }}" style="width: 100%;">
                                         <div class="banner-content-box {{ $slide_data->position == 'right' ? 'ms-auto' : ($slide_data->position == 'center' ? 'mx-auto' : '') }}">
-                                            <div class="banner-content" style="text-align: {{ $slide_data->position }}; padding: 30px;">
-                                                <span class="subtitle animate-stagger-1" style="font-size: 14px; margin-bottom: 10px;">
+                                            <div class="banner-content" style="text-align: {{ $slide_data->position }}; padding: 30px 40px;">
+                                                <span class="subtitle animate-stagger-1" style="font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; display: inline-block; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
                                                     {{ str_replace('2026', '', $slide_data->subtitle_text) }}
                                                 </span>
-                                                <h1 class="title animate-stagger-2" style="font-size: clamp(24px, 5vw, 42px); margin-bottom: 15px;">
+                                                <h1 class="title animate-stagger-2" style="font-size: clamp(28px, 5vw, 46px); font-weight: 800; margin-bottom: 15px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.6); letter-spacing: -0.5px;">
                                                     {{ str_replace('2026', '', $slide_data->title_text) }}
                                                 </h1>
-                                                <p class="details-text animate-stagger-2" style="font-size: 15px; margin-bottom: 20px;">
+                                                <p class="details-text animate-stagger-2" style="font-size: 16px; font-weight: 500; margin-bottom: 22px; color: rgba(255,255,255,0.95); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
                                                     {{ $slide_data->details_text }}
                                                 </p>
                                                 <div class="animate-stagger-3 mt-2">
