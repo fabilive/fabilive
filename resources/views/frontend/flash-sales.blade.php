@@ -1,6 +1,7 @@
 @extends('layouts.front')
 
 @section('content')
+@includeIf('partials.global.common-header')
 <!-- Breadcrumb Area Start -->
 <div class="breadcrumb-area">
     <div class="container">
@@ -132,7 +133,7 @@
                 @endforeach
             @else
                 <div class="col-12 text-center" style="padding: 50px 0;">
-                    <img src="{{ asset('assets/images/no-results.png') }}" style="max-width: 150px; margin-bottom: 20px; opacity: 0.5;">
+                    <i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
                     <h4 style="color: #666;">{{ __('No products available in this time slot.') }}</h4>
                 </div>
             @endif
@@ -140,6 +141,7 @@
     </div>
 </section>
 
+@includeIf('partials.global.common-footer')
 @endsection
 
 @section('scripts')
