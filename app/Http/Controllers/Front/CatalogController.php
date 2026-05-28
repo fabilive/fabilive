@@ -339,6 +339,9 @@ class CatalogController extends FrontBaseController
                 });
             });
         }
+        $minprice = $request->min;
+        $maxprice = $request->max;
+        $sort = $request->sort;
         $search = $request->search;
         $pageby = $request->pageby;
 
