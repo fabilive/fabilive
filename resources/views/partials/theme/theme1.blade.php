@@ -531,7 +531,91 @@
 
 
 
+    <!--==================== Flash Sales Section Start ====================-->
+    @if(isset($homepage_flash_slots) && $homepage_flash_slots->count() > 0)
+    <div class="full-row px-sm-5" style="background-color: #000; padding: 40px 0;">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center mb-4">
+                    <div class="flash-header" style="background: linear-gradient(135deg, #ff4d4d, #ff6b6b); padding: 20px; border-radius: 10px; color: white;">
+                        <h2 class="mb-2" style="font-weight: bold; color: white; display: inline-block; margin-right: 20px;">⚡ {{ __('FLASH SALES') }} ⚡</h2>
+                        <div class="countdown-timer d-inline-block" style="background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 5px;">
+                            <span style="font-size: 16px; margin-right: 10px;">{{ __('Time Left:') }}</span>
+                            <div id="homepage-flash-countdown" style="display: inline-block; font-size: 20px; font-weight: bold; letter-spacing: 1px;">
+                                @if($homepage_active_slot && now()->format('H:i:s') <= $homepage_active_slot->end_time && now()->format('H:i:s') >= $homepage_active_slot->start_time)
+                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->end_time)->format('Y-m-d H:i:s') }}">00:00:00</span>
+                                @elseif($homepage_active_slot && now()->format('H:i:s') < $homepage_active_slot->start_time)
+                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->start_time)->format('Y-m-d H:i:s') }}">{{ __('Starts in') }} 00:00:00</span>
+                                @else
+                                    <span>{{ __('Sale Ended') }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <a href="{{ route('front.flash-sales') }}" class="btn btn-light btn-sm ml-3" style="font-weight: bold;">{{ __('See All') }}</a>
+                    </div>
+                </div>
+            </div>
 
+            <div class="row">
+                <div class="col-12">
+                    <div class="deals-grid-container">
+                        @if(isset($homepage_flash_products) && $homepage_flash_products->count() > 0)
+                            @foreach($homepage_flash_products->take(6) as $flashItem)
+                            @php 
+                                $prod = $flashItem->product; 
+                                if(!$prod) continue;
+                                $percent = 0;
+                                if($prod->previous_price > 0){
+                                    $percent = round((($prod->previous_price - $flashItem->flash_price) / $prod->previous_price) * 100);
+                                }
+                                $itemsLeft = $flashItem->flash_quantity - $flashItem->sold_quantity;
+                                $progressWidth = ($flashItem->sold_quantity / max($flashItem->flash_quantity, 1)) * 100;
+                                if($progressWidth > 100) $progressWidth = 100;
+                                
+                                $isLive = $homepage_active_slot && now()->format('H:i:s') >= $homepage_active_slot->start_time && now()->format('H:i:s') <= $homepage_active_slot->end_time;
+                                $isUpcoming = $homepage_active_slot && now()->format('H:i:s') < $homepage_active_slot->start_time;
+                                $isEnded = $homepage_active_slot && now()->format('H:i:s') > $homepage_active_slot->end_time;
+                            @endphp
+                            <div class="deal-grid-card">
+                                <a href="{{ route('front.product', $prod->slug) }}" style="display: block; position: relative; width: 100%;">
+                                    @if($percent > 0)
+                                        <span class="badge" style="position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; padding: 5px; border-radius: 3px; font-weight: bold; z-index: 2;">-{{ $percent }}%</span>
+                                    @endif
+                                    <div class="deal-grid-image-wrapper">
+                                        <img src="{{ filter_var($prod->photo, FILTER_VALIDATE_URL) ? $prod->photo : asset('assets/images/products/'.$prod->photo) }}" alt="{{ $prod->name }}">
+                                    </div>
+                                    <h5 class="deal-grid-title">
+                                        {{ strlen($prod->name) > 30 ? substr($prod->name,0,30).'...' : $prod->name }}
+                                    </h5>
+                                </a>
+                                <div class="price-box mb-1 text-center w-100">
+                                    <h4 style="color: #ff4d4d; font-weight: 700; margin-bottom: 2px; font-size: 16px;">{{ \PriceHelper::showCurrencyPrice($flashItem->flash_price) }}</h4>
+                                    @if($prod->previous_price > 0)
+                                        <span style="text-decoration: line-through; color: #999; font-size: 12px;">{{ $prod->showPreviousPrice() }}</span>
+                                    @endif
+                                </div>
+                                <div class="flash-stock-info mt-2 px-3 w-100">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size: 11px; color: #666; font-weight: bold;">
+                                        <span>{{ $itemsLeft }} {{ __('left') }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; border-radius: 3px; background-color: #f1f1f1;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ $progressWidth }}%; background-color: #ff4d4d;" aria-valuenow="{{ $progressWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        @else
+                            <div class="col-12 text-center" style="padding: 20px 0;">
+                                <h4 style="color: #ccc;">{{ __('No products available in this time slot.') }}</h4>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    <!--==================== Flash Sales Section End ====================-->
 
     <!--==================== Deals Grid Section Start ====================-->
     <div class="full-row px-sm-5" style="background-color: #f1f1f1; padding: 30px 0;">

@@ -8,7 +8,7 @@
 				<h4 class="heading">{{ __('Flash Sale Products') }}</h4>
 				<ul class="links">
 					<li>
-						<a href="{{ route('vendor-dashboard') }}">{{ __('Dashboard') }} </a>
+						<a href="{{ route('vendor.dashboard') }}">{{ __('Dashboard') }} </a>
 					</li>
 					<li><a href="javascript:;">{{ __('Flash Sales') }}</a></li>
 					<li>
