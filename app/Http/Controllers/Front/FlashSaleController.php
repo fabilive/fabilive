@@ -45,14 +45,17 @@ class FlashSaleController extends Controller
         $sort = $request->get('sort');
         $selectedDate = $request->get('date', \Carbon\Carbon::today()->format('Y-m-d'));
 
-        // Build the flash products query — show ALL active flash products by default
+        // Build the flash products query
         $query = FlashSaleProduct::with('product')
                             ->where('status', 1);
 
-        // Filter by time slot only if one is explicitly selected
-        if ($selectedSlot) {
+        // Filter by time slot only if one is explicitly selected in the request
+        if ($request->has('slot')) {
             $query->where('time_slot_id', $selectedSlot->id)
                   ->whereDate('flash_date', '=', $selectedDate);
+        } else {
+            // Default: show active products for today and future dates
+            $query->whereDate('flash_date', '>=', \Carbon\Carbon::today()->format('Y-m-d'));
         }
 
         // Filter by flash sale category using flash_sale_category_id on flash_sale_products table
