@@ -2600,7 +2600,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/flash-products/datatables', 'Admin\FlashSaleProductController@datatables')->name('admin-flash-products-datatables');
         Route::get('/flash-products', 'Admin\FlashSaleProductController@index')->name('admin-flash-products-index');
         Route::get('/flash-products/status/{id1}/{id2}', 'Admin\FlashSaleProductController@status')->name('admin-flash-products-status');
-        Route::get('/flash-products/delete/{id}', 'Admin\FlashSaleProductController@destroy')->name('admin-flash-products-delete');
+        Route::delete('/flash-products/delete/{id}', 'Admin\FlashSaleProductController@destroy')->name('admin-flash-products-delete');
 
         //------------ ADMIN DEAL PAGES SECTION ------------
         Route::get('/deal-page/datatables', 'Admin\DealPageController@datatables')->name('admin-deal-page-datatables');
@@ -3466,7 +3466,7 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('/flash-products', 'Vendor\FlashSaleProductController@index')->name('vendor-flash-products-index');
             Route::get('/flash-products/create', 'Vendor\FlashSaleProductController@create')->name('vendor-flash-products-create');
             Route::post('/flash-products/store', 'Vendor\FlashSaleProductController@store')->name('vendor-flash-products-store');
-            Route::get('/flash-products/delete/{id}', 'Vendor\FlashSaleProductController@destroy')->name('vendor-flash-products-delete');
+            Route::delete('/flash-products/delete/{id}', 'Vendor\FlashSaleProductController@destroy')->name('vendor-flash-products-delete');
 
             //------------ VENDOR DEAL PRODUCTS SECTION ------------
             Route::get('/deal-product/datatables', 'Vendor\DealProductController@datatables')->name('vendor-deal-product-datatables');
