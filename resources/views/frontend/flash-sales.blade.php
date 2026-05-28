@@ -30,9 +30,9 @@
                 <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                     <h4 style="text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 20px;">Flash Sale Categories</h4>
                     <div class="d-flex justify-content-between text-center" style="overflow-x: auto; gap: 15px;">
-                        @foreach($flashCategories as $cat)
-                        <a href="{{ route('front.flash-sales', array_merge(request()->query(), ['category' => $cat->id])) }}" class="category-tile" style="flex: 1; min-width: 120px; padding: 15px; border: 1px solid {{ $selectedCategory == $cat->id ? '#cb202d' : '#eee' }}; border-radius: 5px; text-decoration: none; color: #333; transition: all 0.3s;">
-                            <h5 style="font-size: 14px; margin: 0; font-weight: {{ $selectedCategory == $cat->id ? '700' : '400' }}; color: {{ $selectedCategory == $cat->id ? '#cb202d' : '#333' }};">{{ $cat->name }}</h5>
+                        @foreach($flashCategories as $fcat)
+                        <a href="{{ route('front.flash-sales', array_merge(request()->query(), ['category' => $fcat->id])) }}" class="category-tile" style="flex: 1; min-width: 120px; padding: 15px; border: 1px solid {{ $selectedCategory == $fcat->id ? '#cb202d' : '#eee' }}; border-radius: 5px; text-decoration: none; color: #333; transition: all 0.3s;">
+                            <h5 style="font-size: 14px; margin: 0; font-weight: {{ $selectedCategory == $fcat->id ? '700' : '400' }}; color: {{ $selectedCategory == $fcat->id ? '#cb202d' : '#333' }};">{{ $fcat->name }}</h5>
                         </a>
                         @endforeach
                     </div>
