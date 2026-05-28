@@ -617,101 +617,17 @@
             </style>
 
             <div class="deals-grid-container">
-                <!-- Card 1 -->
-                <a href="{{ url('/phones-tablets') }}" class="deal-grid-card">
+                @php
+                    $dealPages = \App\Models\DealPage::where('status', 1)->orderBy('sort_order', 'asc')->take(12)->get();
+                @endphp
+                @foreach($dealPages as $deal)
+                <a href="{{ url('/' . $deal->slug) }}" class="deal-grid-card">
                     <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/3d_smartphone.png') }}" alt="Phones & Tablets">
+                        <img src="{{ $deal->image ? asset('assets/images/categories/' . $deal->image) : asset('assets/images/noimage.png') }}" alt="{{ $deal->name }}">
                     </div>
-                    <div class="deal-grid-title">Phones & Tablets</div>
+                    <div class="deal-grid-title">{{ $deal->name }}</div>
                 </a>
-                
-                <!-- Card 2 -->
-                <a href="{{ url('/fashion-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/category_fashion.png') }}" alt="Fashion Deals">
-                    </div>
-                    <div class="deal-grid-title">Fashion deals</div>
-                </a>
-
-                <!-- Card 3 -->
-                <a href="{{ url('/appliances-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/garden.png') }}" alt="Appliances Deals">
-                    </div>
-                    <div class="deal-grid-title">Appliances deals</div>
-                </a>
-
-                <!-- Card 4 -->
-                <a href="{{ url('/tv-audio-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/category_electronic.png') }}" alt="TV & Audio Deals">
-                    </div>
-                    <div class="deal-grid-title">TV & Audio deals</div>
-                </a>
-
-                <!-- Card 5 -->
-                <a href="{{ url('/beauty-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/beauty.png') }}" alt="Beauty Must Have">
-                    </div>
-                    <div class="deal-grid-title">Beauty Must Have</div>
-                </a>
-
-                <!-- Card 6 -->
-                <a href="{{ url('/sneakers-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/category_sport.png') }}" alt="Sneakers Deals">
-                    </div>
-                    <div class="deal-grid-title">Sneakers deals</div>
-                </a>
-
-                <!-- Card 7 -->
-                <a href="{{ url('/new-arrival') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/category_camera.png') }}" alt="New Arrival">
-                    </div>
-                    <div class="deal-grid-title">New Arrival</div>
-                </a>
-
-                <!-- Card 8 -->
-                <a href="{{ url('/mobile-accessories-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/category_surveillance.png') }}" alt="Mobile Accessories">
-                    </div>
-                    <div class="deal-grid-title">Mobile Accessories deals</div>
-                </a>
-
-                <!-- Card 9 -->
-                <a href="{{ url('/home-office-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/building.png') }}" alt="Home & Office Deals">
-                    </div>
-                    <div class="deal-grid-title">Home & Office deals</div>
-                </a>
-
-                <!-- Card 10 -->
-                <a href="{{ url('/beverages-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/food.png') }}" alt="Beverages Deals">
-                    </div>
-                    <div class="deal-grid-title">Beverages deals</div>
-                </a>
-
-                <!-- Card 11 -->
-                <a href="{{ url('/computing-deals') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/3d_laptop.png') }}" alt="Computing Deals">
-                    </div>
-                    <div class="deal-grid-title">Computing deals</div>
-                </a>
-
-                <!-- Card 12 -->
-                <a href="{{ url('/buy-now-pay-small-small') }}" class="deal-grid-card">
-                    <div class="deal-grid-image-wrapper">
-                        <img src="{{ asset('assets/images/categories/services.png') }}" alt="Buy Now Pay Small Small">
-                    </div>
-                    <div class="deal-grid-title">Buy Now, Pay Small Small</div>
-                </a>
+                @endforeach
             </div>
         </div>
     </div>
