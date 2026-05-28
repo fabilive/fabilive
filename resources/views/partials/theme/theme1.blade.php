@@ -545,7 +545,15 @@
                         <div class="countdown-timer d-flex align-items-center" style="font-size: 18px; font-weight: 600;">
                             <span style="margin-right: 10px;">{{ __('Time Left:') }}</span>
                             <div id="homepage-flash-countdown" style="display: inline-block;">
-                                <span class="flash-timer" data-end="{{ now()->endOfDay()->format('Y-m-d H:i:s') }}">00d : 00h : 00m</span>
+                                @if($homepage_active_slot)
+                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->start_time)->addDay()->format('Y-m-d H:i:s') }}">
+                                        00h : 00m : 00s
+                                    </span>
+                                @else
+                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y-m-d H:i:s') }}">
+                                        00h : 00m : 00s
+                                    </span>
+                                @endif
                             </div>
                         </div>
                         <div>

@@ -325,7 +325,13 @@ class FrontendController extends FrontBaseController
                 $data['homepage_flash_products'] = \App\Models\FlashSaleProduct::with('product')
                     ->where('time_slot_id', $activeSlot->id)
                     ->where('status', 1)
-                    ->whereDate('flash_date', \Carbon\Carbon::today())
+                    ->where(function($query) use ($activeSlot) {
+                        $query->whereRaw("TIMESTAMP(flash_date, ?) <= ? AND TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now(), $activeSlot->start_time, now()->subHours(24)])
+                              ->orWhere(function($q) use ($activeSlot) {
+                                  $q->whereDate('flash_date', \Carbon\Carbon::today())
+                                    ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now()]);
+                              });
+                    })
                     ->get();
             } else {
                 $data['homepage_flash_products'] = collect();
@@ -478,7 +484,13 @@ class FrontendController extends FrontBaseController
                     $data['homepage_flash_products'] = \App\Models\FlashSaleProduct::with('product')
                         ->where('time_slot_id', $activeSlot->id)
                         ->where('status', 1)
-                        ->whereDate('flash_date', \Carbon\Carbon::today())
+                        ->where(function($query) use ($activeSlot) {
+                            $query->whereRaw("TIMESTAMP(flash_date, ?) <= ? AND TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now(), $activeSlot->start_time, now()->subHours(24)])
+                                  ->orWhere(function($q) use ($activeSlot) {
+                                      $q->whereDate('flash_date', \Carbon\Carbon::today())
+                                        ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now()]);
+                                  });
+                        })
                         ->get();
                 } else {
                     $data['homepage_flash_products'] = collect();

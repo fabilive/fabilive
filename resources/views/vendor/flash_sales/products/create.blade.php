@@ -38,7 +38,7 @@
                                     <select name="time_slot_id" required="" class="input-field">
                                         <option value="">{{ __('Select Time Slot') }}</option>
                                         @foreach($time_slots as $slot)
-                                            <option value="{{$slot->id}}">{{$slot->name}} ({{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }})</option>
+                                            <option value="{{$slot->id}}">{{$slot->name}} ({{ __('Starts at') }} {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }} - {{ __('Runs for 24h') }})</option>
                                         @endforeach
                                     </select>
                                 </div>

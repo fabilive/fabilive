@@ -69,14 +69,14 @@
                             @if($selectedSlot)
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
                                     {{ __('Time Left:') }} 
-                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->end_time)->format('Y-m-d H:i:s') }}">
+                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->start_time)->addDay()->format('Y-m-d H:i:s') }}">
                                         00h : 00m : 00s
                                     </span>
                                 </div>
                             @else
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
                                     {{ __('Time Left:') }} 
-                                    <span class="flash-timer" data-end="{{ now()->endOfDay()->format('Y-m-d H:i:s') }}">
+                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y-m-d H:i:s') }}">
                                         00h : 00m : 00s
                                     </span>
                                 </div>

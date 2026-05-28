@@ -44,7 +44,13 @@ class FlashSaleController extends Controller
             $flashProducts = FlashSaleProduct::with('product')
                                 ->where('time_slot_id', $selectedSlot->id)
                                 ->where('status', 1)
-                                ->whereDate('flash_date', \Carbon\Carbon::today())
+                                ->where(function($query) use ($selectedSlot) {
+                                    $query->whereRaw("TIMESTAMP(flash_date, ?) <= ? AND TIMESTAMP(flash_date, ?) > ?", [$selectedSlot->start_time, now(), $selectedSlot->start_time, now()->subHours(24)])
+                                          ->orWhere(function($q) use ($selectedSlot) {
+                                              $q->whereDate('flash_date', \Carbon\Carbon::today())
+                                                ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$selectedSlot->start_time, now()]);
+                                          });
+                                })
                                 ->get();
         }
 
