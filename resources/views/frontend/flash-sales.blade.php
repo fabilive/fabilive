@@ -82,27 +82,32 @@
                             @if($selectedSlot)
                                 @php
                                     $currentTime = now()->format('H:i:s');
-                                    $isCurrentlyActive = $currentTime >= $selectedSlot->start_time && $currentTime <= $selectedSlot->end_time;
-                                    $timerLabel = $isCurrentlyActive ? __('Time Left:') : __('Starts In:');
-                                    if ($isCurrentlyActive) {
-                                        $endTimeStr = \Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->end_time;
-                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
-                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                    $isCurrentlyActive = ($selectedDate == \Carbon\Carbon::today()->format('Y-m-d')) && ($currentTime >= $selectedSlot->start_time && $currentTime <= $selectedSlot->end_time);
+                                    
+                                    $isPast = ($selectedDate < \Carbon\Carbon::today()->format('Y-m-d')) || ($selectedDate == \Carbon\Carbon::today()->format('Y-m-d') && $currentTime > $selectedSlot->end_time);
+                                    
+                                    if ($isPast) {
+                                        $timerLabel = __('Sale Ended');
+                                        // Set an arbitrary past time so JS knows it ended immediately
+                                        $endTimeStr = \Carbon\Carbon::parse('-1 day')->format('Y-m-d H:i:s');
                                     } else {
-                                        $flashDate = \Carbon\Carbon::today();
-                                        if ($currentTime > $selectedSlot->start_time) {
-                                            $flashDate = \Carbon\Carbon::tomorrow();
+                                        $timerLabel = $isCurrentlyActive ? __('Time Left:') : __('Starts In:');
+                                        if ($isCurrentlyActive) {
+                                            $endTimeStr = $selectedDate . ' ' . $selectedSlot->end_time;
+                                        } else {
+                                            $endTimeStr = $selectedDate . ' ' . $selectedSlot->start_time;
                                         }
-                                        $endTimeStr = $flashDate->format('Y-m-d') . ' ' . $selectedSlot->start_time;
-                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
-                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
                                     }
+                                    $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
+                                    $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
                                 @endphp
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
                                     <span id="flash-timer-label">{{ $timerLabel }}</span> 
+                                    @if(!$isPast)
                                     <span class="flash-timer" data-end="{{ $endTime }}" data-end-timestamp="{{ $endTimestamp }}">
                                         00h : 00m : 00s
                                     </span>
+                                    @endif
                                 </div>
                             @else
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
@@ -115,18 +120,23 @@
                             
                             @foreach($timeSlots as $slot)
                             @php
-                                $isActive = ($selectedSlot && $selectedSlot->id == $slot->id);
-                                $isPast = now()->format('H:i:s') > $slot->end_time;
-                                $color = $isActive ? '#cb202d' : ($isPast ? '#ccc' : '#666');
+                                $todayStr = \Carbon\Carbon::today()->format('Y-m-d');
+                                $isActive = ($selectedSlot && $selectedSlot->id == $slot->id && $selectedDate == $todayStr);
+                                $isPastSlot = now()->format('H:i:s') > $slot->end_time;
+                                $color = $isActive ? '#cb202d' : ($isPastSlot ? '#ccc' : '#666');
                             @endphp
-                                <a href="{{ route('front.flash-sales', ['slot' => $slot->id]) }}" style="color: {{ $color }}; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
+                                <a href="{{ route('front.flash-sales', array_merge(request()->query(), ['slot' => $slot->id, 'date' => $todayStr])) }}" style="color: {{ $color }}; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
                                     {{ \Carbon\Carbon::parse($slot->start_time)->format('g:iA') }}
                                 </a>
                             @endforeach
                             
-                            <!-- Dummy Upcoming Days to match design -->
                             @foreach($timeSlots as $slot)
-                                <a href="#" style="color: #999; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
+                            @php
+                                $tomorrowStr = \Carbon\Carbon::tomorrow()->format('Y-m-d');
+                                $isActiveTomorrow = ($selectedSlot && $selectedSlot->id == $slot->id && $selectedDate == $tomorrowStr);
+                                $colorTomorrow = $isActiveTomorrow ? '#cb202d' : '#999';
+                            @endphp
+                                <a href="{{ route('front.flash-sales', array_merge(request()->query(), ['slot' => $slot->id, 'date' => $tomorrowStr])) }}" style="color: {{ $colorTomorrow }}; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
                                     {{ strtoupper(\Carbon\Carbon::tomorrow()->format('d M')) }}, {{ \Carbon\Carbon::parse($slot->start_time)->format('g:iA') }}
                                 </a>
                             @endforeach

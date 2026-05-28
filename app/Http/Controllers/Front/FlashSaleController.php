@@ -42,13 +42,14 @@ class FlashSaleController extends Controller
         $flashCategories = \App\Models\Category::where('status', 1)->get();
         $selectedCategory = $request->get('category');
         $sort = $request->get('sort');
+        $selectedDate = $request->get('date', \Carbon\Carbon::today()->format('Y-m-d'));
 
         $flashProducts = collect();
         if ($selectedSlot) {
             $query = FlashSaleProduct::with('product')
                                 ->where('time_slot_id', $selectedSlot->id)
                                 ->where('status', 1)
-                                ->whereDate('flash_date', '>=', \Carbon\Carbon::today());
+                                ->whereDate('flash_date', '=', $selectedDate);
 
             if ($selectedCategory) {
                 $query->whereHas('product', function($q) use ($selectedCategory) {
@@ -94,6 +95,6 @@ class FlashSaleController extends Controller
             ->get()
             ->chunk(4);
 
-        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts', 'latest_products', 'flashCategories', 'sort', 'selectedCategory'));
+        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts', 'latest_products', 'flashCategories', 'sort', 'selectedCategory', 'selectedDate'));
     }
 }
