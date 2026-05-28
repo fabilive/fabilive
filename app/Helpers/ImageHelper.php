@@ -47,8 +47,10 @@ class ImageHelper
         if ($watermark) {
             $watermarkPath = public_path('assets/front/images/watermark.png');
             if (file_exists($watermarkPath)) {
-                // Insert watermark at bottom-right with 10px offset
-                $canvas->insert($watermarkPath, 'bottom-right', 10, 10);
+                $watermarkImg = Image::make($watermarkPath);
+                $watermarkImg->opacity(30);
+                // Insert watermark at bottom-right with 15px offset
+                $canvas->insert($watermarkImg, 'bottom-right', 15, 15);
             }
         }
 

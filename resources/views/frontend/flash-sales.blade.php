@@ -80,16 +80,34 @@
                         
                         <div class="flash-timeline" style="background: white; padding: 15px 20px; border-radius: 0 0 5px 5px; border: 1px solid #eee; border-top: none; display: flex; overflow-x: auto; align-items: center; white-space: nowrap;">
                             @if($selectedSlot)
+                                @php
+                                    $currentTime = now()->format('H:i:s');
+                                    $isCurrentlyActive = $currentTime >= $selectedSlot->start_time && $currentTime <= $selectedSlot->end_time;
+                                    $timerLabel = $isCurrentlyActive ? __('Time Left:') : __('Starts In:');
+                                    if ($isCurrentlyActive) {
+                                        $endTimeStr = \Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->end_time;
+                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
+                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                    } else {
+                                        $flashDate = \Carbon\Carbon::today();
+                                        if ($currentTime > $selectedSlot->start_time) {
+                                            $flashDate = \Carbon\Carbon::tomorrow();
+                                        }
+                                        $endTimeStr = $flashDate->format('Y-m-d') . ' ' . $selectedSlot->start_time;
+                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
+                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                    }
+                                @endphp
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
-                                    {{ __('Time Left:') }} 
-                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->start_time)->addDay()->format('Y-m-d H:i:s') }}">
+                                    <span id="flash-timer-label">{{ $timerLabel }}</span> 
+                                    <span class="flash-timer" data-end="{{ $endTime }}" data-end-timestamp="{{ $endTimestamp }}">
                                         00h : 00m : 00s
                                     </span>
                                 </div>
                             @else
                                 <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
-                                    {{ __('Time Left:') }} 
-                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y-m-d H:i:s') }}">
+                                    <span id="flash-timer-label">{{ __('Time Left:') }}</span> 
+                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y/m/d H:i:s') }}" data-end-timestamp="{{ now()->addDay()->timestamp * 1000 }}">
                                         00h : 00m : 00s
                                     </span>
                                 </div>
@@ -192,33 +210,48 @@
 <script>
     $(document).ready(function() {
         var flashTimer = $('.flash-timer');
-        if (flashTimer.length > 0) {
-            var endTime = new Date(flashTimer.data('end')).getTime();
-            
+        if(flashTimer.length > 0) {
+            var endDate = parseInt(flashTimer.data('end-timestamp'));
+            if (isNaN(endDate)) {
+                var endDateStr = flashTimer.data('end');
+                // Cross-browser compatibility for Safari/iOS parsing
+                if(endDateStr && endDateStr.indexOf('-') !== -1) {
+                    endDateStr = endDateStr.replace(/-/g, '/');
+                }
+                endDate = new Date(endDateStr).getTime();
+            }
+
             var x = setInterval(function() {
                 var now = new Date().getTime();
-                var distance = endTime - now;
+                var distance = endDate - now;
                 
                 if (distance < 0) {
                     clearInterval(x);
-                    flashTimer.html("{{ __('00:00:00') }}");
-                    // Optionally reload page to update slot status
-                    setTimeout(function() {
+                    if ($('#flash-timer-label').text().indexOf('Starts In') !== -1) {
                         location.reload();
-                    }, 2000);
+                    } else {
+                        flashTimer.html("{{ __('Sale Ended') }}");
+                    }
                     return;
                 }
                 
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                hours = (hours < 10) ? "0" + hours : hours;
-                minutes = (minutes < 10) ? "0" + minutes : minutes;
-                seconds = (seconds < 10) ? "0" + seconds : seconds;
+                var dStr = days < 10 ? "0" + days : days;
+                var hStr = hours < 10 ? "0" + hours : hours;
+                var mStr = minutes < 10 ? "0" + minutes : minutes;
+                var sStr = seconds < 10 ? "0" + seconds : seconds;
+
+                var out = "";
+                if (days > 0) {
+                    out += dStr + "d : ";
+                }
+                out += hStr + "h : " + mStr + "m : " + sStr + "s";
                 
-                var text = flashTimer.text().includes('Starts in') ? '{{ __('Starts in') }} ' : '';
-                flashTimer.html(text + hours + "h : " + minutes + "m : " + seconds + "s");
+                flashTimer.html(out);
             }, 1000);
         }
     });

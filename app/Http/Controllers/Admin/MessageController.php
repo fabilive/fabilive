@@ -123,7 +123,8 @@ class MessageController extends AdminBaseController
         $mailer = new GeniusMailer();
         $mailer->sendCustomMail($datas);
 
-        if ($request->type == 'Ticket') {
+        $type = $request->type ? $request->type : 'Ticket';
+        if ($type == 'Ticket') {
             $conv = AdminUserConversation::where('type', '=', 'Ticket')->where('user_id', '=', $user->id)->where('subject', '=', $subject)->first();
         } else {
             $conv = AdminUserConversation::where('type', '=', 'Dispute')->where('user_id', '=', $user->id)->where('subject', '=', $subject)->first();
@@ -141,7 +142,7 @@ class MessageController extends AdminBaseController
             $message->user_id = $user->id;
             $message->message = $request->message;
             $message->order_number = $request->order;
-            $message->type = $request->type;
+            $message->type = $type;
             $message->save();
             $msg = new AdminUserMessage();
             $msg->conversation_id = $message->id;

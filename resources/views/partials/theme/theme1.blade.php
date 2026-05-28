@@ -543,17 +543,33 @@
                             <h3 class="mb-0" style="font-weight: 700; color: white; font-size: 22px;">{{ __('Flash Sales') }}</h3>
                         </div>
                         <div class="countdown-timer d-flex align-items-center" style="font-size: 18px; font-weight: 600;">
-                            <span style="margin-right: 10px;">{{ __('Time Left:') }}</span>
+                            @php
+                                $timerLabel = __('Time Left:');
+                                $endTime = now()->addDay()->format('Y/m/d H:i:s');
+                                $endTimestamp = now()->addDay()->timestamp * 1000;
+                                if (isset($homepage_active_slot) && $homepage_active_slot) {
+                                    $timerLabel = (isset($is_flash_active) && $is_flash_active) ? __('Time Left:') : __('Starts In:');
+                                    
+                                    if (isset($is_flash_active) && $is_flash_active) {
+                                        $endTimeStr = \Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->end_time;
+                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
+                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                    } else {
+                                        $flashDate = \Carbon\Carbon::today();
+                                        if (now()->format('H:i:s') > $homepage_active_slot->start_time) {
+                                            $flashDate = \Carbon\Carbon::tomorrow();
+                                        }
+                                        $endTimeStr = $flashDate->format('Y-m-d') . ' ' . $homepage_active_slot->start_time;
+                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
+                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                    }
+                                }
+                            @endphp
+                            <span style="margin-right: 10px;" id="flash-timer-label">{{ $timerLabel }}</span>
                             <div id="homepage-flash-countdown" style="display: inline-block;">
-                                @if($homepage_active_slot)
-                                    <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->start_time)->addDay()->format('Y-m-d H:i:s') }}">
-                                        00h : 00m : 00s
-                                    </span>
-                                @else
-                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y-m-d H:i:s') }}">
-                                        00h : 00m : 00s
-                                    </span>
-                                @endif
+                                <span class="flash-timer" data-end="{{ $endTime }}" data-end-timestamp="{{ $endTimestamp }}">
+                                    00h : 00m : 00s
+                                </span>
                             </div>
                         </div>
                         <div>
@@ -624,24 +640,45 @@
         $(document).ready(function() {
             var flashTimer = $('.flash-timer');
             if(flashTimer.length > 0) {
-                var endDate = new Date(flashTimer.data('end')).getTime();
+                var endDate = parseInt(flashTimer.data('end-timestamp'));
+                if (isNaN(endDate)) {
+                    var endDateStr = flashTimer.data('end');
+                    // Cross-browser compatibility for Safari/iOS parsing
+                    if(endDateStr && endDateStr.indexOf('-') !== -1) {
+                        endDateStr = endDateStr.replace(/-/g, '/');
+                    }
+                    endDate = new Date(endDateStr).getTime();
+                }
+
                 var timerInterval = setInterval(function() {
                     var now = new Date().getTime();
                     var distance = endDate - now;
                     if (distance < 0) {
                         clearInterval(timerInterval);
-                        flashTimer.html("{{ __('Sale Ended') }}");
+                        if ($('#flash-timer-label').text().indexOf('Starts In') !== -1) {
+                            location.reload();
+                        } else {
+                            flashTimer.html("{{ __('Sale Ended') }}");
+                        }
                         return;
                     }
                     var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
                     
                     var dStr = days < 10 ? "0" + days : days;
                     var hStr = hours < 10 ? "0" + hours : hours;
                     var mStr = minutes < 10 ? "0" + minutes : minutes;
+                    var sStr = seconds < 10 ? "0" + seconds : seconds;
                     
-                    flashTimer.html(dStr + "d : " + hStr + "h : " + mStr + "m");
+                    var out = "";
+                    if (days > 0) {
+                        out += dStr + "d : ";
+                    }
+                    out += hStr + "h : " + mStr + "m : " + sStr + "s";
+                    
+                    flashTimer.html(out);
                 }, 1000);
             }
         });

@@ -95,7 +95,7 @@
                   <img src="{{ asset('assets/images/blogs/'.$blog->photo) }}" class="img-fluid" alt="">
                </div>
                <div class="post-content pt-4 mb-5">
-                  <p>{!! clean($blog->details , array('Attr.EnableID' => true)) !!}</p>
+                  <p>{!! $blog->details !!}</p>
                </div>
                <div class="share-post mt-5">
                   <span><b>{{ __('Share This Post:') }}</b></span>

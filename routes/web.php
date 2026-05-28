@@ -4412,3 +4412,4 @@ Route::group(['middleware' => 'web'], function () {
     });
 });
 
+Route::get('/add-mobile-block-column', function() { Illuminate\Support\Facades\Schema::table('generalsettings', function($table) { $table->boolean('block_mobile_browser')->default(false); }); return 'done'; });

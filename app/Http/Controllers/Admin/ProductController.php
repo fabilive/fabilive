@@ -263,7 +263,11 @@ class ProductController extends AdminBaseController
             $input = $request->all();
             if ($file = $request->file('file')) {
                 $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
-                $file->move(public_path('assets/files'), $name);
+                $path = public_path('assets/files');
+                if (!file_exists($path)) {
+                    mkdir($path, 0755, true);
+                }
+                $file->move($path, $name);
                 $input['file'] = $name;
             }
             $image = $request->photo;
@@ -530,7 +534,11 @@ class ProductController extends AdminBaseController
         $filename = '';
         if ($file = $request->file('csvfile')) {
             $filename = time().'-'.$file->getClientOriginalExtension();
-            $file->move(public_path('assets/temp_files'), $filename);
+            $path = public_path('assets/temp_files');
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+            $file->move($path, $filename);
         }
 
         $datas = '';

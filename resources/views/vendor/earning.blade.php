@@ -57,6 +57,7 @@
                                 <th>{{ __('Payment Method') }}</th>
                                 <th>{{ __('Txn Id') }}</th>
                                 <th>{{ __('Order Date') }}</th>
+                                <th>{{ __('Status') }}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -78,6 +79,9 @@
                                   </td>
                                   <td>
                                     {{$data->order->created_at->format('d-m-Y')}}
+                                  </td>
+                                  <td>
+                                    <span class="badge badge-success">{{ ucfirst($data->status) }}</span>
                                   </td>
                                 </tr>
                             @endforeach

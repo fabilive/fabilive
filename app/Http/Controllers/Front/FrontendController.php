@@ -308,11 +308,15 @@ class FrontendController extends FrontBaseController
         try {
             $timeSlots = \App\Models\FlashSaleTimeSlot::where('status', 1)->orderBy('start_time', 'asc')->get();
             $currentTime = now()->format('H:i:s');
+            
+            $isCurrentlyActive = false;
             $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
                 return $currentTime >= $slot->start_time && $currentTime <= $slot->end_time;
             })->first();
             
-            if (!$activeSlot && $timeSlots->count() > 0) {
+            if ($activeSlot) {
+                $isCurrentlyActive = true;
+            } else if ($timeSlots->count() > 0) {
                 $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
                     return $slot->start_time > $currentTime;
                 })->first() ?? $timeSlots->first();
@@ -320,18 +324,17 @@ class FrontendController extends FrontBaseController
 
             $data['homepage_flash_slots'] = $timeSlots;
             $data['homepage_active_slot'] = $activeSlot;
+            $data['is_flash_active'] = $isCurrentlyActive;
             
             if ($activeSlot) {
+                $flashDate = \Carbon\Carbon::today();
+                if (!$isCurrentlyActive && $timeSlots->count() > 0 && $activeSlot->id === $timeSlots->first()->id && $currentTime > $activeSlot->start_time) {
+                    $flashDate = \Carbon\Carbon::tomorrow();
+                }
                 $data['homepage_flash_products'] = \App\Models\FlashSaleProduct::with('product')
                     ->where('time_slot_id', $activeSlot->id)
                     ->where('status', 1)
-                    ->where(function($query) use ($activeSlot) {
-                        $query->whereRaw("TIMESTAMP(flash_date, ?) <= ? AND TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now(), $activeSlot->start_time, now()->subHours(24)])
-                              ->orWhere(function($q) use ($activeSlot) {
-                                  $q->whereDate('flash_date', \Carbon\Carbon::today())
-                                    ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now()]);
-                              });
-                    })
+                    ->whereDate('flash_date', $flashDate)
                     ->get();
             } else {
                 $data['homepage_flash_products'] = collect();
@@ -339,6 +342,7 @@ class FrontendController extends FrontBaseController
         } catch (\Exception $e) {
             $data['homepage_flash_slots'] = collect();
             $data['homepage_active_slot'] = null;
+            $data['is_flash_active'] = false;
             $data['homepage_flash_products'] = collect();
         }
 
@@ -467,11 +471,15 @@ class FrontendController extends FrontBaseController
             try {
                 $timeSlots = \App\Models\FlashSaleTimeSlot::where('status', 1)->orderBy('start_time', 'asc')->get();
                 $currentTime = now()->format('H:i:s');
+                
+                $isCurrentlyActive = false;
                 $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
                     return $currentTime >= $slot->start_time && $currentTime <= $slot->end_time;
                 })->first();
                 
-                if (!$activeSlot && $timeSlots->count() > 0) {
+                if ($activeSlot) {
+                    $isCurrentlyActive = true;
+                } else if ($timeSlots->count() > 0) {
                     $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
                         return $slot->start_time > $currentTime;
                     })->first() ?? $timeSlots->first();
@@ -479,18 +487,17 @@ class FrontendController extends FrontBaseController
 
                 $data['homepage_flash_slots'] = $timeSlots;
                 $data['homepage_active_slot'] = $activeSlot;
+                $data['is_flash_active'] = $isCurrentlyActive;
                 
                 if ($activeSlot) {
+                    $flashDate = \Carbon\Carbon::today();
+                    if (!$isCurrentlyActive && $timeSlots->count() > 0 && $activeSlot->id === $timeSlots->first()->id && $currentTime > $activeSlot->start_time) {
+                        $flashDate = \Carbon\Carbon::tomorrow();
+                    }
                     $data['homepage_flash_products'] = \App\Models\FlashSaleProduct::with('product')
                         ->where('time_slot_id', $activeSlot->id)
                         ->where('status', 1)
-                        ->where(function($query) use ($activeSlot) {
-                            $query->whereRaw("TIMESTAMP(flash_date, ?) <= ? AND TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now(), $activeSlot->start_time, now()->subHours(24)])
-                                  ->orWhere(function($q) use ($activeSlot) {
-                                      $q->whereDate('flash_date', \Carbon\Carbon::today())
-                                        ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$activeSlot->start_time, now()]);
-                                  });
-                        })
+                        ->whereDate('flash_date', $flashDate)
                         ->get();
                 } else {
                     $data['homepage_flash_products'] = collect();
@@ -498,6 +505,7 @@ class FrontendController extends FrontBaseController
             } catch (\Exception $e) {
                 $data['homepage_flash_slots'] = collect();
                 $data['homepage_active_slot'] = null;
+                $data['is_flash_active'] = false;
                 $data['homepage_flash_products'] = collect();
             }
 

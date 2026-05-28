@@ -401,12 +401,7 @@
 
     // Initialization
     var sizes = "";
-    var size_qty =
-      $(".product-color .color-list li.active").length > 0
-        ? parseFloat(
-            $(".product-color .color-list li.active").find(".size_qty").val()
-          )
-        : "";
+    var size_qty = "";
     var size_price = "";
     var size_key = "";
     var colors = "";
@@ -415,6 +410,19 @@
     var keys = "";
     var values = "";
     var prices = "";
+
+    if ($(".product-color .color-list li.active").length > 0) {
+        var activeColorLi = $(".product-color .color-list li.active");
+        sizes = activeColorLi.find(".size").val();
+        size_qty = parseFloat(activeColorLi.find(".size_qty").val());
+        size_price = activeColorLi.find(".size_price").val();
+        size_key = activeColorLi.find(".size_key").val();
+        colors = activeColorLi.find("span.box").data("color");
+    } else if ($(".product-size .siz-list li.active").length > 0) {
+        var activeSizeLi = $(".product-size .siz-list li.active");
+        sizes = activeSizeLi.find(".size").val();
+        size_key = activeSizeLi.find(".size_key").val();
+    }
 
     // Product Details Product Size Active Js Code
     // Product Details Product Size Active Js Code

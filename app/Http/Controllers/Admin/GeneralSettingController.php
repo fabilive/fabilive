@@ -191,12 +191,17 @@ class GeneralSettingController extends AdminBaseController
                 'capcha_site_key', 'partner_title', 'partner_text', 'deal_title', 'deal_details',
                 'deal_time', 'delivery_base_fee', 'delivery_stopover_fee', 'rider_percentage_commission',
                 'referral_amount', 'referral_bonus', 'custom_referral_bonus', 'same_servicearea_delivery_fee',
-                'vendor_color',
+                'vendor_color', 'block_mobile_browser'
             ];
             foreach ($scalarFields as $field) {
                 if ($request->exists($field)) {
                     $updateData[$field] = $request->input($field);
                 }
+            }
+            
+            // Checkboxes that might not be sent if unchecked
+            if (! $request->exists('block_mobile_browser')) {
+                $updateData['block_mobile_browser'] = 0;
             }
 
             // Product page checkboxes

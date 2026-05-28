@@ -163,7 +163,7 @@ class SubscriptionController extends UserBaseController
             'id_card_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
             'driver_license_copy' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
 
-            'selfie_image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/gif',
+            'selfie_image' => 'required|file|mimetypes:image/jpeg,image/png,image/webp,image/gif',
             'taxpayer_card_copy' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
             'residence_permit' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
             'submerchant_agreement' => 'required|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,application/pdf',
@@ -193,13 +193,13 @@ class SubscriptionController extends UserBaseController
                 ->withInput();
         }
 
-        // if (!$request->hasFile('selfie_image')) {
-        //     return redirect()->back()
-        //         ->withErrors([
-        //             'selfie_image' => __('Please capture and upload a selfie image.')
-        //         ])
-        //         ->withInput();
-        // }
+        if (!$request->hasFile('selfie_image')) {
+            return redirect()->back()
+                ->withErrors([
+                    'selfie_image' => __('Please capture and upload a selfie image.')
+                ])
+                ->withInput();
+        }
 
         if (\DB::table('pages')->where('slug', $request->shop_name)->exists()) {
             return redirect()->back()->with('unsuccess', __('This shop name has already been taken.'));

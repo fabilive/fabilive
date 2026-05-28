@@ -30,17 +30,32 @@
                         <form action="{{ route('admin-gs-update') }}" id="geniusform" method="POST" enctype="multipart/form-data">
                           @csrf
                         @include('alerts.admin.form-both')
-                        <div class="row justify-content-center">
-                          <div class="col-lg-3">
-                            <div class="left-area">
+                          <div class="row justify-content-center">
+                            <div class="col-lg-3">
+                              <div class="left-area">
                                 <h4 class="heading">{{ __('Website Title') }} *
-                                  </h4>
+                                    </h4>
+                              </div>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="text" class="input-field" placeholder="{{ __('Write Your Site Title Here') }}" name="title" value="{{ $gs->title }}" required="">
                             </div>
                           </div>
-                          <div class="col-lg-6">
-                            <input type="text" class="input-field" placeholder="{{ __('Write Your Site Title Here') }}" name="title" value="{{ $gs->title }}" required="">
+  
+                          <div class="row justify-content-center">
+                            <div class="col-lg-3">
+                              <div class="left-area">
+                                <h4 class="heading">{{ __('Block Mobile Browsers') }}</h4>
+                                <p class="sub-heading">{{ __('Forces mobile users to download app') }}</p>
+                              </div>
+                            </div>
+                            <div class="col-lg-6">
+                              <label class="switch">
+                                <input type="checkbox" name="block_mobile_browser" value="1" {{ $gs->block_mobile_browser == 1 ? "checked" : "" }}>
+                                <span class="slider round"></span>
+                              </label>
+                            </div>
                           </div>
-                        </div>
 
 
                         <div class="row justify-content-center">

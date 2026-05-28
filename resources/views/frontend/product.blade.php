@@ -213,7 +213,7 @@
                   <div
                      class="tab-pane fade show active woocommerce-Tabs-panel woocommerce-Tabs-panel--description mb-5 mt-4"
                      id="pills-description-one" role="tabpanel" aria-labelledby="pills-description-one-tab">
-                     {!! clean($productt->details , array('Attr.EnableID' => true)) !!}
+                     {!! $productt->details !!}
                   </div>
                   <div class="tab-pane fade mb-5" id="pills-information-one" role="tabpanel"
                      aria-labelledby="pills-information-one-tab">

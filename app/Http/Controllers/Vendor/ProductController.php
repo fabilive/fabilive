@@ -131,7 +131,10 @@ class ProductController extends VendorBaseController
                 return redirect()->route('vendor-verify');
             }
         }
-        $cats = Category::where('category_type', $slug)->get();
+        $cats = Category::where('category_type', $slug)
+                    ->where('name', 'not like', '%Food%')
+                    ->where('name', 'not like', '%Drink%')
+                    ->get();
         $countries = Country::where('status', 1)->get();
         $sign = $this->curr;
 
@@ -437,7 +440,11 @@ class ProductController extends VendorBaseController
                         return response()->json(['errors' => ['File format not supported']]);
                     }
                     $name = \PriceHelper::ImageCreateName($file);
-                    $file->move(public_path('assets/files'), $name);
+                    $path = public_path('assets/files');
+                    if (!file_exists($path)) {
+                        mkdir($path, 0755, true);
+                    }
+                    $file->move($path, $name);
 
                     $input['file'] = $name;
                 }
@@ -711,7 +718,9 @@ class ProductController extends VendorBaseController
     //*** GET Request
     public function edit($id)
     {
-        $cats = Category::all();
+        $cats = Category::where('name', 'not like', '%Food%')
+                    ->where('name', 'not like', '%Drink%')
+                    ->get();
         $data = Product::findOrFail($id);
         $sign = $this->curr ?? \App\Models\Currency::where('is_default', 1)->first() ?? \App\Models\Currency::where('id', '>', 0)->first();
 
@@ -1034,7 +1043,11 @@ class ProductController extends VendorBaseController
                     return response()->json(['errors' => ['Image format not supported']]);
                 }
                 $name = \PriceHelper::ImageCreateName($file);
-                $file->move(public_path('assets/files'), $name);
+                $path = public_path('assets/files');
+                if (!file_exists($path)) {
+                    mkdir($path, 0755, true);
+                }
+                $file->move($path, $name);
                 $input['file'] = $name;
             }
 

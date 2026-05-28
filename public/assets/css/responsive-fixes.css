@@ -1056,6 +1056,7 @@ div[data-countdown] > div span:last-child {
 .product.type-product .product-image img {
     width: 100% !important;
     height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
     object-fit: contain !important;
     background-color: #ffffff !important;
     padding: 10px !important; /* Premium spacing around image */
@@ -1087,4 +1088,9 @@ div[data-countdown] > div span:last-child {
     justify-content: space-between !important;
 }
 
+
+
+/* ========== BLOG IMAGES ========== */
+.blog-content img, .post-details img { max-width: 100% !important; max-height: 400px !important; object-fit: contain !important; border-radius: 8px !important; margin: 15px auto !important; display: block; }
+.blog-content, .post-details { line-height: 1.8 !important; font-size: 15px !important; }
 

@@ -28,12 +28,26 @@ class MessageDeliveryController extends Controller
             $productNames = [];
 
             if ($chat->order && $chat->order->cart) {
-                $cart = json_decode($chat->order->cart, true);
+                $raw_cart = $chat->order->cart;
+                $cart = json_decode($raw_cart, true);
+                
+                // If it's not JSON, it might be a serialized string
+                if ($cart === null && !empty($raw_cart)) {
+                    $unserialized = @unserialize(bzdecompress(utf8_decode($raw_cart))) ?: @unserialize($raw_cart);
+                    if (is_object($unserialized) && property_exists($unserialized, 'items')) {
+                        // Convert the Cart object to an array structure for compatibility
+                        $cart = ['items' => json_decode(json_encode($unserialized->items), true)];
+                    } elseif (is_array($unserialized) && isset($unserialized['items'])) {
+                        $cart = json_decode(json_encode($unserialized), true);
+                    }
+                }
 
-                if (! empty($cart['items'])) {
+                if (!empty($cart['items'])) {
                     foreach ($cart['items'] as $item) {
-                        if (! empty($item['item']['name'])) {
+                        if (is_array($item) && !empty($item['item']['name'])) {
                             $productNames[] = $item['item']['name'];
+                        } elseif (is_object($item) && !empty($item->item->name)) {
+                            $productNames[] = $item->item->name;
                         }
                     }
                 }
@@ -89,7 +103,7 @@ class MessageDeliveryController extends Controller
                 ], 403);
             }
 
-            if ($chat->order && $chat->order->status === 'completed') {
+            if ($chat->order && in_array($chat->order->status, ['completed', 'delivered'])) {
                 return response()->json([
                     'status' => false,
                     'message' => 'This chat is closed because the order is completed.',

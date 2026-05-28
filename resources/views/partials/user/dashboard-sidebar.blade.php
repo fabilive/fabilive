@@ -11,14 +11,13 @@
             <li class=""><a class="" href="{{ route('vendor.dashboard') }}">{{ __('Vendor Dashboard') }}</a></li>
             @endif
             <li class=""><a class="{{ Request::url() == route('user-orders') ? 'active':'' }}" href="{{ route('user-orders') }}">{{ __('Purchased Items') }}</a></li>
-            <li class=""><a class="{{ Request::url() == route('user-deposit-index') ? 'active':'' }}" href="{{route('user-deposit-index')}}">{{ __('Deposit') }}</a></li>
+            <li class=""><a class="{{ Request::url() == route('front.index') ? 'active':'' }}" href="{{route('front.index')}}">{{ __('Go to Marketplace') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-transactions-index') ? 'active':'' }}" href="{{route('user-transactions-index')}}">{{ __('Transactions') }}</a></li>
-
             <!--<li class=""><a class="{{ Request::url() == route('user-reward-index') ? 'active':'' }}" href="{{route('user-reward-index')}}">{{ __('Rewards') }}</a></li>-->
 
             <li class=""><a class="{{ Request::url() == route('user-affilate-program') ? 'active':'' }}" href="{{ route('user-affilate-program') }}">{{ __('Ambassador Program') }} @if(Auth::user()->referralCodes->count() == 0) <span class="badge badge-primary px-2 ml-1" style="font-size: 10px;">{{ __('Apply') }}</span> @endif</a></li>
 
-    <li class=""><a class="{{ Request::url() == route('user-wwt-index') ? 'active':'' }}" href="{{route('user-wwt-index')}}">{{ __('Withdraw') }}</a></li>
+
 
             <li class=""><a class="{{ Request::url() == route('user-order-track') ? 'active':'' }}" href="{{route('user-order-track')}}">{{ __('Order Tracking') }}</a></li>
             <li class=""><a class="{{ Request::url() == route('user-wishlists') ? 'active':'' }}" href="{{route('user-wishlists')}}">{{ __('Favourite Products') }}</a></li>

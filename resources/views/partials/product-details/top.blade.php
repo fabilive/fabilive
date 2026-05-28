@@ -367,6 +367,11 @@
                                       <i class="fab fa-whatsapp"></i>
                                       </a>
                                   </li>
+                                    <li>
+                                        <a class="copy-link-btn" href="javascript:;" onclick="navigator.clipboard.writeText(window.location.href); toastr.success('Link copied to clipboard!');" title="Copy Link" style="background-color: #6c757d; color: white; display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%;">
+                                        <i class="fas fa-link"></i>
+                                        </a>
+                                    </li>
                               </ul>
 
                           </div>

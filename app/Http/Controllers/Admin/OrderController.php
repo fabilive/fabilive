@@ -90,10 +90,13 @@ class OrderController extends AdminBaseController
                 );
             })
             ->addColumn('commission', function (Order $data) use ($currValue, $currSign) {
-                return PriceHelper::showOrderCurrencyPrice(
-                    ($data->commission * $currValue),
-                    $currSign
-                );
+                if (in_array($data->status, ['completed', 'delivered'])) {
+                    return PriceHelper::showOrderCurrencyPrice(
+                        ($data->commission * $currValue),
+                        $currSign
+                    );
+                }
+                return '<span class="badge badge-warning">Pending</span>';
             })
             ->addColumn('action', function (Order $data) {
                 $orders = '<a href="javascript:;" data-href="'.route('admin-order-edit', $data->id).'" class="delivery" data-toggle="modal" data-target="#modal1"><i class="fas fa-dollar-sign"></i> '.__('Delivery Status').'</a>';
@@ -108,7 +111,7 @@ class OrderController extends AdminBaseController
                             '</div>
                     </div>';
             })
-            ->rawColumns(['id', 'action'])
+            ->rawColumns(['id', 'action', 'commission'])
             ->toJson();
     }
 
@@ -324,13 +327,14 @@ class OrderController extends AdminBaseController
                                         'order_id' => $data->id,
                                         'product_id' => $productId,
                                     ])->get();
-                                    foreach ($deliveryRiders as $deliveryRider) {
-                                        $rider = Rider::lockForUpdate()->find($deliveryRider->rider_id);
-                                        if ($rider) {
-                                            $rider->balance += $productFee;
-                                            $rider->save();
-                                        }
-                                    }
+                                      foreach ($deliveryRiders as $deliveryRider) {
+                                          $rider = Rider::lockForUpdate()->find($deliveryRider->rider_id);
+                                          if ($rider) {
+                                              $riderFee = $productFee * 0.80; // 80% goes to rider
+                                              $rider->balance += $riderFee;
+                                              $rider->save();
+                                          }
+                                      }
                                 }
                             }
                             foreach ($data->vendororders as $vorder) {
@@ -397,26 +401,32 @@ class OrderController extends AdminBaseController
                         }
                     }
                     $cart = json_decode($data->cart, true);
-                    foreach ($cart->items as $prod) {
-                        $x = (string) $prod['stock'];
+                    if (!empty($cart['items'])) {
+                    foreach ($cart['items'] as $prod) {
+                        $x = (string) ($prod['stock'] ?? '');
                         if ($x != null) {
-                            $product = Product::findOrFail($prod['item']['id']);
-                            $product->stock = $product->stock + $prod['qty'];
-                            $product->update();
+                            $product = Product::find($prod['item']['id'] ?? 0);
+                            if ($product) {
+                                $product->stock = $product->stock + $prod['qty'];
+                                $product->update();
+                            }
                         }
                     }
-                    foreach ($cart->items as $prod) {
-                        $x = (string) $prod['size_qty'];
+                    foreach ($cart['items'] as $prod) {
+                        $x = (string) ($prod['size_qty'] ?? '');
                         if (! empty($x)) {
-                            $product = Product::findOrFail($prod['item']['id']);
-                            $x = (int) $x;
-                            $temp = $product->size_qty;
-                            $temp[$prod['size_key']] = $x;
-                            $temp1 = implode(',', $temp);
-                            $product->size_qty = $temp1;
-                            $product->update();
+                            $product = Product::find($prod['item']['id'] ?? 0);
+                            if ($product) {
+                                $x = (int) $x;
+                                $temp = $product->size_qty;
+                                $temp[$prod['size_key']] = $x;
+                                $temp1 = implode(',', $temp);
+                                $product->size_qty = $temp1;
+                                $product->update();
+                            }
                         }
                     }
+                    } // end if (!empty($cart['items']))
                     // Send branded email + in-app notifications
                     try {
                         \App\Services\FabiliveNotifier::orderDeclined($data);

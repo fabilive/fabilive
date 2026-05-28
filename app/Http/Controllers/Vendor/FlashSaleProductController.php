@@ -96,8 +96,10 @@ class FlashSaleProductController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        $data = FlashSaleProduct::where('id', $id)->where('vendor_id', $user->id)->firstOrFail();
-        $data->delete();
+        $data = FlashSaleProduct::where('id', $id)->where('vendor_id', $user->id)->first();
+        if ($data) {
+            $data->delete();
+        }
         $msg = 'Data Deleted Successfully.';
         return response()->json($msg);
     }

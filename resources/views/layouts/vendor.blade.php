@@ -141,6 +141,11 @@
 								href="{{ route('front.vendor',str_replace(' ', '-', Auth::user()->shop_name)) }}"
 								class="wave-effect"><i class="fas fa-eye mr-2"></i> {{ __('Visit Store') }}</a>
 						</li>
+						<li>
+							<a target="_blank"
+								href="{{ route('front.index') }}"
+								class="wave-effect"><i class="fas fa-shopping-cart mr-2"></i> {{ __('Go to Marketplace') }}</a>
+						</li>
 						@endif
 						<li>
 							<a href="{{ route('vendor.dashboard') }}" class="wave-effect"><i
@@ -217,6 +222,10 @@
 						<li>
 							<a href="{{ route('vendor-prod-import') }}"><i class="fas fa-upload"></i>{{ __('Bulk Product
 								Upload') }}</a>
+						</li>
+						<li>
+							<a href="{{ route('vendor.income') }}" class=" wave-effect"><i class="fas fa-chart-line"></i>{{
+								__('Earnings') }}</a>
 						</li>
 						<li>
 							<a href="{{ route('vendor-wt-index') }}" class=" wave-effect"><i class="fas fa-list"></i>{{
