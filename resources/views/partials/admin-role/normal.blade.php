@@ -129,6 +129,24 @@
 
 @endif
 
+@if(Auth::guard('admin')->user()->sectionCheck('products'))
+
+<li>
+    <a href="#flashsales" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
+        <i class="fas fa-bolt"></i>{{ __('Flash Sales') }}
+    </a>
+    <ul class="collapse list-unstyled" id="flashsales" data-parent="#accordion">
+        <li>
+            <a href="{{ route('admin-flash-time-slots-index') }}"><span>{{ __('Time Slots') }}</span></a>
+        </li>
+        <li>
+            <a href="{{ route('admin-flash-products-index') }}"><span>{{ __('Flash Products') }}</span></a>
+        </li>
+    </ul>
+</li>
+
+@endif
+
 @if(Auth::guard('admin')->user()->sectionCheck('affilate_products'))
 
 <li>

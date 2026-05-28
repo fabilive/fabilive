@@ -189,8 +189,10 @@
 											}}</span></a>
 								</li>
 								<li>
-									<a href="{{ route('vendor-deal-product-index') }}"><span>{{ __('Deal Products')
-											}}</span></a>
+									<a href="{{ route('vendor-deal-product-index') }}"><span>{{ __('Deal Products') }}</span></a>
+								</li>
+								<li>
+									<a href="{{ route('vendor-flash-products-index') }}"><span>{{ __('Flash Sales') }}</span></a>
 								</li>
 							</ul>
 						</li>

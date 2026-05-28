@@ -2587,6 +2587,21 @@ Route::prefix('admin')->group(function () {
         Route::get('/category/featured/{id1}/{id2}', 'Admin\CategoryController@featured')->name('admin-cat-featured');
         Route::get('/category/status/{id1}/{id2}', 'Admin\CategoryController@status')->name('admin-cat-status');
 
+        // Flash Sales Admin Routes
+        Route::get('/flash-time-slots/datatables', 'Admin\FlashSaleTimeSlotController@datatables')->name('admin-flash-time-slots-datatables');
+        Route::get('/flash-time-slots', 'Admin\FlashSaleTimeSlotController@index')->name('admin-flash-time-slots-index');
+        Route::get('/flash-time-slots/create', 'Admin\FlashSaleTimeSlotController@create')->name('admin-flash-time-slots-create');
+        Route::post('/flash-time-slots/store', 'Admin\FlashSaleTimeSlotController@store')->name('admin-flash-time-slots-store');
+        Route::get('/flash-time-slots/edit/{id}', 'Admin\FlashSaleTimeSlotController@edit')->name('admin-flash-time-slots-edit');
+        Route::post('/flash-time-slots/update/{id}', 'Admin\FlashSaleTimeSlotController@update')->name('admin-flash-time-slots-update');
+        Route::get('/flash-time-slots/delete/{id}', 'Admin\FlashSaleTimeSlotController@destroy')->name('admin-flash-time-slots-delete');
+        Route::get('/flash-time-slots/status/{id1}/{id2}', 'Admin\FlashSaleTimeSlotController@status')->name('admin-flash-time-slots-status');
+
+        Route::get('/flash-products/datatables', 'Admin\FlashSaleProductController@datatables')->name('admin-flash-products-datatables');
+        Route::get('/flash-products', 'Admin\FlashSaleProductController@index')->name('admin-flash-products-index');
+        Route::get('/flash-products/status/{id1}/{id2}', 'Admin\FlashSaleProductController@status')->name('admin-flash-products-status');
+        Route::get('/flash-products/delete/{id}', 'Admin\FlashSaleProductController@destroy')->name('admin-flash-products-delete');
+
         //------------ ADMIN DEAL PAGES SECTION ------------
         Route::get('/deal-page/datatables', 'Admin\DealPageController@datatables')->name('admin-deal-page-datatables');
         Route::get('/deal-page', 'Admin\DealPageController@index')->name('admin-deal-page-index');
@@ -3446,6 +3461,13 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('/live-messages', 'Vendor\VendorController@sellerMessages')->name('vendor.live-messages');
             Route::get('/customer-chat/{customerId}', 'Vendor\VendorController@sellerChat')->name('vendor.chat');
 
+            // Flash Sales Vendor Routes
+            Route::get('/flash-products/datatables', 'Vendor\FlashSaleProductController@datatables')->name('vendor-flash-products-datatables');
+            Route::get('/flash-products', 'Vendor\FlashSaleProductController@index')->name('vendor-flash-products-index');
+            Route::get('/flash-products/create', 'Vendor\FlashSaleProductController@create')->name('vendor-flash-products-create');
+            Route::post('/flash-products/store', 'Vendor\FlashSaleProductController@store')->name('vendor-flash-products-store');
+            Route::get('/flash-products/delete/{id}', 'Vendor\FlashSaleProductController@destroy')->name('vendor-flash-products-delete');
+
             //------------ VENDOR DEAL PRODUCTS SECTION ------------
             Route::get('/deal-product/datatables', 'Vendor\DealProductController@datatables')->name('vendor-deal-product-datatables');
             Route::get('/deal-product', 'Vendor\DealProductController@index')->name('vendor-deal-product-index');
@@ -4094,6 +4116,7 @@ Route::group(['middleware' => 'maintenance'], function () {
     // CATEGORY SECTION
     Route::get('/categories', 'Front\CatalogController@categories')->name('front.categories');
     Route::get('/category/{category?}/{subcategory?}/{childcategory?}', 'Front\CatalogController@category')->name('front.category');
+    Route::get('/flash-sales', 'Front\FlashSaleController@index')->name('front.flash-sales');
     // CATEGORY SECTION ENDS
 
     // TAG SECTION

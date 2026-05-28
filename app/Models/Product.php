@@ -391,6 +391,19 @@ class Product extends Model
         // The 'price' attribute (via getPriceAttribute accessor) already includes 
         // the marketplace commission and discount logic.
         $price = $this->price; 
+        
+        $activeFlashSales = cache()->remember('active_flash_sales', 60, function () {
+            return \App\Models\FlashSaleProduct::where('status', 1)
+                ->whereDate('flash_date', \Carbon\Carbon::today())
+                ->whereHas('timeSlot', function($q) {
+                    $q->whereTime('start_time', '<=', now()->format('H:i:s'))
+                      ->whereTime('end_time', '>=', now()->format('H:i:s'));
+                })->get()->keyBy('product_id');
+        });
+
+        if (isset($activeFlashSales[$this->id])) {
+            $price = $activeFlashSales[$this->id]->flash_price;
+        }
 
         if (! empty($this->size)) {
             $size_prices = $this->size_price;
@@ -485,18 +498,32 @@ class Product extends Model
 
     public function showPreviousPrice()
     {
-        // Use consistent tiered commission logic for regular price
-        if (empty($this->previous_price) || $this->previous_price <= 0) {
-            return '';
-        }
-
         $gs = \App\Models\Generalsetting::safeFirst();
-        $price = (float)$this->previous_price;
-        $price += self::getTieredCommission($price);
 
-        // Sanity check: If regular price is not higher than sale price after markups, don't show it
-        if ($price <= $this->price) {
-            return '';
+        $activeFlashSales = cache()->remember('active_flash_sales', 60, function () {
+            return \App\Models\FlashSaleProduct::where('status', 1)
+                ->whereDate('flash_date', \Carbon\Carbon::today())
+                ->whereHas('timeSlot', function($q) {
+                    $q->whereTime('start_time', '<=', now()->format('H:i:s'))
+                      ->whereTime('end_time', '>=', now()->format('H:i:s'));
+                })->get()->keyBy('product_id');
+        });
+
+        if (isset($activeFlashSales[$this->id])) {
+            $price = $this->price;
+        } else {
+            // Use consistent tiered commission logic for regular price
+            if (empty($this->previous_price) || $this->previous_price <= 0) {
+                return '';
+            }
+
+            $price = (float)$this->previous_price;
+            $price += self::getTieredCommission($price);
+
+            // Sanity check: If regular price is not higher than sale price after markups, don't show it
+            if ($price <= $this->price) {
+                return '';
+            }
         }
 
         if (Session::has('currency')) {
