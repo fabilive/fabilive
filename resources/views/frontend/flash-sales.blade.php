@@ -79,44 +79,68 @@
                         </div>
                         
                         <div class="flash-timeline" style="background: white; padding: 15px 20px; border-radius: 0 0 5px 5px; border: 1px solid #eee; border-top: none; display: flex; overflow-x: auto; align-items: center; white-space: nowrap;">
-                            @if($selectedSlot)
-                                @php
-                                    $currentTime = now()->format('H:i:s');
-                                    $isCurrentlyActive = ($selectedDate == \Carbon\Carbon::today()->format('Y-m-d')) && ($currentTime >= $selectedSlot->start_time && $currentTime <= $selectedSlot->end_time);
-                                    
-                                    $isPast = ($selectedDate < \Carbon\Carbon::today()->format('Y-m-d')) || ($selectedDate == \Carbon\Carbon::today()->format('Y-m-d') && $currentTime > $selectedSlot->end_time);
-                                    
+                            @php
+                                $currentTime = now()->format('H:i:s');
+                                $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+                                if ($selectedSlot) {
+                                    $isCurrentlyActive = ($selectedDate == $today)
+                                        && ($currentTime >= $selectedSlot->start_time && $currentTime <= $selectedSlot->end_time);
+                                    $isPast = ($selectedDate < $today)
+                                        || ($selectedDate == $today && $currentTime > $selectedSlot->end_time);
+
                                     if ($isPast) {
-                                        $timerLabel = __('Sale Ended');
-                                        // Set an arbitrary past time so JS knows it ended immediately
-                                        $endTimeStr = \Carbon\Carbon::parse('-1 day')->format('Y-m-d H:i:s');
-                                    } else {
-                                        $timerLabel = $isCurrentlyActive ? __('Time Left:') : __('Starts In:');
-                                        if ($isCurrentlyActive) {
-                                            $endTimeStr = $selectedDate . ' ' . $selectedSlot->end_time;
+                                        // Selected slot is over — find the next upcoming slot from today or tomorrow
+                                        $nextSlot = $timeSlots->filter(fn($s) => $s->start_time > $currentTime)->first();
+                                        if ($nextSlot) {
+                                            $countdownLabel   = __('Starts In:');
+                                            $countdownTarget  = \Carbon\Carbon::parse($today . ' ' . $nextSlot->start_time)->timestamp * 1000;
                                         } else {
-                                            $endTimeStr = $selectedDate . ' ' . $selectedSlot->start_time;
+                                            // No more slots today — count to first slot tomorrow
+                                            $firstSlot = $timeSlots->first();
+                                            $countdownLabel  = __('Starts In:');
+                                            $countdownTarget = $firstSlot
+                                                ? \Carbon\Carbon::parse(\Carbon\Carbon::tomorrow()->format('Y-m-d') . ' ' . $firstSlot->start_time)->timestamp * 1000
+                                                : (now()->addDay()->timestamp * 1000);
                                         }
+                                        $showEnded   = false;
+                                        $slotStatus  = 'next';
+                                    } elseif ($isCurrentlyActive) {
+                                        $countdownLabel  = __('Time Left:');
+                                        $countdownTarget = \Carbon\Carbon::parse($selectedDate . ' ' . $selectedSlot->end_time)->timestamp * 1000;
+                                        $showEnded  = false;
+                                        $slotStatus = 'active';
+                                    } else {
+                                        // Slot is upcoming today
+                                        $countdownLabel  = __('Starts In:');
+                                        $countdownTarget = \Carbon\Carbon::parse($selectedDate . ' ' . $selectedSlot->start_time)->timestamp * 1000;
+                                        $showEnded  = false;
+                                        $slotStatus = 'upcoming';
                                     }
-                                    $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
-                                    $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
-                                @endphp
-                                <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
-                                    <span id="flash-timer-label">{{ $timerLabel }}</span> 
-                                    @if(!$isPast)
-                                    <span class="flash-timer" data-end="{{ $endTime }}" data-end-timestamp="{{ $endTimestamp }}">
-                                        00h : 00m : 00s
-                                    </span>
-                                    @endif
-                                </div>
-                            @else
-                                <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
-                                    <span id="flash-timer-label">{{ __('Time Left:') }}</span> 
-                                    <span class="flash-timer" data-end="{{ now()->addDay()->format('Y/m/d H:i:s') }}" data-end-timestamp="{{ now()->addDay()->timestamp * 1000 }}">
-                                        00h : 00m : 00s
-                                    </span>
-                                </div>
-                            @endif
+                                } else {
+                                    // No slot selected — find the very next flash sale slot
+                                    $nextSlot = $timeSlots->filter(fn($s) => $s->start_time > $currentTime)->first();
+                                    if (!$nextSlot) {
+                                        // All slots passed for today — use first slot tomorrow
+                                        $nextSlot = $timeSlots->first();
+                                        $targetDate = \Carbon\Carbon::tomorrow()->format('Y-m-d');
+                                    } else {
+                                        $targetDate = $today;
+                                    }
+                                    $countdownLabel  = __('Starts In:');
+                                    $countdownTarget = $nextSlot
+                                        ? \Carbon\Carbon::parse($targetDate . ' ' . $nextSlot->start_time)->timestamp * 1000
+                                        : (now()->addDay()->timestamp * 1000);
+                                    $showEnded  = false;
+                                    $slotStatus = 'upcoming';
+                                }
+                            @endphp
+                            <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
+                                <span id="flash-timer-label">{{ $countdownLabel }}</span>
+                                <span id="flash-page-timer" data-end-timestamp="{{ $countdownTarget }}">
+                                    00h : 00m : 00s
+                                </span>
+                            </div>
                             
                             @foreach($timeSlots as $slot)
                             @php
@@ -218,63 +242,44 @@
 
 @section('script')
 <script>
-    $(document).ready(function() {
-        $('.flash-timer').each(function() {
-            var flashTimer = $(this);
-            var endDate = parseInt(flashTimer.attr('data-end-timestamp'));
-            
-            if (isNaN(endDate)) {
-                var endDateStr = flashTimer.attr('data-end');
-                // Cross-browser compatibility for Safari/iOS parsing
-                if(endDateStr && endDateStr.indexOf('-') !== -1) {
-                    endDateStr = endDateStr.replace(/-/g, '/');
-                }
-                if (endDateStr) {
-                    endDate = new Date(endDateStr).getTime();
-                }
+    (function() {
+        var timerEl = document.getElementById('flash-page-timer');
+        if (!timerEl) return;
+
+        var endMs = parseInt(timerEl.getAttribute('data-end-timestamp'), 10);
+        if (isNaN(endMs) || endMs <= 0) return;
+
+        function tick() {
+            var now  = Date.now();
+            var dist = endMs - now;
+
+            if (dist <= 0) {
+                timerEl.innerHTML = '00h : 00m : 00s';
+                clearInterval(interval);
+                // Reload after 2 s so the new slot becomes active
+                setTimeout(function() { location.reload(); }, 2000);
+                return;
             }
 
-            var updateTimer = function() {
-                var now = new Date().getTime();
-                var distance = endDate - now;
-                
-                if (isNaN(distance) || distance < 0) {
-                    var intervalId = flashTimer.data('timer-interval');
-                    if (intervalId) clearInterval(intervalId);
-                    
-                    var label = $('#flash-timer-label');
-                    if (label.length > 0 && label.text().indexOf('Starts In') !== -1) {
-                        if (!isNaN(distance)) location.reload();
-                    } else {
-                        flashTimer.html("{{ __('Sale Ended') }}");
-                    }
-                    return;
-                }
-                
-                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                
-                var dStr = days < 10 ? "0" + days : days;
-                var hStr = hours < 10 ? "0" + hours : hours;
-                var mStr = minutes < 10 ? "0" + minutes : minutes;
-                var sStr = seconds < 10 ? "0" + seconds : seconds;
+            var days    = Math.floor(dist / 86400000);
+            var hours   = Math.floor((dist % 86400000) / 3600000);
+            var minutes = Math.floor((dist % 3600000)  / 60000);
+            var seconds = Math.floor((dist % 60000)    / 1000);
 
-                var out = "";
-                if (days > 0) {
-                    out += dStr + "d : ";
-                }
-                out += hStr + "h : " + mStr + "m : " + sStr + "s";
-                
-                flashTimer.html(out);
-            };
-            
-            updateTimer();
-            var x = setInterval(updateTimer, 1000);
-            flashTimer.data('timer-interval', x);
-        });
-    });
+            var h = (hours   < 10 ? '0' : '') + hours;
+            var m = (minutes < 10 ? '0' : '') + minutes;
+            var s = (seconds < 10 ? '0' : '') + seconds;
+
+            var out = '';
+            if (days > 0) out += days + 'd : ';
+            out += h + 'h : ' + m + 'm : ' + s + 's';
+
+            timerEl.innerHTML = out;
+        }
+
+        tick();
+        var interval = setInterval(tick, 1000);
+    })();
 </script>
 <style>
     .flash-tab-item:hover {
@@ -305,3 +310,4 @@
     }
 </style>
 @endsection
+

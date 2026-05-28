@@ -544,30 +544,31 @@
                         </div>
                         <div class="countdown-timer d-flex align-items-center" style="font-size: 18px; font-weight: 600;">
                             @php
-                                $timerLabel = __('Time Left:');
-                                $endTime = now()->addDay()->format('Y/m/d H:i:s');
-                                $endTimestamp = now()->addDay()->timestamp * 1000;
+                                // Determine the correct countdown target for the homepage flash timer
+                                $currentTime = now()->format('H:i:s');
+                                $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+                                $homepageTimerLabel  = __('Starts In:');
+                                $homepageTimerTarget = now()->addDay()->timestamp * 1000; // safe default
+
                                 if (isset($homepage_active_slot) && $homepage_active_slot) {
-                                    $timerLabel = (isset($is_flash_active) && $is_flash_active) ? __('Time Left:') : __('Starts In:');
-                                    
                                     if (isset($is_flash_active) && $is_flash_active) {
-                                        $endTimeStr = \Carbon\Carbon::today()->format('Y-m-d') . ' ' . $homepage_active_slot->end_time;
-                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
-                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                        // A flash sale is currently running — count to its end
+                                        $homepageTimerLabel  = __('Time Left:');
+                                        $homepageTimerTarget = \Carbon\Carbon::parse($today . ' ' . $homepage_active_slot->end_time)->timestamp * 1000;
                                     } else {
-                                        $flashDate = \Carbon\Carbon::today();
-                                        if (now()->format('H:i:s') > $homepage_active_slot->start_time) {
-                                            $flashDate = \Carbon\Carbon::tomorrow();
-                                        }
-                                        $endTimeStr = $flashDate->format('Y-m-d') . ' ' . $homepage_active_slot->start_time;
-                                        $endTime = \Carbon\Carbon::parse($endTimeStr)->format('Y/m/d H:i:s');
-                                        $endTimestamp = \Carbon\Carbon::parse($endTimeStr)->timestamp * 1000;
+                                        // Next upcoming slot — count to its start
+                                        // Decide whether start is today or tomorrow
+                                        $startIsToday = $currentTime < $homepage_active_slot->start_time;
+                                        $targetDate   = $startIsToday ? $today : \Carbon\Carbon::tomorrow()->format('Y-m-d');
+                                        $homepageTimerLabel  = __('Starts In:');
+                                        $homepageTimerTarget = \Carbon\Carbon::parse($targetDate . ' ' . $homepage_active_slot->start_time)->timestamp * 1000;
                                     }
                                 }
                             @endphp
-                            <span style="margin-right: 10px;" id="flash-timer-label">{{ $timerLabel }}</span>
+                            <span style="margin-right: 10px;" id="homepage-flash-timer-label">{{ $homepageTimerLabel }}</span>
                             <div id="homepage-flash-countdown" style="display: inline-block;">
-                                <span class="flash-timer" data-end="{{ $endTime }}" data-end-timestamp="{{ $endTimestamp }}">
+                                <span id="homepage-flash-timer" data-end-timestamp="{{ $homepageTimerTarget }}">
                                     00h : 00m : 00s
                                 </span>
                             </div>
@@ -637,59 +638,43 @@
     <!--==================== Flash Sales Section End ====================-->
 
     <script>
-        $(document).ready(function() {
-            $('.flash-timer').each(function() {
-                var flashTimer = $(this);
-                var endDate = parseInt(flashTimer.attr('data-end-timestamp'));
-                
-                if (isNaN(endDate)) {
-                    var endDateStr = flashTimer.attr('data-end');
-                    // Cross-browser compatibility for Safari/iOS parsing
-                    if(endDateStr && endDateStr.indexOf('-') !== -1) {
-                        endDateStr = endDateStr.replace(/-/g, '/');
-                    }
-                    if (endDateStr) {
-                        endDate = new Date(endDateStr).getTime();
-                    }
+        (function() {
+            var timerEl = document.getElementById('homepage-flash-timer');
+            if (!timerEl) return;
+
+            var endMs = parseInt(timerEl.getAttribute('data-end-timestamp'), 10);
+            if (isNaN(endMs) || endMs <= 0) return;
+
+            function tick() {
+                var now  = Date.now();
+                var dist = endMs - now;
+
+                if (dist <= 0) {
+                    timerEl.innerHTML = '00h : 00m : 00s';
+                    clearInterval(interval);
+                    setTimeout(function() { location.reload(); }, 2000);
+                    return;
                 }
 
-                var updateTimer = function() {
-                    var now = new Date().getTime();
-                    var distance = endDate - now;
-                    
-                    if (isNaN(distance) || distance < 0) {
-                        var intervalId = flashTimer.data('timer-interval');
-                        if (intervalId) clearInterval(intervalId);
-                        
-                        // Just say Sale Ended, homepage usually doesn't say Starts In or reload
-                        flashTimer.html("{{ __('Sale Ended') }}");
-                        return;
-                    }
-                    
-                    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                    
-                    var dStr = days < 10 ? "0" + days : days;
-                    var hStr = hours < 10 ? "0" + hours : hours;
-                    var mStr = minutes < 10 ? "0" + minutes : minutes;
-                    var sStr = seconds < 10 ? "0" + seconds : seconds;
+                var days    = Math.floor(dist / 86400000);
+                var hours   = Math.floor((dist % 86400000) / 3600000);
+                var minutes = Math.floor((dist % 3600000)  / 60000);
+                var seconds = Math.floor((dist % 60000)    / 1000);
 
-                    var out = "";
-                    if (days > 0) {
-                        out += dStr + "d : ";
-                    }
-                    out += hStr + "h : " + mStr + "m : " + sStr + "s";
-                    
-                    flashTimer.html(out);
-                };
-                
-                updateTimer();
-                var x = setInterval(updateTimer, 1000);
-                flashTimer.data('timer-interval', x);
-            });
-        });
+                var h = (hours   < 10 ? '0' : '') + hours;
+                var m = (minutes < 10 ? '0' : '') + minutes;
+                var s = (seconds < 10 ? '0' : '') + seconds;
+
+                var out = '';
+                if (days > 0) out += days + 'd : ';
+                out += h + 'h : ' + m + 'm : ' + s + 's';
+
+                timerEl.innerHTML = out;
+            }
+
+            tick();
+            var interval = setInterval(tick, 1000);
+        })();
     </script>
 
     <!--==================== Deals Grid Section Start ====================-->

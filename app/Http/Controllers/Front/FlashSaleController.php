@@ -39,50 +39,51 @@ class FlashSaleController extends Controller
         $selectedSlotId = $request->get('slot', $activeSlot ? $activeSlot->id : null);
         $selectedSlot = $timeSlots->where('id', $selectedSlotId)->first();
 
-        $flashCategories = \App\Models\Category::where('status', 1)->get();
+        // Use the 6 flash sale categories from the flash_sale_categories table
+        $flashCategories = \Illuminate\Support\Facades\DB::table('flash_sale_categories')->where('status', 1)->get();
         $selectedCategory = $request->get('category');
         $sort = $request->get('sort');
         $selectedDate = $request->get('date', \Carbon\Carbon::today()->format('Y-m-d'));
 
-        $flashProducts = collect();
+        // Build the flash products query — show ALL active flash products by default
+        $query = FlashSaleProduct::with('product')
+                            ->where('status', 1);
+
+        // Filter by time slot only if one is explicitly selected
         if ($selectedSlot) {
-            $query = FlashSaleProduct::with('product')
-                                ->where('time_slot_id', $selectedSlot->id)
-                                ->where('status', 1)
-                                ->whereDate('flash_date', '=', $selectedDate);
+            $query->where('time_slot_id', $selectedSlot->id)
+                  ->whereDate('flash_date', '=', $selectedDate);
+        }
 
-            if ($selectedCategory) {
-                $query->whereHas('product', function($q) use ($selectedCategory) {
-                    $q->where('category_id', $selectedCategory);
-                });
-            }
+        // Filter by flash sale category using flash_sale_category_id on flash_sale_products table
+        if ($selectedCategory) {
+            $query->where('flash_sale_category_id', $selectedCategory);
+        }
 
-            // Apply Sorting
-            if ($sort == 'price_asc') {
-                $query->orderBy('flash_price', 'asc');
-            } elseif ($sort == 'price_desc') {
-                $query->orderBy('flash_price', 'desc');
-            }
+        // Apply Sorting
+        if ($sort == 'price_asc') {
+            $query->orderBy('flash_price', 'asc');
+        } elseif ($sort == 'price_desc') {
+            $query->orderBy('flash_price', 'desc');
+        }
 
-            $flashProducts = $query->get();
+        $flashProducts = $query->get();
 
-            // Handle sorting that depends on the related product model
-            if ($sort == 'newest') {
+        // Handle sorting that depends on the related product model
+        if ($sort == 'newest') {
+            $flashProducts = $flashProducts->sortByDesc(function ($fp) {
+                return $fp->product->created_at ?? now();
+            });
+        } elseif ($sort == 'rating') {
+            $flashProducts = $flashProducts->sortByDesc(function ($fp) {
+                return $fp->product->ratings()->avg('rating') ?? 0;
+            });
+        } else {
+            // Default: Popularity
+            if (!$sort || $sort == 'popularity') {
                 $flashProducts = $flashProducts->sortByDesc(function ($fp) {
-                    return $fp->product->created_at ?? now();
+                    return $fp->product->views ?? 0;
                 });
-            } elseif ($sort == 'rating') {
-                // Assuming product has a method or attribute for average rating
-                $flashProducts = $flashProducts->sortByDesc(function ($fp) {
-                    return $fp->product->ratings()->avg('rating') ?? 0;
-                });
-            } else {
-                // Default: Popularity
-                if (!$sort || $sort == 'popularity') {
-                    $flashProducts = $flashProducts->sortByDesc(function ($fp) {
-                        return $fp->product->views ?? 0;
-                    });
-                }
             }
         }
 
