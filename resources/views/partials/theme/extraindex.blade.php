@@ -111,9 +111,9 @@
     }
     .jumia-style-carousel-wrapper .owl-prev:hover,
     .jumia-style-carousel-wrapper .owl-next:hover {
-        background: #f68b1e !important;
+        background: #000000 !important;
         color: #fff !important;
-        border-color: #f68b1e !important;
+        border-color: #000000 !important;
     }
     .jumia-style-carousel-wrapper .owl-prev {
         margin-left: -18px;
@@ -129,7 +129,7 @@
         
         <!-- SECTION 1: TOP SELLERS -->
         <div class="mb-5">
-            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #f68b1e; font-weight: 700;">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #000000; font-weight: 700;">
                 <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Top Sellers') }}</h4>
                 <a href="{{ route('front.category') }}?sort=sales_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
@@ -167,7 +167,7 @@
 
         <!-- SECTION 3: BUYERS CHOICE -->
         <div class="mb-5">
-            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #f68b1e; font-weight: 700;">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #000000; font-weight: 700;">
                 <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Buyers Choice') }}</h4>
                 <a href="{{ route('front.category') }}?sort=views_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>

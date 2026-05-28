@@ -978,43 +978,40 @@ div[data-countdown] > div span:last-child {
    GLOBAL PRODUCT CARD STYLES
    ========================================================= */
 
-/* Black background on all cards and card wrappers */
+/* White background on all cards and card wrappers */
 .product.type-product,
 .product.type-product .product-wrapper {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border: 1.5px solid #222222 !important;
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #eaeaea !important;
 }
 
 .product.type-product .product-info {
-    background-color: #000000 !important;
-    color: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #333333 !important;
     padding: 12px 10px !important;
 }
 
-/* Force product name to show and wrap fully */
+/* Force product name to show with consistent single-line ellipsis style */
 .product.type-product .product-title,
 .product.type-product .product-title a {
-    color: #ffffff !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
+    color: #333333 !important;
+    font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
     line-height: 1.4 !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     display: block !important;
-    height: auto !important;
-    max-height: none !important;
-    min-height: unset !important;
-    -webkit-line-clamp: unset !important;
-    -webkit-box-orient: unset !important;
+    height: 20px !important;
     margin-bottom: 6px !important;
 }
 
-/* Ensure price and star ratings are visible on black background */
+/* Ensure price and star ratings are visible on light background */
 .product.type-product .product-price ins,
 .product.type-product .price ins {
-    color: #ffffff !important;
+    color: #111111 !important;
     font-size: 15px !important;
     font-weight: 700 !important;
     text-decoration: none !important;
@@ -1022,13 +1019,13 @@ div[data-countdown] > div span:last-child {
 
 .product.type-product .product-price del,
 .product.type-product .price del {
-    color: #888888 !important;
+    color: #999999 !important;
     font-size: 11px !important;
 }
 
 .product.type-product .shipping-feed-back span,
 .product.type-product .star-rating span {
-    color: #cccccc !important;
+    color: #666666 !important;
 }
 
 /* Normalize product image container to 1:1 aspect ratio with containment (Top Sellers format) */
@@ -1037,7 +1034,7 @@ div[data-countdown] > div span:last-child {
     aspect-ratio: 1/1 !important;
     overflow: hidden !important;
     border-radius: 8px !important;
-    background-color: #000000 !important;
+    background-color: #ffffff !important;
     position: relative !important;
 }
 
@@ -1045,7 +1042,33 @@ div[data-countdown] > div span:last-child {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    background-color: #000000 !important;
+    background-color: #ffffff !important;
+}
+
+/* Equalize heights in Owl Carousel */
+.jumia-style-carousel .owl-stage {
+    display: flex !important;
+}
+.jumia-style-carousel .owl-item {
+    display: flex !important;
+}
+.jumia-style-carousel .item {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+.jumia-style-carousel .product {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 1 auto !important;
+}
+.jumia-style-carousel .product-wrapper {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
 }
 
 
