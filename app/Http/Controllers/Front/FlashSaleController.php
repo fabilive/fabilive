@@ -54,6 +54,15 @@ class FlashSaleController extends Controller
                                 ->get();
         }
 
-        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts'));
+        $latest_products = \App\Models\Product::with('user')->whereStatus(1)->whereLatest(1)
+            ->whereHas('user', function ($q) {
+                $q->where('is_vendor', 2);
+            })
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
+            ->get()
+            ->chunk(4);
+
+        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts', 'latest_products'));
     }
 }
