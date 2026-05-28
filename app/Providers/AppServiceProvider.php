@@ -23,6 +23,20 @@ class AppServiceProvider extends ServiceProvider
         // Test database connectivity once — skip all DB operations if unreachable
         $dbAvailable = \App\Models\Generalsetting::isDbValid();
 
+        // Auto-seed Flash Sale Time Slots if empty
+        if ($dbAvailable) {
+            try {
+                if (Schema::hasTable('flash_sale_time_slots') && DB::table('flash_sale_time_slots')->count() == 0) {
+                    DB::table('flash_sale_time_slots')->insert([
+                        ['start_time' => '10:00:00', 'end_time' => '13:59:59', 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['start_time' => '14:00:00', 'end_time' => '16:59:59', 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['start_time' => '17:00:00', 'end_time' => '18:59:59', 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['start_time' => '19:00:00', 'end_time' => '23:59:59', 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                    ]);
+                }
+            } catch (\Exception $e) {}
+        }
+
         // 2. Global General Settings with Fail-safe
         $gs = \App\Models\Generalsetting::safeFirst();
         view()->share('gs', $gs);
