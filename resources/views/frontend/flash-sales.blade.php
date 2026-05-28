@@ -8,7 +8,7 @@
             <div class="col-lg-12">
                 <ul class="pages">
                     <li>
-                        <a href="{{ route('front.index') }}">{{ $langg->lang17 }}</a>
+                        <a href="{{ route('front.index') }}">{{ __('Home') }}</a>
                     </li>
                     <li>
                         <a href="{{ route('front.flash-sales') }}">{{ __('Flash Sales') }}</a>
