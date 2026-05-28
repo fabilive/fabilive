@@ -23,43 +23,51 @@
 <!-- Flash Sales Section -->
 <section class="flash-sales-page mt-4 mb-5">
     <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-4">
-                <div class="flash-header" style="background: linear-gradient(135deg, #ff4d4d, #ff6b6b); padding: 30px; border-radius: 10px; color: white;">
-                    <h2 class="mb-2" style="font-weight: bold; color: white;">⚡ {{ __('FLASH SALES') }} ⚡</h2>
-                    <h5 class="mb-3" style="color: #fff;">{{ __('Everyday top deals with massive discounts!') }}</h5>
-                    <div class="countdown-timer d-inline-block" style="background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 5px;">
-                        <span style="font-size: 18px; margin-right: 15px;">{{ __('Time Left For This Sale:') }}</span>
-                        <div id="flash-countdown" style="display: inline-block; font-size: 24px; font-weight: bold; letter-spacing: 2px;">
-                            @if($selectedSlot && now()->format('H:i:s') <= $selectedSlot->end_time && now()->format('H:i:s') >= $selectedSlot->start_time)
-                                <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->end_time)->format('Y-m-d H:i:s') }}">00:00:00</span>
-                            @elseif($selectedSlot && now()->format('H:i:s') < $selectedSlot->start_time)
-                                <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->start_time)->format('Y-m-d H:i:s') }}">{{ __('Starts in') }} 00:00:00</span>
-                            @else
-                                <span>{{ __('Sale Ended') }}</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="row mb-4">
             <div class="col-12">
-                <div class="flash-tabs" style="display: flex; overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 10px;">
+                <div class="flash-header d-flex justify-content-between align-items-center" style="background-color: #cb202d; padding: 15px 20px; border-radius: 5px 5px 0 0; color: white;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-bolt" style="color: #ffcc00; font-size: 24px; margin-right: 10px;"></i>
+                        <h3 class="mb-0" style="font-weight: 700; color: white; font-size: 20px;">{{ __('Flash Sales') }} <span style="font-size: 14px; font-weight: 400; opacity: 0.9;">({{ $flashProducts->count() }} {{ __('products found') }})</span></h3>
+                    </div>
+                    <div>
+                        <span style="font-weight: 600; font-size: 14px; cursor: pointer;">{{ __('Sort by: Popularity') }} <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 5px;"></i></span>
+                    </div>
+                </div>
+                
+                <div class="flash-timeline" style="background: white; padding: 15px 20px; border-radius: 0 0 5px 5px; border: 1px solid #eee; border-top: none; display: flex; overflow-x: auto; align-items: center; white-space: nowrap;">
+                    @if($selectedSlot)
+                        <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
+                            {{ __('Time Left:') }} 
+                            <span class="flash-timer" data-end="{{ \Carbon\Carbon::parse(\Carbon\Carbon::today()->format('Y-m-d') . ' ' . $selectedSlot->end_time)->format('Y-m-d H:i:s') }}">
+                                00h : 00m : 00s
+                            </span>
+                        </div>
+                    @else
+                        <div style="color: #cb202d; font-weight: 600; font-size: 15px; margin-right: 30px; padding-right: 30px; border-right: 1px solid #eee; display: inline-block;">
+                            {{ __('Time Left:') }} 
+                            <span class="flash-timer" data-end="{{ now()->endOfDay()->format('Y-m-d H:i:s') }}">
+                                00h : 00m : 00s
+                            </span>
+                        </div>
+                    @endif
+                    
                     @foreach($timeSlots as $slot)
                     @php
-                        $isLive = now()->format('H:i:s') >= $slot->start_time && now()->format('H:i:s') <= $slot->end_time;
-                        $isUpcoming = now()->format('H:i:s') < $slot->start_time;
-                        $isEnded = now()->format('H:i:s') > $slot->end_time;
-                        $statusText = $isLive ? __('Sale is Live') : ($isUpcoming ? __('Upcoming') : __('Ended'));
-                        
-                        $activeClass = ($selectedSlot && $selectedSlot->id == $slot->id) ? 'active-slot' : '';
+                        $isActive = ($selectedSlot && $selectedSlot->id == $slot->id);
+                        $isPast = now()->format('H:i:s') > $slot->end_time;
+                        $color = $isActive ? '#cb202d' : ($isPast ? '#ccc' : '#666');
                     @endphp
-                    <a href="{{ route('front.flash-sales', ['slot' => $slot->id]) }}" class="flash-tab-item {{ $activeClass }}" style="flex: 1; text-align: center; padding: 15px 20px; text-decoration: none; border-radius: 8px; margin: 0 5px; min-width: 150px; transition: 0.3s; {{ $activeClass ? 'background: #ff4d4d; color: white;' : 'background: #f8f9fa; color: #333;' }}">
-                        <h4 style="margin: 0; font-weight: bold; {{ $activeClass ? 'color: white;' : '' }}">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}</h4>
-                        <span style="font-size: 14px; opacity: 0.9;">{{ $statusText }}</span>
-                    </a>
+                        <a href="{{ route('front.flash-sales', ['slot' => $slot->id]) }}" style="color: {{ $color }}; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
+                            {{ \Carbon\Carbon::parse($slot->start_time)->format('g:iA') }}
+                        </a>
+                    @endforeach
+                    
+                    <!-- Dummy Upcoming Days to match design -->
+                    @foreach($timeSlots as $slot)
+                        <a href="#" style="color: #999; font-weight: 600; margin-right: 30px; text-decoration: none; font-size: 14px;">
+                            {{ strtoupper(\Carbon\Carbon::tomorrow()->format('d M')) }}, {{ \Carbon\Carbon::parse($slot->start_time)->format('g:iA') }}
+                        </a>
                     @endforeach
                 </div>
             </div>
@@ -164,7 +172,7 @@
                 seconds = (seconds < 10) ? "0" + seconds : seconds;
                 
                 var text = flashTimer.text().includes('Starts in') ? '{{ __('Starts in') }} ' : '';
-                flashTimer.html(text + hours + "h " + minutes + "m " + seconds + "s");
+                flashTimer.html(text + hours + "h : " + minutes + "m : " + seconds + "s");
             }, 1000);
         }
     });
