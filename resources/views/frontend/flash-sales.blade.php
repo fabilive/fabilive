@@ -216,7 +216,7 @@
 @includeIf('partials.global.common-footer')
 @endsection
 
-@section('scripts')
+@section('script')
 <script>
     $(document).ready(function() {
         $('.flash-timer').each(function() {
