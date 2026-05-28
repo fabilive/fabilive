@@ -638,30 +638,34 @@
 
     <script>
         $(document).ready(function() {
-            var flashTimer = $('.flash-timer');
-            if(flashTimer.length > 0) {
-                var endDate = parseInt(flashTimer.data('end-timestamp'));
+            $('.flash-timer').each(function() {
+                var flashTimer = $(this);
+                var endDate = parseInt(flashTimer.attr('data-end-timestamp'));
+                
                 if (isNaN(endDate)) {
-                    var endDateStr = flashTimer.data('end');
+                    var endDateStr = flashTimer.attr('data-end');
                     // Cross-browser compatibility for Safari/iOS parsing
                     if(endDateStr && endDateStr.indexOf('-') !== -1) {
                         endDateStr = endDateStr.replace(/-/g, '/');
                     }
-                    endDate = new Date(endDateStr).getTime();
+                    if (endDateStr) {
+                        endDate = new Date(endDateStr).getTime();
+                    }
                 }
 
-                var timerInterval = setInterval(function() {
+                var updateTimer = function() {
                     var now = new Date().getTime();
                     var distance = endDate - now;
-                    if (distance < 0) {
-                        clearInterval(timerInterval);
-                        if ($('#flash-timer-label').text().indexOf('Starts In') !== -1) {
-                            location.reload();
-                        } else {
-                            flashTimer.html("{{ __('Sale Ended') }}");
-                        }
+                    
+                    if (isNaN(distance) || distance < 0) {
+                        var intervalId = flashTimer.data('timer-interval');
+                        if (intervalId) clearInterval(intervalId);
+                        
+                        // Just say Sale Ended, homepage usually doesn't say Starts In or reload
+                        flashTimer.html("{{ __('Sale Ended') }}");
                         return;
                     }
+                    
                     var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -671,7 +675,7 @@
                     var hStr = hours < 10 ? "0" + hours : hours;
                     var mStr = minutes < 10 ? "0" + minutes : minutes;
                     var sStr = seconds < 10 ? "0" + seconds : seconds;
-                    
+
                     var out = "";
                     if (days > 0) {
                         out += dStr + "d : ";
@@ -679,8 +683,12 @@
                     out += hStr + "h : " + mStr + "m : " + sStr + "s";
                     
                     flashTimer.html(out);
-                }, 1000);
-            }
+                };
+                
+                updateTimer();
+                var x = setInterval(updateTimer, 1000);
+                flashTimer.data('timer-interval', x);
+            });
         });
     </script>
 

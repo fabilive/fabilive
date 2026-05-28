@@ -219,16 +219,19 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        var flashTimer = $('.flash-timer');
-        if(flashTimer.length > 0) {
-            var endDate = parseInt(flashTimer.data('end-timestamp'));
+        $('.flash-timer').each(function() {
+            var flashTimer = $(this);
+            var endDate = parseInt(flashTimer.attr('data-end-timestamp'));
+            
             if (isNaN(endDate)) {
-                var endDateStr = flashTimer.data('end');
+                var endDateStr = flashTimer.attr('data-end');
                 // Cross-browser compatibility for Safari/iOS parsing
                 if(endDateStr && endDateStr.indexOf('-') !== -1) {
                     endDateStr = endDateStr.replace(/-/g, '/');
                 }
-                endDate = new Date(endDateStr).getTime();
+                if (endDateStr) {
+                    endDate = new Date(endDateStr).getTime();
+                }
             }
 
             var updateTimer = function() {
@@ -236,8 +239,11 @@
                 var distance = endDate - now;
                 
                 if (isNaN(distance) || distance < 0) {
-                    if (typeof x !== 'undefined') clearInterval(x);
-                    if ($('#flash-timer-label').text().indexOf('Starts In') !== -1) {
+                    var intervalId = flashTimer.data('timer-interval');
+                    if (intervalId) clearInterval(intervalId);
+                    
+                    var label = $('#flash-timer-label');
+                    if (label.length > 0 && label.text().indexOf('Starts In') !== -1) {
                         if (!isNaN(distance)) location.reload();
                     } else {
                         flashTimer.html("{{ __('Sale Ended') }}");
@@ -266,7 +272,8 @@
             
             updateTimer();
             var x = setInterval(updateTimer, 1000);
-        }
+            flashTimer.data('timer-interval', x);
+        });
     });
 </script>
 <style>
