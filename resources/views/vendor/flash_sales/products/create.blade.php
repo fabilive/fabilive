@@ -47,6 +47,22 @@
                             <div class="row">
                                 <div class="col-lg-4">
                                     <div class="left-area">
+                                        <h4 class="heading">{{ __('Select Flash Sale Category') }} *</h4>
+                                    </div>
+                                </div>
+                                <div class="col-lg-7">
+                                    <select name="flash_sale_category_id" required="" class="input-field">
+                                        <option value="">{{ __('Select Category') }}</option>
+                                        @foreach($flash_categories as $cat)
+                                            <option value="{{$cat->id}}">{{$cat->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="left-area">
                                         <h4 class="heading">{{ __('Flash Date') }} *</h4>
                                     </div>
                                 </div>

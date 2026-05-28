@@ -34,6 +34,35 @@ class AppServiceProvider extends ServiceProvider
                         ['start_time' => '19:00:00', 'end_time' => '23:59:59', 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
                     ]);
                 }
+
+                // Auto-create flash_sale_categories table if it doesn't exist
+                if (!Schema::hasTable('flash_sale_categories')) {
+                    Schema::create('flash_sale_categories', function (\Illuminate\Database\Schema\Blueprint $table) {
+                        $table->id();
+                        $table->string('name');
+                        $table->string('slug')->unique();
+                        $table->string('image')->nullable();
+                        $table->tinyInteger('status')->default(1);
+                        $table->timestamps();
+                    });
+
+                    // Seed default categories matching Jumia
+                    DB::table('flash_sale_categories')->insert([
+                        ['name' => 'Phones & Tablets', 'slug' => 'phones-tablets', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['name' => 'Home & Appliances', 'slug' => 'home-appliances', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['name' => 'Electronics', 'slug' => 'electronics', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['name' => 'Health & Beauty', 'slug' => 'health-beauty', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['name' => 'Fashion', 'slug' => 'fashion', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                        ['name' => 'Groceries', 'slug' => 'groceries', 'image' => null, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+                    ]);
+                }
+
+                // Add category column to products table if missing
+                if (Schema::hasTable('flash_sale_products') && !Schema::hasColumn('flash_sale_products', 'flash_sale_category_id')) {
+                    Schema::table('flash_sale_products', function (\Illuminate\Database\Schema\Blueprint $table) {
+                        $table->unsignedBigInteger('flash_sale_category_id')->nullable()->after('time_slot_id');
+                    });
+                }
             } catch (\Exception $e) {}
         }
 

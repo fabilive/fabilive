@@ -48,7 +48,8 @@ class FlashSaleProductController extends Controller
         $user = Auth::user();
         $products = Product::where('user_id', $user->id)->where('status', 1)->get();
         $time_slots = FlashSaleTimeSlot::where('status', 1)->get();
-        return view('vendor.flash_sales.products.create', compact('products', 'time_slots'));
+        $flash_categories = \Illuminate\Support\Facades\DB::table('flash_sale_categories')->where('status', 1)->get();
+        return view('vendor.flash_sales.products.create', compact('products', 'time_slots', 'flash_categories'));
     }
 
     public function store(Request $request)
@@ -56,6 +57,7 @@ class FlashSaleProductController extends Controller
         $rules = [
             'product_id' => 'required',
             'time_slot_id' => 'required',
+            'flash_sale_category_id' => 'required',
             'flash_date' => 'required|date',
             'flash_price' => 'required|numeric',
             'flash_quantity' => 'required|integer|min:1'

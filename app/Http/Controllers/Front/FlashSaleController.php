@@ -39,9 +39,13 @@ class FlashSaleController extends Controller
         $selectedSlotId = $request->get('slot', $activeSlot ? $activeSlot->id : null);
         $selectedSlot = $timeSlots->where('id', $selectedSlotId)->first();
 
+        $flashCategories = \Illuminate\Support\Facades\DB::table('flash_sale_categories')->where('status', 1)->get();
+        $selectedCategory = $request->get('category');
+        $sort = $request->get('sort');
+
         $flashProducts = collect();
         if ($selectedSlot) {
-            $flashProducts = FlashSaleProduct::with('product')
+            $query = FlashSaleProduct::with('product')
                                 ->where('time_slot_id', $selectedSlot->id)
                                 ->where('status', 1)
                                 ->where(function($query) use ($selectedSlot) {
@@ -50,8 +54,39 @@ class FlashSaleController extends Controller
                                               $q->whereDate('flash_date', \Carbon\Carbon::today())
                                                 ->whereRaw("TIMESTAMP(flash_date, ?) > ?", [$selectedSlot->start_time, now()]);
                                           });
-                                })
-                                ->get();
+                                });
+
+            if ($selectedCategory) {
+                $query->where('flash_sale_category_id', $selectedCategory);
+            }
+
+            // Apply Sorting
+            if ($sort == 'price_asc') {
+                $query->orderBy('flash_price', 'asc');
+            } elseif ($sort == 'price_desc') {
+                $query->orderBy('flash_price', 'desc');
+            }
+
+            $flashProducts = $query->get();
+
+            // Handle sorting that depends on the related product model
+            if ($sort == 'newest') {
+                $flashProducts = $flashProducts->sortByDesc(function ($fp) {
+                    return $fp->product->created_at ?? now();
+                });
+            } elseif ($sort == 'rating') {
+                // Assuming product has a method or attribute for average rating
+                $flashProducts = $flashProducts->sortByDesc(function ($fp) {
+                    return $fp->product->ratings()->avg('rating') ?? 0;
+                });
+            } else {
+                // Default: Popularity
+                if (!$sort || $sort == 'popularity') {
+                    $flashProducts = $flashProducts->sortByDesc(function ($fp) {
+                        return $fp->product->views ?? 0;
+                    });
+                }
+            }
         }
 
         $latest_products = \App\Models\Product::with('user')->whereStatus(1)->whereLatest(1)
@@ -63,6 +98,6 @@ class FlashSaleController extends Controller
             ->get()
             ->chunk(4);
 
-        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts', 'latest_products'));
+        return view('frontend.flash-sales', compact('timeSlots', 'selectedSlot', 'flashProducts', 'latest_products', 'flashCategories', 'sort', 'selectedCategory'));
     }
 }

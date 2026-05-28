@@ -2,24 +2,7 @@
 
 @section('content')
 @includeIf('partials.global.common-header')
-<!-- Breadcrumb Area Start -->
-<div class="breadcrumb-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <ul class="pages">
-                    <li>
-                        <a href="{{ route('front.index') }}">{{ __('Home') }}</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('front.flash-sales') }}">{{ __('Flash Sales') }}</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Breadcrumb Area End -->
+<!-- Breadcrumb removed per user request -->
 
 <!-- Flash Sales Section -->
 <section class="flash-sales-page mt-4 mb-5">
@@ -27,7 +10,7 @@
         <!-- HUGE BLACK BANNER -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="flash-banner" style="background-color: #000; border-radius: 8px; padding: 40px; text-align: center; color: white;">
+                <div class="flash-banner" style="background-color: #000; border-radius: 8px; padding: 60px 40px; text-align: center; color: white;">
                     <div class="d-flex flex-wrap justify-content-center align-items-center">
                         <i class="fas fa-bolt" style="color: #ffcc00; font-size: 80px; margin-right: 20px;"></i>
                         <div class="text-left" style="text-align: left;">
@@ -36,6 +19,22 @@
                         <div style="margin-left: 30px; text-align: left; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 30px;" class="d-none d-md-block">
                             <h2 style="font-size: 26px; font-weight: 300; margin: 0; color: white;">Everyday deals you<br>don't want to miss</h2>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Sale Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h4 style="text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 20px;">Flash Sale Categories</h4>
+                    <div class="d-flex justify-content-between text-center" style="overflow-x: auto; gap: 15px;">
+                        @foreach($flashCategories as $cat)
+                        <a href="{{ route('front.flash-sales', array_merge(request()->query(), ['category' => $cat->id])) }}" class="category-tile" style="flex: 1; min-width: 120px; padding: 15px; border: 1px solid {{ $selectedCategory == $cat->id ? '#cb202d' : '#eee' }}; border-radius: 5px; text-decoration: none; color: #333; transition: all 0.3s;">
+                            <h5 style="font-size: 14px; margin: 0; font-weight: {{ $selectedCategory == $cat->id ? '700' : '400' }}; color: {{ $selectedCategory == $cat->id ? '#cb202d' : '#333' }};">{{ $cat->name }}</h5>
+                        </a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -60,8 +59,22 @@
                                 <i class="fas fa-bolt" style="color: #ffcc00; font-size: 24px; margin-right: 10px;"></i>
                                 <h3 class="mb-0" style="font-weight: 700; color: white; font-size: 20px;">{{ __('Flash Sales') }} <span style="font-size: 14px; font-weight: 400; opacity: 0.9;">({{ $flashProducts->count() }} {{ __('products found') }})</span></h3>
                             </div>
-                            <div>
-                                <span style="font-weight: 600; font-size: 14px; cursor: pointer;">{{ __('Sort by: Popularity') }} <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 5px;"></i></span>
+                            <div class="sort-by-dropdown">
+                                <form action="{{ route('front.flash-sales') }}" method="GET" id="sortForm">
+                                    @if(request()->has('slot'))
+                                        <input type="hidden" name="slot" value="{{ request('slot') }}">
+                                    @endif
+                                    @if(request()->has('category'))
+                                        <input type="hidden" name="category" value="{{ request('category') }}">
+                                    @endif
+                                    <select name="sort" onchange="document.getElementById('sortForm').submit()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 4px; font-weight: 600; font-size: 14px; outline: none; cursor: pointer;">
+                                        <option style="color: black;" value="popularity" {{ $sort == 'popularity' ? 'selected' : '' }}>Sort by: Popularity</option>
+                                        <option style="color: black;" value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Newest Arrivals</option>
+                                        <option style="color: black;" value="price_asc" {{ $sort == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                                        <option style="color: black;" value="price_desc" {{ $sort == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
+                                        <option style="color: black;" value="rating" {{ $sort == 'rating' ? 'selected' : '' }}>Product Rating</option>
+                                    </select>
+                                </form>
                             </div>
                         </div>
                         
