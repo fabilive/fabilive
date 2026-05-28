@@ -456,6 +456,38 @@ class FrontendController extends FrontBaseController
                     ->with(['user' => fn($q) => $q->select('id', 'is_vendor')])
                     ->latest()->first();
             } catch (\Exception $e) {}
+            
+            // Fetch Active Flash Sale Slots and Products for Homepage
+            try {
+                $timeSlots = \App\Models\FlashSaleTimeSlot::where('status', 1)->orderBy('start_time', 'asc')->get();
+                $currentTime = now()->format('H:i:s');
+                $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
+                    return $currentTime >= $slot->start_time && $currentTime <= $slot->end_time;
+                })->first();
+                
+                if (!$activeSlot && $timeSlots->count() > 0) {
+                    $activeSlot = $timeSlots->filter(function($slot) use ($currentTime) {
+                        return $slot->start_time > $currentTime;
+                    })->first() ?? $timeSlots->first();
+                }
+
+                $data['homepage_flash_slots'] = $timeSlots;
+                $data['homepage_active_slot'] = $activeSlot;
+                
+                if ($activeSlot) {
+                    $data['homepage_flash_products'] = \App\Models\FlashSaleProduct::with('product')
+                        ->where('time_slot_id', $activeSlot->id)
+                        ->where('status', 1)
+                        ->whereDate('flash_date', \Carbon\Carbon::today())
+                        ->get();
+                } else {
+                    $data['homepage_flash_products'] = collect();
+                }
+            } catch (\Exception $e) {
+                $data['homepage_flash_slots'] = collect();
+                $data['homepage_active_slot'] = null;
+                $data['homepage_flash_products'] = collect();
+            }
 
             try { $data['blogs'] = Blog::latest()->take(2)->get(); } catch (\Exception $e) {}
         }
