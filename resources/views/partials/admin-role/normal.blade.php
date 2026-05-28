@@ -94,6 +94,9 @@
             class="@if(request()->is('admin/attribute/*/manage') && request()->input('type')=='childcategory') active @endif">
             <a href="{{ route('admin-childcat-index') }}"><span>{{ __('Child Category') }}</span></a>
         </li>
+        <li class="@if(request()->routeIs('admin-deal-page-index')) active @endif">
+            <a href="{{ route('admin-deal-page-index') }}"><span>{{ __('Deal Pages') }}</span></a>
+        </li>
     </ul>
 </li>
 
