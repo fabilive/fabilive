@@ -221,14 +221,14 @@
                 endDate = new Date(endDateStr).getTime();
             }
 
-            var x = setInterval(function() {
+            var updateTimer = function() {
                 var now = new Date().getTime();
                 var distance = endDate - now;
                 
-                if (distance < 0) {
-                    clearInterval(x);
+                if (isNaN(distance) || distance < 0) {
+                    if (typeof x !== 'undefined') clearInterval(x);
                     if ($('#flash-timer-label').text().indexOf('Starts In') !== -1) {
-                        location.reload();
+                        if (!isNaN(distance)) location.reload();
                     } else {
                         flashTimer.html("{{ __('Sale Ended') }}");
                     }
@@ -252,7 +252,10 @@
                 out += hStr + "h : " + mStr + "m : " + sStr + "s";
                 
                 flashTimer.html(out);
-            }, 1000);
+            };
+            
+            updateTimer();
+            var x = setInterval(updateTimer, 1000);
         }
     });
 </script>

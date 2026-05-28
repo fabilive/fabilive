@@ -39,7 +39,7 @@ class FlashSaleController extends Controller
         $selectedSlotId = $request->get('slot', $activeSlot ? $activeSlot->id : null);
         $selectedSlot = $timeSlots->where('id', $selectedSlotId)->first();
 
-        $flashCategories = \Illuminate\Support\Facades\DB::table('flash_sale_categories')->where('status', 1)->get();
+        $flashCategories = \App\Models\Category::where('status', 1)->get();
         $selectedCategory = $request->get('category');
         $sort = $request->get('sort');
 
@@ -51,7 +51,9 @@ class FlashSaleController extends Controller
                                 ->whereDate('flash_date', '>=', \Carbon\Carbon::today());
 
             if ($selectedCategory) {
-                $query->where('flash_sale_category_id', $selectedCategory);
+                $query->whereHas('product', function($q) use ($selectedCategory) {
+                    $q->where('category_id', $selectedCategory);
+                });
             }
 
             // Apply Sorting
