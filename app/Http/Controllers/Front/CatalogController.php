@@ -315,11 +315,13 @@ class CatalogController extends FrontBaseController
 
         if (!$dealPage) {
             // Fallback or 404 if deal page not found
-            $deal = ['title' => 'Hot Deals'];
-            $prods = collect([]);
-            $page = null;
+            $deal = ['title' => 'Hot Deals', 'banner' => null];
+            $prodsQuery = Product::with('user')->where('id', '<', 0); // Empty query fallback
         } else {
-            $deal = ['title' => $dealPage->name];
+            $deal = [
+                'title' => $dealPage->name,
+                'banner' => $dealPage->image ? asset('assets/images/categories/' . $dealPage->image) : null,
+            ];
             
             // Fetch products associated with this deal page
             // We only show products where the discount has NOT expired
@@ -378,6 +380,7 @@ class CatalogController extends FrontBaseController
 
         $data['prods'] = $prods;
         $data['deal_title'] = $deal['title'];
+        $data['deal_banner'] = $deal['banner'];
         $data['deal_slug'] = $slug;
 
         // Fetch latest products for the sidebar "Recent Product" section

@@ -20,6 +20,20 @@
    </div>
 </div>
 <!-- breadcrumb -->
+
+<!-- Deal Banner -->
+@if(!empty($deal_banner))
+<div class="full-row bg-white py-4 pb-0">
+   <div class="container">
+      <div class="row">
+         <div class="col-12">
+            <img src="{{ $deal_banner }}" alt="{{ $deal_title }}" class="img-fluid w-100 rounded" style="max-height: 350px; object-fit: cover;">
+         </div>
+      </div>
+   </div>
+</div>
+@endif
+<!-- Deal Banner -->
 <div class="full-row">
    <div class="container">
       <div class="row">
