@@ -310,103 +310,35 @@ class CatalogController extends FrontBaseController
         // Remove leading slash if present
         $slug = ltrim($uri, '/');
 
-        // Map deals to category titles or slugs
-        $deals = [
-            'phones-tablets' => [
-                'title' => 'Phones & Tablets',
-                'keywords' => ['phone', 'tablet', 'smartphone', 'iphone', 'android', 'samsung', 'huawei', 'pixel'],
-                'category_slugs' => ['smartphones', 'electronics']
-            ],
-            'fashion-deals' => [
-                'title' => 'Fashion Deals',
-                'keywords' => ['dress', 'shirt', 'clothing', 'fashion', 't-shirt', 'wear', 'trousers', 'suit'],
-                'category_slugs' => ['fashion', 'men-fashion', 'women-fashion']
-            ],
-            'appliances-deals' => [
-                'title' => 'Appliances Deals',
-                'keywords' => ['appliance', 'fridge', 'cooker', 'oven', 'mixer', 'kettle', 'iron', 'washing-machine'],
-                'category_slugs' => ['appliances', 'home-appliances']
-            ],
-            'tv-audio-deals' => [
-                'title' => 'TV & Audio Deals',
-                'keywords' => ['tv', 'television', 'audio', 'sound', 'speaker', 'home-theater', 'soundbar'],
-                'category_slugs' => ['electronics', 'tv-audio']
-            ],
-            'beauty-deals' => [
-                'title' => 'Beauty Must Have',
-                'keywords' => ['beauty', 'cosmetics', 'makeup', 'perfume', 'skin', 'hair', 'cream', 'lotion'],
-                'category_slugs' => ['beauty', 'health-beauty']
-            ],
-            'sneakers-deals' => [
-                'title' => 'Sneakers Deals',
-                'keywords' => ['sneaker', 'shoe', 'nike', 'adidas', 'puma', 'trainer', 'footwear'],
-                'category_slugs' => ['shoes', 'sneakers', 'sports']
-            ],
-            'new-arrival' => [
-                'title' => 'New Arrival',
-                'keywords' => [],
-                'category_slugs' => []
-            ],
-            'mobile-accessories-deals' => [
-                'title' => 'Mobile Accessories Deals',
-                'keywords' => ['case', 'charger', 'cable', 'powerbank', 'headphone', 'earbud', 'accessories'],
-                'category_slugs' => ['accessories', 'mobile-accessories']
-            ],
-            'home-office-deals' => [
-                'title' => 'Home & Office Deals',
-                'keywords' => ['chair', 'desk', 'office', 'furniture', 'table', 'lamp', 'printer'],
-                'category_slugs' => ['home-office', 'furniture', 'home-garden']
-            ],
-            'beverages-deals' => [
-                'title' => 'Beverages Deals',
-                'keywords' => ['drink', 'juice', 'wine', 'beer', 'soda', 'beverage', 'water', 'whisky'],
-                'category_slugs' => ['food-drinks', 'beverages']
-            ],
-            'computing-deals' => [
-                'title' => 'Computing Deals',
-                'keywords' => ['laptop', 'computer', 'pc', 'monitor', 'keyboard', 'mouse', 'computing'],
-                'category_slugs' => ['computing', 'laptops-computers', 'electronics']
-            ],
-            'buy-now-pay-small-small' => [
-                'title' => 'Buy Now, Pay Small Small',
-                'keywords' => [],
-                'category_slugs' => []
-            ]
-        ];
+        // Fetch the DealPage from the database
+        $dealPage = \App\Models\DealPage::where('slug', $slug)->where('status', 1)->first();
 
-        $deal = $deals[$slug] ?? [
-            'title' => 'Hot Deals',
-            'keywords' => [],
-            'category_slugs' => []
-        ];
-
-        // Perform dynamic query based on deal type
-        $prodsQuery = Product::with('user')->whereStatus(1);
-
-        if ($slug == 'new-arrival') {
-            // Ordered by latest first
-            $prodsQuery->latest('id');
-        } elseif ($slug == 'buy-now-pay-small-small') {
-            // Ordered by hottest/discount or big discounts
-            $prodsQuery->where('is_discount', 1)->orWhere('hot', 1)->latest('id');
+        if (!$dealPage) {
+            // Fallback or 404 if deal page not found
+            $deal = ['title' => 'Hot Deals'];
+            $prods = collect([]);
+            $page = null;
         } else {
-            // Find categories matching slugs
-            $catIds = Category::whereIn('slug', $deal['category_slugs'])->pluck('id')->toArray();
+            $deal = ['title' => $dealPage->name];
             
-            $prodsQuery->where(function ($q) use ($catIds, $deal) {
-                if (!empty($catIds)) {
-                    $q->whereIn('category_id', $catIds);
-                }
-                foreach ($deal['keywords'] as $keyword) {
-                    $q->orWhere('name', 'like', '%' . $keyword . '%');
-                }
+            // Fetch products associated with this deal page
+            // We only show products where the discount has NOT expired
+            $prodsQuery = Product::with('user')
+                ->where('status', 1)
+                ->where('deal_page_id', $dealPage->id);
+            
+            // Only fetch active deals (start <= now <= end) or no date set
+            $now = \Carbon\Carbon::now()->format('Y-m-d');
+            $prodsQuery->where(function ($q) use ($now) {
+                $q->where(function($query) use ($now) {
+                    $query->where('discount_date_start', '<=', $now)
+                          ->orWhereNull('discount_date_start');
+                })->where(function($query) use ($now) {
+                    $query->where('discount_date_end', '>=', $now)
+                          ->orWhereNull('discount_date_end');
+                });
             });
         }
-
-        // Apply basic sort, min/max price, search inputs if present
-        $minprice = $request->min;
-        $maxprice = $request->max;
-        $sort = $request->sort;
         $search = $request->search;
         $pageby = $request->pageby;
 

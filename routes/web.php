@@ -2587,6 +2587,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/category/featured/{id1}/{id2}', 'Admin\CategoryController@featured')->name('admin-cat-featured');
         Route::get('/category/status/{id1}/{id2}', 'Admin\CategoryController@status')->name('admin-cat-status');
 
+        //------------ ADMIN DEAL PAGES SECTION ------------
+        Route::get('/deal-page/datatables', 'Admin\DealPageController@datatables')->name('admin-deal-page-datatables');
+        Route::get('/deal-page', 'Admin\DealPageController@index')->name('admin-deal-page-index');
+        Route::get('/deal-page/create', 'Admin\DealPageController@create')->name('admin-deal-page-create');
+        Route::post('/deal-page/create', 'Admin\DealPageController@store')->name('admin-deal-page-store');
+        Route::get('/deal-page/edit/{id}', 'Admin\DealPageController@edit')->name('admin-deal-page-edit');
+        Route::put('/deal-page/edit/{id}', 'Admin\DealPageController@update')->name('admin-deal-page-update');
+        Route::delete('/deal-page/delete/{id}', 'Admin\DealPageController@destroy')->name('admin-deal-page-delete');
+        Route::get('/deal-page/status/{id1}/{id2}', 'Admin\DealPageController@status')->name('admin-deal-page-status');
         //------------ ADMIN ATTRIBUTE SECTION ------------
 
         Route::get('/attribute/datatables', 'Admin\AttributeController@datatables')->name('admin-attr-datatables'); //JSON REQUEST
@@ -3436,6 +3445,15 @@ Route::group(['middleware' => 'maintenance'], function () {
             Route::get('/dashboard', 'Vendor\VendorController@index')->name('vendor.dashboard');
             Route::get('/live-messages', 'Vendor\VendorController@sellerMessages')->name('vendor.live-messages');
             Route::get('/customer-chat/{customerId}', 'Vendor\VendorController@sellerChat')->name('vendor.chat');
+
+            //------------ VENDOR DEAL PRODUCTS SECTION ------------
+            Route::get('/deal-product/datatables', 'Vendor\DealProductController@datatables')->name('vendor-deal-product-datatables');
+            Route::get('/deal-product', 'Vendor\DealProductController@index')->name('vendor-deal-product-index');
+            Route::get('/deal-product/create', 'Vendor\DealProductController@create')->name('vendor-deal-product-create');
+            Route::post('/deal-product/create', 'Vendor\DealProductController@store')->name('vendor-deal-product-store');
+            Route::get('/deal-product/edit/{id}', 'Vendor\DealProductController@edit')->name('vendor-deal-product-edit');
+            Route::put('/deal-product/edit/{id}', 'Vendor\DealProductController@update')->name('vendor-deal-product-update');
+            Route::delete('/deal-product/remove/{id}', 'Vendor\DealProductController@remove')->name('vendor-deal-product-remove');
 
             //------------ ORDER SECTION ------------
 

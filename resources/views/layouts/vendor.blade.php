@@ -188,6 +188,10 @@
 									<a href="{{ route('admin-vendor-catalog-index') }}"><span>{{ __('Product Catalogs')
 											}}</span></a>
 								</li>
+								<li>
+									<a href="{{ route('vendor-deal-product-index') }}"><span>{{ __('Deal Products')
+											}}</span></a>
+								</li>
 							</ul>
 						</li>
 						@if ($gs->affilite == 1)

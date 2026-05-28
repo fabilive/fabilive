@@ -20,9 +20,9 @@ class Product extends Model
         'popular_count', 'top_rated_count', 'big_save_count', 'trending_count', 'page_count',
         'seller_product_count', 'wishlist_count', 'vendor_page_count', 'min_price', 'max_price',
         'product_page', 'post_count', 'minimum_qty', 'preordered', 'color_all', 'size_all', 'stock_check', 'delivery_fee', 'delivery_unit', 'product_servicearea',
-        'cross_products', '3d_model', 'discount_date_start', 'discount_date_end', 'state_id'];
+        'cross_products', '3d_model', 'discount_date_start', 'discount_date_end', 'state_id', 'deal_page_id'];
 
-    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end'];
+    public $selectable = ['id', 'user_id', 'name', 'slug', 'features', 'colors', 'thumbnail', 'price', 'previous_price', 'attributes', 'size', 'size_price', 'discount_date', 'color_all', 'size_all', 'stock_check', 'category_id', 'details', 'type', '3d_model', 'discount_date_start', 'discount_date_end', 'deal_page_id'];
 
     public static function boot()
     {
@@ -237,6 +237,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo('App\Models\Category')->withDefault();
+    }
+
+    public function dealPage()
+    {
+        return $this->belongsTo('App\Models\DealPage', 'deal_page_id')->withDefault();
     }
 
     public function subcategory()
