@@ -307,37 +307,7 @@
 
 <!--==================== Service Section End ====================-->
 
-<!--==================== Top Products Section Start ====================-->
-<!--==================== Top Products Section Start ====================-->
-<div class="full-row">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-5">
-                <span class="text-secondary pb-2 d-table tagline mx-auto text-uppercase text-center">{{ __('Top
-                    Products') }}</span>
-                <h2 class="main-title mb-4 text-center text-secondary">{{ __('Top Sales Products') }}</h2>
 
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-
-                <div class="products product-style-1 owl-mx-15">
-                    <div
-                        class="four-carousel owl-carousel dot-disable nav-arrow-middle-show e-title-general e-title-hover-primary e-image-bg-light  e-info-center e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-                        @foreach($best_products as $prod)
-                        <div class="item">
-                            @include('partials.product.home-product')
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!--==================== Top Products Section End ====================-->
 
 
 
