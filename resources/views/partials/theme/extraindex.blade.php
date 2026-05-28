@@ -210,25 +210,24 @@
 
 
 
-<!--==================== Top Products Section Start ====================-->
-<div class="full-row">
+<!--==================== Top Products Section Start (Featured Products Carousel) ====================-->
+<div class="full-row bg-white py-4">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-5">
-                <span class="text-secondary pb-2 d-table tagline mx-auto text-uppercase text-center">{{ __('Featured
-                    Products') }}</span>
-                <h2 class="main-title mb-4 text-center text-secondary">{{ __('Our Featured Products') }}</h2>
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-top text-white" style="background: #000000; font-weight: 700;">
+                <h4 class="mb-0 text-white" style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Featured Products') }}</h4>
+                <a href="{{ route('front.category') }}?sort=views_desc" class="text-white text-decoration-none d-flex align-items-center" style="font-size: 14px; font-weight: 600;">
+                    {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
+                </a>
             </div>
-        </div>
-        <div class="products product-style-1">
-            <div
-                class="row g-4 row-cols-xl-4 row-cols-md-3 row-cols-sm-2 row-cols-1 e-title-general e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-
-                @foreach($popular_products as $prod)
-                <div class="col">
-                    @include('partials.product.home-product')
+            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel">
+                    @foreach($popular_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
                 </div>
-                @endforeach
             </div>
         </div>
     </div>
