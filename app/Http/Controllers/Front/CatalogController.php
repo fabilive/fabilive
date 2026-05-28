@@ -445,8 +445,18 @@ class CatalogController extends FrontBaseController
         $data['deal_title'] = $deal['title'];
         $data['deal_slug'] = $slug;
 
+        // Fetch latest products for the sidebar "Recent Product" section
+        $data['latest_products'] = Product::with('user')->whereStatus(1)->whereLatest(1)
+            ->whereHas('user', function ($q) {
+                $q->where('is_vendor', 2);
+            })
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
+            ->get()
+            ->chunk(4);
+
         // Fetch categories and other filters to show in the sidebar catalog
-        $data['categories'] = Category::with('subcategories')->get();
+        $data['categories'] = Category::with('subs')->get();
 
         if ($request->ajax()) {
             return view('frontend.ajax.category', $data);
