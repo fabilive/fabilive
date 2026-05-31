@@ -832,18 +832,15 @@
                     <div class="deal-grid-image-wrapper">
                         @php
                             $slug = $deal->slug;
-                            $deal_image = asset('assets/images/noimage.png');
+                            $deal_image = null;
+                            $match_found = false;
                             
-                            // Priority 1: Database fields
-                            if($deal->image && file_exists(public_path('assets/images/categories/'.$deal->image))) {
-                                $deal_image = asset('assets/images/categories/' . $deal->image);
-                            } else {
-                                // Priority 2: Filesystem Pattern Matching (Fallback)
-                                $patterns = [];
-                                $featured_dir = public_path('featured_categories');
-                                if(is_dir($featured_dir)) {
-                                    $patterns = array_diff(scandir($featured_dir), array('..', '.'));
-                                }
+                            // Priority 1: Filesystem Pattern Matching (Featured Categories)
+                            // We do this first because the database image path (assets/images/categories) 
+                            // has a symlink/CDN bug where file_exists returns true but the browser 404s.
+                            $featured_dir = public_path('featured_categories');
+                            if(is_dir($featured_dir)) {
+                                $patterns = array_diff(scandir($featured_dir), array('..', '.'));
                                 foreach($patterns as $p) {
                                     if(file_exists(public_path('featured_categories/'.$p))) {
                                         $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
@@ -870,18 +867,21 @@
                                            (str_contains($slug, 'beverage') && str_contains($p, 'food')) || 
                                            (str_contains($slug, 'buy-now') && str_contains($p, 'services'))) {
                                             $deal_image = asset('featured_categories/'.$p).'?v='.time();
+                                            $match_found = true;
                                             break;
                                         }
                                     }
                                 }
-                                
-                                // Final Fallback
-                                if(!$deal_image || strpos($deal_image, 'noimage') !== false) {
-                                    if($deal->image) {
-                                        // Even if file_exists fails (symlink issue), try to force load it
-                                        $deal_image = asset('assets/images/categories/'.$deal->image).'?v='.time();
-                                    }
-                                }
+                            }
+                            
+                            // Priority 2: Database fields (if no featured category matched)
+                            if(!$match_found && $deal->image) {
+                                $deal_image = asset('assets/images/categories/' . $deal->image).'?v='.time();
+                            }
+                            
+                            // Final fallback
+                            if(!$deal_image) {
+                                $deal_image = asset('assets/images/noimage.png');
                             }
                         @endphp
                         <img src="{{ $deal_image }}" alt="{{ $deal->name }}" onerror="this.src='{{ asset('assets/images/noimage.png') }}'">
