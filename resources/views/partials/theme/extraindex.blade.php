@@ -135,8 +135,15 @@
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
                 </a>
             </div>
-            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
-                <div class="owl-carousel owl-theme jumia-style-carousel">
+            <div class="bg-light p-2 p-md-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel d-none d-md-block">
+                    @foreach($sale_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mobile-horizontal-scroll d-flex d-md-none">
                     @foreach($sale_products as $prod)
                         <div class="item">
                             @include('partials.product.home-product')
@@ -154,8 +161,15 @@
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
                 </a>
             </div>
-            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
-                <div class="owl-carousel owl-theme jumia-style-carousel">
+            <div class="bg-light p-2 p-md-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel d-none d-md-block">
+                    @foreach($latest_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mobile-horizontal-scroll d-flex d-md-none">
                     @foreach($latest_products as $prod)
                         <div class="item">
                             @include('partials.product.home-product')
@@ -173,8 +187,15 @@
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
                 </a>
             </div>
-            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
-                <div class="owl-carousel owl-theme jumia-style-carousel">
+            <div class="bg-light p-2 p-md-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel d-none d-md-block">
+                    @foreach($popular_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mobile-horizontal-scroll d-flex d-md-none">
                     @foreach($popular_products as $prod)
                         <div class="item">
                             @include('partials.product.home-product')
@@ -192,8 +213,15 @@
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
                 </a>
             </div>
-            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
-                <div class="owl-carousel owl-theme jumia-style-carousel">
+            <div class="bg-light p-2 p-md-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel d-none d-md-block">
+                    @foreach($trending_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mobile-horizontal-scroll d-flex d-md-none">
                     @foreach($trending_products as $prod)
                         <div class="item">
                             @include('partials.product.home-product')
@@ -220,8 +248,15 @@
                     {{ __('See All') }} <i class="fas fa-chevron-right ms-2" style="font-size: 11px;"></i>
                 </a>
             </div>
-            <div class="bg-light p-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
-                <div class="owl-carousel owl-theme jumia-style-carousel">
+            <div class="bg-light p-2 p-md-3 rounded-bottom border border-top-0 jumia-style-carousel-wrapper">
+                <div class="owl-carousel owl-theme jumia-style-carousel d-none d-md-block">
+                    @foreach($popular_products as $prod)
+                        <div class="item">
+                            @include('partials.product.home-product')
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mobile-horizontal-scroll d-flex d-md-none">
                     @foreach($popular_products as $prod)
                         <div class="item">
                             @include('partials.product.home-product')

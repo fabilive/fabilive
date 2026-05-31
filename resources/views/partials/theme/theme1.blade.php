@@ -273,6 +273,12 @@
         </form>
     </div>
 
+    {{-- Mobile Contact Banner (Jumia Style) --}}
+    <div class="mobile-contact-banner d-block d-lg-none">
+        <a href="tel:{{ $ps->phone }}">CONTACT MBOKA FOR QUERIES: {{ $ps->phone }}</a>
+    </div>
+
+
     @include('partials.global.subscription-popup')
 
 
@@ -432,8 +438,8 @@
 
     <!--==================== Category Section Start ====================-->
     <div class="container mt-3 mb-4 category-carousel-wrap">
-        <div class="bg-white rounded shadow-sm p-3">
-            <div class="category-owl-carousel owl-carousel owl-theme">
+        <div class="bg-white rounded shadow-sm p-3 p-md-4">
+            <div class="category-owl-carousel owl-carousel owl-theme d-none d-md-block">
                 @foreach ($featured_categories as $fcategory)
                     <div class="item text-center">
                         <a href="{{ route('front.category', $fcategory->slug) }}" class="text-decoration-none text-dark d-block">
@@ -525,8 +531,35 @@
                     </div>
                 @endforeach
             </div>
+            
+            {{-- Mobile Category Grid (Jumia Style) --}}
+            <div class="mobile-category-scroll d-grid d-md-none">
+                @foreach ($featured_categories as $fcategory)
+                    <div class="mobile-category-item">
+                        <a href="{{ route('front.category', $fcategory->slug) }}" class="text-decoration-none text-dark d-block">
+                            <div class="product-image mx-auto mb-2">
+                                @php
+                                    $slug = $fcategory->slug;
+                                    $fcat_image = asset('assets/images/noimage.png');
+                                    // Fallbacks simplified for mobile snippet
+                                    if($fcategory->image && file_exists(public_path('assets/images/categories/'.$fcategory->image))) {
+                                        $fcat_image = asset('assets/images/categories/' . $fcategory->image);
+                                    } else {
+                                        $fcat_image = asset('featured_categories/'.$slug.'.png'); // assuming standard format
+                                    }
+                                @endphp
+                                <img src="{{ $fcat_image }}" alt="{{ $fcategory->name }}">
+                            </div>
+                            <div class="product-info mt-1">
+                                <span>{{ $fcategory->name }}</span>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
+
     <!--==================== Category Section End ====================-->
 
 
@@ -582,8 +615,8 @@
 
             <!-- Products Grid -->
             <div class="row">
-                <div class="col-12">
-                    <div class="deals-grid-container" style="background-color: #ffffff; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div class="col-12 px-0 px-md-3">
+                    <div class="deals-grid-container mobile-horizontal-scroll" style="background-color: #ffffff; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                         @if(isset($homepage_flash_products) && $homepage_flash_products->count() > 0)
                             @foreach($homepage_flash_products->take(6) as $flashItem)
                             @php 
@@ -597,29 +630,29 @@
                                 $progressWidth = ($flashItem->sold_quantity / max($flashItem->flash_quantity, 1)) * 100;
                                 if($progressWidth > 100) $progressWidth = 100;
                             @endphp
-                            <div class="deal-grid-card" style="border: none; box-shadow: none;">
+                            <div class="deal-grid-card" style="border: 1px solid #eaeaea; box-shadow: none;">
                                 <a href="{{ route('front.product', $prod->slug) }}" style="display: block; position: relative; width: 100%;">
                                     @if($percent > 0)
-                                        <span class="badge" style="position: absolute; top: 10px; right: 10px; background: #feefef; color: #cb202d; padding: 4px 8px; border-radius: 3px; font-weight: bold; font-size: 12px; z-index: 2;">-{{ $percent }}%</span>
+                                        <span class="badge" style="position: absolute; top: 8px; right: 8px; background: #feefef; color: #cb202d; padding: 4px 6px; border-radius: 3px; font-weight: bold; font-size: 11px; z-index: 2;">-{{ $percent }}%</span>
                                     @endif
                                     <div class="deal-grid-image-wrapper">
                                         <img src="{{ filter_var($prod->photo, FILTER_VALIDATE_URL) ? $prod->photo : asset('assets/images/products/'.$prod->photo) }}" alt="{{ $prod->name }}">
                                     </div>
-                                    <h5 class="deal-grid-title" style="text-align: left; font-weight: 400; font-size: 13px; color: #333; margin-top: 5px;">
-                                        {{ strlen($prod->name) > 30 ? substr($prod->name,0,30).'...' : $prod->name }}
+                                    <h5 class="deal-grid-title" style="text-align: left; font-weight: 500; font-size: 12px; color: #333; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; padding: 0 8px;">
+                                        {{ $prod->name }}
                                     </h5>
                                 </a>
-                                <div class="price-box mb-1 w-100" style="text-align: left; padding: 0 8px;">
-                                    <h4 style="color: #333; font-weight: 700; margin-bottom: 2px; font-size: 16px;">{{ \PriceHelper::showCurrencyPrice($flashItem->flash_price) }}</h4>
+                                <div class="price-box mb-1 w-100" style="text-align: left; padding: 0 8px; margin-top: auto;">
+                                    <h4 style="color: #333; font-weight: 700; margin-bottom: 2px; font-size: 15px;">{{ \PriceHelper::showCurrencyPrice($flashItem->flash_price) }}</h4>
                                     @if($prod->previous_price > 0)
-                                        <span style="text-decoration: line-through; color: #999; font-size: 12px;">{{ $prod->showPreviousPrice() }}</span>
+                                        <span style="text-decoration: line-through; color: #999; font-size: 11px;">{{ $prod->showPreviousPrice() }}</span>
                                     @endif
                                 </div>
-                                <div class="flash-stock-info mt-1 px-2 w-100">
-                                    <div class="d-flex justify-content-between mb-1" style="font-size: 11px; color: #666;">
+                                <div class="flash-stock-info mt-1 px-2 w-100 pb-2">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size: 10px; color: #666;">
                                         <span>{{ $itemsLeft }} {{ __('items left') }}</span>
                                     </div>
-                                    <div class="progress" style="height: 6px; border-radius: 3px; background-color: #f1f1f1;">
+                                    <div class="progress" style="height: 5px; border-radius: 3px; background-color: #f1f1f1;">
                                         <div class="progress-bar" role="progressbar" style="width: {{ $progressWidth }}%; background-color: #f68b1e;" aria-valuenow="{{ $progressWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
@@ -631,6 +664,7 @@
                             </div>
                         @endif
                     </div>
+
                 </div>
             </div>
         </div>

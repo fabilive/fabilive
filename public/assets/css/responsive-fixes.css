@@ -1094,3 +1094,123 @@ div[data-countdown] > div span:last-child {
 .blog-content img, .post-details img { max-width: 100% !important; max-height: 400px !important; object-fit: contain !important; border-radius: 8px !important; margin: 15px auto !important; display: block; }
 .blog-content, .post-details { line-height: 1.8 !important; font-size: 15px !important; }
 
+/* ========== MOBILE JUMIA-STYLE REDESIGN ========== */
+@media (max-width: 767.98px) {
+    /* Contact Banner */
+    .mobile-contact-banner {
+        background-color: #ff6a00;
+        color: #ffffff;
+        font-weight: 800;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 8px 15px;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        display: block !important;
+        margin-bottom: 8px;
+    }
+    .mobile-contact-banner a {
+        color: #ffffff;
+        text-decoration: none;
+        display: block;
+    }
+    
+    /* Native Horizontal Scrolling for mobile carousels (Jumia style) */
+    .mobile-horizontal-scroll {
+        display: flex !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 8px !important;
+        padding-bottom: 10px !important;
+        scrollbar-width: none !important; /* Firefox */
+    }
+    .mobile-horizontal-scroll::-webkit-scrollbar {
+        display: none !important; /* Chrome/Safari */
+    }
+    .mobile-horizontal-scroll > .item,
+    .mobile-horizontal-scroll > .deal-grid-card {
+        flex: 0 0 130px !important; /* Fixed width for cards */
+        scroll-snap-align: start !important;
+        min-width: 130px !important;
+    }
+    
+    /* Flash sales cards tighter on mobile */
+    .mobile-horizontal-scroll > .deal-grid-card {
+        flex: 0 0 140px !important;
+        min-width: 140px !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Category Grid (2 rows horizontal scroll or CSS Grid) */
+    .mobile-category-scroll {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        padding: 10px 5px !important;
+    }
+    .mobile-category-item {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none !important;
+    }
+    .mobile-category-item .product-image {
+        width: 65px !important;
+        height: 65px !important;
+        border-radius: 12px !important;
+        background: #f8f9fa;
+        padding: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        margin-bottom: 6px !important;
+    }
+    .mobile-category-item .product-image img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        border-radius: 0 !important; /* Image inside wrapper */
+    }
+    .mobile-category-item .product-info {
+        background: none !important;
+        padding: 0 !important;
+        position: static !important;
+    }
+    .mobile-category-item .product-info span {
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        color: #333 !important;
+        font-weight: 500 !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal !important;
+    }
+    
+    /* Tighter Section Headers */
+    .section-header-mobile {
+        padding: 10px 15px !important;
+        font-size: 15px !important;
+    }
+    
+    /* Deals Grid Container tightening */
+    .deals-grid-container {
+        padding: 10px !important;
+        gap: 6px !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    .deal-grid-title {
+        font-size: 11px !important;
+        padding: 0 4px !important;
+        margin-top: 6px !important;
+        line-height: 1.3 !important;
+    }
+    .price-box h4 {
+        font-size: 14px !important;
+    }
+    .price-box span {
+        font-size: 11px !important;
+    }
+}
