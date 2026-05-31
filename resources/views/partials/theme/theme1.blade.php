@@ -454,29 +454,11 @@
                                         $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
                                     } else {
                                         // Priority 2: Filesystem Pattern Matching (Fallback)
-                                        $patterns = [
-                                            'building.png',
-                                            'market.png',
-                                            'baby.png',
-                                            'health.png',
-                                            'gaming.png',
-                                            'solar.png',
-                                            'beauty.png',
-                                            'auto.png',
-                                            'internet.png',
-                                            'services.png',
-                                            'digital.png',
-                                            'food.png',
-                                            'garden.png',
-                                            'category_home_garden_black.png',
-                                            'category_services_black.png',
-                                            'category_food_drinks_black.png',
-                                            'category_digital_black.png',
-                                            'category_'.$slug.'.png',
-                                            'category_'.$slug.'.jpg',
-                                            '1568878538electronic.jpg',
-                                            '1568878596home.jpg'
-                                        ];
+                                        $patterns = [];
+                                        $featured_dir = public_path('featured_categories');
+                                        if(is_dir($featured_dir)) {
+                                            $patterns = array_diff(scandir($featured_dir), array('..', '.'));
+                                        }
                                         foreach($patterns as $p) {
                                             if(file_exists(public_path('featured_categories/'.$p))) {
                                                 $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
@@ -548,15 +530,11 @@
                                         $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
                                     } else {
                                         // Priority 2: Filesystem Pattern Matching (Fallback)
-                                        $patterns = [
-                                            'building.png', 'market.png', 'baby.png', 'health.png',
-                                            'gaming.png', 'solar.png', 'beauty.png', 'auto.png',
-                                            'internet.png', 'services.png', 'digital.png', 'food.png',
-                                            'garden.png', 'category_home_garden_black.png',
-                                            'category_services_black.png', 'category_food_drinks_black.png',
-                                            'category_digital_black.png', 'category_'.$slug.'.png',
-                                            'category_'.$slug.'.jpg', '1568878538electronic.jpg', '1568878596home.jpg'
-                                        ];
+                                        $patterns = [];
+                                        $featured_dir = public_path('featured_categories');
+                                        if(is_dir($featured_dir)) {
+                                            $patterns = array_diff(scandir($featured_dir), array('..', '.'));
+                                        }
                                         foreach($patterns as $p) {
                                             if(file_exists(public_path('featured_categories/'.$p))) {
                                                 $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
@@ -861,15 +839,11 @@
                                 $deal_image = asset('assets/images/categories/' . $deal->image);
                             } else {
                                 // Priority 2: Filesystem Pattern Matching (Fallback)
-                                $patterns = [
-                                    'building.png', 'market.png', 'baby.png', 'health.png',
-                                    'gaming.png', 'solar.png', 'beauty.png', 'auto.png',
-                                    'internet.png', 'services.png', 'digital.png', 'food.png',
-                                    'garden.png', 'category_home_garden_black.png',
-                                    'category_services_black.png', 'category_food_drinks_black.png',
-                                    'category_digital_black.png', 'category_'.$slug.'.png',
-                                    'category_'.$slug.'.jpg'
-                                ];
+                                $patterns = [];
+                                $featured_dir = public_path('featured_categories');
+                                if(is_dir($featured_dir)) {
+                                    $patterns = array_diff(scandir($featured_dir), array('..', '.'));
+                                }
                                 foreach($patterns as $p) {
                                     if(file_exists(public_path('featured_categories/'.$p))) {
                                         $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
