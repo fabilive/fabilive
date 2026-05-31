@@ -852,7 +852,65 @@
                 @foreach($dealPages as $deal)
                 <a href="{{ url('/' . $deal->slug) }}" class="deal-grid-card">
                     <div class="deal-grid-image-wrapper">
-                        <img src="{{ $deal->image ? asset('assets/images/categories/' . $deal->image) : asset('assets/images/noimage.png') }}" alt="{{ $deal->name }}">
+                        @php
+                            $slug = $deal->slug;
+                            $deal_image = asset('assets/images/noimage.png');
+                            
+                            // Priority 1: Database fields
+                            if($deal->image && file_exists(public_path('assets/images/categories/'.$deal->image))) {
+                                $deal_image = asset('assets/images/categories/' . $deal->image);
+                            } else {
+                                // Priority 2: Filesystem Pattern Matching (Fallback)
+                                $patterns = [
+                                    'building.png', 'market.png', 'baby.png', 'health.png',
+                                    'gaming.png', 'solar.png', 'beauty.png', 'auto.png',
+                                    'internet.png', 'services.png', 'digital.png', 'food.png',
+                                    'garden.png', 'category_home_garden_black.png',
+                                    'category_services_black.png', 'category_food_drinks_black.png',
+                                    'category_digital_black.png', 'category_'.$slug.'.png',
+                                    'category_'.$slug.'.jpg'
+                                ];
+                                foreach($patterns as $p) {
+                                    if(file_exists(public_path('featured_categories/'.$p))) {
+                                        $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
+                                        $s_clean = strtolower(str_replace('-', ' ', $slug));
+                                        
+                                        // Extract keywords
+                                        $p_keywords = array_filter(explode(' ', $p_clean), function($v) { return strlen($v) > 2; });
+                                        $s_keywords = array_filter(explode(' ', $s_clean), function($v) { return strlen($v) > 2; });
+                                        
+                                        $match = false;
+                                        foreach($p_keywords as $pk) {
+                                            foreach($s_keywords as $sk) {
+                                                if(str_contains($pk, $sk) || str_contains($sk, $pk)) {
+                                                    $match = true;
+                                                    break 2;
+                                                }
+                                            }
+                                        }
+
+                                        if($match || 
+                                           (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
+                                           (str_contains($slug, 'office') && str_contains($p, 'market')) || 
+                                           (str_contains($slug, 'appliance') && str_contains($p, 'market')) || 
+                                           (str_contains($slug, 'beverage') && str_contains($p, 'food')) || 
+                                           (str_contains($slug, 'buy-now') && str_contains($p, 'services'))) {
+                                            $deal_image = asset('featured_categories/'.$p).'?v='.time();
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Final Fallback
+                                if(!$deal_image || strpos($deal_image, 'noimage') !== false) {
+                                    if($deal->image) {
+                                        // Even if file_exists fails (symlink issue), try to force load it
+                                        $deal_image = asset('assets/images/categories/'.$deal->image).'?v='.time();
+                                    }
+                                }
+                            }
+                        @endphp
+                        <img src="{{ $deal_image }}" alt="{{ $deal->name }}" onerror="this.src='{{ asset('assets/images/noimage.png') }}'">
                     </div>
                     <div class="deal-grid-title">{{ $deal->name }}</div>
                 </a>
