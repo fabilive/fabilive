@@ -275,7 +275,7 @@
 
     {{-- Mobile Contact Banner (Jumia Style) --}}
     <div class="mobile-contact-banner d-block d-lg-none">
-        <a href="tel:{{ $ps->phone }}">CONTACT MBOKA FOR QUERIES: {{ $ps->phone }}</a>
+        <a href="{{ route('front.contact') }}">CONTACT MBOKA FOR QUERIES</a>
     </div>
 
 
@@ -396,8 +396,7 @@
                                     <i class="flaticon-phone-call text-primary" style="font-size: 18px;"></i>
                                 </div>
                                 <div>
-                                    <div style="font-size: 13px; font-weight: 600;">CALL TO ORDER</div>
-                                    <div style="font-size: 12px; color: #666;">{{ $ps->phone }}</div>
+                                    <div style="font-size: 13px; font-weight: 600;">CONTACT MBOKA FOR QUERIES</div>
                                 </div>
                             </a>
                             
@@ -541,11 +540,63 @@
                                 @php
                                     $slug = $fcategory->slug;
                                     $fcat_image = asset('assets/images/noimage.png');
-                                    // Fallbacks simplified for mobile snippet
+                                    
+                                    // Priority 1: Database fields
                                     if($fcategory->image && file_exists(public_path('assets/images/categories/'.$fcategory->image))) {
                                         $fcat_image = asset('assets/images/categories/' . $fcategory->image);
+                                    } elseif($fcategory->photo && file_exists(public_path('assets/images/categories/'.$fcategory->photo))) {
+                                        $fcat_image = asset('assets/images/categories/' . $fcategory->photo);
                                     } else {
-                                        $fcat_image = asset('featured_categories/'.$slug.'.png'); // assuming standard format
+                                        // Priority 2: Filesystem Pattern Matching (Fallback)
+                                        $patterns = [
+                                            'building.png', 'market.png', 'baby.png', 'health.png',
+                                            'gaming.png', 'solar.png', 'beauty.png', 'auto.png',
+                                            'internet.png', 'services.png', 'digital.png', 'food.png',
+                                            'garden.png', 'category_home_garden_black.png',
+                                            'category_services_black.png', 'category_food_drinks_black.png',
+                                            'category_digital_black.png', 'category_'.$slug.'.png',
+                                            'category_'.$slug.'.jpg', '1568878538electronic.jpg', '1568878596home.jpg'
+                                        ];
+                                        foreach($patterns as $p) {
+                                            if(file_exists(public_path('featured_categories/'.$p))) {
+                                                $p_clean = strtolower(str_replace(['_', '-', '.png', '.jpg', 'lifestyle'], ' ', $p));
+                                                $s_clean = strtolower(str_replace('-', ' ', $slug));
+                                                
+                                                // Extract keywords (longer than 2 chars)
+                                                $p_keywords = array_filter(explode(' ', $p_clean), function($v) { return strlen($v) > 2; });
+                                                $s_keywords = array_filter(explode(' ', $s_clean), function($v) { return strlen($v) > 2; });
+                                                
+                                                // Check if any keyword matches
+                                                $match = false;
+                                                foreach($p_keywords as $pk) {
+                                                    foreach($s_keywords as $sk) {
+                                                        if(str_contains($pk, $sk) || str_contains($sk, $pk)) {
+                                                            $match = true;
+                                                            break 2;
+                                                        }
+                                                    }
+                                                }
+
+                                                if($match || 
+                                                   (str_contains($slug, 'home') && str_contains($p, 'garden')) || 
+                                                   (str_contains($slug, 'service') && str_contains($p, 'service')) || 
+                                                   (str_contains($slug, 'food') && str_contains($p, 'food')) || 
+                                                   (str_contains($slug, 'digital') && str_contains($p, 'digital'))) {
+                                                    $fcat_image = asset('featured_categories/'.$p).'?v='.time();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Final Fallback
+                                        if(!$fcat_image || strpos($fcat_image, 'noimage') !== false) {
+                                            foreach($patterns as $p) {
+                                                if(file_exists(public_path('assets/images/categories/'.$p))) {
+                                                    $fcat_image = asset('assets/images/categories/'.$p).'?v='.time();
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     }
                                 @endphp
                                 <img src="{{ $fcat_image }}" alt="{{ $fcategory->name }}">
