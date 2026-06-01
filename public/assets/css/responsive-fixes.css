@@ -36,6 +36,100 @@ body {
 
 img { max-width: 100%; height: auto; display: block; }
 
+/* ========== GLOBAL PRODUCT CARD STANDARDIZATION (JUMIA STYLE) ========== */
+.product.type-product {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.product.type-product .product-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    background: #fff !important;
+    border-radius: 4px !important;
+    border: 1px solid #f1f1f1 !important;
+    transition: box-shadow 0.2s !important;
+}
+
+.product.type-product .product-wrapper:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.product.type-product .product-image {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important; /* Perfectly square images */
+    position: relative !important;
+    background: #fff !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+.product.type-product .product-image a.woocommerce-LoopProduct-link {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.product.type-product .product-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Never crop, always fit inside the square */
+    padding: 15px !important;
+}
+
+.product.type-product .product-info {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px !important;
+}
+
+.product.type-product .product-info .product-title {
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    color: #333 !important;
+    
+    /* Ensure title is exactly 2 lines for uniform height */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-height: 38px !important;
+}
+
+.product.type-product .product-info .product-price {
+    margin-top: auto !important; /* Push price down so all cards align at bottom */
+}
+
+.product.type-product .product-info .price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.product.type-product .product-info .price ins {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #222 !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    margin-bottom: 4px !important;
+}
+
+.product.type-product .product-info .price del {
+    font-size: 12px !important;
+    color: #999 !important;
+}
+
 /* ========== MOBILE HEADER ========== */
 @media (max-width: 991.98px) {
     /* Sticky mobile header */
