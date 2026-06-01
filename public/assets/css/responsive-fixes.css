@@ -80,9 +80,9 @@ img { max-width: 100%; height: auto; display: block; }
 .product.type-product .product-image img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important; /* Auto-compress/fit inside the box */
+    object-fit: cover !important; /* Force image to cover the entire square, cropping if necessary */
     object-position: center !important;
-    padding: 2px !important; /* Reduced padding so image fills the width */
+    padding: 0 !important; /* Zero padding so it touches the edges of the card */
 }
 
 .product.type-product .product-info {
