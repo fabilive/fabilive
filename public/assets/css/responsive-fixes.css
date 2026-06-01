@@ -80,8 +80,9 @@ img { max-width: 100%; height: auto; display: block; }
 .product.type-product .product-image img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important; /* Never crop, always fit inside the square */
-    padding: 15px !important;
+    object-fit: contain !important; /* Auto-compress/fit inside the box */
+    object-position: center !important;
+    padding: 2px !important; /* Reduced padding so image fills the width */
 }
 
 .product.type-product .product-info {
